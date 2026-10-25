@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
-#define BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
 
 #include <optional>
 
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"
@@ -384,4 +384,4 @@ std::ostream &operator<<(std::ostream &out, const DarkInitPrimitive &);
 
 std::ostream &operator<<(std::ostream &, const safe_vector<PHV::AllocSlice> &);
 
-#endif /* BF_P4C_PHV_UTILS_SLICE_ALLOC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_ */

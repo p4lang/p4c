@@ -19,15 +19,15 @@
 #include "backends/tofino/bf-p4c/midend/check_header_alignment.h"
 
 #include "backends/tofino/bf-p4c/common/bridged_packing.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/lib/pad_alignment.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
 namespace BFN {
 
-bool CheckPadAssignment::preorder(const IR::AssignmentStatement *statement) {
+bool CheckPadAssignment::preorder(const IR::BaseAssignmentStatement *statement) {
     auto member = statement->left->to<IR::Member>();
     if (!member) return false;
     auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
@@ -74,7 +74,7 @@ std::vector<cstring> FindPaddingCandidate::find_headers_to_pad(P4::MethodInstanc
 std::vector<const IR::Type_StructLike *> FindPaddingCandidate::find_all_headers(
     P4::MethodInstance *mi) {
     std::vector<const IR::Type_StructLike *> retval;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction != IR::Direction::In) continue;
         auto paramType = typeMap->getType(p, true);
         if (auto hdr = paramType->to<IR::Type_Header>()) {
@@ -107,7 +107,7 @@ void FindPaddingCandidate::check_resubmit(P4::MethodInstance *mi) {
 void FindPaddingCandidate::check_digest(P4::MethodInstance *mi) {
     auto em = mi->to<P4::ExternMethod>();
     if (!em) return;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (auto hdr = p->type->to<IR::Type_Header>()) {
             auto decl = all_header_types->at(hdr->name);
             if (findFlexibleAnnotation(decl)) {

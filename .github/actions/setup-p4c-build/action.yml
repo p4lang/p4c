@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium & Devansh Singh <devansh.jay.singh@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+name: "Setup and Build p4c"
+description: "Handles ccache configuration and runs the initial CI build script."
+inputs:
+  ccache-key:
+    description: "Cache key for jobs using the same compiler and build settings."
+    required: true
+  max-size:
+    description: "Maximum compiler cache size."
+    required: false
+    default: "750M"
+  save-main:
+    description: "Allow this job to update the main cache."
+    default: "true"
+  use-ccache:
+    description: "Disable for jobs that do not compile, such as formatting."
+    default: "true"
+  custom-build-command:
+    description: "Optional custom compilation commands instead of running ci-build.sh"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Restore compiler cache
+      if: inputs.use-ccache == 'true'
+      id: ccache
+      uses: ./.github/actions/restore-ccache
+      with:
+        key: ${{ inputs.ccache-key }}
+        max-size: ${{ inputs.max-size }}
+    - name: Run baseline CI build
+      shell: bash
+      env:
+        CUSTOM_CMD: ${{ inputs.custom-build-command }}
+      run: |
+        if [ -n "$CUSTOM_CMD" ]; then
+          echo "$CUSTOM_CMD" > custom_build.sh
+          chmod +x custom_build.sh
+          ./custom_build.sh
+          rm custom_build.sh
+        else
+          tools/ci-build.sh
+        fi
+    - name: Save compiler cache
+      if: inputs.use-ccache == 'true'
+      uses: ./.github/actions/save-ccache
+      with:
+        prefix: ${{ steps.ccache.outputs.prefix }}
+        save-main: ${{ inputs.save-main }}

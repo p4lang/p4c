@@ -1,18 +1,6 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "action.h"
 
@@ -26,7 +14,7 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_Varbits>()) return "assign_VL"_cs;
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
-    if (auto ts = type->to<IR::Type_Stack>()) {
+    if (auto ts = type->to<IR::Type_Array>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
             return "assign_union_stack"_cs;
@@ -56,10 +44,19 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 auto em = mi->to<P4::ExternMethod>();
                 if (em != nullptr) {
-                    if ((em->originalExternType->name.name == "Register" ||
-                         em->method->name.name == "read") ||
-                        (em->originalExternType->name.name == "Meter" &&
-                         em->method->name.name == "execute")) {
+                    if (em->originalExternType->name.name == "Random" &&
+                        em->method->name.name == "read") {
+                        isR = true;
+                        auto dest = new IR::Argument(l);
+                        auto args = new IR::Vector<IR::Argument>();
+                        args->push_back(dest);  // dest
+                        mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
+                        mce2->arguments = args;
+                        s = new IR::MethodCallStatement(mce);
+                    } else if ((em->originalExternType->name.name == "Register" ||
+                                em->method->name.name == "read") ||
+                               (em->originalExternType->name.name == "Meter" &&
+                                em->method->name.name == "execute")) {
                         isR = true;
                         // l = l->to<IR::PathExpression>();
                         // BUG_CHECK(l != nullptr, "register_read dest cast failed");
@@ -134,6 +131,25 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
             primitive2->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             continue;
+        } else if (s->is<IR::BreakStatement>()) {
+            BUG_CHECK(jumpInfo->labelIdBreak >= 0, "%1%: break statement outside of a loop", s);
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump"_cs, result);
+            (jumpInfo->offsetToTargetLabelId)[curOffset] = jumpInfo->labelIdBreak;
+            (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
+        } else if (s->is<IR::ContinueStatement>()) {
+            BUG_CHECK(jumpInfo->labelIdContinue >= 0, "%1%: continue statement outside of a loop",
+                      s);
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump"_cs, result);
+            (jumpInfo->offsetToTargetLabelId)[curOffset] = jumpInfo->labelIdContinue;
+            (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression *l, *r;
             auto assign = s->to<IR::AssignmentStatement>();
@@ -176,12 +192,12 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                     prim = "add_header"_cs;
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
                     prim = "remove_header"_cs;
-                } else if (builtin->name == IR::Type_Stack::push_front) {
+                } else if (builtin->name == IR::Type_Array::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
                     prim = "push"_cs;
                     parameters->append(arg);
-                } else if (builtin->name == IR::Type_Stack::pop_front) {
+                } else if (builtin->name == IR::Type_Array::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
                     prim = "pop"_cs;
@@ -258,6 +274,73 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             }
             (jumpInfo->labelIdToJumpOffset)[labelIdEndOfIf] = result->size();
             continue;
+        } else if (s->is<IR::ForStatement>()) {
+            auto forStmt = s->to<IR::ForStatement>();
+
+            // Allocate labels for the loop structure:
+            //   labelCondition: where the condition check starts
+            //   labelUpdate:    where continue jumps to (update section)
+            //   labelEndOfLoop: where to jump after the loop (or on break)
+            int labelIdCondition = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+            int labelIdUpdate = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+            int labelIdEndOfLoop = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+
+            // Emit init statements
+            convertActionBody(&forStmt->init, result, inConditional, jumpInfo);
+
+            // Record label for condition check
+            (jumpInfo->labelIdToJumpOffset)[labelIdCondition] = result->size();
+
+            // Emit condition check - _jump_if_zero(cond, labelEndOfLoop)
+            {
+                unsigned int curOffset = result->size();
+                auto parameters = new Util::JsonArray();
+                auto primitive = mkPrimitive("_jump_if_zero"_cs, result);
+                auto cond = ctxt->conv->convert(forStmt->condition, true, true, true);
+                parameters->append(cond);
+                (jumpInfo->offsetToTargetLabelId)[curOffset] = labelIdEndOfLoop;
+                (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            }
+
+            // Emit loop body with break/continue context.
+            // Save and set the innermost loop labels so that
+            // BreakStatement/ContinueStatement handlers know where to jump.
+            int savedBreak = jumpInfo->labelIdBreak;
+            int savedContinue = jumpInfo->labelIdContinue;
+            jumpInfo->labelIdBreak = labelIdEndOfLoop;
+            jumpInfo->labelIdContinue = labelIdUpdate;
+
+            auto bodyVec = new IR::IndexedVector<IR::StatOrDecl>();
+            bodyVec->push_back(forStmt->body);
+            convertActionBody(bodyVec, result, true, jumpInfo);
+
+            // Restore previous loop context (for nested loops)
+            jumpInfo->labelIdBreak = savedBreak;
+            jumpInfo->labelIdContinue = savedContinue;
+
+            // Record label for update section (continue target)
+            (jumpInfo->labelIdToJumpOffset)[labelIdUpdate] = result->size();
+
+            // Emit update statements
+            convertActionBody(&forStmt->updates, result, true, jumpInfo);
+
+            // Unconditional jump back to condition check
+            {
+                unsigned int curOffset = result->size();
+                auto parameters = new Util::JsonArray();
+                auto primitive = mkPrimitive("_jump"_cs, result);
+                (jumpInfo->offsetToTargetLabelId)[curOffset] = labelIdCondition;
+                (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            }
+
+            // Record label for end of loop (break target)
+            (jumpInfo->labelIdToJumpOffset)[labelIdEndOfLoop] = result->size();
+            continue;
         }
         ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% not yet supported on this target", s);
     }
@@ -296,7 +379,7 @@ void ActionConverter::convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *bod
 
 void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
                                           Util::JsonArray *params) {
-    for (auto p : *parameters->getEnumerator()) {
+    for (auto p : parameters->getEnumerator()) {
         if (!ctxt->refMap->isUsed(p))
             warn(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 

@@ -28,17 +28,17 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout 
 }
 
 control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue655bmv2l32() {
+    @hidden action issue655bmv2l38() {
         hdr.h.d = hdr.h.d + 16w1;
     }
-    @hidden table tbl_issue655bmv2l32 {
+    @hidden table tbl_issue655bmv2l38 {
         actions = {
-            issue655bmv2l32();
+            issue655bmv2l38();
         }
-        const default_action = issue655bmv2l32();
+        const default_action = issue655bmv2l38();
     }
     apply {
-        tbl_issue655bmv2l32.apply();
+        tbl_issue655bmv2l38.apply();
     }
 }
 

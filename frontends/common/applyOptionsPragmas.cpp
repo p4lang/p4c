@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "frontends/common/applyOptionsPragmas.h"
 
@@ -44,13 +33,30 @@ void ApplyOptionsPragmas::end_apply() {
     // XXX(seth): It'd be nice if the user's command line options took
     // precedence; currently, pragmas override the command line.
     auto &compilerOptionsInstance = P4CContext::get().options();
-    compilerOptionsInstance.process(options.size(), const_cast<char *const *>(options.data()));
+    compilerOptionsInstance.process_options(options.size(),
+                                            const_cast<char *const *>(options.data()));
 }
 
 std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tryToParse(
     const IR::Annotation *annotation) {
     auto pragmaName = annotation->name.name;
     if (pragmaName == "diagnostic") return parseDiagnostic(annotation);
+    if (supportCommandLinePragma && pragmaName == "command_line") {
+        IOptionPragmaParser::CommandLineOptions options;
+        auto *args = annotation->needsParsing()
+                         ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                               annotation->getUnparsed())
+                         : &annotation->getExpr();
+        for (auto *arg : *args) {
+            if (auto *a = arg->to<IR::StringLiteral>()) {
+                options.push_back(a->value.c_str());
+            } else {
+                // can this happen?  annotation parser should require only strings
+                warning("ignoring non-string %1% in @command_line", a);
+            }
+        }
+        return options;
+    }
     return std::nullopt;
 }
 

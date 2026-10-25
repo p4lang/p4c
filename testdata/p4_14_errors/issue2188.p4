@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type ethernet_t {
     fields {
         dst_addr        : 48; // width in bits

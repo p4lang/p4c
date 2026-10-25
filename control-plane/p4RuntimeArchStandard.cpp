@@ -1,18 +1,7 @@
-/*
-Copyright 2018-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2018-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "p4RuntimeArchStandard.h"
 
@@ -77,7 +66,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     static std::optional<Digest> getDigestCall(const P4::ExternFunction *function,
                                                ReferenceMap *refMap, P4::TypeMap *typeMap,
                                                p4configv1::P4TypeInfo *p4RtTypeInfo) {
-        if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
+        if (function->method->name != P4V1::V1Model::instance().digest_receiver.name)
             return std::nullopt;
 
         auto call = function->expr;
@@ -115,10 +104,11 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         }
 
         // Convert the generic type for the digest method call to a P4DataTypeSpec
-        auto *typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not "
-                  "be converted to P4Info P4DataTypeSpec");
+                  "be converted to P4Info P4DataTypeSpec",
+                  typeArg);
         return Digest{controlPlaneName, typeSpec, nullptr};
     }
 
@@ -126,7 +116,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table *table) {
         auto timeout = table->properties->getProperty(
-            P4V1::V1Model::instance.tableAttributes.supportTimeout.name);
+            P4V1::V1Model::instance().tableAttributes.supportTimeout.name);
         if (timeout == nullptr) return false;
         if (!timeout->value->is<IR::ExpressionValue>()) {
             ::P4::error(ErrorType::ERR_UNEXPECTED,

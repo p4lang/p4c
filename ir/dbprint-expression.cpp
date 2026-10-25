@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <ostream>
 
@@ -89,6 +78,7 @@ void IR::PlusSlice::dbprint(std::ostream &out) const {
     if (prec == 0) out << ';';
 }
 
+#ifdef SUPPORT_P4_14
 void IR::Primitive::dbprint(std::ostream &out) const {
     const char *sep = "";
     int prec = getprec(out);
@@ -100,6 +90,37 @@ void IR::Primitive::dbprint(std::ostream &out) const {
     out << setprec(prec) << ')';
     if (prec == 0) out << ';';
 }
+
+void IR::Apply::dbprint(std::ostream &out) const {
+    out << "apply(" << name << ")";
+    int prec = getprec(out);
+    if (!actions.empty()) {
+        out << " {" << indent << setprec(0);
+        for (const auto &[actName, actExprs] : actions)
+            out << Log::endl << actName << " {" << indent << actExprs << unindent << " }";
+        out << setprec(prec) << " }" << unindent;
+    } else if (prec == 0) {
+        out << ';';
+    }
+}
+
+void IR::If::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    if (prec) {
+        if (prec > Prec_Cond) out << '(';
+        out << setprec(Prec_Cond + 1) << pred << " ? " << setprec(Prec_Low) << ifTrue << " : "
+            << setprec(Prec_Cond) << ifFalse << setprec(prec);
+        if (prec > Prec_Cond) out << ')';
+    } else {
+        out << "if (" << setprec(Prec_Low) << pred << ") {" << indent << setprec(0) << ifTrue;
+        if (ifFalse) {
+            if (!ifFalse->empty()) out << unindent << Log::endl << "} else {" << indent;
+            out << ifFalse;
+        }
+        out << " }" << unindent;
+    }
+}
+#endif
 
 void IR::Constant::dbprint(std::ostream &out) const {
     // Node::dbprint(out);
@@ -119,36 +140,6 @@ void IR::Member::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << expr << setprec(prec) << '.' << member;
     if (prec == 0) out << ';';
-}
-
-void IR::If::dbprint(std::ostream &out) const {
-    int prec = getprec(out);
-    if (prec) {
-        if (prec > Prec_Cond) out << '(';
-        out << setprec(Prec_Cond + 1) << pred << " ? " << setprec(Prec_Low) << ifTrue << " : "
-            << setprec(Prec_Cond) << ifFalse << setprec(prec);
-        if (prec > Prec_Cond) out << ')';
-    } else {
-        out << "if (" << setprec(Prec_Low) << pred << ") {" << indent << setprec(0) << ifTrue;
-        if (ifFalse) {
-            if (!ifFalse->empty()) out << unindent << Log::endl << "} else {" << indent;
-            out << ifFalse;
-        }
-        out << " }" << unindent;
-    }
-}
-
-void IR::Apply::dbprint(std::ostream &out) const {
-    out << "apply(" << name << ")";
-    int prec = getprec(out);
-    if (!actions.empty()) {
-        out << " {" << indent << setprec(0);
-        for (const auto &[actName, actExprs] : actions)
-            out << Log::endl << actName << " {" << indent << actExprs << unindent << " }";
-        out << setprec(prec) << " }" << unindent;
-    } else if (prec == 0) {
-        out << ';';
-    }
 }
 
 void IR::BoolLiteral::dbprint(std::ostream &out) const {
@@ -256,7 +247,7 @@ void IR::InvalidHeaderUnion::dbprint(std::ostream &out) const { out << "(" << ty
 
 void IR::Invalid::dbprint(std::ostream &out) const { out << "{#}"; }
 
-void IR::HeaderStackExpression::dbprint(std::ostream &out) const {
+void IR::ArrayExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);

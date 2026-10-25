@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header E {}
 header H {
     bit<32> f;

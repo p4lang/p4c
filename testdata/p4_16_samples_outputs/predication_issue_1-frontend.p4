@@ -29,13 +29,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.target_addr") bit<48> target_addr_0;
     @name("ingress.check_bool") bool check_bool_0;
     @name("ingress.retval") bool retval;
+    @name("ingress.inlinedRetval") bool inlinedRetval_0;
     @name(".assign") action assign_0() {
         eth_t_0 = h.eth_hdr.eth_type;
         target_addr_0 = h.eth_hdr.dst_addr;
         check_bool_0 = true;
         if (check_bool_0) {
             retval = true;
-            tmp = retval;
+            inlinedRetval_0 = retval;
+            tmp = inlinedRetval_0;
             if (tmp) {
                 tmp_0 = 16w0xdead != eth_t_0;
             } else {

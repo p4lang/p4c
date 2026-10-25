@@ -1,20 +1,11 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "validateParsedProgram.h"
+
+#include "lib/error_catalog.h"
 
 namespace P4 {
 
@@ -56,6 +47,16 @@ void ValidateParsedProgram::postorder(const IR::Annotation *annotation) {
     if (!inserted && (it->second || annotation->structured))
         ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation",
                     annotation);
+
+    // Check that @noWarn annotation has a valid diagnostic name
+    if (annotation->name == IR::Annotation::noWarnAnnotation) {
+        auto arg = annotation->getSingleString(false);
+        if (!arg.isNullOrEmpty() && !ErrorCatalog::getCatalog().diagnosticExists(arg)) {
+            ::P4::warning(ErrorType::WARN_UNKNOWN,
+                          "%1%: unknown diagnostic name '%2%' in @noWarn annotation", annotation,
+                          arg);
+        }
+    }
 }
 
 /// Struct field names cannot be underscore
@@ -141,8 +142,10 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable *decl) {
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
-    if (!decl->type->is<IR::Type_Name>() && !decl->type->is<IR::Type_Specialized>() &&
-        !decl->type->is<IR::Type_Extern>())  // P4_14 only?
+    auto *type = decl->type;
+    while (auto *at = type->to<IR::Type_Array>()) type = at->elementType;
+    if (!type->is<IR::Type_Name>() && !type->is<IR::Type_Specialized>() &&
+        !type->is<IR::Type_Extern>())  // P4_14 only?
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type for declaration", decl->type);
     if (decl->name.isDontCare())
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
@@ -219,7 +222,7 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement *statement) {
 
 void ValidateParsedProgram::postorder(const IR::P4Program *program) {
     IR::IndexedVector<IR::Node> declarations;
-    for (auto decl : *program->getDeclarations()) {
+    for (auto decl : program->getDeclarations()) {
         cstring name = decl->getName();
         auto existing = declarations.getDeclaration(name);
         if (existing != nullptr) {

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_UTILS_V2_H_
-#define BF_P4C_PHV_V2_UTILS_V2_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_
 
 #include <iterator>
 #include <optional>
@@ -25,11 +25,11 @@
 #include <sstream>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
 #include "backends/tofino/bf-p4c/phv/v2/types.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -197,9 +197,6 @@ class ScoreContext {
     /// search time related parameters.
     const SearchConfig *search_config_i = new SearchConfig();
 
-    /// tracer will try to log steps of every allocation.
-    std::ostream *tracer = nullptr;
-
  private:
     static constexpr const char *tab_table[] = {
         "", " ", "  ", "   ", "    ", "     ", "      ", "       ", "        ",
@@ -279,4 +276,4 @@ class ScoreContext {
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_UTILS_V2_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_ */

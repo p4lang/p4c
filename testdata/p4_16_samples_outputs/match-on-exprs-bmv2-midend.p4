@@ -52,18 +52,18 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = NoAction_1();
     }
-    @hidden action matchonexprsbmv2l64() {
+    @hidden action matchonexprsbmv2l55() {
         key_1 = hdr.ethernet.dstAddr & 48w0x10101010101;
         key_2 = hdr.ethernet.etherType + 16w65526;
     }
-    @hidden table tbl_matchonexprsbmv2l64 {
+    @hidden table tbl_matchonexprsbmv2l55 {
         actions = {
-            matchonexprsbmv2l64();
+            matchonexprsbmv2l55();
         }
-        const default_action = matchonexprsbmv2l64();
+        const default_action = matchonexprsbmv2l55();
     }
     apply {
-        tbl_matchonexprsbmv2l64.apply();
+        tbl_matchonexprsbmv2l55.apply();
         t1_0.apply();
     }
 }

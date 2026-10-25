@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_BACKEND_H_
-#define BF_P4C_BACKEND_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_BACKEND_H_
+#define BACKENDS_TOFINO_BF_P4C_BACKEND_H_
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/bridged_packing.h"
@@ -123,4 +123,4 @@ class Backend : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_BACKEND_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_BACKEND_H_ */

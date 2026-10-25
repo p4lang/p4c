@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_HAS_SIDE_EFFECTS_H_
 #define MIDEND_HAS_SIDE_EFFECTS_H_
@@ -29,7 +20,7 @@ class hasSideEffects : public Inspector, public ResolutionContext {
     P4::TypeMap *typeMap = nullptr;
 
     bool result = false;
-    bool preorder(const IR::AssignmentStatement *) override {
+    bool preorder(const IR::BaseAssignmentStatement *) override {
         result = true;
         return false;
     }
@@ -49,10 +40,12 @@ class hasSideEffects : public Inspector, public ResolutionContext {
         return false;
     }
 
+#ifdef SUPPORT_P4_14
     bool preorder(const IR::Primitive *) override {
         result = true;
         return false;
     }
+#endif
     bool preorder(const IR::Expression *) override { return !result; }
 
  public:

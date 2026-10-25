@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <ostream>
 
@@ -89,13 +78,19 @@ void IR::Constant::handleOverflow(bool noWarning) {
     big_int one = 1;
     big_int mask = Util::mask(width);
 
-    if (tb->isSigned) {
+    if (width == 0) {
+        if (value != 0 && !noWarning) {
+            warning(ErrorType::WARN_OVERFLOW, "%1%: zero-width integer cannot have non-zero value",
+                    this);
+        }
+        value = 0;
+    } else if (tb->isSigned) {
         big_int max = (one << (width - 1)) - 1;
         big_int min = -(one << (width - 1));
         if (value < min || value > max) {
             if (!noWarning)
-                ::P4::warning(ErrorType::WARN_OVERFLOW,
-                              "%1%: signed value does not fit in %2% bits", this, width);
+                warning(ErrorType::WARN_OVERFLOW, "%1%: signed value does not fit in %2% bits",
+                        this, width);
             LOG2("value=" << value << ", min=" << min << ", max=" << max << ", masked="
                           << (value & mask) << ", adj=" << ((value & mask) - (one << width)));
             value = value & mask;
@@ -104,12 +99,11 @@ void IR::Constant::handleOverflow(bool noWarning) {
     } else {
         if (value < 0) {
             if (!noWarning)
-                ::P4::warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type",
-                              this);
+                warning(ErrorType::WARN_MISMATCH, "%1%: negative value with unsigned type", this);
         } else if ((value & mask) != value) {
             if (!noWarning)
-                ::P4::warning(ErrorType::WARN_MISMATCH, "%1%: value does not fit in %2% bits", this,
-                              width);
+                warning(ErrorType::WARN_OVERFLOW, "%1%: value does not fit in %2% bits", this,
+                        width);
         }
 
         value = value & mask;

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <stdio.h>
 
@@ -56,7 +45,7 @@ void compile(EbpfOptions &options) {
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return;
         }
@@ -66,7 +55,7 @@ void compile(EbpfOptions &options) {
         program = P4::parseP4File(options);
         if (::P4::errorCount() > 0) return;
 
-        P4::P4COptionPragmaParser optionsPragmaParser;
+        P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
         P4::FrontEnd frontend;
@@ -83,8 +72,10 @@ void compile(EbpfOptions &options) {
     EBPF::MidEnd midend;
     midend.addDebugHook(hook);
     auto toplevel = midend.run(options, program);
-    if (!options.dumpJsonFile.empty())
-        JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+    if (!options.dumpJsonFile.empty()) {
+        auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+        JSONGenerator(*dumpJsonStream).emit(program);
+    }
     if (::P4::errorCount() > 0) return;
 
     EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);

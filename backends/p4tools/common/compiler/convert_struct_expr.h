@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_STRUCT_EXPR_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_STRUCT_EXPR_H_
 

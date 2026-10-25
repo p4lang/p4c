@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #include <tc/pna.p4>
 
@@ -71,7 +77,6 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
-    PortId_t port = (PortId_t)8;
     action next_hop(@tc_type ("dev") PortId_t vport) {
         send_to_port(vport);
     }

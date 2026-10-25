@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef MIDEND_ELIMINATETYPEDEFS_H_
 #define MIDEND_ELIMINATETYPEDEFS_H_
 

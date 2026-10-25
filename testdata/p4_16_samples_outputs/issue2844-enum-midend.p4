@@ -26,7 +26,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("cIngress.E.c1.stats") counter(32w1024, CounterType.packets) E_c1_stats;
-    @hidden action issue2844enum48() {
+    @hidden action issue2844enum38() {
         hdr.ethernet.etherType = hdr.ethernet.etherType << 1;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
         E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
@@ -34,14 +34,14 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
         E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
     }
-    @hidden table tbl_issue2844enum48 {
+    @hidden table tbl_issue2844enum38 {
         actions = {
-            issue2844enum48();
+            issue2844enum38();
         }
-        const default_action = issue2844enum48();
+        const default_action = issue2844enum38();
     }
     apply {
-        tbl_issue2844enum48.apply();
+        tbl_issue2844enum38.apply();
     }
 }
 

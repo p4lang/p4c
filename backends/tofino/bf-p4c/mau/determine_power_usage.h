@@ -16,12 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
-#define BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
 
 #include <map>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
 #include "backends/tofino/bf-p4c/mau/build_power_graph.h"
@@ -30,6 +29,7 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/error.h"
 #include "lib/json.h"
 
@@ -140,4 +140,4 @@ class DeterminePowerUsage : public MauInspector {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_DETERMINE_POWER_USAGE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_ */

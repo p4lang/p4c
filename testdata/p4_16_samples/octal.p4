@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const bit<16> n1 = 16w0377;    // 377
 const bit<16> n2 = 16w0o0377;  // 255
 const bool t1 = (n1 == 377);

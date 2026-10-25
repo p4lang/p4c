@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /// This file implements the simple switch model.
 #include "simpleSwitch.h"
@@ -23,7 +12,6 @@ limitations under the License.
 
 #include "backends/bmv2/common/annotations.h"
 #include "backends/bmv2/simple_switch/options.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "lib/json.h"
 #include "midend/flattenLogMsg.h"
@@ -265,8 +253,12 @@ Util::IJson *ExternConverter_hash::convertExternFunction(ConversionContext *ctxt
     auto base = ctxt->conv->convert(mc->arguments->at(2)->expression);
     parameters->append(base);
     auto calculation = new Util::JsonObject();
-    auto ei = P4::EnumInstance::resolve(mc->arguments->at(1)->expression, ctxt->typeMap);
-    CHECK_NULL(ei);
+    auto algoExpr = mc->arguments->at(1)->expression;
+    auto ei = P4::EnumInstance::resolve(algoExpr, ctxt->typeMap);
+    if (ei == nullptr) {
+        modelError("%1%: expected a HashAlgorithm member", algoExpr);
+        return nullptr;
+    }
     if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unexpected algorithm", ei->name);
         return nullptr;
@@ -969,9 +961,13 @@ void SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block,
                         modelError("%1%: Expected 4 arguments", mc);
                         return;
                     }
+                    auto algoExpr = mi->expr->arguments->at(3)->expression;
+                    auto ei = P4::EnumInstance::resolve(algoExpr, typeMap);
+                    if (ei == nullptr) {
+                        modelError("%1%: expected a HashAlgorithm member", algoExpr);
+                        return;
+                    }
                     auto cksum = new Util::JsonObject();
-                    auto ei =
-                        P4::EnumInstance::resolve(mi->expr->arguments->at(3)->expression, typeMap);
                     cstring algo = ExternConverter::convertHashAlgorithm(ei->name);
                     auto calcExpr = mi->expr->arguments->at(1)->expression;
                     EnsureExpressionIsSimple eeis(verify ? v1model.verify_checksum.name
@@ -1143,7 +1139,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         LOG2("Headers type is " << st);
         for (auto f : st->fields) {
             auto t = typeMap->getType(f, true);
-            if (!t->is<IR::Type_Header>() && !t->is<IR::Type_Stack>() &&
+            if (!t->is<IR::Type_Header>() && !t->is<IR::Type_Array>() &&
                 !t->is<IR::Type_HeaderUnion>()) {
                 ::P4::error(ErrorType::ERR_EXPECTED,
                             "%1%: the type should be a struct of headers, stacks, or unions",
@@ -1176,12 +1172,12 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
                                   new SkipControls(&structure->non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(nullptr, typeMap),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(typeMap, false),
         new P4::TypeChecking(nullptr, typeMap),
         new RemoveComplexExpressions(typeMap, new ProcessControls(&structure->pipeline_controls)),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new P4::RemoveAllUnusedDeclarations(P4::RemoveUnusedPolicy()),
         new P4::FlattenLogMsg(typeMap),
         // Converts the DAG into a TREE (at least for expressions)

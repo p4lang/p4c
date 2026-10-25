@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# Copyright 2025 Intel Corporation
+# SPDX-License-Identifier: GPL-2.0-only
+# Reason-GPL: imports-scapy
+
+import argparse
+from scapy.all import sendp, rdpcap
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("pcap_file", help="PCAP file to send")
+PARSER.add_argument("iface", help="Interface to send the pcap to")
+
+
+def main():
+    args, _ = PARSER.parse_known_args()
+
+    pcap_file = args.pcap_file
+    iface = args.iface
+
+    packets = rdpcap(pcap_file)
+    print("pcap_file", pcap_file)
+    print("iface", iface)
+    print("packets", packets)
+    for packet in packets:
+        print("packet", packet)
+        sendp(packet, iface=iface)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,1 +1,4 @@
+trailing-comma.p4(21): [--Wwarn=unused] warning: 'f' is unused
+void f(out H h) {
+     ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

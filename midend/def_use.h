@@ -1,18 +1,9 @@
 /*
-Copyright 2024 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2024 Intel Corp.
+ * SPDX-FileCopyrightText: 2024 Intel Corp.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_DEF_USE_H_
 #define MIDEND_DEF_USE_H_
@@ -50,7 +41,7 @@ class ComputeDefUse : public Inspector,
     ComputeDefUse *clone() const override {
         auto *rv = new ComputeDefUse(*this);
         rv->uid = ++uid_ctr;
-        LOG8("ComputeDefUse::clone " << rv->uid);
+        LOG8("ComputeDefUse::clone " << rv->uid << " <- " << uid);
         return rv;
     }
     void flow_merge(Visitor &) override;
@@ -169,7 +160,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::Type *) override { return false; }
     bool preorder(const IR::Vector<IR::Annotation> *) override { return false; }
     bool preorder(const IR::KeyElement *) override;
-    bool preorder(const IR::AssignmentStatement *) override;
+    bool preorder(const IR::BaseAssignmentStatement *) override;
     const IR::Expression *do_read(def_info_t &, const IR::Expression *, const Context *);
     const IR::Expression *do_write(def_info_t &, const IR::Expression *, const Context *);
     bool preorder(const IR::PathExpression *) override;
@@ -201,6 +192,8 @@ class ComputeDefUse : public Inspector,
         return out << cdu.defuse;
     }
 };
+
+std::ostream &operator<<(std::ostream &, const hvec_set<const ComputeDefUse::loc_t *> &);
 
 }  // namespace P4
 

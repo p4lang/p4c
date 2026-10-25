@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef TYPECHECKING_TYPECHECKER_H_
-#define TYPECHECKING_TYPECHECKER_H_
+#ifndef FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
+#define FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -200,6 +191,14 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// @returns the resolved type, or nullptr if the type is invalid
     const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
 
+    /// Converts an IR::Invalid expression ({#}) with Type_Unknown to a typed
+    /// IR::InvalidHeader or IR::InvalidHeaderUnion, inferred from destType.
+    /// Returns expr unchanged if it is not an untyped Invalid, or if destType
+    /// is not a header or header union.  Emits a type error if destType is
+    /// some other concrete type.
+    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
+                                                const IR::Type *destType);
+
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*
     template <class Node>
@@ -237,6 +236,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Declaration_Constant *constant);
     const IR::Node *postorder(const IR::P4Control *cont);
     const IR::Node *postorder(const IR::P4Parser *cont);
+    const IR::Node *postorder(const IR::ParserState *state);
     const IR::Node *postorder(const IR::Method *method);
 
     const IR::Node *postorder(const IR::Type_Type *type);
@@ -252,7 +252,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Type_Extern *type);
     const IR::Node *postorder(const IR::StructField *field);
     const IR::Node *postorder(const IR::Type_Header *type);
-    const IR::Node *postorder(const IR::Type_Stack *type);
+    const IR::Node *postorder(const IR::Type_Array *type);
     const IR::Node *postorder(const IR::Type_Struct *type);
     const IR::Node *postorder(const IR::Type_HeaderUnion *type);
     const IR::Node *postorder(const IR::Type_Typedef *type);
@@ -263,6 +263,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Type_List *type);
     const IR::Node *postorder(const IR::Type_Set *type);
     const IR::Node *postorder(const IR::Type_ArchBlock *type);
+    const IR::Node *postorder(const IR::Type_Parser *type);
+    const IR::Node *postorder(const IR::Type_Control *type);
     const IR::Node *postorder(const IR::Type_Newtype *type);
     const IR::Node *postorder(const IR::Type_Package *type);
     const IR::Node *postorder(const IR::Type_ActionEnum *type);
@@ -315,20 +317,28 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Invalid *expression);
     const IR::Node *postorder(const IR::P4ListExpression *expression);
     const IR::Node *postorder(const IR::StructExpression *expression);
-    const IR::Node *postorder(const IR::HeaderStackExpression *expression);
+    const IR::Node *postorder(const IR::ArrayExpression *expression);
     const IR::Node *postorder(const IR::MethodCallStatement *mcs);
     const IR::Node *postorder(const IR::MethodCallExpression *expression);
     const IR::Node *postorder(const IR::ConstructorCallExpression *expression);
     const IR::Node *postorder(const IR::SelectExpression *expression);
     const IR::Node *postorder(const IR::DefaultExpression *expression);
     const IR::Node *postorder(const IR::This *expression);
+#ifdef SUPPORT_P4_14
     const IR::Node *postorder(const IR::AttribLocal *local);
+#endif
     const IR::Node *postorder(const IR::ActionList *al);
 
     const IR::Node *postorder(const IR::ReturnStatement *stat);
+    const IR::Node *postorder(const IR::ForStatement *stat);
     const IR::Node *postorder(const IR::IfStatement *stat);
     const IR::Node *postorder(const IR::SwitchStatement *stat);
+    const IR::Node *common_assign(const IR::BaseAssignmentStatement *stat, const IR::Type *);
     const IR::Node *postorder(const IR::AssignmentStatement *stat);
+    const IR::Node *postorder(const IR::OpAssignmentStatement *stat);
+    const IR::Node *shiftAssign(const IR::OpAssignmentStatement *stat);
+    const IR::Node *postorder(const IR::ShlAssign *stat) { return shiftAssign(stat); }
+    const IR::Node *postorder(const IR::ShrAssign *stat) { return shiftAssign(stat); }
     const IR::Node *postorder(const IR::ForInStatement *stat);
     const IR::Node *postorder(const IR::ActionListElement *elem);
     const IR::Node *postorder(const IR::KeyElement *elem);
@@ -380,6 +390,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Declaration_Constant *constant) override;
     void postorder(const IR::P4Control *cont) override;
     void postorder(const IR::P4Parser *cont) override;
+    void postorder(const IR::ParserState *state) override;
     void postorder(const IR::Method *method) override;
 
     void postorder(const IR::Type_Type *type) override;
@@ -395,7 +406,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Type_Extern *type) override;
     void postorder(const IR::StructField *field) override;
     void postorder(const IR::Type_Header *type) override;
-    void postorder(const IR::Type_Stack *type) override;
+    void postorder(const IR::Type_Array *type) override;
     void postorder(const IR::Type_Struct *type) override;
     void postorder(const IR::Type_HeaderUnion *type) override;
     void postorder(const IR::Type_Typedef *type) override;
@@ -406,6 +417,8 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Type_List *type) override;
     void postorder(const IR::Type_Set *type) override;
     void postorder(const IR::Type_ArchBlock *type) override;
+    void postorder(const IR::Type_Parser *type) override;
+    void postorder(const IR::Type_Control *type) override;
     void postorder(const IR::Type_Newtype *type) override;
     void postorder(const IR::Type_Package *type) override;
     void postorder(const IR::Type_ActionEnum *type) override;
@@ -458,20 +471,26 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Invalid *expression) override;
     void postorder(const IR::P4ListExpression *expression) override;
     void postorder(const IR::StructExpression *expression) override;
-    void postorder(const IR::HeaderStackExpression *expression) override;
+    void postorder(const IR::ArrayExpression *expression) override;
     void postorder(const IR::MethodCallStatement *mcs) override;
     void postorder(const IR::MethodCallExpression *expression) override;
     void postorder(const IR::ConstructorCallExpression *expression) override;
     void postorder(const IR::SelectExpression *expression) override;
     void postorder(const IR::DefaultExpression *expression) override;
     void postorder(const IR::This *expression) override;
+#ifdef SUPPORT_P4_14
     void postorder(const IR::AttribLocal *local) override;
+#endif
     void postorder(const IR::ActionList *al) override;
 
     void postorder(const IR::ReturnStatement *stat) override;
+    void postorder(const IR::ForStatement *stat) override;
     void postorder(const IR::IfStatement *stat) override;
     void postorder(const IR::SwitchStatement *stat) override;
     void postorder(const IR::AssignmentStatement *stat) override;
+    void postorder(const IR::OpAssignmentStatement *stat) override;
+    void postorder(const IR::ShlAssign *stat) override;
+    void postorder(const IR::ShrAssign *stat) override;
     void postorder(const IR::ForInStatement *stat) override;
     void postorder(const IR::ActionListElement *elem) override;
     void postorder(const IR::KeyElement *elem) override;
@@ -516,6 +535,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Declaration_Constant *constant) override;
     const IR::Node *postorder(IR::P4Control *cont) override;
     const IR::Node *postorder(IR::P4Parser *cont) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
     const IR::Node *postorder(IR::Method *method) override;
 
     const IR::Node *postorder(IR::Type_Type *type) override;
@@ -531,7 +551,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Type_Extern *type) override;
     const IR::Node *postorder(IR::StructField *field) override;
     const IR::Node *postorder(IR::Type_Header *type) override;
-    const IR::Node *postorder(IR::Type_Stack *type) override;
+    const IR::Node *postorder(IR::Type_Array *type) override;
     const IR::Node *postorder(IR::Type_Struct *type) override;
     const IR::Node *postorder(IR::Type_HeaderUnion *type) override;
     const IR::Node *postorder(IR::Type_Typedef *type) override;
@@ -542,6 +562,8 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Type_List *type) override;
     const IR::Node *postorder(IR::Type_Set *type) override;
     const IR::Node *postorder(IR::Type_ArchBlock *type) override;
+    const IR::Node *postorder(IR::Type_Parser *type) override;
+    const IR::Node *postorder(IR::Type_Control *type) override;
     const IR::Node *postorder(IR::Type_Newtype *type) override;
     const IR::Node *postorder(IR::Type_Package *type) override;
     const IR::Node *postorder(IR::Type_ActionEnum *type) override;
@@ -594,20 +616,26 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Invalid *expression) override;
     const IR::Node *postorder(IR::P4ListExpression *expression) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;
-    const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
+    const IR::Node *postorder(IR::ArrayExpression *expression) override;
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;
     const IR::Node *postorder(IR::SelectExpression *expression) override;
     const IR::Node *postorder(IR::DefaultExpression *expression) override;
     const IR::Node *postorder(IR::This *expression) override;
+#ifdef SUPPORT_P4_14
     const IR::Node *postorder(IR::AttribLocal *local) override;
+#endif
     const IR::Node *postorder(IR::ActionList *al) override;
 
     const IR::Node *postorder(IR::ReturnStatement *stat) override;
+    const IR::Node *postorder(IR::ForStatement *stat) override;
     const IR::Node *postorder(IR::IfStatement *stat) override;
     const IR::Node *postorder(IR::SwitchStatement *stat) override;
     const IR::Node *postorder(IR::AssignmentStatement *stat) override;
+    const IR::Node *postorder(IR::OpAssignmentStatement *stat) override;
+    const IR::Node *postorder(IR::ShlAssign *stat) override;
+    const IR::Node *postorder(IR::ShrAssign *stat) override;
     const IR::Node *postorder(IR::ForInStatement *stat) override;
     const IR::Node *postorder(IR::ActionListElement *elem) override;
     const IR::Node *postorder(IR::KeyElement *elem) override;
@@ -645,4 +673,4 @@ class ApplyTypesToExpressions : public Transform {
 
 }  // namespace P4
 
-#endif /* TYPECHECKING_TYPECHECKER_H_ */
+#endif /* FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_ */

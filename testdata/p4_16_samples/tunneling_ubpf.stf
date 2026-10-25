@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add pipe_downstream_tbl 0 key.headers_ipv4_dstAddr:0x01020304 pipe_mpls_encap()
 add pipe_upstream_tbl 0 key.headers_mpls_label:20 pipe_mpls_decap()
 

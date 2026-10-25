@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef P4_STRENGTHREDUCTION_H_
-#define P4_STRENGTHREDUCTION_H_
+#ifndef FRONTENDS_P4_STRENGTHREDUCTION_H_
+#define FRONTENDS_P4_STRENGTHREDUCTION_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/sideEffects.h"
@@ -26,6 +17,29 @@ limitations under the License.
 namespace P4 {
 
 using namespace literals;
+
+class StrengthReductionPolicy {
+ public:
+    StrengthReductionPolicy() {}
+    StrengthReductionPolicy(bool enableSubConstToAddTransform,
+                            bool enableNarrowingCastToSliceTransform,
+                            bool enablePlusSliceToShiftTransform = false)
+        : enableSubConstToAddTransform(enableSubConstToAddTransform),
+          enableNarrowingCastToSliceTransform(enableNarrowingCastToSliceTransform),
+          enablePlusSliceToShiftTransform(enablePlusSliceToShiftTransform) {}
+
+    /// Enable the subtract constant to add negative constant transform.
+    /// Replaces `a - constant` with `a + (-constant)`.
+    bool enableSubConstToAddTransform = true;
+
+    /// Replace narrowing casts with slices.
+    /// i.e. replaces (bit<n>)(expr) with expr[n-1:0] when n is smaller than the width of expr.
+    bool enableNarrowingCastToSliceTransform = false;
+
+    /// Replace slices with a variable offset with a shift followed by a constant slice.
+    /// i.e. replaces expr[offset+:width] with (expr >> offset)[width-1:0].
+    bool enablePlusSliceToShiftTransform = false;
+};
 
 /** Implements a pass that replaces expensive arithmetic and boolean
  * operations with cheaper ones -- i.e., strength reduction
@@ -44,11 +58,11 @@ using namespace literals;
  *   - division and modulus by `0`
  *
  */
-class DoStrengthReduction final : public Transform {
+class DoStrengthReduction final : public Transform, P4WriteContext {
  protected:
-    /// Enable the subtract constant to add negative constant transform.
-    /// Replaces `a - constant` with `a + (-constant)`.
-    bool enableSubConstToAddTransform = true;
+    TypeMap *typeMap = nullptr;
+    std::shared_ptr<StrengthReductionPolicy> defaultPolicy;
+    StrengthReductionPolicy *policy;
 
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression *expr) const;
@@ -72,16 +86,15 @@ class DoStrengthReduction final : public Transform {
     }
 
  public:
-    DoStrengthReduction() {
+    DoStrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
+        : typeMap(typeMap),
+          defaultPolicy(policy ? nullptr : std::make_shared<StrengthReductionPolicy>()),
+          policy(policy ? policy : defaultPolicy.get()) {
         visitDagOnce = true;
         setName("StrengthReduction");
     }
 
-    explicit DoStrengthReduction(bool enableSubConstToAddTransform)
-        : enableSubConstToAddTransform(enableSubConstToAddTransform) {
-        // FIXME: This does not call a constructor
-        DoStrengthReduction();
-    }
+    DoStrengthReduction() : DoStrengthReduction(nullptr, nullptr) {}
 
     using Transform::postorder;
 
@@ -90,12 +103,19 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::BOr *expr) override;
     const IR::Node *postorder(IR::Equ *expr) override;
     const IR::Node *postorder(IR::Neq *expr) override;
+    const IR::Node *relation(IR::Operation_Relation *expr, bool grt, bool eq);
+    const IR::Node *postorder(IR::Geq *expr) override { return relation(expr, true, true); }
+    const IR::Node *postorder(IR::Grt *expr) override { return relation(expr, true, false); }
+    const IR::Node *postorder(IR::Leq *expr) override { return relation(expr, false, true); }
+    const IR::Node *postorder(IR::Lss *expr) override { return relation(expr, false, false); }
     const IR::Node *postorder(IR::BXor *expr) override;
     const IR::Node *postorder(IR::LAnd *expr) override;
     const IR::Node *postorder(IR::LOr *expr) override;
     const IR::Node *postorder(IR::LNot *expr) override;
     const IR::Node *postorder(IR::Sub *expr) override;
+    const IR::Node *postorder(IR::SubSat *expr) override;
     const IR::Node *postorder(IR::Add *expr) override;
+    const IR::Node *postorder(IR::AddSat *expr) override;
     const IR::Node *postorder(IR::UPlus *expr) override;
     const IR::Node *postorder(IR::Shl *expr) override;
     const IR::Node *postorder(IR::Shr *expr) override;
@@ -105,6 +125,7 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::Mux *expr) override;
     const IR::Node *postorder(IR::Slice *expr) override;
     const IR::Node *postorder(IR::PlusSlice *expr) override;
+    const IR::Node *postorder(IR::Cast *expr) override;
     const IR::Node *postorder(IR::Mask *expr) override;
     const IR::Node *postorder(IR::Range *expr) override;
     const IR::Node *postorder(IR::Concat *expr) override;
@@ -121,18 +142,18 @@ class DoStrengthReduction final : public Transform {
 class StrengthReduction : public PassManager {
  public:
     explicit StrengthReduction(TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-                               bool enableSubConstToAddTransform = true) {
+                               StrengthReductionPolicy *policy = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
             passes.push_back(typeChecking);
         }
-        passes.push_back(new DoStrengthReduction(enableSubConstToAddTransform));
+        passes.push_back(new DoStrengthReduction(typeMap, policy));
     }
 
-    explicit StrengthReduction(TypeMap *typeMap, bool enableSubConstToAddTransform)
-        : StrengthReduction(typeMap, nullptr, enableSubConstToAddTransform) {}
+    explicit StrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
+        : StrengthReduction(typeMap, nullptr, policy) {}
 };
 
 }  // namespace P4
 
-#endif /* P4_STRENGTHREDUCTION_H_ */
+#endif /* FRONTENDS_P4_STRENGTHREDUCTION_H_ */

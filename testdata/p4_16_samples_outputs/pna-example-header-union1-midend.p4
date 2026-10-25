@@ -33,10 +33,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna
     }
     state parseO1 {
         packet.extract<O1>(hdr.u_byte);
+        hdr.u_short.setInvalid();
         transition accept;
     }
     state parseO2 {
         packet.extract<O2>(hdr.u_short);
+        hdr.u_byte.setInvalid();
         transition accept;
     }
 }
@@ -59,13 +61,13 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         }
         const default_action = NoAction_1();
     }
-    @hidden action pnaexampleheaderunion1l51() {
+    @hidden action pnaexampleheaderunion1l57() {
         retval = true;
     }
-    @hidden action pnaexampleheaderunion1l52() {
+    @hidden action pnaexampleheaderunion1l58() {
         retval = false;
     }
-    @hidden action act() {
+    @hidden action pnaexampleheaderunion1l78() {
         hdr_1_base = hdr.base;
         if (hdr.u_byte.isValid()) {
             hdr_1_u_byte.setValid();
@@ -82,88 +84,88 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
             hdr_1_u_short.setInvalid();
         }
     }
-    @hidden action pnaexampleheaderunion1l73() {
+    @hidden action pnaexampleheaderunion1l79() {
         hdr.base.t = 8w3;
     }
-    @hidden action pnaexampleheaderunion1l75() {
+    @hidden action pnaexampleheaderunion1l81() {
         hdr.u_short.setValid();
         hdr.u_short.data = 16w0xffff;
         hdr.u_byte.setInvalid();
     }
-    @hidden action pnaexampleheaderunion1l77() {
+    @hidden action pnaexampleheaderunion1l83() {
         hdr.u_byte.setValid();
         hdr.u_byte.data = 8w0xff;
         hdr.u_short.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_pnaexampleheaderunion1l78 {
         actions = {
-            act();
+            pnaexampleheaderunion1l78();
         }
-        const default_action = act();
+        const default_action = pnaexampleheaderunion1l78();
     }
-    @hidden table tbl_pnaexampleheaderunion1l51 {
+    @hidden table tbl_pnaexampleheaderunion1l57 {
         actions = {
-            pnaexampleheaderunion1l51();
+            pnaexampleheaderunion1l57();
         }
-        const default_action = pnaexampleheaderunion1l51();
+        const default_action = pnaexampleheaderunion1l57();
     }
-    @hidden table tbl_pnaexampleheaderunion1l52 {
+    @hidden table tbl_pnaexampleheaderunion1l58 {
         actions = {
-            pnaexampleheaderunion1l52();
+            pnaexampleheaderunion1l58();
         }
-        const default_action = pnaexampleheaderunion1l52();
+        const default_action = pnaexampleheaderunion1l58();
     }
-    @hidden table tbl_pnaexampleheaderunion1l73 {
+    @hidden table tbl_pnaexampleheaderunion1l79 {
         actions = {
-            pnaexampleheaderunion1l73();
+            pnaexampleheaderunion1l79();
         }
-        const default_action = pnaexampleheaderunion1l73();
+        const default_action = pnaexampleheaderunion1l79();
     }
-    @hidden table tbl_pnaexampleheaderunion1l75 {
+    @hidden table tbl_pnaexampleheaderunion1l81 {
         actions = {
-            pnaexampleheaderunion1l75();
+            pnaexampleheaderunion1l81();
         }
-        const default_action = pnaexampleheaderunion1l75();
+        const default_action = pnaexampleheaderunion1l81();
     }
-    @hidden table tbl_pnaexampleheaderunion1l77 {
+    @hidden table tbl_pnaexampleheaderunion1l83 {
         actions = {
-            pnaexampleheaderunion1l77();
+            pnaexampleheaderunion1l83();
         }
-        const default_action = pnaexampleheaderunion1l77();
+        const default_action = pnaexampleheaderunion1l83();
     }
     apply {
         debug_hdr_0.apply();
-        tbl_act.apply();
+        tbl_pnaexampleheaderunion1l78.apply();
         if (hdr_1_base.isValid() && hdr_1_u_short.isValid()) {
-            tbl_pnaexampleheaderunion1l51.apply();
+            tbl_pnaexampleheaderunion1l57.apply();
         } else {
-            tbl_pnaexampleheaderunion1l52.apply();
+            tbl_pnaexampleheaderunion1l58.apply();
         }
         if (retval) {
-            tbl_pnaexampleheaderunion1l73.apply();
+            tbl_pnaexampleheaderunion1l79.apply();
         }
         if (hdr.u_short.isValid()) {
-            tbl_pnaexampleheaderunion1l75.apply();
+            tbl_pnaexampleheaderunion1l81.apply();
         } else if (hdr.u_byte.isValid()) {
-            tbl_pnaexampleheaderunion1l77.apply();
+            tbl_pnaexampleheaderunion1l83.apply();
         }
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr, in metadata meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleheaderunion1l86() {
+    @hidden action pnaexampleheaderunion1l92() {
         packet.emit<S>(hdr.base);
         packet.emit<O1>(hdr.u_byte);
         packet.emit<O2>(hdr.u_short);
     }
-    @hidden table tbl_pnaexampleheaderunion1l86 {
+    @hidden table tbl_pnaexampleheaderunion1l92 {
         actions = {
-            pnaexampleheaderunion1l86();
+            pnaexampleheaderunion1l92();
         }
-        const default_action = pnaexampleheaderunion1l86();
+        const default_action = pnaexampleheaderunion1l92();
     }
     apply {
-        tbl_pnaexampleheaderunion1l86.apply();
+        tbl_pnaexampleheaderunion1l92.apply();
     }
 }
 

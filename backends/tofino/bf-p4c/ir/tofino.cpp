@@ -31,9 +31,9 @@ IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
     } else if (auto *meta = t->to<IR::Type_Struct>()) {
         obj = new IR::Metadata(name, meta);
         for (auto f : meta->fields)
-            if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Stack>())
+            if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Array>())
                 nested.add(name + "." + f->name, new InstanceRef(name, f->name, f->type));
-    } else if (auto *stk = t->to<IR::Type_Stack>()) {
+    } else if (auto *stk = t->to<IR::Type_Array>()) {
         if (stk->elementType->is<IR::Type_HeaderUnion>()) {
             P4C_UNIMPLEMENTED("Unsupported type %s %s", stk, n);
         }
@@ -63,9 +63,9 @@ IR::V1InstanceRef::V1InstanceRef(cstring /* prefix */, IR::ID n, const IR::Type 
     } else if (auto *meta = t->to<IR::Type_Struct>()) {
         obj = new IR::Metadata(n, meta);
         for (auto f : meta->fields)
-            if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Stack>())
+            if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Array>())
                 nested.add(f->name, new V1InstanceRef(n, f->name, f->type));
-    } else if (auto *stk = t->to<IR::Type_Stack>()) {
+    } else if (auto *stk = t->to<IR::Type_Array>()) {
         obj = new IR::HeaderStack(n, stk->elementType->to<IR::Type_Header>(), stk->getSize());
     } else if (t->is<IR::Type::Bits>() || t->is<IR::Type::Boolean>() || t->is<IR::Type_Set>()) {
         obj = nullptr;

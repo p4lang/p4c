@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import argparse
 import re
 import sys
@@ -363,10 +367,8 @@ def main(input_file, output_file, verb):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='''\nUsage info: \n\nn  report_overlays.py 
-                                                  -i <input.bfa> [-o <output.log>] [-v]'''
-    )
+    parser = argparse.ArgumentParser(description='''\nUsage info: \n\nn  report_overlays.py 
+                                                  -i <input.bfa> [-o <output.log>] [-v]''')
 
     parser.add_argument("-i", "--input", required=True, help="Specify input tofino assembly file")
     parser.add_argument("-o", "--output", help="Speficy name of output text report file")

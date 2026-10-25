@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 set -x
 set -e
 
@@ -17,7 +21,7 @@ else
 fi
 
 install_prefix=/usr/local
-barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF"
+barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF -DENABLE_DUMP_PIPE=OFF"
 pgo=false
 lto=false
 

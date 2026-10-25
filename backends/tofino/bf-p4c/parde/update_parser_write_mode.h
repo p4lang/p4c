@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_
-#define BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_
 
 #include <ir/ir.h>
 
@@ -41,4 +41,4 @@ struct UpdateParserWriteMode : public PassManager {
     }
 };
 
-#endif /*BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_*/
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_UPDATE_PARSER_WRITE_MODE_H_*/

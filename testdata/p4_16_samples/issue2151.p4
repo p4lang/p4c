@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control c() {
     bit<16> f = 0;
     bit<128> y = 0;

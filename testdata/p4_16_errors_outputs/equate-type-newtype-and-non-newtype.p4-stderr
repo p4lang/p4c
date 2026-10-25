@@ -1,0 +1,23 @@
+equate-type-newtype-and-non-newtype.p4(4): [--Wwarn=unused] warning: 'PSA_CPU_PORT' is unused
+const tuple<> PSA_CPU_PORT = (Narrow) 0;
+              ^^^^^^^^^^^^
+equate-type-newtype-and-non-newtype.p4(4): [--Werror=type-error] error: 'PSA_CPU_PORT'
+const tuple<> PSA_CPU_PORT = (Narrow) 0;
+              ^^^^^^^^^^^^
+  ---- Actual error:
+equate-type-newtype-and-non-newtype.p4(3): Cannot cast implicitly type 'Narrow' to type 'tuple<>'
+  type bit<9> Narrow;
+              ^^^^^^
+equate-type-newtype-and-non-newtype.p4(4)
+  const tuple<> PSA_CPU_PORT = (Narrow) 0;
+        ^^^^^^^
+  ---- Originating from:
+equate-type-newtype-and-non-newtype.p4(4): Source expression '(Narrow)9w0' produces a result of type 'Narrow' which cannot be assigned to a left-value with type 'tuple<>'
+  const tuple<> PSA_CPU_PORT = (Narrow) 0;
+                               ^^^^^^^^^^
+equate-type-newtype-and-non-newtype.p4(3)
+  type bit<9> Narrow;
+              ^^^^^^
+equate-type-newtype-and-non-newtype.p4(4)
+  const tuple<> PSA_CPU_PORT = (Narrow) 0;
+        ^^^^^^^

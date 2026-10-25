@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* -*-C++-*- */
 
 /*
@@ -160,7 +164,7 @@ class If :  Expression {
     visit_children {
         v.visit(pred, "pred");
         SplitFlowVisit<Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
-        Expression::visit_children(v);
+        Expression::visit_children(v, n);
     }
 }
 
@@ -255,6 +259,7 @@ class CalculatedField : IAnnotated {
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     visit_children {
+        (void)n;
         v.visit(field, "field");
         for (auto &s : specs) v.visit(s.cond, s.name.name.c_str());
         v.visit(annotations, "annotations"); }
@@ -384,6 +389,7 @@ class ActionFunction : IAnnotated {
                 return a;
         return nullptr; }
     visit_children {
+        (void)n;
         v.visit(action, "action");
         // DANGER -- visiting action first so type inferencing will push types to
         // DANGER -- action args based on use.  This is immoral.
@@ -457,7 +463,7 @@ class AttribLocal : Expression, IDeclaration {
 class AttribLocals : ISimpleNamespace {
     inline NameMap<AttribLocal> locals = {};
 #nodbprint
-    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration>getDeclarations() const override {
         return locals.valueEnumerator()->as<const IDeclaration *>(); }
     IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
     IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }

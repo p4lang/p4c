@@ -37,20 +37,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_inout_slice_table_keybmv2l27() {
+    @hidden action gauntlet_inout_slice_table_keybmv2l33() {
         tmp_val_0 = 8w1;
     }
-    @hidden action gauntlet_inout_slice_table_keybmv2l41() {
+    @hidden action gauntlet_inout_slice_table_keybmv2l47() {
         h.eth_hdr.eth_type = 16w1;
     }
-    @hidden action act() {
+    @hidden action gauntlet_inout_slice_table_keybmv2l45() {
         tmp_val_0[7:4] = 4w0;
     }
-    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l27 {
+    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l33 {
         actions = {
-            gauntlet_inout_slice_table_keybmv2l27();
+            gauntlet_inout_slice_table_keybmv2l33();
         }
-        const default_action = gauntlet_inout_slice_table_keybmv2l27();
+        const default_action = gauntlet_inout_slice_table_keybmv2l33();
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -58,24 +58,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = simple_action();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l45 {
         actions = {
-            act();
+            gauntlet_inout_slice_table_keybmv2l45();
         }
-        const default_action = act();
+        const default_action = gauntlet_inout_slice_table_keybmv2l45();
     }
-    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l41 {
+    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l47 {
         actions = {
-            gauntlet_inout_slice_table_keybmv2l41();
+            gauntlet_inout_slice_table_keybmv2l47();
         }
-        const default_action = gauntlet_inout_slice_table_keybmv2l41();
+        const default_action = gauntlet_inout_slice_table_keybmv2l47();
     }
     apply {
-        tbl_gauntlet_inout_slice_table_keybmv2l27.apply();
+        tbl_gauntlet_inout_slice_table_keybmv2l33.apply();
         tbl_simple_action.apply();
-        tbl_act.apply();
+        tbl_gauntlet_inout_slice_table_keybmv2l45.apply();
         if (simple_table_0.apply().hit) {
-            tbl_gauntlet_inout_slice_table_keybmv2l41.apply();
+            tbl_gauntlet_inout_slice_table_keybmv2l47.apply();
         }
     }
 }

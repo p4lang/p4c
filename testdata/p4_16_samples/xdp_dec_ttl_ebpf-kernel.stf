@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Program will decrement IPv4 TTL field by 1.
 
 packet 0 00112233 445500aa bbccddee 08004500 001c0001 00004011 7cce7f00 00017f00 00010035 01bb0008 ffeb

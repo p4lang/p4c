@@ -1,0 +1,18 @@
+expr-select-with-single-expression-and-tuple-keyset.p4(6): [--Wwarn=unused] warning: parser 'parserI' is unused
+parser parserI(packet_in pkt) {
+       ^^^^^^^
+expr-select-with-single-expression-and-tuple-keyset.p4(8): [--Werror=type-error] error: 'SelectExpression'
+    transition select(pkt.lookahead<bit<112>>()[111:96]) {
+               ^
+  ---- Actual error:
+  Tuples with different sizes 1 vs 2
+  ---- Originating from:
+expr-select-with-single-expression-and-tuple-keyset.p4(9): 'match' case label '{ 4096 &&& 4096, 4096 &&& 4096 }' has type 'tuple<bit<16>, bit<16>>' which does not match the expected type 'tuple<bit<16>>'
+        (16w4096 &&& 16w4096, 16w4096 &&& 16w4096): accept;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-select-with-single-expression-and-tuple-keyset.p4(9)
+        (16w4096 &&& 16w4096, 16w4096 &&& 16w4096): accept;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-select-with-single-expression-and-tuple-keyset.p4(8)
+      transition select(pkt.lookahead<bit<112>>()[111:96]) {
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

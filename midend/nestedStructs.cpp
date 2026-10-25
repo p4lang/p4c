@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "nestedStructs.h"
 
 #include "frontends/p4/methodInstance.h"
@@ -12,7 +16,7 @@ bool ComplexValues::isNestedStruct(const IR::Type *type) const {
     for (const auto *f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->is<IR::Type_StructLike>() || ftype->is<IR::Type_Tuple>() ||
-            ftype->is<IR::Type_Stack>()) {
+            ftype->is<IR::Type_Array>()) {
             LOG3("Type " << dbp(type) << " is nested");
             return true;
         }

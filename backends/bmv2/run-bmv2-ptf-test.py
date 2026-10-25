@@ -42,7 +42,7 @@ PARSER.add_argument(
 PARSER.add_argument(
     "-n",
     "--num-ifaces",
-    default=8,
+    default=10,
     dest="num_ifaces",
     help="How many virtual interfaces to create.",
 )
@@ -51,8 +51,15 @@ PARSER.add_argument(
     "--use-nanomsg",
     action="store_true",
     dest="use_nn",
-    help="Use nanomsg for packet sending instead of virtual interfaces.",
+    help="Use nn platform sockets for packet sending (default).",
 )
+PARSER.add_argument(
+    "--use-veth",
+    action="store_false",
+    dest="use_nn",
+    help="Use virtual interfaces instead of nn platform sockets.",
+)
+PARSER.set_defaults(use_nn=True)
 PARSER.add_argument(
     "-ll",
     "--log_level",
@@ -91,8 +98,8 @@ class Options:
     # The base directory where tests are executed.
     rootdir: Path = Path(".")
     # The number of interfaces to create for this particular test.
-    num_ifaces: int = 8
-    # Whether to use nanomsg for packet delivery as opposed to Linux veth interfaces.
+    num_ifaces: int = 10
+    # Whether to use nn platform sockets for packet delivery instead of Linux veth interfaces.
     use_nn: bool = False
 
 
@@ -148,11 +155,17 @@ class PTFTestEnv:
 
 class NNEnv(PTFTestEnv):
     bridge: Optional[Bridge] = None
+    use_namespace: bool = True
 
     def __init__(self, options: Options) -> None:
         super().__init__(options)
-        # Create the virtual environment for the test execution.
-        self.bridge = self.create_bridge(options.num_ifaces)
+        # Rooted runs use an isolated namespace. Non-root runs execute directly on the host while
+        # still using nanomsg sockets for packet IO.
+        self.use_namespace = testutils.check_root()
+        if self.use_namespace:
+            self.bridge = self.create_bridge(options.num_ifaces)
+        else:
+            testutils.log.info("Running NN mode without network namespace (non-root mode).")
 
     def __del__(self) -> None:
         if self.bridge:
@@ -160,28 +173,31 @@ class NNEnv(PTFTestEnv):
         super().__del__()
 
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> Optional[subprocess.Popen]:
-        if not self.bridge:
-            testutils.log.error("Unable to run simple_switch_grpc without a bridge.")
-            return None
         """Start simple_switch_grpc and return the process handle."""
         testutils.log.info(
             "---------------------- Start simple_switch_grpc ----------------------",
         )
+        simple_switch_bin = testutils.check_if_binary("simple_switch_grpc")
+        if not simple_switch_bin:
+            return None
+
         thrift_port = testutils.pick_tcp_port(GRPC_ADDRESS, THRIFT_PORT)
         simple_switch_grpc = (
-            f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
+            f"{simple_switch_bin} --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
             f"--log-flush --packet-in ipc://{self.options.testdir}/bmv2_packets_1.ipc  --no-p4 "
             f"-- --grpc-server-addr {GRPC_ADDRESS}:{grpc_port} & "
         )
-        bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
-        self.switch_proc = testutils.open_process(bridge_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run simple_switch_grpc without a bridge.")
+                return None
+            run_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
+        else:
+            run_cmd = simple_switch_grpc
+        self.switch_proc = testutils.open_process(run_cmd)
         return self.switch_proc
 
     def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
-        if not self.bridge:
-            testutils.log.error("Unable to run run_ptf without a bridge.")
-            return testutils.FAILURE
-
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
@@ -192,7 +208,13 @@ class NNEnv(PTFTestEnv):
             f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-dir {self.options.testdir} --list"
         )
-        returncode = self.bridge.ns_exec(test_list_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run run_ptf without a bridge.")
+                return testutils.FAILURE
+            returncode = self.bridge.ns_exec(test_list_cmd)
+        else:
+            returncode = testutils.exec_process(test_list_cmd).returncode
         if returncode != testutils.SUCCESS:
             return returncode
         test_params = (
@@ -201,14 +223,20 @@ class NNEnv(PTFTestEnv):
         )
         # TODO: There is currently a bug where we can not support more than 344 ports at once.
         # The nanomsg test back end simply hangs, the reason is unclear.
-        port_range = "0-8"
+        port_range = f"0-{self.options.num_ifaces - 1}"
         run_ptf_cmd = (
             f"ptf --platform nn --device-socket 0-{{{port_range}}}@ipc://{self.options.testdir}/"
             f"bmv2_packets_1.ipc --pypath {pypath} "
             f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
-        returncode = self.bridge.ns_exec(run_ptf_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run run_ptf without a bridge.")
+                return testutils.FAILURE
+            returncode = self.bridge.ns_exec(run_ptf_cmd)
+        else:
+            returncode = testutils.exec_process(run_ptf_cmd).returncode
         return returncode
 
 
@@ -236,6 +264,9 @@ class VethEnv(PTFTestEnv):
         if not self.bridge:
             testutils.log.error("Unable to run simple_switch_grpc without a bridge.")
             return None
+        simple_switch_bin = testutils.check_if_binary("simple_switch_grpc")
+        if not simple_switch_bin:
+            return None
         """Start simple_switch_grpc and return the process handle."""
         testutils.log.info(
             "---------------------- Start simple_switch_grpc ----------------------",
@@ -243,8 +274,8 @@ class VethEnv(PTFTestEnv):
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces)
         thrift_port = testutils.pick_tcp_port(GRPC_ADDRESS, THRIFT_PORT)
         simple_switch_grpc = (
-            f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
-            f"{ifaces} --log-flush -i 0@0 --no-p4 "
+            f"{simple_switch_bin} --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
+            f"{ifaces} --log-flush --no-p4 "
             f"-- --grpc-server-addr {GRPC_ADDRESS}:{grpc_port}"
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
@@ -271,7 +302,7 @@ class VethEnv(PTFTestEnv):
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces, prefix="br_")
         test_params = (
             f"grpcaddr='{GRPC_ADDRESS}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-            f"packet_wait_time='0.1';"
+            f"packet_wait_time='0.5';"
         )
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')} "
@@ -355,13 +386,18 @@ def create_options(test_args: Any) -> Optional[Options]:
     options.rootdir = Path(test_args.rootdir)
     options.num_ifaces = test_args.num_ifaces
 
-    try:
-        import nnpy  # pylint: disable=W0611,C0415
+    if test_args.use_nn:
+        try:
+            import pynng  # pylint: disable=W0611,C0415
 
-        assert nnpy
-        options.use_nn = test_args.use_nn
-    except ImportError:
-        testutils.log.error("nnpy is not available on this system. Falling back to veth testing.")
+            assert pynng
+            options.use_nn = True
+        except ImportError:
+            testutils.log.error(
+                "pynng is not available on this system. Falling back to veth testing."
+            )
+            options.use_nn = False
+    else:
         options.use_nn = False
 
     # Configure logging.
@@ -382,8 +418,8 @@ if __name__ == "__main__":
     if not test_options:
         sys.exit(testutils.FAILURE)
 
-    if not testutils.check_root():
-        testutils.log.error("This script requires root privileges; Exiting.")
+    if not testutils.check_root() and not test_options.use_nn:
+        testutils.log.error("This script requires root privileges unless --use-nanomsg is enabled.")
         sys.exit(1)
 
     # Run the test with the extracted options

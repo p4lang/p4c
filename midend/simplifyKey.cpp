@@ -1,18 +1,7 @@
-/*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2016 VMware, Inc.
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "simplifyKey.h"
 
@@ -23,6 +12,7 @@ namespace P4 {
 
 bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *ctxt) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
+    Visitor::init_apply(expression, ctxt);
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), this, typeMap,
                                       false, ctxt);
     if (!mi->is<BuiltInMethod>()) return false;
@@ -54,14 +44,16 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
 
     auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
-    auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
+    auto srcInfo = element->expression->srcInfo;
+    auto name = IR::ID(srcInfo, tmp);
+    auto decl = new IR::Declaration_Variable(srcInfo, name, type, nullptr);
     insertions->declarations.push_back(decl);
-    auto left = new IR::PathExpression(type, new IR::Path(tmp));
+    auto left = new IR::PathExpression(type, new IR::Path(name));
     auto right = element->expression;
     auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
     insertions->statements.push_back(assign);
 
-    auto path = new IR::PathExpression(type, new IR::Path(tmp));
+    auto path = new IR::PathExpression(type, new IR::Path(name));
     // This preserves annotations on the key
     element->expression = path;
     LOG2("Created new key expression " << element);
@@ -91,7 +83,7 @@ const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
     IR::IndexedVector<IR::StatOrDecl> result;
     for (auto assign : insertions->statements) result.push_back(assign);
     result.push_back(statement);
-    return new IR::BlockStatement(std::move(result));
+    return new IR::BlockStatement(statement->srcInfo, std::move(result));
 }
 
 }  // namespace P4

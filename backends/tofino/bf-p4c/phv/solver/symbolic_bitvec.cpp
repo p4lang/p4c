@@ -185,8 +185,8 @@ cstring BitVec::to_cstring() const {
 }
 
 BitVec BitVec::slice(int start, int sz) const {
-    BUG_CHECK(start >= 0 && start < int(bits.size()), "invalid start: %1%");
-    BUG_CHECK(start + sz <= int(bits.size()), "invalid sz: %1%");
+    BUG_CHECK(start >= 0 && start < int(bits.size()), "invalid start: %1%", start);
+    BUG_CHECK(start + sz <= int(bits.size()), "invalid sz: %1%", sz);
     auto s = std::vector<const Expr *>(bits.begin() + start, bits.begin() + start + sz);
     return BitVec{s};
 }

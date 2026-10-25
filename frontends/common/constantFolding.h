@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef COMMON_CONSTANTFOLDING_H_
-#define COMMON_CONSTANTFOLDING_H_
+#ifndef FRONTENDS_COMMON_CONSTANTFOLDING_H_
+#define FRONTENDS_COMMON_CONSTANTFOLDING_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -34,6 +25,7 @@ using namespace literals;
 /// functions.
 class ConstantFoldingPolicy {
  public:
+    virtual ~ConstantFoldingPolicy() = default;
     /// The default hook does not modify anything.
     virtual const IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
 };
@@ -60,6 +52,7 @@ class ConstantFoldingPolicy {
  */
 class DoConstantFolding : public Transform, public ResolutionContext {
  protected:
+    std::shared_ptr<ConstantFoldingPolicy> defaultPolicy;
     ConstantFoldingPolicy *policy;
 
     /// Used to resolve IR nodes to declarations.
@@ -82,12 +75,16 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     // we substituting constants there.
     bool assignmentTarget;
 
+    /// @returns a concrete type from a Type_Typedef by resolving it and also getting
+    /// any updated type from ConstantFolding an expression size into a Type_Bits
+    const IR::Type *resolveType(const IR::Type *t);
+
     /// @returns a constant equivalent to @p expr or `nullptr`
     const IR::Expression *getConstant(const IR::Expression *expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
-    const IR::Constant *cast(const IR::Constant *node, unsigned base,
-                             const IR::Type_Bits *type) const;
+    const IR::Constant *cast(const IR::Constant *node, unsigned base, const IR::Type_Bits *type,
+                             bool noWarning = false) const;
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node *binary(const IR::Operation_Binary *op,
@@ -116,7 +113,8 @@ class DoConstantFolding : public Transform, public ResolutionContext {
  public:
     DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,
                       ConstantFoldingPolicy *policy = nullptr)
-        : policy(policy ? policy : new ConstantFoldingPolicy()),
+        : defaultPolicy(policy ? nullptr : std::make_shared<ConstantFoldingPolicy>()),
+          policy(policy ? policy : defaultPolicy.get()),
           refMap(refMap),
           typeMap(typeMap),
           typesKnown(typeMap != nullptr),
@@ -170,7 +168,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::Type_Varbits *type) override;
     const IR::Node *postorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::IfStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::ArrayIndex *e) override;
     const IR::Node *preorder(IR::SwitchCase *c) override;
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
@@ -206,4 +204,4 @@ class ConstantFolding : public PassManager {
 
 }  // namespace P4
 
-#endif /* COMMON_CONSTANTFOLDING_H_ */
+#endif /* FRONTENDS_COMMON_CONSTANTFOLDING_H_ */

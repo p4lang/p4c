@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_GATEWAY_H_
-#define BF_P4C_MAU_GATEWAY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_
 
 #include <set>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/input_xbar.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;
@@ -34,19 +34,6 @@ class Field;
 }  // namespace PHV
 
 class PhvInfo;
-
-struct Device::GatewaySpec {
-    int PhvBytes;
-    int HashBits;
-    int PredicateBits;
-    int MaxRows;
-    bool SupportXor;
-    bool SupportRange;
-    int ExactShifts;
-    bool ByteSwizzle;  // is the a byte swizzle between ixbar and gateway
-    int PerByteMatch;  // lower bytes are shared per row, with 1 bit match per row
-    unsigned XorByteSlots;
-};
 
 class CanonGatewayExpr : public MauTransform {
  public:
@@ -219,4 +206,4 @@ class GatewayOpt : public PassManager {
     explicit GatewayOpt(const PhvInfo &);
 };
 
-#endif /* BF_P4C_MAU_GATEWAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_ */

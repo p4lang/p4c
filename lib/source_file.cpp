@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "source_file.h"
 
@@ -51,10 +40,22 @@ cstring SourcePosition::toString() const {
 SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end)
     : sources(sources), start(start), end(end) {
     BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
-    if (!start.isValid() || !end.isValid())
-        BUG("Invalid source position in SourceInfo %1%-%2%", start.toString(), end.toString());
+    if (!start.isValid() || !end.isValid()) {
+        BUG("Invalid source position in SourceInfo %1%-%2% for %3%", start.toString(),
+            end.toString(), sources->toDebugString());
+    }
     if (start > end)
         BUG("SourceInfo position start %1% after end %2%", start.toString(), end.toString());
+}
+
+SourceInfo::SourceInfo(const InputSources *sources, SourcePosition point)
+    : SourceInfo(sources, point, point) {}
+
+SourceInfo::SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
+    this->filename = filename;
+    this->line = line;
+    this->column = column;
+    this->srcBrief = srcBrief;
 }
 
 cstring SourceInfo::toString() const {
@@ -343,6 +344,10 @@ cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber, unsigned *outC
 
 SourceFileLine SourceInfo::toPosition() const {
     return sources->getSourceLine(start.getLineNumber());
+}
+
+SourceFileLine SourceInfo::toPositionEnd() const {
+    return sources->getSourceLine(end.getLineNumber());
 }
 
 cstring SourceInfo::getSourceFile() const {

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
 
@@ -25,6 +14,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "midend/convertEnums.h"
+#include "midend/global_copyprop.h"
 #include "midend/replaceSelectRange.h"
 
 using namespace P4;
@@ -42,6 +32,49 @@ class EnumOn32Bits : public ChooseEnumRepresentation {
 
 class P4CMidend : public P4CTest {};
 
+TEST_F(P4CMidend, GlobalCopyPropagationCopyInCopyOut) {
+    for (bool named : {false, true}) {
+        auto program = P4::parseP4String(std::string(R"(
+                extern void copy(out bit<32> destination, in bit<32> source);
+                control C(out bit<32> result) {
+                    bit<32> value;
+                    action a() {
+            )") + (named ? "copy(source = value, destination = value);" : "copy(value, value);") +
+                                         R"(
+                        result = value;
+                    }
+                    apply {
+                        value = 32w7;
+                        a();
+                    }
+                }
+            )");
+        ASSERT_NE(program, nullptr);
+        ASSERT_EQ(errorCount(), 0U);
+
+        ReferenceMap refMap;
+        TypeMap typeMap;
+        program = program->apply(GlobalCopyPropagation(&refMap, &typeMap));
+        ASSERT_NE(program, nullptr);
+        ASSERT_EQ(errorCount(), 0U);
+
+        auto control = program->getDeclsByName("C"_cs)->single()->checkedTo<IR::P4Control>();
+        auto action = control->controlLocals.getDeclaration("a"_cs)->checkedTo<IR::P4Action>();
+        auto call =
+            action->body->components.at(0)->checkedTo<IR::MethodCallStatement>()->methodCall;
+        EXPECT_TRUE(call->arguments->at(named ? 1 : 0)->expression->is<IR::PathExpression>());
+        auto input = call->arguments->at(named ? 0 : 1)->expression->to<IR::Constant>();
+        ASSERT_NE(input, nullptr);
+        EXPECT_EQ(input->asInt(), 7);
+        auto assignment = action->body->components.at(1)->checkedTo<IR::AssignmentStatement>();
+        EXPECT_TRUE(assignment->right->is<IR::PathExpression>());
+
+        program = program->apply(TypeChecking(&refMap, &typeMap, true));
+        ASSERT_NE(program, nullptr);
+        EXPECT_EQ(errorCount(), 0U);
+    }
+}
+
 // test various way of using enum
 TEST_F(P4CMidend, convertEnums_pass) {
     std::string program = P4_SOURCE(R"(
@@ -50,7 +83,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
         extern C { C(E e); }
         control m() { C(E.A) ctr; apply{} }
     )");
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     // Example to enable logging in source
@@ -69,7 +102,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
         enum E { A, B, C, D };
     )");
     P4CContext::get().options().langVersion = CompilerOptions::FrontendVersion::P4_16;
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm && ::P4::errorCount() == 0);
 
     ReferenceMap refMap;
@@ -87,7 +120,7 @@ TEST_F(P4CMidend, getEnumMapping) {
         enum E { A, B, C, D };
         const bool a = E.A == E.B;
     )");
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap refMap;
@@ -153,7 +186,7 @@ static void testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTe
     auto codeStr = code.str();
     SCOPED_TRACE(codeStr);
     std::string program = P4_SOURCE(codeStr.c_str());
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap refMap;

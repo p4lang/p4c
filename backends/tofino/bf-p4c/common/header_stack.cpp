@@ -86,8 +86,8 @@ void CollectHeaderStackInfo::postorder(IR::MAU::Primitive *prim) {
         auto op0 = operand0->e0->to<IR::Member>();
         auto op1 = operand1->e0->to<IR::Member>();
         if (!op0 || !op1) return;
-        if (op0->member == "$stkvalid" && op0->expr->type->is<IR::Type_Stack>() &&
-            op1->member == "$stkvalid" && op1->expr->type->is<IR::Type_Stack>()) {
+        if (op0->member == "$stkvalid" && op0->expr->type->is<IR::Type_Array>() &&
+            op1->member == "$stkvalid" && op1->expr->type->is<IR::Type_Array>()) {
             auto &s = stacks->at(op0->expr->toString());
             // Because of the way stkvalid is formatted, the lower limit of the
             // first the operand will always be equal to maxpop

@@ -1,16 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 set (P4_FRONTEND_SRCS
   p4/actionsInlining.cpp
@@ -84,84 +75,20 @@ set (P4_FRONTEND_SRCS
   p4/unusedDeclarations.cpp
   p4/uselessCasts.cpp
   p4/validateParsedProgram.cpp
+  p4/metrics/metricsPassManager.cpp
+  p4/metrics/linesOfCodeMetric.cpp
+  p4/metrics/cyclomaticComplexity.cpp
+  p4/metrics/unusedCodeMetric.cpp
+  p4/metrics/nestingDepthMetric.cpp
+  p4/metrics/halsteadMetrics.cpp
+  p4/metrics/headerMetrics.cpp
+  p4/metrics/headerPacketMetrics.cpp
+  p4/metrics/matchActionTableMetrics.cpp
+  p4/metrics/parserMetrics.cpp
+  p4/metrics/inlinedActionsMetric.cpp
+  p4/metrics/externalObjectsMetric.cpp
+  p4/metrics/exportMetrics.cpp
   )
-
-set (P4_FRONTEND_HDRS
-  p4/actionsInlining.h
-  p4/alias.h
-  p4/callGraph.h
-  p4/checkConstants.h
-  p4/checkCoreMethods.h
-  p4/checkNamedArgs.h
-  p4/cloner.h
-  p4/commonInlining.h
-  p4/coreLibrary.h
-  p4/createBuiltins.h
-  p4/def_use.h
-  p4/defaultArguments.h
-  p4/defaultValues.h
-  p4/deprecated.h
-  p4/directCalls.h
-  p4/dontcareArgs.h
-  p4/enumInstance.h
-  p4/entryPriorities.h
-  p4/evaluator/evaluator.h
-  p4/evaluator/substituteParameters.h
-  p4/externInstance.h
-  p4/frontend.h
-  p4/functionsInlining.h
-  p4/hierarchicalNames.h
-  p4/duplicateActionControlPlaneNameCheck.h
-  p4/inlining.h
-  p4/localizeActions.h
-  p4/methodInstance.h
-  p4/moveConstructors.h
-  p4/moveDeclarations.h
-  p4/parameterSubstitution.h
-  p4/parseAnnotations.h
-  p4/parserCallGraph.h
-  p4/parserControlFlow.h
-  p4/reassociation.h
-  p4/redundantParsers.h
-  p4/removeParameters.h
-  p4/removeReturns.h
-  p4/reservedWords.h
-  p4/resetHeaders.h
-  p4/setHeaders.h
-  p4/sideEffects.h
-  p4/simplify.h
-  p4/simplifyDefUse.h
-  p4/simplifyParsers.h
-  p4/simplifySwitch.h
-  p4/specialize.h
-  p4/specializeGenericFunctions.h
-  p4/specializeGenericTypes.h
-  p4/staticAssert.h
-  p4/strengthReduction.h
-  p4/structInitializers.h
-  p4/switchAddDefault.h
-  p4/symbol_table.h
-  p4/tableApply.h
-  p4/tableKeyNames.h
-  p4/ternaryBool.h
-  p4/toP4/toP4.h
-  p4/typeChecking/bindVariables.h
-  p4/typeChecking/constantTypeSubstitution.h
-  p4/typeChecking/syntacticEquivalence.h
-  p4/typeChecking/typeChecker.h
-  p4/typeChecking/typeConstraints.h
-  p4/typeChecking/typeSubstitution.h
-  p4/typeChecking/typeSubstitutionVisitor.h
-  p4/typeChecking/typeUnification.h
-  p4/typeMap.h
-  p4/uniqueNames.h
-  p4/unusedDeclarations.h
-  p4/uselessCasts.h
-  p4/validateMatchAnnotations.h
-  p4/validateParsedProgram.h
-  p4/validateValueSets.h
-  )
-
 
 set (COMMON_FRONTEND_SRCS
   common/applyOptionsPragmas.cpp
@@ -174,52 +101,9 @@ set (COMMON_FRONTEND_SRCS
   common/resolveReferences/resolveReferences.cpp
   )
 
-set (COMMON_FRONTEND_HDRS
-  common/applyOptionsPragmas.h
-  common/constantFolding.h
-  common/constantParsing.h
-  common/model.h
-  common/name_gateways.h
-  common/options.h
-  common/parser_options.h
-  common/parseInput.h
-  common/programMap.h
-  common/resolveReferences/referenceMap.h
-  common/resolveReferences/resolveReferences.h
-  )
-
-
-set (V1_FRONTEND_SRCS
-  p4-14/typecheck.cpp
-  p4-14/header_type.cpp
-  p4-14/v1.cpp
-
-  p4-14/fromv1.0/converters.cpp
-  p4-14/fromv1.0/programStructure.cpp
-  p4-14/fromv1.0/v1model.cpp
-  )
-
-set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/ir-v1.def PARENT_SCOPE)
-
-set (V1_FRONTEND_HDRS
-  p4-14/header_type.h
-  p4-14/inline_control_flow.h
-  p4-14/typecheck.h
-
-  p4-14/fromv1.0/converters.h
-  p4-14/fromv1.0/programStructure.h
-  p4-14/fromv1.0/v1model.h
-  )
-
 set (PARSERS_SRCS
   parsers/parserDriver.cpp
   parsers/p4/p4AnnotationLexer.cpp
-  )
-
-set (PARSERS_HDRS
-  parsers/parserDriver.h
-  parsers/p4/abstractP4Lexer.hpp
-  parsers/p4/p4AnnotationLexer.hpp
   )
 
 macro(add_parser pname)
@@ -247,30 +131,51 @@ macro(add_parser pname)
 
 endmacro(add_parser)
 
-add_parser(v1)
-add_parser(p4)
 
-add_library (frontend-parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
+
+add_parser(p4)
+set(FRONTEND_GEN_SOURCES ${p4PARSER_GEN_SRCS})
+
+if (SUPPORT_P4_14)
+add_parser(v1)
+set (FRONTEND_GEN_SOURCES ${FRONTEND_GEN_SOURCES} ${v1PARSER_GEN_SRCS})
+endif ()
+
+
+add_library (frontend-parser-gen OBJECT ${FRONTEND_GEN_SOURCES})
 target_link_libraries (frontend-parser-gen
   # Make sure to also expose the compile flags associated with the ir library.
   PUBLIC ir
   # These libraries are exposed by a header.
   PUBLIC p4ctoolkit
 )
-add_dependencies (frontend-parser-gen mkp4dirs mkv1dirs ir-generated)
+add_dependencies (frontend-parser-gen mkp4dirs ir-generated)
+
+
 
 set (FRONTEND_SOURCES
   ${COMMON_FRONTEND_SRCS}
   ${PARSERS_SRCS}
   ${P4_FRONTEND_SRCS}
-  ${V1_FRONTEND_SRCS}
   )
 
-set (FRONTEND_CPPLINT_FILES
-  ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
-  ${COMMON_FRONTEND_SRCS} ${COMMON_FRONTEND_HDRS}
-  ${V1_FRONTEND_SRCS} ${V1_FRONTEND_HDRS}
-  ${PARSERS_SRCS} ${PARSERS_HDRS})
+if (SUPPORT_P4_14)
+  add_dependencies (frontend-parser-gen mkv1dirs)
+
+  set (V1_FRONTEND_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/parsers/parserDriver_v1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4/typeChecking/typeCheckExpr_v1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/typecheck.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/header_type.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/v1.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/fromv1.0/converters.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/fromv1.0/programStructure.cpp
+  )
+  set (FRONTEND_SOURCES ${FRONTEND_SOURCES} ${V1_FRONTEND_SRCS})
+  set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/ir-v1.def PARENT_SCOPE)
+endif ()
+
 
 if (FLEX_INCLUDE_DIRS)
   include_directories (${FLEX_INCLUDE_DIRS})

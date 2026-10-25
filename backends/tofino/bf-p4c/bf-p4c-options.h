@@ -22,7 +22,6 @@
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/options.h"
 #include "lib/cstring.h"
-#include "lib/exename.h"
 #include "logging/bf_error_reporter.h"
 
 class BFN_Options : public CompilerOptions {
@@ -222,6 +221,9 @@ inline BFN_Options &BackendOptions() { return BFNContext::get().options(); }
 class BFNOptionPragmaParser : public P4::P4COptionPragmaParser {
  public:
     std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) override;
+
+    BFNOptionPragmaParser() : P4::P4COptionPragmaParser(false) {}
+    // FIXME -- should remove the tofino @command_line stuff and use the base class
 
  private:
     std::optional<CommandLineOptions> parseCompilerOption(const IR::Annotation *annotation);

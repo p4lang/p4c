@@ -20,6 +20,7 @@
 #define BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -33,7 +34,7 @@
 #include "backends/tofino/bf-p4c/control-plane/bfruntime.h"
 #include "backends/tofino/bf-p4c/control-plane/p4runtime_force_std.h"
 #include "backends/tofino/bf-p4c/control-plane/runtime.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "barefoot/p4info.pb.h"
 #include "control-plane/flattenHeader.h"
 #include "control-plane/p4RuntimeArchHandler.h"
@@ -278,8 +279,8 @@ struct ActionSelector {
 
 /// The information about a digest instance which is needed to serialize it.
 struct Digest {
-    const cstring name;                          // The fully qualified external name of the digest
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    const cstring name;  // The fully qualified external name of the digest
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this digest
                                         // declaration.
 };
@@ -288,7 +289,7 @@ struct Digest {
 struct DynHash {
     const cstring name;  // The fully qualified external name of the dynhash
     // The format of the fields used for hash calculation.
-    const p4configv1::P4DataTypeSpec *typeSpec;
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this dynhash
                                         // declaration.
     struct hashField {
@@ -302,8 +303,8 @@ struct DynHash {
 /// The information about a value set instance which is needed to serialize it.
 struct ValueSet {
     const cstring name;
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the stored data
-    const int64_t size;                          // Number of entries in the value set
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the stored data
+    const int64_t size;                 // Number of entries in the value set
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this value set
                                         // declaration.
 
@@ -332,7 +333,7 @@ struct ValueSet {
 /// The information about a register instance which is needed to serialize it.
 struct Register {
     const cstring name;  // The fully qualified external name of the register table
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     int64_t size;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this register
                                         // declaration.
@@ -394,7 +395,7 @@ struct Register {
 /// The information about a register parameter instance which is needed to serialize it.
 struct RegisterParam {
     const cstring name;  // The fully qualified external name of the register parameter
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     int64_t initial_value;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this register
                                         // declaration.
@@ -507,7 +508,7 @@ struct Wred {
 };
 
 struct PortMetadata {
-    const p4configv1::P4DataTypeSpec *typeSpec;  // format of port metadata
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // format of port metadata
     static const cstring name() { return "$PORT_METADATA"_cs; }
 };
 
@@ -573,7 +574,7 @@ class SnapshotFieldFinder : public Inspector {
         prefixList.push_back(prefix);
         // Setting visitDagOnce to false so IR nodes can be visited more than once. This is required
         // while dealing with header stacks where we have to loop for all elements in a stack.
-        // Type_Stack is not a vector so we have a single node which needs to output 'n' values for
+        // Type_Array is not a vector so we have a single node which needs to output 'n' values for
         // a size 'n' stack.
         visitDagOnce = false;
     }
@@ -617,7 +618,7 @@ class SnapshotFieldFinder : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Type_Stack *st) override {
+    bool preorder(const IR::Type_Array *st) override {
         Log::TempIndent indent;
         LOG4("SnapshotFinder preorder Stack : " << st << indent);
         // Remove stack name and re-insert based on index
@@ -810,7 +811,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     void collectAssignmentStatement(P4RuntimeSymbolTableIface *,
-                                    const IR::AssignmentStatement *) override {}
+                                    const IR::BaseAssignmentStatement *) override {}
 
     void collectExternMethod(P4RuntimeSymbolTableIface *, const P4::ExternMethod *) override {}
 
@@ -1061,7 +1062,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         auto typeSpec =
             P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
-                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeArg);
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }
 
@@ -1113,7 +1114,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
             auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap,
                                                                             typeList, p4RtTypeInfo);
             BUG_CHECK(typeSpec != nullptr,
-                      "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                      "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeList);
             return DynHash{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>(),
                            hashFieldInfo, hashWidth};
         }
@@ -1475,7 +1476,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         auto impl = getTableImplementationProperty(table);
         if (impl == nullptr) return std::nullopt;
         if (!impl->value->template is<IR::ExpressionValue>()) {
-            error("Expected %1% property value for table %2% to be an expression: %2%",
+            error("Expected %1% property value for table %2% to be an expression: %3%",
                   implementationString, table->controlPlaneName(), impl);
             return std::nullopt;
         }

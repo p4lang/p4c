@@ -1,0 +1,6 @@
+expr-binary-logical-on-unsupported-types.p4(3): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+expr-binary-logical-on-unsupported-types.p4(5): [--Werror=type-error] error: ... && ...: not defined on ANYTYPE and ANYTYPE
+    if ((...) && (...)) {}
+        ^^^^^^^^^^^^^^

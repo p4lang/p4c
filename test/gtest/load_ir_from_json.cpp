@@ -1,18 +1,7 @@
-/*
-Copyright 2019 RT-RK Computer Based Systems.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2019 RT-RK Computer Based Systems.
+// SPDX-FileCopyrightText: 2019 RT-RK Computer Based Systems.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +27,7 @@ namespace P4::Test {
 class FromJSONTest : public P4CTest {};
 
 TEST_F(FromJSONTest, load_ir_from_json) {
+    // FIXME: This path should be set by the build system.
     int exitCode = system(
         "./p4c-bm2-ss -o outputTO.json test/test_fromJSON.p4 "
         "--toJSON jsonFile.json");

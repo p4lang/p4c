@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "irclass.h"
 
@@ -99,7 +88,38 @@ void exit_namespace(std::ostream &out, IrNamespace *ns) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
+/* sort class definitions so defs come before uses */
+void IrDefinitions::toposort() {
+    std::vector<IrElement *> sorted;
+    std::map<const IrClass *, IrClass *> classes;
+
+    auto visit = [&](const IrClass *cl) -> void {
+        auto do_visit = [&](const auto &self, const IrClass *cl) -> void {
+            auto it = classes.find(cl);
+            if (it != classes.end()) {
+                auto *cl = it->second;
+                classes.erase(it);
+                self(self, cl->concreteParent);
+                for (auto *p : cl->parentClasses) self(self, p);
+                sorted.push_back(cl);
+            }
+        };
+        do_visit(do_visit, cl);
+    };
+
+    for (auto *el : elements)
+        if (auto *cl = el->to<IrClass>()) classes.emplace(cl, cl);
+
+    for (auto *el : elements) {
+        if (auto *cl = el->to<IrClass>())
+            visit(cl);
+        else
+            sorted.push_back(el);
+    }
+    elements = std::move(sorted);
+}
+
+Util::EnumeratorPtr<IrClass *> IrDefinitions::getClasses() const {
     return Util::enumerate(elements)->as<IrClass *>()->where(
         [](IrClass *e) { return e != nullptr; });
 }
@@ -147,7 +167,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
 
     bool first = true;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->kind == NodeKind::Concrete) {
             if (first)
                 first = false;
@@ -164,7 +184,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     out << "extern template class IR::Vector<IR::Node>;" << std::endl;
     impl << "template class IR::IndexedVector<IR::Node>;" << std::endl;
     out << "extern template class IR::IndexedVector<IR::Node>;" << std::endl;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->needVector || cls->needIndexedVector) {
             impl << "template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
                  << std::endl;
@@ -195,7 +215,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     t << "#define IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, T, D, B, ...) \\"
       << std::endl;
-    for (auto cls : *getClasses())
+    for (auto cls : getClasses())
         if (cls->kind != NodeKind::Interface) cls->generateTreeMacro(t);
 
     t << "T(Vector<IR::Node>, D(Node), ##__VA_ARGS__) \\" << std::endl;
@@ -203,7 +223,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          "D(Vector<IR::Node>) "
          "B(Node), ##__VA_ARGS__) \\"
       << std::endl;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->needVector || cls->needIndexedVector)
             t << "T(Vector<IR::" << cls->containedIn << cls->name
               << ">, D(Node), "
@@ -227,7 +247,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     t << "namespace P4::IR {" << std::endl;
 
     // Emit forward declarations
-    for (auto *cls : *getClasses()) {
+    for (auto *cls : getClasses()) {
         enter_namespace(t, cls->containedIn);
         cls->declare(t);
         exit_namespace(t, cls->containedIn);
@@ -245,7 +265,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     unsigned nkId = 3;
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
-    for (auto *cls : *getClasses())
+    for (auto *cls : getClasses())
         t << "  " << cls->qualified_name(irNamespace).replace("::", "_") << " = " << nkId++
           << ",\n";
 
@@ -478,7 +498,7 @@ void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
         concreteParent->computeConstructorArguments(args);
     }
 
-    for (auto field : *getFields())
+    for (auto field : getFields())
         if (!field->isStatic && (!field->initializer || field->optional))
             args.emplace_back(field, this);
 }
@@ -491,7 +511,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     //     F2 f2;
     //     T(PF1 pf1, PF2 pf2, F1 f1, F2 f2) :
     //         P(pf1, pf2), f1(f1), f2(f2)
-    //     { validate(); }
+    //     { T::validate(); }
     // }
     int optargs = 0;
     std::stringstream body;
@@ -519,7 +539,10 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
         body << '\n'
              << LineDirective(user->getSourceInfo()) << user->body << '\n'
              << LineDirective() << indent;
-    if (kind != NodeKind::Nested) body << " validate(); ";
+    // Construction validates only the class currently being initialized.
+    if (kind != NodeKind::Nested) {
+        body << " " << name << "::validate(); ";
+    }
     body << "}";
     auto ctor = new IrMethod(name, body.str());
     ctor->clss = this;
@@ -535,12 +558,12 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     return optargs;
 }
 
-Util::Enumerator<IrField *> *IrClass::getFields() const {
+Util::EnumeratorPtr<IrField *> IrClass::getFields() const {
     return Util::enumerate(elements)->as<IrField *>()->where(
         [](IrField *f) { return f && !f->isStatic; });
 }
 
-Util::Enumerator<IrMethod *> *IrClass::getUserMethods() const {
+Util::EnumeratorPtr<IrMethod *> IrClass::getUserMethods() const {
     return Util::enumerate(elements)->as<IrMethod *>()->where(
         [](IrElement *e) { return e != nullptr; });
 }
@@ -572,6 +595,8 @@ bool IrClass::shouldSkip(cstring feature) const {
 }
 
 void IrClass::resolve() {
+    if (resolved) return;
+    resolved = true;
     for (auto s : parents) {
         const IrClass *p = s->resolve(containedIn);
         if (p == nullptr) throw Util::CompilationError("Could not find class %1%", s);

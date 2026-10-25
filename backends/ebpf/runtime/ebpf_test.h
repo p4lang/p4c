@@ -1,18 +1,9 @@
 /*
-Copyright 2018 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2018 VMware, Inc.
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /// This file contains all functions and definitions necessary for the user space
 /// target C code to compile. It is part of the extended ebpf testing framework
@@ -26,6 +17,7 @@ limitations under the License.
 #include "ebpf_common.h"
 
 #include <endian.h>
+#include <stdio.h>          // printf
 
 /// define some byte order conversions, these mimic bpf_endian.h
 #define htonll(x) htobe64(x)
@@ -104,5 +96,12 @@ struct bpf_table tables[] = {
 extern struct bpf_table tables[];
 extern int ebpf_filter(struct sk_buff *skb);
 
+/// Helper function.
+/// Print a byte buffer according to the specified length.
+static inline void print_n_bytes(void *receiveBuffer, int num) {
+    for (int i = 0; i < num; i++)
+        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
+    printf("\n");
+}
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_USER_H_

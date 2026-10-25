@@ -1,23 +1,14 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "lib/nethash.h"
 
 #include <arpa/inet.h>
 
 #include <algorithm>
+#include <cstring>
 
 /** \file
  * \author Antonin Bas (antonin@barefootnetworks.com) (the behavioral-model version)
@@ -175,35 +166,46 @@ uint16_t crcCCITT(const uint8_t *buf, size_t len) {
     return crcGeneric<uint16_t, 0xffff, 0, table_crcCCITT, Identity>(buf, len);
 }
 
+namespace {
+
+/// Load a value without requiring alignment.
+template <typename T>
+T loadUnaligned(const uint8_t *p) {
+    T value;
+    std::memcpy(&value, p, sizeof(value));
+    return value;
+}
+
+}  // namespace
+
 uint16_t csum16(const uint8_t *buf, size_t len) {
     uint64_t sum = 0;
-    const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
     uint16_t t3, t4;
-    const uint8_t *tail;
+    const uint8_t *tail = buf;
     /* Main loop - 8 bytes at a time */
     while (len >= sizeof(uint64_t)) {
-        uint64_t s = *b++;
+        uint64_t s = loadUnaligned<uint64_t>(tail);
         sum += s;
         if (sum < s) sum++;
         len -= 8;
+        tail += 8;
     }
     /* Handle tail less than 8-bytes long */
-    tail = reinterpret_cast<const uint8_t *>(b);
     if (len & 4) {
-        uint32_t s = *reinterpret_cast<const uint32_t *>(tail);
+        uint32_t s = loadUnaligned<uint32_t>(tail);
         sum += s;
         if (sum < s) sum++;
         tail += 4;
     }
     if (len & 2) {
-        uint16_t s = *reinterpret_cast<const uint16_t *>(tail);
+        uint16_t s = loadUnaligned<uint16_t>(tail);
         sum += s;
         if (sum < s) sum++;
         tail += 2;
     }
     if (len & 1) {
-        uint8_t s = *reinterpret_cast<const uint8_t *>(tail);
+        uint8_t s = *tail;
         sum += s;
         if (sum < s) sum++;
     }

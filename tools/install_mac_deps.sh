@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2020 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script to install P4C dependencies on MacOS.
 
 set -e  # Exit on error.
@@ -11,7 +15,7 @@ brew_install() {
     if brew list $1 &>/dev/null; then
         echo "${1} is already installed"
     else
-        brew install --ignore-dependencies $1 && echo "$1 is installed"
+        brew install $1 && echo "$1 is installed"
     fi
 }
 
@@ -38,10 +42,17 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
+# FIXME: As of 2026-Oct-11, brew update removes python@3.14 and
+# installs python@3.15, which gives errors when trying to install the
+# pynng package.  Install python@3.14 and use it later below in
+# creating a Python venv so package install succeeds.
+brew install python@3.14
+
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
-    autoconf automake ccache cmake libtool
-    openssl coreutils bison grep ninja
+    autoconf automake ccache cmake jsoncpp libtool
+    openssl coreutils bison grep ninja uv
+    libevent nanomsg thrift xxhash
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
@@ -60,8 +71,21 @@ fi
 if ! grep -q "$HOMEBREW_PREFIX/opt/grep/libexec/gnubin" ~/.bash_profile; then
   echo 'export PATH="$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 fi
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
-# Install required pip packages
-# TODO: Should we use --break-system-packages or should we set up a venv?
-pip3 install --user --break-system-packages -r requirements.txt
+# Set up uv for Python dependency management.
+# FIXME: See earlier FIXME for why we force the use of python@3.14
+# here.
+uv venv --seed --python /opt/homebrew/opt/python@3.14/libexec/bin/python3 ~/.venv
+source ~/.venv/bin/activate
+uv sync --python /opt/homebrew/opt/python@3.14/libexec/bin/python3
+
+# Install BMv2 from source via the shared CMake-based helper.
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
+BMV2_INSTALL_ARGS=(
+)
+if [[ -n "${BMV2_REF:-}" ]]; then
+  BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+fi
+"${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"

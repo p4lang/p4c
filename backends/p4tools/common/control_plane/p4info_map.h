@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4INFO_MAP_H_
 #define BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4INFO_MAP_H_
 #include <cstdint>

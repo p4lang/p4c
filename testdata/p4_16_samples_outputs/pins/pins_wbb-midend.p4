@@ -285,39 +285,39 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         counters = acl_wbb_ingress_acl_wbb_ingress_counter;
         size = 8;
     }
-    @hidden action pins_wbb325() {
+    @hidden action pins_wbb331() {
         acl_wbb_ingress_ttl = headers.ipv4.ttl;
     }
-    @hidden action pins_wbb327() {
+    @hidden action pins_wbb333() {
         acl_wbb_ingress_ttl = headers.ipv6.hop_limit;
     }
-    @hidden action pins_wbb262() {
+    @hidden action pins_wbb268() {
         acl_wbb_ingress_ttl = 8w0;
     }
-    @hidden table tbl_pins_wbb262 {
+    @hidden table tbl_pins_wbb268 {
         actions = {
-            pins_wbb262();
+            pins_wbb268();
         }
-        const default_action = pins_wbb262();
+        const default_action = pins_wbb268();
     }
-    @hidden table tbl_pins_wbb325 {
+    @hidden table tbl_pins_wbb331 {
         actions = {
-            pins_wbb325();
+            pins_wbb331();
         }
-        const default_action = pins_wbb325();
+        const default_action = pins_wbb331();
     }
-    @hidden table tbl_pins_wbb327 {
+    @hidden table tbl_pins_wbb333 {
         actions = {
-            pins_wbb327();
+            pins_wbb333();
         }
-        const default_action = pins_wbb327();
+        const default_action = pins_wbb333();
     }
     apply {
-        tbl_pins_wbb262.apply();
+        tbl_pins_wbb268.apply();
         if (headers.ipv4.isValid()) {
-            tbl_pins_wbb325.apply();
+            tbl_pins_wbb331.apply();
         } else if (headers.ipv6.isValid()) {
-            tbl_pins_wbb327.apply();
+            tbl_pins_wbb333.apply();
         }
         acl_wbb_ingress_acl_wbb_ingress_table.apply();
     }

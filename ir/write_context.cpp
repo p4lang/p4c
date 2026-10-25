@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2013-present Barefoot Networks, Inc.
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -31,13 +20,18 @@ bool P4WriteContext::isWrite(bool root_value) {
     const Context *ctxt = getContext();
     if (!ctxt || !ctxt->node) return root_value;
     while (ctxt->child_index == 0 &&
-           (ctxt->node->is<IR::ArrayIndex>() || ctxt->node->is<IR::HeaderStackItemRef>() ||
-            ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
+           (ctxt->node->is<IR::ArrayIndex>()
+#ifdef SUPPORT_P4_14
+            || ctxt->node->is<IR::HeaderStackItemRef>()
+#endif
+            || ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
         ctxt = ctxt->parent;
         if (!ctxt || !ctxt->node) return root_value;
     }
+#ifdef SUPPORT_P4_14
     if (auto *prim = ctxt->node->to<IR::Primitive>()) return prim->isOutput(ctxt->child_index);
-    if (ctxt->node->is<IR::AssignmentStatement>()) return ctxt->child_index == 0;
+#endif
+    if (ctxt->node->is<IR::BaseAssignmentStatement>()) return ctxt->child_index == 0;
     if (ctxt->node->is<IR::Argument>()) {
         // MethodCallExpression(Vector<Argument(Expression)>)
         if (!ctxt->parent || !ctxt->parent->parent || !ctxt->parent->parent->node) return false;
@@ -76,12 +70,17 @@ bool P4WriteContext::isRead(bool root_value) {
     const Context *ctxt = getContext();
     if (!ctxt || !ctxt->node) return root_value;
     while (ctxt->child_index == 0 &&
-           (ctxt->node->is<IR::ArrayIndex>() || ctxt->node->is<IR::HeaderStackItemRef>() ||
-            ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
+           (ctxt->node->is<IR::ArrayIndex>()
+#ifdef SUPPORT_P4_14
+            || ctxt->node->is<IR::HeaderStackItemRef>()
+#endif
+            || ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
         ctxt = ctxt->parent;
         if (!ctxt || !ctxt->node) return root_value;
     }
+#ifdef SUPPORT_P4_14
     if (auto *prim = ctxt->node->to<IR::Primitive>()) return !prim->isOutput(ctxt->child_index);
+#endif
     if (ctxt->node->is<IR::AssignmentStatement>()) return ctxt->child_index != 0;
     if (ctxt->node->is<IR::Argument>()) {
         // MethodCallExpression(Vector<Argument(Expression)>)

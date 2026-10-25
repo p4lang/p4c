@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Nvidia Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 
 enum bit<2> foo_t { A = 0, B = 1, C = 2, D = 3 }

@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Marvell Technology, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Marvell Technology, Inc.
+// SPDX-FileCopyrightText: 2024 Marvell Technology, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "pnaNic.h"
 
@@ -86,13 +75,13 @@ void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
                                   new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new LowerExpressions(typeMap),
         new PassRepeated({new P4::ConstantFolding(typeMap), new P4::StrengthReduction(typeMap)}),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new P4::RemoveAllUnusedDeclarations(P4::RemoveUnusedPolicy()),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
@@ -318,7 +307,7 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
-    auto block = inst->controlPlaneName().trim(trim);
+    auto block = inst->controlPlaneName().before(trim);
     auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
     auto mainParser = pnaStructure->parsers.at("main_parser"_cs)->controlPlaneName();
     auto mainDeparser = pnaStructure->deparsers.at("main_deparser"_cs)->controlPlaneName();

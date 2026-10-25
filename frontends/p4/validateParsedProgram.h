@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef P4_VALIDATEPARSEDPROGRAM_H_
-#define P4_VALIDATEPARSEDPROGRAM_H_
+#ifndef FRONTENDS_P4_VALIDATEPARSEDPROGRAM_H_
+#define FRONTENDS_P4_VALIDATEPARSEDPROGRAM_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -88,7 +79,7 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::P4Parser *parser) override {
         auto start = parser->states.getDeclaration(IR::ParserState::start);
         if (!start) {
-            ::P4::error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser);
+            error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser->name);
         }
         container(parser);
         distinctParameters(parser->getTypeParameters(), parser->getApplyParameters(),
@@ -101,4 +92,4 @@ class ValidateParsedProgram final : public Inspector {
 
 }  // namespace P4
 
-#endif /* P4_VALIDATEPARSEDPROGRAM_H_ */
+#endif /* FRONTENDS_P4_VALIDATEPARSEDPROGRAM_H_ */

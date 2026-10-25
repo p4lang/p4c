@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>

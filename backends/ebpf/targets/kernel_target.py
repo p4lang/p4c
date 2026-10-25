@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
-# Copyright 2013-present Barefoot Networks, Inc.
-# Copyright 2018 VMware, Inc.
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 import os
 import subprocess
@@ -20,6 +11,7 @@ import sys
 import time
 from glob import glob
 from pathlib import Path
+from typing import Optional
 
 from .ebpfenv import Bridge
 from .target import EBPFTarget
@@ -33,10 +25,15 @@ import testutils
 
 
 class Target(EBPFTarget):
-    EBPF_MAP_PATH = "/sys/fs/bpf/tc/globals"
+    EBPF_PATH = Path("/sys/fs/bpf")
 
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
+        self.bpftool = self.runtimedir.joinpath("install/bpftool")
+        if self.options.target == "xdp":
+            self.ebpf_map_path = self.EBPF_PATH.joinpath(f"xdp/globals")
+        else:
+            self.ebpf_map_path = self.EBPF_PATH.joinpath(f"tc/globals")
 
     def compile_dataplane(self):
         # Use clang to compile the generated C code to a LLVM IR
@@ -68,10 +65,7 @@ class Target(EBPFTarget):
         args += "CFLAGS+=-DCONTROL_PLANE "
         # add the folder local to the P4 file to the list of includes
         args += f"INCLUDES+=-I{os.path.dirname(self.options.p4filename)} "
-        # some kernel specific includes for libbpf
-        args += f"INCLUDES+=-I{self.runtimedir}/usr/include "
-        args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/include/uapi "
-        args += f"LIBS+={self.runtimedir}/usr/lib64/libbpf.a "
+        args += f"LIBS+={self.runtimedir}/install/libbpf/libbpf.a "
         args += "LIBS+=-lz "
         args += "LIBS+=-lelf "
         result = testutils.exec_process(args)
@@ -79,19 +73,25 @@ class Target(EBPFTarget):
             testutils.log.error("Failed to build the filter")
         return result.returncode
 
-    def _create_bridge(self):
+    def _create_bridge(self) -> Optional[Bridge]:
         # The namespace is the id of the process
         namespace = str(os.getpid())
         # Number of input files
         direction = "in"
         num_files = len(glob(self.filename("*", direction)))
         # Create the namespace and the bridge with all its ports
-        br = Bridge(namespace)
-        result = br.create_virtual_env(num_files)
+        bridge = Bridge(namespace)
+        result = bridge.create_virtual_env(num_files)
         if result != testutils.SUCCESS:
-            br.ns_del()
+            bridge.ns_del()
             return None
-        return br
+        if self.options.target != "xdp":
+            # Add the qdisc. MUST be clsact layer.
+            for port_name in bridge.edge_ports:
+                result = bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
+                if result != testutils.SUCCESS:
+                    return None
+        return bridge
 
     def _get_run_cmd(self):
         direction = "in"
@@ -108,7 +108,7 @@ class Target(EBPFTarget):
         cmd += "-d"
         return cmd
 
-    def _kill_processes(self, procs):
+    def _kill_processes(self, procs) -> None:
         for proc in procs:
             # kill process, 15 is SIGTERM
             os.kill(proc.pid, 15)
@@ -127,7 +127,7 @@ class Target(EBPFTarget):
             bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
             cmd = (
                 f"tc filter add dev {port_name} egress"
-                f" bpf da obj {self.template}.o section prog verbose"
+                f" bpf da obj {self.template}.o section tc verbose "
             )
         return bridge.ns_proc_write(proc, cmd)
 
@@ -144,6 +144,48 @@ class Target(EBPFTarget):
         if result != testutils.SUCCESS:
             return result
         return testutils.SUCCESS
+
+    # FIXME: Reenable bpftool for loading in subsequent PRs.
+    # def _attach_filters(self, bridge: Bridge, proc: subprocess.Popen) -> int:
+    #     # Is this a XDP or TC (ebpf_filter) program?
+    #     p_result = testutils.exec_process(f"objdump -hj xdp {self.template}.o").returncode
+    #     is_xdp = p_result == testutils.SUCCESS
+    #     # Load the specified eBPF object to "port_name" egress
+    #     # As a side-effect, this may create maps in /sys/fs/bpf/
+    #     # Get the command to load eBPF code to all the attached ports
+    #     result = bridge.ns_proc_write(proc, f"mount -t bpf none {self.EBPF_PATH}")
+    #     if result != testutils.SUCCESS:
+    #         return result
+    #     result = bridge.ns_proc_append(proc, f"mkdir -p {self.ebpf_map_path}")
+    #     if result != testutils.SUCCESS:
+    #         return result
+    #     load_type = "xdp" if is_xdp else "tc"
+    #     cmd = (
+    #         f"{self.bpftool} prog load {self.template}.o {self.EBPF_PATH}/ebpf_filter pinmaps "
+    #         f"{self.ebpf_map_path} type {load_type}"
+    #     )
+    #     result = bridge.ns_proc_append(proc, cmd)
+    #     if result != testutils.SUCCESS:
+    #         return result
+
+    #     attach_type = "xdp" if is_xdp else "tcx_egress"
+    #     ports = bridge.br_ports if is_xdp else bridge.edge_ports
+    #     if len(ports) > 0:
+    #         for port_name in ports:
+    #             cmd = (
+    #                 f"{self.bpftool} net attach {attach_type} pinned "
+    #                 f"{self.EBPF_PATH}/ebpf_filter dev {port_name} "
+    #             )
+    #             result = bridge.ns_proc_append(proc, cmd)
+    #             if result != testutils.SUCCESS:
+    #                 return result
+    #         return result
+    #     # No ports attached (no pcap files), load to bridge instead
+    #     cmd = (
+    #         f"{self.bpftool} net attach {attach_type} pinned "
+    #         f"{self.EBPF_PATH}/ebpf_filter dev {bridge.br_name} "
+    #     )
+    #     return bridge.ns_proc_append(proc, cmd)
 
     def _run_tcpdump(self, bridge, filename, port):
         cmd = f"{bridge.get_ns_prefix()} tcpdump -w {filename} -i {port}"
@@ -168,12 +210,8 @@ class Target(EBPFTarget):
         result = self._attach_filters(bridge, proc)
         if result != testutils.SUCCESS:
             return result
-        # Check if eBPF maps have actually been created
-        result = bridge.ns_proc_write(proc, f"ls -1 {self.EBPF_MAP_PATH}")
-        if result != testutils.SUCCESS:
-            return result
         # Finally, append the actual runtime command to the process
-        result = bridge.ns_proc_append(proc, self._get_run_cmd())
+        result = bridge.ns_proc_write(proc, self._get_run_cmd())
         if result != testutils.SUCCESS:
             return result
         # Execute the command queue and close the process, retrieve result

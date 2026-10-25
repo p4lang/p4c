@@ -1,21 +1,14 @@
 /*
-Copyright (C) 2024 Intel Corporation
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+ * Copyright (C) 2024 Intel Corporation
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_TC_TCEXTERNS_H_
 #define BACKENDS_TC_TCEXTERNS_H_
 
 #include "backend.h"
-#include "ebpfCodeGen.h"
 
 namespace P4::TC {
 
@@ -144,6 +137,7 @@ class InternetChecksumAlgorithmPNA : public EBPF::EBPFHashAlgorithmPSA {
 
 class EBPFChecksumPNA : public EBPF::EBPFChecksumPSA {
  protected:
+    cstring csumVar;
     void init(const EBPF::EBPFProgram *program, cstring name, int type);
 
  public:
@@ -177,18 +171,44 @@ class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
 };
 
-class EBPFHashPNA : public EBPFChecksumPNA {
+class EBPFHashPNA : public EBPF::EBPFChecksumPSA {
+ protected:
+    void init(const EBPF::EBPFProgram *program, cstring name, int type);
+
  public:
     EBPFHashPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
                 cstring name)
-        : EBPFChecksumPNA(program, block, name) {}
+        : EBPF::EBPFChecksumPSA(program, block, name) {
+        auto di = block->to<IR::Declaration_Instance>();
+        if (di->arguments->size() != 1) {
+            ::P4::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
+            return;
+        }
+        int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();
+        init(program, name, type);
+    }
     void processMethod(EBPF::CodeBuilder *builder, cstring method,
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
     void calculateHash(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expr,
                        Visitor *visitor);
     void emitVariables(EBPF::CodeBuilder *builder);
 };
+
+class EBPFCRCChecksumPNA : public EBPFChecksumPNA {
+ public:
+    EBPFCRCChecksumPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
+                       cstring name)
+        : EBPFChecksumPNA(program, block, name) {}
+
+    void processMethod(EBPF::CodeBuilder *builder, cstring method,
+                       const IR::MethodCallExpression *expr, Visitor *visitor) override;
+    void emitVariables(EBPF::CodeBuilder *builder);
+};
+
 class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
+ protected:
+    cstring csumVar;
+
  public:
     CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
         : EBPF::CRCChecksumAlgorithm(program, name, width) {
@@ -200,6 +220,23 @@ class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
                      const IR::MethodCallExpression *expr);
     void emitAddData(EBPF::CodeBuilder *builder, int dataPos,
                      const IR::MethodCallExpression *expr) override;
+    void emitVariables(EBPF::CodeBuilder *builder, const IR::Declaration_Instance *decl) override;
+    void emitClear(EBPF::CodeBuilder *builder) override;
+};
+
+class HashAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
+ public:
+    HashAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
+        : EBPF::CRCChecksumAlgorithm(program, name, width) {
+        BUG_CHECK(width == 16 || width == 32, "Must be 16 bits width or 32 bits width.");
+        initialValue = "0"_cs;
+    }
+    void emitGet(EBPF::CodeBuilder *builder) override;
+    void emitAddData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments,
+                     const IR::MethodCallExpression *expr);
+    void emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                     const IR::MethodCallExpression *expr) override;
+    void emitVariables(EBPF::CodeBuilder *builder);
 };
 
 class EBPFDigestPNA : public EBPF::EBPFDigestPSA {
@@ -274,6 +311,14 @@ class EBPFTablePNADirectMeterPropertyVisitor : public EBPF::EBPFTablePsaProperty
     }
 };
 
+class EBPFRandomPNA : public EBPF::EBPFRandomPSA {
+ public:
+    explicit EBPFRandomPNA(const IR::Declaration_Instance *di) : EBPF::EBPFRandomPSA(di) {}
+
+    void emitExecute(EBPF::CodeBuilder *builder, ControlBodyTranslatorPNA *translator,
+                     const IR::Type *ltype, const IR::Expression *lexpr,
+                     const IR::Expression *rexpr) const;
+};
 }  // namespace P4::TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

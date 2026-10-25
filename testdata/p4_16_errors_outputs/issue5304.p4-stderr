@@ -1,0 +1,3 @@
+issue5304.p4(22): [--Werror=type-error] error: ttt: transition target must be a parser state
+        transition ttt;
+                   ^^^

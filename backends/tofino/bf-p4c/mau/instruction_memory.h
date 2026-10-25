@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_INSTRUCTION_MEMORY_H_
-#define BF_P4C_MAU_INSTRUCTION_MEMORY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_
 
 /* clang-format off */
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/common/alloc.h"
 
 using namespace P4;
@@ -179,4 +179,4 @@ struct InstructionMemory {
 
 /* clang-format on */
 
-#endif /* BF_P4C_MAU_INSTRUCTION_MEMORY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_ */

@@ -1,0 +1,36 @@
+equate-type-struct-and-non-struct.p4(4): [--Wwarn=shadow] warning: 'S' shadows 'struct S'
+control C(inout tuple<> S)() {
+                        ^
+equate-type-struct-and-non-struct.p4(3)
+struct S {}
+       ^
+equate-type-struct-and-non-struct.p4(7): [--Wwarn=unused] warning: control 'C2' is unused
+control C2()() {
+        ^^
+equate-type-struct-and-non-struct.p4(10): [--Werror=type-error] error: 'C_inst.apply(s)'
+    C.apply(s);
+    ^^^^^^^^^^
+  ---- Actual error:
+equate-type-struct-and-non-struct.p4(3): Cannot unify type 'struct S' with type 'tuple<>'
+  struct S {}
+         ^
+equate-type-struct-and-non-struct.p4(4)
+  control C(inout tuple<> S)() {
+                  ^^^^^^^
+  ---- Originating from:
+equate-type-struct-and-non-struct.p4(10): Type of argument 's' (struct S) does not match type of parameter 'S' (tuple<>)
+      C.apply(s);
+              ^
+equate-type-struct-and-non-struct.p4(3)
+  struct S {}
+         ^
+equate-type-struct-and-non-struct.p4(4)
+  control C(inout tuple<> S)() {
+                          ^
+equate-type-struct-and-non-struct.p4(4)
+  control C(inout tuple<> S)() {
+                  ^^^^^^^
+  ---- Originating from:
+equate-type-struct-and-non-struct.p4(10): Function type 'C' does not match invocation type '<Method call>'
+      C.apply(s);
+      ^^^^^^^^^^

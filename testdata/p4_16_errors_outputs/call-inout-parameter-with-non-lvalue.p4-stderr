@@ -1,0 +1,20 @@
+call-inout-parameter-with-non-lvalue.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c(packet_out p) {
+        ^
+call-inout-parameter-with-non-lvalue.p4(8): [--Werror=type-error] error: 'p.emit({ 0, 1 })'
+    p.emit({ 0, 1 });
+    ^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-inout-parameter-with-non-lvalue.p4(8): : Read-only value used for out/inout parameter 'hdr'
+      p.emit({ 0, 1 });
+             ^^^^^^^^
+call-inout-parameter-with-non-lvalue.p4(4)
+    void emit<T>(inout T hdr);
+                         ^^^
+  ---- Originating from:
+call-inout-parameter-with-non-lvalue.p4(4): Function type 'emit' does not match invocation type '<Method call>'
+    void emit<T>(inout T hdr);
+         ^^^^
+call-inout-parameter-with-non-lvalue.p4(8)
+      p.emit({ 0, 1 });
+      ^^^^^^^^^^^^^^^^

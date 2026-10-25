@@ -57,6 +57,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct metadata_t *meta;
@@ -69,7 +70,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
-        u64 tmp_5 = 0;
+        u8 tmp_5[6] = {0};
         {
 if (/* hdr->p4calc.isValid() */
             hdr->p4calc.ebpf_valid) {
@@ -101,10 +102,10 @@ if (/* hdr->p4calc.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_ADD: 
                                 {
-                                    hdr->p4calc.res = (hdr->p4calc.operand_a + hdr->p4calc.operand_b);
-                                                                        tmp_5 = hdr->ethernet.dstAddr;
-                                                                        hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
-                                                                        hdr->ethernet.srcAddr = tmp_5;
+                                    hdr->p4calc.res = hdr->p4calc.operand_a + hdr->p4calc.operand_b;
+                                    storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
                                     /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
@@ -112,10 +113,10 @@ if (/* hdr->p4calc.isValid() */
                                 break;
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_SUB: 
                                 {
-                                    hdr->p4calc.res = (hdr->p4calc.operand_a - hdr->p4calc.operand_b);
-                                                                        tmp_5 = hdr->ethernet.dstAddr;
-                                                                        hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
-                                                                        hdr->ethernet.srcAddr = tmp_5;
+                                    hdr->p4calc.res = hdr->p4calc.operand_a - hdr->p4calc.operand_b;
+                                    storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
                                     /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
@@ -123,10 +124,10 @@ if (/* hdr->p4calc.isValid() */
                                 break;
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_AND: 
                                 {
-                                    hdr->p4calc.res = (hdr->p4calc.operand_a & hdr->p4calc.operand_b);
-                                                                        tmp_5 = hdr->ethernet.dstAddr;
-                                                                        hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
-                                                                        hdr->ethernet.srcAddr = tmp_5;
+                                    hdr->p4calc.res = hdr->p4calc.operand_a & hdr->p4calc.operand_b;
+                                    storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
                                     /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
@@ -134,10 +135,10 @@ if (/* hdr->p4calc.isValid() */
                                 break;
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_OR: 
                                 {
-                                    hdr->p4calc.res = (hdr->p4calc.operand_a | hdr->p4calc.operand_b);
-                                                                        tmp_5 = hdr->ethernet.dstAddr;
-                                                                        hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
-                                                                        hdr->ethernet.srcAddr = tmp_5;
+                                    hdr->p4calc.res = hdr->p4calc.operand_a | hdr->p4calc.operand_b;
+                                    storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
                                     /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
@@ -145,10 +146,10 @@ if (/* hdr->p4calc.isValid() */
                                 break;
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_XOR: 
                                 {
-                                    hdr->p4calc.res = (hdr->p4calc.operand_a ^ hdr->p4calc.operand_b);
-                                                                        tmp_5 = hdr->ethernet.dstAddr;
-                                                                        hdr->ethernet.dstAddr = hdr->ethernet.srcAddr;
-                                                                        hdr->ethernet.srcAddr = tmp_5;
+                                    hdr->p4calc.res = hdr->p4calc.operand_a ^ hdr->p4calc.operand_b;
+                                    storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
                                     /* send_to_port(skb->ifindex) */
                                     compiler_meta__->drop = false;
                                     send_to_port(skb->ifindex);
@@ -189,13 +190,9 @@ if (/* hdr->p4calc.isValid() */
             return TC_ACT_SHOT;
         }
         int outHeaderLength = 0;
-        if (hdr->ethernet.ebpf_valid) {
-            outHeaderLength += 112;
-        }
-;        if (hdr->p4calc.ebpf_valid) {
-            outHeaderLength += 128;
-        }
-;
+        if (hdr->ethernet.ebpf_valid) outHeaderLength += 112;
+        if (hdr->p4calc.ebpf_valid) outHeaderLength += 128;
+
         __u16 saved_proto = 0;
         bool have_saved_proto = false;
         // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
@@ -225,50 +222,52 @@ if (/* hdr->p4calc.isValid() */
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
+// emitting header ethernet_t
         if (hdr->ethernet.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112)) {
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (htonll(getPrimitive64(hdr->ethernet.dstAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (htonll(getPrimitive64(hdr->ethernet.srcAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
-            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->p4calc.ebpf_valid) {
+;// emitting header p4calc_t
+        if (hdr->p4calc.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 128)) {
                 return TC_ACT_SHOT;
             }
@@ -290,36 +289,36 @@ if (/* hdr->p4calc.isValid() */
             ebpf_packetOffsetInBits += 8;
 
             hdr->p4calc.operand_a = htonl(hdr->p4calc.operand_a);
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
             hdr->p4calc.operand_b = htonl(hdr->p4calc.operand_b);
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
             hdr->p4calc.res = htonl(hdr->p4calc.res);
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.res))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
         }

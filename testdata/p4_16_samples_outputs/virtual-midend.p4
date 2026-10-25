@@ -26,17 +26,17 @@ control c(inout bit<16> p) {
             }
         }
     };
-    @hidden action virtual51() {
+    @hidden action virtual42() {
         p = cntr_0.f(16w6);
     }
-    @hidden table tbl_virtual51 {
+    @hidden table tbl_virtual42 {
         actions = {
-            virtual51();
+            virtual42();
         }
-        const default_action = virtual51();
+        const default_action = virtual42();
     }
     apply {
-        tbl_virtual51.apply();
+        tbl_virtual42.apply();
     }
 }
 

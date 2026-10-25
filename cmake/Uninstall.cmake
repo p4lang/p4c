@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # uninstall
 find_file (
   INSTALL_MANIFEST_LOCATION "install_manifest.txt"

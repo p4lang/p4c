@@ -3,27 +3,27 @@ struct S<T, N> {
     bit<32> otherField;
 }
 
-struct S_0 {
+struct S_bit32_bit32 {
     bit<32> field;
     bit<32> otherField;
 }
 
 control _c<T>(out T t);
 package top<T>(_c<T> c);
-control c(out S_0 t) {
-    @hidden action issue2635l13() {
+control c(out S_bit32_bit32 t) {
+    @hidden action issue2635l19() {
         t.field = 32w0;
         t.otherField = 32w0;
     }
-    @hidden table tbl_issue2635l13 {
+    @hidden table tbl_issue2635l19 {
         actions = {
-            issue2635l13();
+            issue2635l19();
         }
-        const default_action = issue2635l13();
+        const default_action = issue2635l19();
     }
     apply {
-        tbl_issue2635l13.apply();
+        tbl_issue2635l19.apply();
     }
 }
 
-top<S_0>(c()) main;
+top<S_bit32_bit32>(c()) main;

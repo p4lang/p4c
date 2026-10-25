@@ -24,28 +24,28 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name("ingress.rand_int") bit<16> rand_int_0;
-    @hidden action issue1517bmv2l62() {
+    @hidden action issue1517bmv2l53() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action issue1517bmv2l56() {
+    @hidden action issue1517bmv2l47() {
         random<bit<16>>(rand_int_0, 16w0, 16w49151);
     }
-    @hidden table tbl_issue1517bmv2l56 {
+    @hidden table tbl_issue1517bmv2l47 {
         actions = {
-            issue1517bmv2l56();
+            issue1517bmv2l47();
         }
-        const default_action = issue1517bmv2l56();
+        const default_action = issue1517bmv2l47();
     }
-    @hidden table tbl_issue1517bmv2l62 {
+    @hidden table tbl_issue1517bmv2l53 {
         actions = {
-            issue1517bmv2l62();
+            issue1517bmv2l53();
         }
-        const default_action = issue1517bmv2l62();
+        const default_action = issue1517bmv2l53();
     }
     apply {
-        tbl_issue1517bmv2l56.apply();
+        tbl_issue1517bmv2l47.apply();
         if (rand_int_0 < 16w32768) {
-            tbl_issue1517bmv2l62.apply();
+            tbl_issue1517bmv2l53.apply();
         }
     }
 }

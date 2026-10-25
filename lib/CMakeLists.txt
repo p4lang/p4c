@@ -1,16 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 set(LIBP4CTOOLKIT_SRCS
     alloc_trace.cpp
@@ -23,6 +14,8 @@ set(LIBP4CTOOLKIT_SRCS
     error_catalog.cpp
     error_message.cpp
     exename.cpp
+    fdstream.cpp
+    format.cpp
     gc.cpp
     big_int_util.cpp
     hash.cpp
@@ -58,6 +51,8 @@ set(LIBP4CTOOLKIT_HDRS
     error_reporter.h
     exceptions.h
     exename.h
+    fdstream.h
+    format.h
     gc.h
     big_int_util.h
     hash.h
@@ -94,10 +89,16 @@ add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
 set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
 target_link_libraries(p4ctoolkit
+  PRIVATE absl::node_hash_set
   PRIVATE absl::stacktrace
   PRIVATE absl::symbolize
   # These libraries are exposed by a header.
   PUBLIC absl::bits
+  PUBLIC absl::flat_hash_map
   PUBLIC absl::strings
+  PUBLIC absl::str_format
   PUBLIC ${LIBGC_LIBRARIES}
 )
+if (HAVE_LIBBACKTRACE)
+  target_link_libraries(p4ctoolkit PRIVATE backtrace)
+endif ()

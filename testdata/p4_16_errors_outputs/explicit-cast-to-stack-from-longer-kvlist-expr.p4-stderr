@@ -1,0 +1,43 @@
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(3): [--Wwarn=unused] warning: 'T' is unused
+header H<T> {}
+         ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7): [--Werror=type-error] error: '(H<bit<32>>[0]){ { 0, 1 }, { 2, 3 }, InvalidHeader }'
+    s = (H<bit<32>>[0]) {
+        ^
+  ---- Actual error:
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7): Number of components 3 in initializer tuple<tuple<int, int>, tuple<int, int>, header H<...>> is different than stack size 0
+      s = (H<bit<32>>[0]) {
+                          ^
+  ---- Originating from:
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7): Source expression '{ { 0, 1 }, { 2, 3 }, InvalidHeader }' produces a result of type 'tuple<tuple<int, int>, tuple<int, int>, header H<...>>' which cannot be assigned to a left-value with type 'header H<...>[0]'
+      s = (H<bit<32>>[0]) {
+                          ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7)
+      s = (H<bit<32>>[0]) {
+                          ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7)
+      s = (H<bit<32>>[0]) {
+           ^^^^^^^^^^^^^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7): [--Werror=type-error] error: 's = { { 0, 1 }, { 2, 3 }, InvalidHeader }'
+    s = (H<bit<32>>[0]) {
+      ^
+  ---- Actual error:
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(9): Number of fields 2 in initializer tuple<int, int> is different than number of fields 0 in 'header H'
+        { 2, 3 },
+        ^^^^^^^^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(3)
+  header H<T> {}
+         ^
+  ---- Originating from:
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7): Source expression '{ { 0, 1 }, { 2, 3 }, InvalidHeader }' produces a result of type 'tuple<tuple<int, int>, tuple<int, int>, header H<...>>' which cannot be assigned to a left-value with type 'header H<...>[3]'
+      s = (H<bit<32>>[0]) {
+                          ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(7)
+      s = (H<bit<32>>[0]) {
+                          ^
+explicit-cast-to-stack-from-longer-kvlist-expr.p4(6)
+      H<bit<32>>[3] s;
+      ^^^^^^^^^^^^^

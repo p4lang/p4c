@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_EBPF_EBPFTYPE_H_
 #define BACKENDS_EBPF_EBPFTYPE_H_
@@ -62,8 +53,10 @@ class EBPFTypeFactory {
 
  public:
     static EBPFTypeFactory *instance;
-    static void createFactory(const P4::TypeMap *typeMap) {
+    static bool isTC;
+    static void createFactory(const P4::TypeMap *typeMap, bool TC) {
         EBPFTypeFactory::instance = new EBPFTypeFactory(typeMap);
+        EBPFTypeFactory::isTC = TC;
     }
     virtual EBPFType *create(const IR::Type *type);
 };
@@ -86,7 +79,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     unsigned size;
 
  public:
-    EBPFStackType(const IR::Type_Stack *type, EBPFType *elementType)
+    EBPFStackType(const IR::Type_Array *type, EBPFType *elementType)
         : EBPFType(type), elementType(elementType), size(type->getSize()) {
         CHECK_NULL(type);
         CHECK_NULL(elementType);
@@ -107,10 +100,11 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
  public:
     const unsigned width;
     const bool isSigned;
+    const bool isvariable;
     explicit EBPFScalarType(const IR::Type_Bits *bits)
-        : EBPFType(bits), width(bits->size), isSigned(bits->isSigned) {}
+        : EBPFType(bits), width(bits->size), isSigned(bits->isSigned), isvariable(false) {}
     explicit EBPFScalarType(const IR::Type_Varbits *bits)
-        : EBPFType(bits), width(bits->size), isSigned(false) {}
+        : EBPFType(bits), width(bits->size), isSigned(false), isvariable(true) {}
     unsigned bytesRequired() const { return ROUNDUP(width, 8); }
     unsigned alignment() const;
     void emit(CodeBuilder *builder) override;
@@ -167,6 +161,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     std::vector<EBPFField *> fields;
     unsigned width;
     unsigned implWidth;
+    bool packed;
 
     explicit EBPFStructType(const IR::Type_StructLike *strct);
     void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
@@ -221,6 +216,20 @@ class EBPFMethodDeclaration : public EBPFObject {
     void emit(CodeBuilder *builder);
 
     DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
+};
+
+class EBPFScalarTypePNA : public EBPFScalarType {
+    bool isPrimitiveByteAligned = false;
+
+ public:
+    explicit EBPFScalarTypePNA(const IR::Type_Bits *bits) : EBPFScalarType(bits) {
+        isPrimitiveByteAligned = (width <= 8 || width <= 16 || (width > 24 && width <= 32) ||
+                                  (width > 56 && width <= 64));
+    }
+    unsigned alignment() const;
+    void declare(CodeBuilder *builder, cstring id, bool asPointer);
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer);
+    void emitInitializer(CodeBuilder *builder);
 };
 
 }  // namespace P4::EBPF

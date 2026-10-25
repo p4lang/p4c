@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 if [ ! -r CMakeCache.txt ]; then
     echo >&2 "Must run from the build directory"
     echo >&2 "usage $0 1|2|3";

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_SLICE_H_
-#define BF_P4C_COMMON_SLICE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_SLICE_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_SLICE_H_
 
 #include "ir/ir.h"
 #include "lib/safe_vector.h"
@@ -72,4 +72,4 @@ safe_vector<const IR::Expression *> convertMaskToSlices(const IR::Mask *m);
  */
 const IR::Expression *MakeWrappedSlice(const IR::Expression *e, int lo, int hi, int wrap_size);
 
-#endif /* BF_P4C_COMMON_SLICE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_SLICE_H_ */

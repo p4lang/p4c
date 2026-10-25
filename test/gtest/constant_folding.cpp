@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <gtest/gtest.h>
 
 #include "frontends/common/constantFolding.h"
@@ -17,7 +21,7 @@ struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
 
     const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        const auto *pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -53,7 +57,7 @@ class ConstantFoldFilter : public P4::ConstantFoldingPolicy {
 
 const IR::StructField *getStructField(const IR::P4Program *program, cstring struct_name,
                                       cstring field_name) {
-    for (const auto *d : *program->getDeclarations()) {
+    for (const auto *d : program->getDeclarations()) {
         const auto *ts = d->to<IR::Type_Struct>();
         if (ts && ts->name == struct_name) {
             for (const auto *f : ts->fields) {
@@ -99,14 +103,44 @@ TEST_F(P4CConstantFoldingValidation, no_filter) {
     // my_hdr_stack_1_t.hdr should be a Constant
     auto *sf_1 = getStructField(program, "my_hdr_stack_1_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_1);
-    auto *ts_1 = sf_1->type->to<IR::Type_Stack>();
+    auto *ts_1 = sf_1->type->to<IR::Type_Array>();
     ASSERT_TRUE(ts_1->size->is<IR::Constant>());
 
     // my_hdr_stack_2_t.hdr should be a Constant
     auto *sf_2 = getStructField(program, "my_hdr_stack_2_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_2);
-    auto *ts_2 = sf_2->type->to<IR::Type_Stack>();
+    auto *ts_2 = sf_2->type->to<IR::Type_Array>();
     ASSERT_TRUE(ts_2->size->is<IR::Constant>());
+}
+
+TEST_F(P4CConstantFoldingValidation, struct_cast_preserves_type) {
+    createPasses(nullptr);
+
+    std::string code = P4_SOURCE(R"(
+        struct S {
+            bit<8> x;
+        }
+
+        const S value = (S){x = 1};
+    )");
+
+    auto *program = parseAndProcess(code)->to<IR::P4Program>();
+    ASSERT_TRUE(program);
+
+    const IR::Declaration_Constant *constant = nullptr;
+    for (const auto *declaration : program->getDeclarations()) {
+        const auto *candidate = declaration->to<IR::Declaration_Constant>();
+        if (candidate != nullptr && candidate->name == "value") {
+            constant = candidate;
+            break;
+        }
+    }
+    ASSERT_TRUE(constant);
+
+    const auto *initializer = constant->initializer->to<IR::StructExpression>();
+    ASSERT_TRUE(initializer);
+    ASSERT_TRUE(initializer->structType);
+    EXPECT_TRUE(initializer->structType->is<IR::Type_Name>());
 }
 
 // Constant folding with filtering active
@@ -120,13 +154,13 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     // my_hdr_stack_1_t.hdr should be a Constant
     auto *sf_1 = getStructField(program, "my_hdr_stack_1_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_1);
-    auto *ts_1 = sf_1->type->to<IR::Type_Stack>();
+    auto *ts_1 = sf_1->type->to<IR::Type_Array>();
     EXPECT_TRUE(ts_1->size->is<IR::PathExpression>());
 
     // my_hdr_stack_2_t.hdr should be a Constant
     auto *sf_2 = getStructField(program, "my_hdr_stack_2_t"_cs, "hdr"_cs);
     ASSERT_TRUE(sf_2);
-    auto *ts_2 = sf_2->type->to<IR::Type_Stack>();
+    auto *ts_2 = sf_2->type->to<IR::Type_Array>();
     EXPECT_TRUE(ts_2->size->is<IR::Constant>());
 }
 

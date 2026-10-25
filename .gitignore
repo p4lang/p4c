@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 frontends/p4/p4-lex.c
 frontends/p4/p4-parse.cpp
 py-compile
@@ -19,6 +23,8 @@ unified-compilation.am
 *.json.p4
 *p4.json
 build/
+# ccache directory
+.ccache
 *.pyc
 # testing may generate packet observation logs
 *.obs
@@ -42,6 +48,7 @@ build/
 
 # Bazel files
 bazel-*
+*.bazel.lock
 
 # JetBrains
 .idea/
@@ -52,3 +59,6 @@ docs/doxygen/awesome_css/
 
 # thirdparty
 backends/tofino/third_party/
+
+# Python uv
+uv.lock

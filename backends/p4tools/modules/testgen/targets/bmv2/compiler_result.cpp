@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/compiler_result.h"
 
 #include <optional>

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
-#define _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -31,7 +31,7 @@
 
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/cstring.h"
 
 namespace Logging {
@@ -170,4 +170,4 @@ class Manifest : public Inspector {
 };
 }  // end namespace Logging
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_ */

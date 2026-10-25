@@ -14,72 +14,101 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build_direct: # Build p4c directly.
+
+  format_bazel_files:
     runs-on: ubuntu-latest
-    env:
-      BAZEL: bazelisk-linux-amd64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - run: tools/format-bazel-files.sh
+      - name: Check formatting diff
+        run: |
+          CHANGED_FILES="$(git diff-index --name-only HEAD --)"
+          if [[ -z "${CHANGED_FILES}" ]]; then
+            echo "Success: no formatting changes needed."
+            exit 0
+          fi
+          echo "Found formatting changes in the following files:"
+          echo "${CHANGED_FILES}"
+          echo ""
+          echo "Please run \`tools/format-bazel-files.sh\` to apply the changes."
+          exit 1
+
+  build_direct: # Build p4c directly.
+    needs: format_bazel_files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v6
         with:
-          # See https://docs.bazel.build/versions/master/output_directories.html
-          path: "~/.cache/bazel"
-          # Create cash entry for every run (by using unique key derived from commit hash).
-          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ runner.os }}-build-direct-${{ github.sha }}
+          path: ~/.cache/bazel
+          key: bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ${{ runner.os }}-build-direct-
+            bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-
+            bazel-v2-${{ runner.os }}-direct-main-
 
-      - name: Install bazelisk
-        run: |
-          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-          chmod +x $BAZEL
-          sudo mv $BAZEL /usr/local/bin/bazel
-
-      - name: First, pass the lint test
-        run: bazel run //:buildifier_check
-
-      - name: Install Flex and Bison
-        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+      - name: Save start time
+        run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
       - name: Build p4c
         run: bazel build //... --verbose_failures
 
-  build_indirect: # Build 3rd party Bazel project depending on p4c as a subproject.
+      - name: Calculate build duration
+        if: always()
+        run: echo "duration=$(( $(date +%s) - START_TIME ))" >> "$GITHUB_ENV"
+
+      - name: Compress cache
+        if: always()
+        run: rm -rf $(bazel info repository_cache)
+
+      - name: Save bazel cache
+        uses: actions/cache/save@v6
+        # Keep expensive PR rebuilds reusable, but never save merge-queue caches.
+        if: success() && (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && fromJSON(env.duration) > 180))
+        with:
+          path: ~/.cache/bazel
+          key: bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+  build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
+    needs: format_bazel_files
     runs-on: ubuntu-latest
-    env:
-      BAZEL: bazelisk-linux-amd64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v6
         with:
-          # See https://docs.bazel.build/versions/master/output_directories.html
-          path: "~/.cache/bazel"
-          # Create cash entry for every run (by using unique key derived from commit hash).
-          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ runner.os }}-build-indirect-${{ github.sha }}
+          path: ~/.cache/bazel
+          key: bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ${{ runner.os }}-build-indirect-
+            bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-
+            bazel-v2-${{ runner.os }}-indirect-main-
 
-      - name: First, pass the lint test
-        run: bazel run //:buildifier_check
-
-      - name: Install bazelisk
-        run: |
-          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-          chmod +x $BAZEL
-          sudo mv $BAZEL /usr/local/bin/bazel
-
-      - name: Install Flex and Bison
-        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+      - name: Save start time
+        run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
       - name: Build bazel/example
-        run: cd ./bazel/example && bazel build //... --verbose_failures
+        run: |
+          cd ./bazel/example
+          bazel build @p4c//... //... --verbose_failures
+
+      - name: Calculate build duration
+        if: always()
+        run: echo "duration=$(( $(date +%s) - START_TIME ))" >> "$GITHUB_ENV"
+
+      - name: Compress cache
+        if: always()
+        run: rm -rf $(bazel info repository_cache)
+
+      - name: Save bazel cache
+        uses: actions/cache/save@v6
+        # Keep expensive PR rebuilds reusable, but never save merge-queue caches.
+        if: success() && (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && fromJSON(env.duration) > 180))
+        with:
+          path: ~/.cache/bazel
+          key: bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}

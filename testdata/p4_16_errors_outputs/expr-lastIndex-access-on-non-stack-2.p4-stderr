@@ -1,0 +1,9 @@
+expr-lastIndex-access-on-non-stack-2.p4(6): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(out Headers h) {
+       ^
+expr-lastIndex-access-on-non-stack-2.p4(8): [--Werror=type-error] error: Cannot extract field lastIndex from h.h1 which has type bool
+    transition select(h.h1.lastIndex) {}
+                           ^^^^^^^^^
+expr-lastIndex-access-on-non-stack-2.p4(8)
+    transition select(h.h1.lastIndex) {}
+                      ^^^^

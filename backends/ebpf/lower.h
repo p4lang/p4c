@@ -1,18 +1,9 @@
 /*
-Copyright 2017 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2017 VMware, Inc.
+ * SPDX-FileCopyrightText: 2017 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_EBPF_LOWER_H_
 #define BACKENDS_EBPF_LOWER_H_
@@ -26,13 +17,14 @@ namespace P4::EBPF {
 /// This pass rewrites expressions which are not supported natively on EBPF.
 class LowerExpressions : public Transform {
     P4::TypeMap *typeMap;
-    /// Cannot shift with a value larger than 5 bits.
-    const int maxShiftWidth = 5;
+    std::optional<int> maxShiftWidth;
     const IR::Expression *shift(const IR::Operation_Binary *expression) const;
 
  public:
-    explicit LowerExpressions(P4::TypeMap *typeMap) : typeMap(typeMap) {
+    explicit LowerExpressions(P4::TypeMap *typeMap, std::optional<int> maxShiftWidth)
+        : typeMap(typeMap) {
         CHECK_NULL(typeMap);
+        this->maxShiftWidth = maxShiftWidth;
         setName("LowerExpressions");
     }
 
@@ -46,10 +38,10 @@ class LowerExpressions : public Transform {
 
 class Lower : public PassManager {
  public:
-    Lower(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    Lower(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, std::optional<int> maxShiftWidth) {
         setName("Lower");
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new LowerExpressions(typeMap));
+        passes.push_back(new LowerExpressions(typeMap, maxShiftWidth));
     }
 };
 

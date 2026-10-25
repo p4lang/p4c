@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "resolveReferences.h"
 
@@ -20,20 +9,22 @@ limitations under the License.
 
 namespace P4 {
 
-ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
+ResolutionContext::ResolutionContext() {
+#ifdef SUPPORT_P4_14
+    anyOrder = P4CContext::get().options().isv1();
+#endif
+}
 
 const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
     std::vector<const IR::IDeclaration *> decls;
     if (const auto *nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
-            auto *nnDecls = nn->getDeclarations();
-            decls.insert(decls.end(), nnDecls->begin(), nnDecls->end());
+            for (const auto *decl : nn->getDeclarations()) decls.push_back(decl);
         }
     }
 
-    auto *nsDecls = ns->getDeclarations();
-    decls.insert(decls.end(), nsDecls->begin(), nsDecls->end());
+    for (const auto *decl : ns->getDeclarations()) decls.push_back(decl);
 
     return (namespaceDecls[ns] = std::move(decls));
 }
@@ -63,7 +54,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
-        auto *decls = getDeclsByName(gen, name);
+        auto decls = getDeclsByName(gen, name);
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
@@ -359,9 +350,11 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 // These can overload each other.
                 // Also, the constructor is supposed to have the same name as the class.
                 continue;
+#ifdef SUPPORT_P4_14
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
                 continue;
+#endif
 
             // parameter shadowing
             if (node->is<IR::Declaration>() && !node->is<IR::Parameter>()) {
@@ -378,7 +371,9 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
 }
 
 Visitor::profile_t ResolveReferences::init_apply(const IR::Node *node) {
+#ifdef SUPPORT_P4_14
     anyOrder = refMap->isV1();
+#endif
     // Check shadowing even if the program map is up-to-date.
     if (!refMap->checkMap(node) || checkShadow) refMap->clear();
     return Inspector::init_apply(node);

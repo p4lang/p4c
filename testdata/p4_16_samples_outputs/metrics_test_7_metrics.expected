@@ -1,0 +1,74 @@
+
+Cyclomatic Complexity:
+  c: 1
+
+Halstead Metrics:
+  Unique Operators: 5
+  Unique Operands: 8
+  Total Operators: 10
+  Total Operands: 15
+  Vocabulary: 13
+  Length: 25
+  Difficulty: 4.6875
+  Volume: 92.511
+  Effort: 433.645
+  Estimated Bugs: 0.030837
+
+Unused Code Instances:
+  Program Structure:
+	Actions: 0
+	Functions: 0
+	Parser states: 0
+  Declarations:
+	Variables: 0
+	Enums: 0
+  Other:
+	Conditionals: 0
+	Parameters: 0
+	Returns: 0
+
+Nesting Depth Metrics:
+  Average: 1
+  Global Max: 1
+  Individual blocks: 
+	c: 1
+
+Header Metrics:
+  Total Headers: 0
+  Avg Fields Per Header: 0
+  Avg Field Size: 0
+  Per-header metrics:
+
+Header Manipulation Metrics:
+  Total Operations: 0
+  Total Size: 0
+  Per-packet metrics:
+
+Header Modification Metrics:
+  Total Operations: 0
+  Total Size: 0
+  Per-packet metrics:
+
+Match-Action Table Metrics:
+  Number of Tables: 0
+  Total Keys: 0
+  Total Key Size: 0
+  Avg Key Size: 0
+  Avg Keys Per Table: 0
+  Max Keys Per Table: 0
+  Total Actions: 0
+  Avg Actions Per Table: 0
+  Max Actions Per Table: 0
+  Per-table Metrics:
+
+Parser Metrics:
+  States: 0
+  Per-parser complexities:
+
+Extern Metrics:
+  Extern Functions: 1
+  Function Calls: 2
+  Extern Structures: 0
+  Structure Uses: 0
+
+Number of Inlined Actions: 0

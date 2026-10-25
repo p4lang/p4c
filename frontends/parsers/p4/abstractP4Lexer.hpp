@@ -10,6 +10,7 @@ class AbstractP4Lexer {
     typedef P4::P4Parser::symbol_type Token;
 
  public:
+    virtual ~AbstractP4Lexer() = default;
     /**
      * Invoked by the parser to advance to the next token in the input stream.
      *

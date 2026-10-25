@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/core/z3_solver.h"
 
 #include <algorithm>
@@ -77,16 +81,23 @@ z3::expr Z3Solver::declareVar(const IR::SymbolicVariable &var) {
 
 void Z3Solver::reset() {
     z3solver.reset();
+    p4Assertions.clear();
     declaredVarsById.clear();
     checkpoints.clear();
     z3Assertions.resize(0);
 }
 
+safe_vector<const Constraint *> Z3Solver::getAssertions() const { return p4Assertions; }
+
 void Z3Solver::clearMemory() {
     auto p4AssertionsBuf = p4Assertions;
     reset();
-    Z3_finalize_memory();
-    z3solver = z3::solver(*new z3::context());
+    auto nextContext = std::make_unique<z3::context>();
+    z3solver = z3::solver(*nextContext);
+    z3Assertions = z3::expr_vector(*nextContext);
+    context = std::move(nextContext);
+    if (seed_) seed(*seed_);
+    if (timeout_) timeout(*timeout_);
     p4Assertions.clear();
     for (const auto &assert : p4AssertionsBuf) {
         push();
@@ -231,9 +242,9 @@ void Z3Solver::asrt(const z3::expr &assertion) {
     }
 }
 
-const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
+SymbolicMapping Z3Solver::getSymbolicMapping() const {
     Util::ScopedTimer ctZ3("z3");
-    auto *result = new SymbolicMapping();
+    SymbolicMapping result;
     // First, collect a map of all the declared variables we have encountered in the stack.
     std::map<unsigned int, const IR::SymbolicVariable *> declaredVars;
     for (auto it = declaredVarsById.rbegin(); it != declaredVarsById.rend(); ++it) {
@@ -263,7 +274,7 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
                       z3Expr);
             const auto *symbolicVar = declaredVars.at(exprId);
             const auto *value = toLiteral(z3Value, symbolicVar->type);
-            result->emplace(symbolicVar, value);
+            result.emplace(symbolicVar, value);
         }
     } catch (z3::exception &e) {
         BUG("Z3Solver : Z3 exception: %1%", e.msg());
@@ -272,7 +283,7 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
     } catch (...) {
         BUG("Z3Solver : unknown segmentation fault in getModel");
     }
-    return *result;
+    return result;
 }
 
 const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) {
@@ -299,15 +310,11 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
 }
 
 void Z3Solver::toJSON(JSONGenerator &json) const {
-    json << json.indent << "{\n";
-    json.indent++;
-    json << json.indent << "\"checkpoints\" : " << checkpoints;
-    json << ",\n";
-    json << json.indent << "\"declarations\" : " << declaredVarsById;
-    json << ",\n";
-    json << json.indent << "\"assertions\" : " << p4Assertions;
-    json.indent--;
-    json << json.indent << "}\n";
+    auto state = json.begin_object();
+    json.emit("checkpoints", checkpoints);
+    json.emit("declarations", declaredVarsById);
+    json.emit("assertions", p4Assertions);
+    json.end_object(state);
 }
 
 void Z3Solver::addZ3Pushes(size_t &chkIndex, size_t asrtIndex) {
@@ -333,7 +340,10 @@ z3::context &Z3Solver::ctx() const { return z3solver.ctx(); }
 bool Z3Solver::isInIncrementalMode() const { return isIncremental; }
 
 Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
-    : z3solver(*new z3::context), isIncremental(isIncremental), z3Assertions(ctx()) {
+    : context(std::make_unique<z3::context>()),
+      z3solver(*context),
+      isIncremental(isIncremental),
+      z3Assertions(ctx()) {
     // Add a top-level set to declaration vars that we can insert variables.
     // TODO: Think about whether this is necessary or it is not better to remove it.
     declaredVarsById.emplace_back();
@@ -344,13 +354,13 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     JSONLoader loader(*inOpt.value());
 
     JSONLoader solverCheckpoints(loader, "checkpoints");
-    BUG_CHECK(solverCheckpoints.json->is<JsonVector>(),
+    BUG_CHECK(solverCheckpoints.is<JsonVector>(),
               "Z3 solver loading: can't find list of checkpoint");
     solverCheckpoints >> checkpoints;
 
     // loading all assertions
     JSONLoader solverAssertions(loader, "assertions");
-    BUG_CHECK(solverAssertions.json->is<JsonVector>(),
+    BUG_CHECK(solverAssertions.is<JsonVector>(),
               "Z3 solver loading: can't find list of assertions");
     safe_vector<const Constraint *> assertions;
     solverAssertions >> assertions;

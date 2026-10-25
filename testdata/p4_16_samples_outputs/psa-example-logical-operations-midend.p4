@@ -59,20 +59,20 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexamplelogicaloperations75() {
+    @hidden action psaexamplelogicaloperations81() {
         a.dstAddr = b.meta;
         a.srcAddr = b.meta2;
         a.etherType = b.meta3[15:0];
     }
-    @hidden table tbl_psaexamplelogicaloperations75 {
+    @hidden table tbl_psaexamplelogicaloperations81 {
         actions = {
-            psaexamplelogicaloperations75();
+            psaexamplelogicaloperations81();
         }
-        const default_action = psaexamplelogicaloperations75();
+        const default_action = psaexamplelogicaloperations81();
     }
     apply {
         tbl_0.apply();
-        tbl_psaexamplelogicaloperations75.apply();
+        tbl_psaexamplelogicaloperations81.apply();
     }
 }
 

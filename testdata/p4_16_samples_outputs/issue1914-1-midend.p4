@@ -52,17 +52,17 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
-    @hidden action issue19141l109() {
+    @hidden action issue19141l100() {
         packet.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_issue19141l109 {
+    @hidden table tbl_issue19141l100 {
         actions = {
-            issue19141l109();
+            issue19141l100();
         }
-        const default_action = issue19141l109();
+        const default_action = issue19141l100();
     }
     apply {
-        tbl_issue19141l109.apply();
+        tbl_issue19141l100.apply();
     }
 }
 

@@ -50,6 +50,26 @@ bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool
             typeError("%1%: parameter cannot have type %2%", p, type);
             return false;
         }
+        const IR::IApply *applyType = nullptr;
+        const char *kindName = nullptr;
+        if (auto parserType = type->to<IR::Type_Parser>()) {
+            applyType = parserType;
+            kindName = "parser";
+        } else if (auto controlType = type->to<IR::Type_Control>()) {
+            applyType = controlType;
+            kindName = "control";
+        }
+        if (applyType != nullptr) {
+            for (auto param : applyType->getApplyParameters()->parameters) {
+                if (param->defaultValue != nullptr) {
+                    typeError(
+                        "%1%: %2% type declarations cannot have parameters "
+                        "with default values",
+                        param, kindName);
+                    return false;
+                }
+            }
+        }
     }
     return true;
 }
@@ -60,7 +80,7 @@ const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
 
     bool changes = false;
     IR::IndexedVector<IR::Parameter> vec;
-    for (auto p : *params->getEnumerator()) {
+    for (auto p : params->getEnumerator()) {
         auto paramType = getTypeType(p->type);
         if (paramType == nullptr) return nullptr;
         BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);
@@ -221,6 +241,11 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
     return rv;
 }
 
+static const IR::Type *relayerArrayType(const IR::Type *base, const IR::Type_Array *arr) {
+    if (auto *nest = arr->elementType->to<IR::Type_Array>()) base = relayerArrayType(base, nest);
+    return new IR::Type_Array(base, arr->size);
+}
+
 template <class Node>
 TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstanceImpl(Node *decl) {
     // We need to control the order of the type-checking: we want to do first
@@ -237,6 +262,8 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
 
+    auto *arrayType = type->template to<IR::Type_Array>();
+    while (auto *at = type->template to<IR::Type_Array>()) type = at->elementType;
     auto simpleType = type;
     if (auto *sc = type->template to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
 
@@ -251,6 +278,14 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
         if (type->template is<IR::Type_Extern>()) type = newType;
+        // If the type arguments of a generic extern were inferred from the constructor arguments,
+        // the abstract methods have to be checked against the extern type specialized with them,
+        // and not against the generic declaration.
+        if (auto *sc = type->template to<IR::Type_SpecializedCanonical>()) {
+            if (auto *specialized = sc->substituted->template to<IR::Type_Extern>())
+                et = specialized;
+        }
+        if (arrayType) type = relayerArrayType(type, arrayType);
         setType(orig, type);
         setType(decl, type);
 
@@ -269,6 +304,10 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
             setType(decl, type);
         }
     } else if (simpleType->template is<IR::IContainer>()) {
+        if (arrayType) {
+            typeError("%1%: can't create arrays of %2%", decl, simpleType);
+            return {decl, true};
+        }
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             return {decl, true};
@@ -310,12 +349,13 @@ template <class Node>
 TypeInferenceBase::PreorderResult TypeInferenceBase::preorderFunctionImpl(Node *function) {
     if (done()) return {function, false};
 
-    visit(function->type);
+    visit(function->annotations, "annotations");
+    visit(function->type, "type");
     auto type = getTypeType(function->type);
     if (type == nullptr) return {function, false};
     setType(getOriginal(), type);
     setType(function, type);
-    visit(function->body);
+    visit(function->body, "body");
 
     return {function, true};
 }

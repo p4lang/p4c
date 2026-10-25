@@ -30,20 +30,14 @@ bool isIntrinsicMetadataType(const IR::Type *type) {
     BUG_CHECK(!type->is<IR::Type_Name>(),
               "Trying to categorize a Type_Name; "
               "you can avoid this problem by getting types from a TypeMap");
-    auto *annotated = type->to<IR::IAnnotated>();
-    if (!annotated) return false;
-    auto *intrinsicMetadata = annotated->getAnnotation("__intrinsic_metadata"_cs);
-    return bool(intrinsicMetadata);
+    return type->hasAnnotation("__intrinsic_metadata"_cs);
 }
 
 bool isCompilerGeneratedType(const IR::Type *type) {
     BUG_CHECK(!type->is<IR::Type_Name>(),
               "Trying to categorize a Type_Name; "
               "you can avoid this problem by getting types from a TypeMap");
-    auto *annotated = type->to<IR::IAnnotated>();
-    if (!annotated) return false;
-    auto *intrinsicMetadata = annotated->getAnnotation("__compiler_generated"_cs);
-    return bool(intrinsicMetadata);
+    return type->hasAnnotation("__compiler_generated"_cs);
 }
 
 bool isMetadataType(const IR::Type *type) {

@@ -30,17 +30,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_index_9bmv2l38() {
+    @hidden action gauntlet_index_9bmv2l44() {
         h.h[3w0].a = 8w1;
     }
-    @hidden table tbl_gauntlet_index_9bmv2l38 {
+    @hidden table tbl_gauntlet_index_9bmv2l44 {
         actions = {
-            gauntlet_index_9bmv2l38();
+            gauntlet_index_9bmv2l44();
         }
-        const default_action = gauntlet_index_9bmv2l38();
+        const default_action = gauntlet_index_9bmv2l44();
     }
     apply {
-        tbl_gauntlet_index_9bmv2l38.apply();
+        tbl_gauntlet_index_9bmv2l44.apply();
     }
 }
 

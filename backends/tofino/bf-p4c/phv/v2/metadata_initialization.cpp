@@ -18,6 +18,8 @@
 
 #include "metadata_initialization.h"
 
+#include "ir/dump.h"
+
 namespace {
 
 /** A helper class that maps phv::Field to a IR::Expression.
@@ -794,7 +796,16 @@ PHV::v2::MetadataInitialization::MetadataInitialization(MauBacktracker &backtrac
         collect_pov_protected_field->pov_protected_fields);
     auto *apply_init_insert =
         new ApplyMetadataInitialization(*gen_init_plans, *field_to_expr, *table_write_info);
-    addPasses({new DumpPipe("before v2 metadata initialization"), collect_pov_protected_field,
-               pa_no_init, mutex, tfg_builder, field_to_expr, table_write_info, gen_init_plans,
-               apply_init_insert, new DumpPipe("after v2 metadata initialization")});
+    addPasses({
+        new P4::DumpPipe("before v2 metadata initialization"),
+        collect_pov_protected_field,
+        pa_no_init,
+        mutex,
+        tfg_builder,
+        field_to_expr,
+        table_write_info,
+        gen_init_plans,
+        apply_init_insert,
+        new P4::DumpPipe("after v2 metadata initialization"),
+    });
 }

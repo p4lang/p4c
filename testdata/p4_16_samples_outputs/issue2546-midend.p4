@@ -43,74 +43,74 @@ control ingress(inout Headers h) {
         }
         default_action = NoAction_2();
     }
-    @hidden action act() {
+    @hidden action issue2546l39() {
         tmp = true;
     }
-    @hidden action act_0() {
+    @hidden action issue2546l39_0() {
         tmp = false;
     }
-    @hidden action issue2546l26() {
+    @hidden action issue2546l32() {
         key_1 = 48w1;
     }
-    @hidden action issue2546l33() {
+    @hidden action issue2546l39_1() {
         tmp_0 = 8w1;
     }
-    @hidden action issue2546l33_0() {
+    @hidden action issue2546l39_2() {
         tmp_0 = 8w2;
     }
-    @hidden action issue2546l40() {
+    @hidden action issue2546l46() {
         h.eth_hdr.dst_addr = 48w1;
     }
-    @hidden table tbl_issue2546l26 {
+    @hidden table tbl_issue2546l32 {
         actions = {
-            issue2546l26();
+            issue2546l32();
         }
-        const default_action = issue2546l26();
+        const default_action = issue2546l32();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue2546l39 {
         actions = {
-            act();
+            issue2546l39();
         }
-        const default_action = act();
+        const default_action = issue2546l39();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue2546l39_0 {
         actions = {
-            act_0();
+            issue2546l39_0();
         }
-        const default_action = act_0();
+        const default_action = issue2546l39_0();
     }
-    @hidden table tbl_issue2546l33 {
+    @hidden table tbl_issue2546l39_1 {
         actions = {
-            issue2546l33();
+            issue2546l39_1();
         }
-        const default_action = issue2546l33();
+        const default_action = issue2546l39_1();
     }
-    @hidden table tbl_issue2546l33_0 {
+    @hidden table tbl_issue2546l39_2 {
         actions = {
-            issue2546l33_0();
+            issue2546l39_2();
         }
-        const default_action = issue2546l33_0();
+        const default_action = issue2546l39_2();
     }
-    @hidden table tbl_issue2546l40 {
+    @hidden table tbl_issue2546l46 {
         actions = {
-            issue2546l40();
+            issue2546l46();
         }
-        const default_action = issue2546l40();
+        const default_action = issue2546l46();
     }
     apply {
-        tbl_issue2546l26.apply();
+        tbl_issue2546l32.apply();
         if (simple_table.apply().hit) {
-            tbl_act.apply();
+            tbl_issue2546l39.apply();
         } else {
-            tbl_act_0.apply();
+            tbl_issue2546l39_0.apply();
         }
         if (tmp) {
-            tbl_issue2546l33.apply();
+            tbl_issue2546l39_1.apply();
         } else {
-            tbl_issue2546l33_0.apply();
+            tbl_issue2546l39_2.apply();
         }
         if (simple_table_0.apply().hit) {
-            tbl_issue2546l40.apply();
+            tbl_issue2546l46.apply();
         }
     }
 }

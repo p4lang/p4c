@@ -21,30 +21,30 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @hidden action issue2797_ebpf27() {
+    @hidden action issue2797_ebpf33() {
         pass = false;
     }
-    @hidden action issue2797_ebpf25() {
+    @hidden action issue2797_ebpf31() {
         pass = true;
     }
-    @hidden table tbl_issue2797_ebpf25 {
+    @hidden table tbl_issue2797_ebpf31 {
         actions = {
-            issue2797_ebpf25();
+            issue2797_ebpf31();
         }
-        const default_action = issue2797_ebpf25();
+        const default_action = issue2797_ebpf31();
     }
-    @hidden table tbl_issue2797_ebpf27 {
+    @hidden table tbl_issue2797_ebpf33 {
         actions = {
-            issue2797_ebpf27();
+            issue2797_ebpf33();
         }
-        const default_action = issue2797_ebpf27();
+        const default_action = issue2797_ebpf33();
     }
     apply {
-        tbl_issue2797_ebpf25.apply();
+        tbl_issue2797_ebpf31.apply();
         if (headers.x.isValid()) {
             ;
         } else {
-            tbl_issue2797_ebpf27.apply();
+            tbl_issue2797_ebpf33.apply();
         }
     }
 }

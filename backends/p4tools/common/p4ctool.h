@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 #define BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 
@@ -41,8 +47,9 @@ class AbstractP4cTool {
         if (!context.has_value()) {
             return EXIT_FAILURE;
         }
-        AutoCompileContext autoContext(context.value());
-        Options &toolOptions = dynamic_cast<CompileContext<Options> *>(context.value())->options();
+        AutoCompileContext autoContext(context.value().get());
+        Options &toolOptions =
+            dynamic_cast<CompileContext<Options> *>(context.value().get())->options();
 
         // Process command-line options.
         auto result = toolOptions.process(args);

@@ -1,25 +1,18 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_COMMON_PARSEINPUT_H_
 #define FRONTENDS_COMMON_PARSEINPUT_H_
 
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
+#ifdef SUPPORT_P4_14
 #include "frontends/p4-14/fromv1.0/converters.h"
+#endif
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
@@ -29,6 +22,7 @@ class P4Program;
 
 namespace P4 {
 
+#ifdef SUPPORT_P4_14
 template <typename Input, typename C = P4V1::Converter>
 static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
                                            unsigned sourceLine,
@@ -50,7 +44,7 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
     BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
     return v1->to<IR::P4Program>();
 }
-
+#endif
 /**
  * Parse P4 source from a file. The filename and language version are specified
  * by @options. If the language version is not P4-16, then the program is
@@ -59,7 +53,11 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
  * @return a P4-16 IR tree representing the contents of the given file, or null
  * on failure. If failure occurs, an error will also be reported.
  */
+#ifdef SUPPORT_P4_14
 template <typename C = P4V1::Converter>
+#else
+inline
+#endif
 const IR::P4Program *parseP4File(const ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
@@ -72,21 +70,29 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
             ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
             return nullptr;
         }
+#ifdef SUPPORT_P4_14
         result = options.isv1() ? parseV1Program<FILE *, C>(file, options.file.string(), 1,
                                                             options.getDebugHook())
                                 : P4ParserDriver::parse(file, options.file.string());
+#else
+        result = P4ParserDriver::parse(file, options.file.string());
+#endif
         fclose(file);
     } else {
         auto preprocessorResult = options.preprocess();
-        if (::P4::errorCount() > 0 || !preprocessorResult.has_value()) {
+        if (!preprocessorResult.has_value()) {
             return nullptr;
         }
-        // Need to assign file here because the parser requires an lvalue.
+// Need to assign file here because the parser requires an lvalue.
+#ifdef SUPPORT_P4_14
         result =
             options.isv1()
                 ? parseV1Program<FILE *, C>(preprocessorResult.value().get(), options.file.string(),
                                             1, options.getDebugHook())
                 : P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
+#else
+        result = P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
+#endif
     }
 
     if (::P4::errorCount() > 0) {
@@ -99,20 +105,39 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
 }
 
 /**
- * Parse P4 source from the string @input, interpreting it as having language
- * version @version. The source is not preprocessed before being parsed; the
- * initial source location is derived from @sourceFile and @sourceLine. If the
- * language version is not P4-16, then the program is converted to P4-16 before
- * being returned.
+ * Parse P4 source from the string @input. The source is not preprocessed
+ * before being parsed; the initial source location is derived from
+ * @sourceFile and @sourceLine.
+ * When P4-14 support is enabled, @version specifies the language version of
+ * the source; if it is not P4-16, then the program is converted to P4-16
+ * before being returned.
  *
  * @return a P4-16 IR tree representing the contents of the given string, or
  * null on failure. If failure occurs, an error will also be reported.
  */
+#ifdef SUPPORT_P4_14
+const IR::P4Program *parseP4String(
+    const char *sourceFile, unsigned sourceLine, const std::string &input,
+    CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
+const IR::P4Program *parseP4String(
+    const std::string &input,
+    CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
+#else
+[[deprecated(
+    "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
+    "the version argument.")]]
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
                                    CompilerOptions::FrontendVersion version);
+[[deprecated(
+    "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
+    "the version argument.")]]
 const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version);
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input);
+const IR::P4Program *parseP4String(const std::string &input);
+#endif
 
 }  // namespace P4
 

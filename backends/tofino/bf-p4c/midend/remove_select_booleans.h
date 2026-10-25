@@ -51,8 +51,8 @@
  *       IR::BFN::ReinterpretCast.
  */
 
-#ifndef BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
-#define BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
 
 #include "backends/tofino/bf-p4c/midend/elim_cast.h"
 #include "frontends/p4/typeMap.h"
@@ -82,4 +82,4 @@ class RemoveSelectBooleans : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_ */

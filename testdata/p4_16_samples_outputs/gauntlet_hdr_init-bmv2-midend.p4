@@ -27,7 +27,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp1") ethernet_t tmp1_0;
     @name("ingress.tmp2") ethernet_t tmp2_0;
-    @hidden action gauntlet_hdr_initbmv2l30() {
+    @hidden action gauntlet_hdr_initbmv2l36() {
         tmp1_0.setInvalid();
         tmp2_0.setInvalid();
         tmp1_0.setValid();
@@ -41,14 +41,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp2_0.eth_type = 16w1;
         h.eth_hdr2 = tmp2_0;
     }
-    @hidden table tbl_gauntlet_hdr_initbmv2l30 {
+    @hidden table tbl_gauntlet_hdr_initbmv2l36 {
         actions = {
-            gauntlet_hdr_initbmv2l30();
+            gauntlet_hdr_initbmv2l36();
         }
-        const default_action = gauntlet_hdr_initbmv2l30();
+        const default_action = gauntlet_hdr_initbmv2l36();
     }
     apply {
-        tbl_gauntlet_hdr_initbmv2l30.apply();
+        tbl_gauntlet_hdr_initbmv2l36.apply();
     }
 }
 

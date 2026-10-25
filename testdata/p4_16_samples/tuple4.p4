@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control c(out bit<16> r) {
     apply {
         tuple<bit<32>, bit<16>> x = { 10, 12 };

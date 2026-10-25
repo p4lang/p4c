@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # vi: ft=python
 set print static-members off
 set print object

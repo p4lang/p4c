@@ -32,24 +32,24 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
     @name("cIngress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
-    @hidden action psameter7bmv2l61() {
+    @hidden action psameter7bmv2l52() {
         hdr.ethernet.dstAddr = 48w3;
     }
-    @hidden action psameter7bmv2l59() {
+    @hidden action psameter7bmv2l50() {
         hdr.ethernet.dstAddr = 48w2;
         tmp = meter0_0.execute(12w1);
     }
-    @hidden table tbl_psameter7bmv2l59 {
+    @hidden table tbl_psameter7bmv2l50 {
         actions = {
-            psameter7bmv2l59();
+            psameter7bmv2l50();
         }
-        const default_action = psameter7bmv2l59();
+        const default_action = psameter7bmv2l50();
     }
-    @hidden table tbl_psameter7bmv2l61 {
+    @hidden table tbl_psameter7bmv2l52 {
         actions = {
-            psameter7bmv2l61();
+            psameter7bmv2l52();
         }
-        const default_action = psameter7bmv2l61();
+        const default_action = psameter7bmv2l52();
     }
     @hidden table tbl_send_to_port {
         actions = {
@@ -58,9 +58,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         const default_action = send_to_port_0();
     }
     apply {
-        tbl_psameter7bmv2l59.apply();
+        tbl_psameter7bmv2l50.apply();
         if (tmp == PSA_MeterColor_t.GREEN) {
-            tbl_psameter7bmv2l61.apply();
+            tbl_psameter7bmv2l52.apply();
         }
         tbl_send_to_port.apply();
     }
@@ -79,32 +79,32 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psameter7bmv2l93() {
+    @hidden action psameter7bmv2l84() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psameter7bmv2l93 {
+    @hidden table tbl_psameter7bmv2l84 {
         actions = {
-            psameter7bmv2l93();
+            psameter7bmv2l84();
         }
-        const default_action = psameter7bmv2l93();
+        const default_action = psameter7bmv2l84();
     }
     apply {
-        tbl_psameter7bmv2l93.apply();
+        tbl_psameter7bmv2l84.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psameter7bmv2l93_0() {
+    @hidden action psameter7bmv2l84_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psameter7bmv2l93_0 {
+    @hidden table tbl_psameter7bmv2l84_0 {
         actions = {
-            psameter7bmv2l93_0();
+            psameter7bmv2l84_0();
         }
-        const default_action = psameter7bmv2l93_0();
+        const default_action = psameter7bmv2l84_0();
     }
     apply {
-        tbl_psameter7bmv2l93_0.apply();
+        tbl_psameter7bmv2l84_0.apply();
     }
 }
 

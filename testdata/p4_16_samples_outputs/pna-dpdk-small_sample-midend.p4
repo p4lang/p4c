@@ -74,18 +74,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdksmall_sample163() {
+    @hidden action pnadpdksmall_sample154() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdksmall_sample163 {
+    @hidden table tbl_pnadpdksmall_sample154 {
         actions = {
-            pnadpdksmall_sample163();
+            pnadpdksmall_sample154();
         }
-        const default_action = pnadpdksmall_sample163();
+        const default_action = pnadpdksmall_sample154();
     }
     apply {
-        tbl_pnadpdksmall_sample163.apply();
+        tbl_pnadpdksmall_sample154.apply();
     }
 }
 

@@ -26,7 +26,7 @@ control c(in Headers h) {
         default_action = a;
         largest_priority_wins = false;
         priority_delta = 10;
-        @noWarn("duplicate_priorities") entries = {
+        @noWarn("duplicate-priorities") entries = {
                         const priority=10: (0x1, 0x1111 &&& 0xf) : a_params(1);
                         (0x2, 0x1181) : a_params(2);
                         (0x3, 0x1000 &&& 0xf000) : a_params(3);

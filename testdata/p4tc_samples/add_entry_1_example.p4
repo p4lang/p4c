@@ -86,9 +86,6 @@ control MainControlImpl(
     action dflt_route_drop() {
         drop_packet();
     }
-    action drop() {
-        drop_packet();
-    }
 
     @tc_acl("CRUS:CRXP") table ipv4_tbl_1 {
         key = {

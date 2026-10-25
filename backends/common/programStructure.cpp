@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "backends/common/programStructure.h"
 
@@ -23,7 +12,7 @@ namespace P4 {
 void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
     bool inAction = findContext<IR::P4Action>() != nullptr;
     unsigned index = 0;
-    for (const auto *p : *paramList->getEnumerator()) {
+    for (const auto *p : paramList->getEnumerator()) {
         structure->index.emplace(p, index);
         if (!inAction) {
             structure->nonActionParameters.emplace(p);
@@ -44,7 +33,7 @@ void DiscoverStructure::postorder(const IR::Declaration_Variable *decl) {
 
 void DiscoverStructure::postorder(const IR::Type_Error *errors) {
     auto &map = structure->errorCodesMap;
-    for (const auto *m : *errors->getDeclarations()) {
+    for (const auto *m : errors->getDeclarations()) {
         BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
         map[m] = map.size();
     }

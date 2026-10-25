@@ -29,43 +29,6 @@
 #include "ixbar_expr.h"
 #include "lib/hex.h"
 
-const Device::StatefulAluSpec &TofinoDevice::getStatefulAluSpec() const {
-    static const Device::StatefulAluSpec spec = {/* .CmpMask = */ false,
-                                                 /* .CmpUnits = */ {"lo"_cs, "hi"_cs},
-                                                 /* .MaxSize = */ 32,
-                                                 /* .MaxDualSize = */ 64,
-                                                 /* .MaxPhvInputWidth = */ 32,
-                                                 /* .MaxInstructions = */ 4,
-                                                 /* .MaxInstructionConstWidth = */ 4,
-                                                 /* .MinInstructionConstValue = */ -8,
-                                                 /* .MaxInstructionConstValue = */ 7,
-                                                 /* .OutputWords = */ 1,
-                                                 /* .DivModUnit = */ false,
-                                                 /* .FastClear = */ false,
-                                                 /* .MaxRegfileRows = */ 4};
-    return spec;
-}
-
-#if HAVE_JBAY
-const Device::StatefulAluSpec &JBayDevice::getStatefulAluSpec() const {
-    static const Device::StatefulAluSpec spec = {
-        /* .CmpMask = */ true,
-        /* .CmpUnits = */ {"cmp0"_cs, "cmp1"_cs, "cmp2"_cs, "cmp3"_cs},
-        /* .MaxSize = */ 128,
-        /* .MaxDualSize = */ 128,
-        /* .MaxPhvInputWidth = */ 64,
-        /* .MaxInstructions = */ 4,
-        /* .MaxInstructionConstWidth = */ 4,
-        /* .MinInstructionConstValue = */ -8,
-        /* .MaxInstructionConstValue = */ 7,
-        /* .OutputWords = */ 4,
-        /* .DivModUnit = */ true,
-        /* .FastClear = */ true,
-        /* .MaxRegfileRows = */ 4};
-    return spec;
-}
-#endif
-
 /**
  * @brief This class detects a following pattern:
  *
@@ -1016,11 +979,11 @@ bool CreateSaluInstruction::preorder(const IR::Slice *sl) {
 
 static double mul(double x) { return x; }
 static double sqr(double x) { return x * x; }
-static double rsqrt(double x) { return 1.0 / sqrt(x); }
+static double recip_sqrt(double x) { return 1.0 / sqrt(x); }
 static double div(double x) { return 1.0 / x; }
-static double rsqr(double x) { return 1.0 / x * x; }
+static double rsqr(double x) { return 1.0 / (x * x); }
 
-static double (*fn[2][3])(double) = {{sqrt, mul, sqr}, {rsqrt, div, rsqr}};
+static double (*fn[2][3])(double) = {{sqrt, mul, sqr}, {recip_sqrt, div, rsqr}};
 // fn_max is max(fn(x)) for the x value range we need ([4/8, 15/8] for shift == -1,
 // [8/8, 15/8] for shift >= 0)
 static double fn_max[2][3] = {{1.36930639376291528364, 1.875, 3.515625},
@@ -1330,7 +1293,7 @@ bool CreateSaluInstruction::preorder(const IR::Operation::Relation *rel, cstring
     if (etype == IF) {
         Pattern::Match<IR::Expression> e1, e2;
         Pattern::Match<IR::Constant> k;
-        if (Device::statefulAluSpec().CmpMask && ((e1 & k) == e2).match(rel) && !k->fitsUint() &&
+        if (Device::statefulAluSpec().CmpMask && (e2 == (e1 & k)).match(rel) && !k->fitsUint() &&
             !k->fitsInt()) {
             // FIXME -- wide "neq" can be done with tmatch too?
             opcode = "tmatch"_cs;
@@ -2283,13 +2246,11 @@ std::map<std::pair<cstring, cstring>, std::vector<CreateSaluInstruction::param_t
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
         {{"RegisterAction"_cs, "underflow"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
-#ifdef HAVE_JBAY
         {{"LearnAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::HASH, param_t::LEARN, param_t::OUTPUT, param_t::OUTPUT,
           param_t::OUTPUT, param_t::OUTPUT}},
         {{"MinMaxAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
-#endif
         {{"SelectorAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}}};
 

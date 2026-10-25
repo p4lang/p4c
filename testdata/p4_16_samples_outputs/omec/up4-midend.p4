@@ -431,27 +431,35 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         const default_action = do_drop_1();
     }
     @name("PreQosPipe.uplink_term_fwd") action uplink_term_fwd(@name("ctr_idx") bit<32> ctr_idx_0, @name("tc") bit<2> tc_2, @name("app_meter_idx") bit<32> app_meter_idx) {
-        local_meta.ctr_idx = ctr_idx_0;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_0;
+            local_meta.terminations_hit = true;
+        }
         local_meta.app_meter_idx_internal = app_meter_idx;
         local_meta.tc = tc_2;
     }
     @name("PreQosPipe.uplink_term_drop") action uplink_term_drop(@name("ctr_idx") bit<32> ctr_idx_5) {
-        local_meta.ctr_idx = ctr_idx_5;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_5;
+            local_meta.terminations_hit = true;
+        }
         local_meta.needs_dropping = true;
     }
     @name("PreQosPipe.downlink_term_fwd") action downlink_term_fwd(@name("ctr_idx") bit<32> ctr_idx_6, @name("teid") bit<32> teid_1, @name("qfi") bit<6> qfi_1, @name("tc") bit<2> tc_3, @name("app_meter_idx") bit<32> app_meter_idx_2) {
-        local_meta.ctr_idx = ctr_idx_6;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_6;
+            local_meta.terminations_hit = true;
+        }
         local_meta.tunnel_out_teid = teid_1;
         local_meta.tunnel_out_qfi = qfi_1;
         local_meta.app_meter_idx_internal = app_meter_idx_2;
         local_meta.tc = tc_3;
     }
     @name("PreQosPipe.downlink_term_drop") action downlink_term_drop(@name("ctr_idx") bit<32> ctr_idx_7) {
-        local_meta.ctr_idx = ctr_idx_7;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_7;
+            local_meta.terminations_hit = true;
+        }
         local_meta.needs_dropping = true;
     }
     @name("PreQosPipe.terminations_uplink") table terminations_uplink_0 {
@@ -510,78 +518,86 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         default_action = NoAction_2();
     }
     @name("PreQosPipe.do_gtpu_tunnel") action do_gtpu_tunnel() {
-        hdr.inner_udp = hdr.udp;
-        hdr.udp.setInvalid();
-        hdr.inner_tcp = hdr.tcp;
-        hdr.tcp.setInvalid();
-        hdr.inner_icmp = hdr.icmp;
-        hdr.icmp.setInvalid();
-        hdr.udp.setValid();
-        hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-        hdr.udp.dport = 16w2152;
-        hdr.udp.len = hdr.ipv4.total_len + 16w16;
-        hdr.udp.checksum = 16w0;
-        hdr.inner_ipv4 = hdr.ipv4;
-        hdr.ipv4.setValid();
-        hdr.ipv4.version = 4w4;
-        hdr.ipv4.ihl = 4w5;
-        hdr.ipv4.dscp = 6w0;
-        hdr.ipv4.ecn = 2w0;
-        hdr.ipv4.total_len = hdr.ipv4.total_len + 16w36;
-        hdr.ipv4.identification = 16w0x1513;
-        hdr.ipv4.flags = 3w0;
-        hdr.ipv4.frag_offset = 13w0;
-        hdr.ipv4.ttl = 8w64;
-        hdr.ipv4.proto = 8w17;
-        hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-        hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
-        hdr.ipv4.checksum = 16w0;
-        hdr.gtpu.setValid();
-        hdr.gtpu.version = 3w0x1;
-        hdr.gtpu.pt = 1w0x1;
-        hdr.gtpu.spare = 1w0;
-        hdr.gtpu.ex_flag = 1w0;
-        hdr.gtpu.seq_flag = 1w0;
-        hdr.gtpu.npdu_flag = 1w0;
-        hdr.gtpu.msgtype = 8w255;
-        hdr.gtpu.msglen = hdr.inner_ipv4.total_len;
-        hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        @hidden @inlinedFrom("_udp_encap") {
+            hdr.inner_udp = hdr.udp;
+            hdr.udp.setInvalid();
+            hdr.inner_tcp = hdr.tcp;
+            hdr.tcp.setInvalid();
+            hdr.inner_icmp = hdr.icmp;
+            hdr.icmp.setInvalid();
+            hdr.udp.setValid();
+            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
+            hdr.udp.dport = 16w2152;
+            hdr.udp.len = hdr.ipv4.total_len + 16w16;
+            hdr.udp.checksum = 16w0;
+            hdr.inner_ipv4 = hdr.ipv4;
+            hdr.ipv4.setValid();
+            hdr.ipv4.version = 4w4;
+            hdr.ipv4.ihl = 4w5;
+            hdr.ipv4.dscp = 6w0;
+            hdr.ipv4.ecn = 2w0;
+            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w36;
+            hdr.ipv4.identification = 16w0x1513;
+            hdr.ipv4.flags = 3w0;
+            hdr.ipv4.frag_offset = 13w0;
+            hdr.ipv4.ttl = 8w64;
+            hdr.ipv4.proto = 8w17;
+            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
+            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.checksum = 16w0;
+        }
+        @hidden @inlinedFrom("_gtpu_encap") {
+            hdr.gtpu.setValid();
+            hdr.gtpu.version = 3w0x1;
+            hdr.gtpu.pt = 1w0x1;
+            hdr.gtpu.spare = 1w0;
+            hdr.gtpu.ex_flag = 1w0;
+            hdr.gtpu.seq_flag = 1w0;
+            hdr.gtpu.npdu_flag = 1w0;
+            hdr.gtpu.msgtype = 8w255;
+            hdr.gtpu.msglen = hdr.inner_ipv4.total_len;
+            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        }
     }
     @name("PreQosPipe.do_gtpu_tunnel_with_psc") action do_gtpu_tunnel_with_psc() {
-        hdr.inner_udp = hdr.udp;
-        hdr.udp.setInvalid();
-        hdr.inner_tcp = hdr.tcp;
-        hdr.tcp.setInvalid();
-        hdr.inner_icmp = hdr.icmp;
-        hdr.icmp.setInvalid();
-        hdr.udp.setValid();
-        hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-        hdr.udp.dport = 16w2152;
-        hdr.udp.len = hdr.ipv4.total_len + 16w24;
-        hdr.udp.checksum = 16w0;
-        hdr.inner_ipv4 = hdr.ipv4;
-        hdr.ipv4.setValid();
-        hdr.ipv4.version = 4w4;
-        hdr.ipv4.ihl = 4w5;
-        hdr.ipv4.dscp = 6w0;
-        hdr.ipv4.ecn = 2w0;
-        hdr.ipv4.total_len = hdr.ipv4.total_len + 16w44;
-        hdr.ipv4.identification = 16w0x1513;
-        hdr.ipv4.flags = 3w0;
-        hdr.ipv4.frag_offset = 13w0;
-        hdr.ipv4.ttl = 8w64;
-        hdr.ipv4.proto = 8w17;
-        hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-        hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
-        hdr.ipv4.checksum = 16w0;
-        hdr.gtpu.setValid();
-        hdr.gtpu.version = 3w0x1;
-        hdr.gtpu.pt = 1w0x1;
-        hdr.gtpu.spare = 1w0;
-        hdr.gtpu.seq_flag = 1w0;
-        hdr.gtpu.npdu_flag = 1w0;
-        hdr.gtpu.msgtype = 8w255;
-        hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        @hidden @inlinedFrom("_udp_encap") {
+            hdr.inner_udp = hdr.udp;
+            hdr.udp.setInvalid();
+            hdr.inner_tcp = hdr.tcp;
+            hdr.tcp.setInvalid();
+            hdr.inner_icmp = hdr.icmp;
+            hdr.icmp.setInvalid();
+            hdr.udp.setValid();
+            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
+            hdr.udp.dport = 16w2152;
+            hdr.udp.len = hdr.ipv4.total_len + 16w24;
+            hdr.udp.checksum = 16w0;
+            hdr.inner_ipv4 = hdr.ipv4;
+            hdr.ipv4.setValid();
+            hdr.ipv4.version = 4w4;
+            hdr.ipv4.ihl = 4w5;
+            hdr.ipv4.dscp = 6w0;
+            hdr.ipv4.ecn = 2w0;
+            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w44;
+            hdr.ipv4.identification = 16w0x1513;
+            hdr.ipv4.flags = 3w0;
+            hdr.ipv4.frag_offset = 13w0;
+            hdr.ipv4.ttl = 8w64;
+            hdr.ipv4.proto = 8w17;
+            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
+            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.checksum = 16w0;
+        }
+        @hidden @inlinedFrom("_gtpu_encap") {
+            hdr.gtpu.setValid();
+            hdr.gtpu.version = 3w0x1;
+            hdr.gtpu.pt = 1w0x1;
+            hdr.gtpu.spare = 1w0;
+            hdr.gtpu.seq_flag = 1w0;
+            hdr.gtpu.npdu_flag = 1w0;
+            hdr.gtpu.msgtype = 8w255;
+            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        }
         hdr.gtpu.msglen = hdr.inner_ipv4.total_len + 16w8;
         hdr.gtpu.ex_flag = 1w1;
         hdr.gtpu_options.setValid();
@@ -661,48 +677,48 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         hasExited = false;
         hasReturned_0 = false;
     }
-    @hidden action up4l681() {
+    @hidden action up4l687() {
         hdr.packet_out.setInvalid();
     }
-    @hidden action up4l688() {
+    @hidden action up4l694() {
         local_meta.ue_addr = hdr.inner_ipv4.src_addr;
         local_meta.inet_addr = hdr.inner_ipv4.dst_addr;
         local_meta.ue_l4_port = local_meta.l4_sport;
         local_meta.inet_l4_port = local_meta.l4_dport;
         local_meta.ip_proto = hdr.inner_ipv4.proto;
     }
-    @hidden action up4l695() {
+    @hidden action up4l701() {
         local_meta.ue_addr = hdr.ipv4.dst_addr;
         local_meta.inet_addr = hdr.ipv4.src_addr;
         local_meta.ue_l4_port = local_meta.l4_dport;
         local_meta.inet_l4_port = local_meta.l4_sport;
         local_meta.ip_proto = hdr.ipv4.proto;
     }
-    @hidden action up4l710() {
+    @hidden action up4l716() {
         pre_qos_counter_0.count(local_meta.ctr_idx);
     }
-    @hidden action up4l714() {
-        local_meta.needs_dropping = true;
-    }
-    @hidden action up4l718() {
-        local_meta.needs_dropping = true;
-    }
-    @hidden action up4l722() {
-        local_meta.needs_dropping = true;
-    }
     @hidden action up4l720() {
+        local_meta.needs_dropping = true;
+    }
+    @hidden action up4l724() {
+        local_meta.needs_dropping = true;
+    }
+    @hidden action up4l728() {
+        local_meta.needs_dropping = true;
+    }
+    @hidden action up4l726() {
         slice_tc_meter_0.execute_meter<bit<2>>(local_meta.slice_id ++ local_meta.tc, local_meta.slice_tc_color);
     }
-    @hidden action up4l716() {
+    @hidden action up4l722() {
         session_meter_0.execute_meter<bit<2>>(local_meta.session_meter_idx_internal, local_meta.session_color);
     }
-    @hidden action up4l712() {
+    @hidden action up4l718() {
         app_meter_0.execute_meter<bit<2>>(local_meta.app_meter_idx_internal, local_meta.app_color);
     }
-    @hidden action up4l684() {
+    @hidden action up4l690() {
         hasReturned_0 = true;
     }
-    @hidden action up4l433() {
+    @hidden action up4l439() {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @hidden table tbl_act {
@@ -717,41 +733,23 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         const default_action = _initialize_metadata();
     }
-    @hidden table tbl_up4l681 {
+    @hidden table tbl_up4l687 {
         actions = {
-            up4l681();
+            up4l687();
         }
-        const default_action = up4l681();
+        const default_action = up4l687();
     }
-    @hidden table tbl_up4l688 {
+    @hidden table tbl_up4l694 {
         actions = {
-            up4l688();
+            up4l694();
         }
-        const default_action = up4l688();
+        const default_action = up4l694();
     }
-    @hidden table tbl_up4l695 {
+    @hidden table tbl_up4l701 {
         actions = {
-            up4l695();
+            up4l701();
         }
-        const default_action = up4l695();
-    }
-    @hidden table tbl_up4l710 {
-        actions = {
-            up4l710();
-        }
-        const default_action = up4l710();
-    }
-    @hidden table tbl_up4l712 {
-        actions = {
-            up4l712();
-        }
-        const default_action = up4l712();
-    }
-    @hidden table tbl_up4l714 {
-        actions = {
-            up4l714();
-        }
-        const default_action = up4l714();
+        const default_action = up4l701();
     }
     @hidden table tbl_up4l716 {
         actions = {
@@ -776,6 +774,24 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             up4l722();
         }
         const default_action = up4l722();
+    }
+    @hidden table tbl_up4l724 {
+        actions = {
+            up4l724();
+        }
+        const default_action = up4l724();
+    }
+    @hidden table tbl_up4l726 {
+        actions = {
+            up4l726();
+        }
+        const default_action = up4l726();
+    }
+    @hidden table tbl_up4l728 {
+        actions = {
+            up4l728();
+        }
+        const default_action = up4l728();
     }
     @hidden table tbl_gtpu_decap {
         actions = {
@@ -807,17 +823,17 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         const default_action = do_drop_4();
     }
-    @hidden table tbl_up4l684 {
+    @hidden table tbl_up4l690 {
         actions = {
-            up4l684();
+            up4l690();
         }
-        const default_action = up4l684();
+        const default_action = up4l690();
     }
-    @hidden table tbl_up4l433 {
+    @hidden table tbl_up4l439 {
         actions = {
-            up4l433();
+            up4l439();
         }
-        const default_action = up4l433();
+        const default_action = up4l439();
     }
     @hidden table tbl_Routing_drop {
         actions = {
@@ -829,14 +845,14 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         tbl_act.apply();
         tbl__initialize_metadata.apply();
         if (hdr.packet_out.isValid()) {
-            tbl_up4l681.apply();
+            tbl_up4l687.apply();
         } else if (my_station_0.apply().hit) {
             if (interfaces_0.apply().hit) {
                 if (local_meta.direction == 8w0x1) {
-                    tbl_up4l688.apply();
+                    tbl_up4l694.apply();
                     sessions_uplink_0.apply();
                 } else if (local_meta.direction == 8w0x2) {
-                    tbl_up4l695.apply();
+                    tbl_up4l701.apply();
                     sessions_downlink_0.apply();
                     if (hasExited) {
                         ;
@@ -858,19 +874,19 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
                     ;
                 } else {
                     if (local_meta.terminations_hit) {
-                        tbl_up4l710.apply();
-                    }
-                    tbl_up4l712.apply();
-                    if (local_meta.app_color == 2w2) {
-                        tbl_up4l714.apply();
-                    } else {
                         tbl_up4l716.apply();
+                    }
+                    tbl_up4l718.apply();
+                    if (local_meta.app_color == 2w2) {
+                        tbl_up4l720.apply();
+                    } else {
+                        tbl_up4l722.apply();
                         if (local_meta.session_color == 2w2) {
-                            tbl_up4l718.apply();
+                            tbl_up4l724.apply();
                         } else {
-                            tbl_up4l720.apply();
+                            tbl_up4l726.apply();
                             if (local_meta.slice_tc_color == 2w2) {
-                                tbl_up4l722.apply();
+                                tbl_up4l728.apply();
                             }
                         }
                     }
@@ -897,7 +913,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
                 }
             }
         } else {
-            tbl_up4l684.apply();
+            tbl_up4l690.apply();
         }
         if (hasExited) {
             ;
@@ -905,7 +921,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             ;
         } else {
             if (hdr.ipv4.isValid()) {
-                tbl_up4l433.apply();
+                tbl_up4l439.apply();
                 if (hdr.ipv4.ttl == 8w0) {
                     tbl_Routing_drop.apply();
                 } else {
@@ -923,29 +939,29 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
 
 control PostQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
     @name("PostQosPipe.post_qos_counter") counter<bit<32>>(32w1024, CounterType.packets_and_bytes) post_qos_counter_0;
-    @hidden action up4l754() {
+    @hidden action up4l760() {
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = local_meta.preserved_ingress_port;
     }
-    @hidden action up4l752() {
+    @hidden action up4l758() {
         post_qos_counter_0.count(local_meta.ctr_idx);
     }
-    @hidden table tbl_up4l752 {
+    @hidden table tbl_up4l758 {
         actions = {
-            up4l752();
+            up4l758();
         }
-        const default_action = up4l752();
+        const default_action = up4l758();
     }
-    @hidden table tbl_up4l754 {
+    @hidden table tbl_up4l760 {
         actions = {
-            up4l754();
+            up4l760();
         }
-        const default_action = up4l754();
+        const default_action = up4l760();
     }
     apply {
-        tbl_up4l752.apply();
+        tbl_up4l758.apply();
         if (std_meta.egress_port == 9w255) {
-            tbl_up4l754.apply();
+            tbl_up4l760.apply();
         }
     }
 }

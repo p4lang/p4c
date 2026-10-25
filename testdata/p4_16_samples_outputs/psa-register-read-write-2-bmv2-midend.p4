@@ -48,44 +48,32 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
         ostd.egress_port = 32w1;
     }
     @name("MyIC.reg") Register<bit<16>, bit<8>>(32w6) reg_0;
-    @hidden action psaregisterreadwrite2bmv2l78() {
+    @hidden action psaregisterreadwrite2bmv2l84() {
         orig_data_0 = reg_0.read(hdr.ethernet.dstAddr[7:0]);
     }
-    @hidden action psaregisterreadwrite2bmv2l82() {
+    @hidden action psaregisterreadwrite2bmv2l88() {
         next_data_0 = hdr.ethernet.dstAddr[47:32];
     }
-    @hidden action psaregisterreadwrite2bmv2l85() {
+    @hidden action psaregisterreadwrite2bmv2l91() {
         next_data_0 = orig_data_0;
     }
-    @hidden action psaregisterreadwrite2bmv2l88() {
+    @hidden action psaregisterreadwrite2bmv2l94() {
         next_data_0 = orig_data_0 + 16w1;
     }
-    @hidden action psaregisterreadwrite2bmv2l90() {
+    @hidden action psaregisterreadwrite2bmv2l96() {
         orig_data_0 = 16w0xdead;
         next_data_0 = 16w0xbeef;
     }
-    @hidden action psaregisterreadwrite2bmv2l93() {
+    @hidden action psaregisterreadwrite2bmv2l99() {
         reg_0.write(hdr.ethernet.dstAddr[7:0], next_data_0);
         hdr.output_data.word0 = (bit<32>)orig_data_0;
         hdr.output_data.word1 = (bit<32>)next_data_0;
     }
-    @hidden table tbl_psaregisterreadwrite2bmv2l78 {
+    @hidden table tbl_psaregisterreadwrite2bmv2l84 {
         actions = {
-            psaregisterreadwrite2bmv2l78();
+            psaregisterreadwrite2bmv2l84();
         }
-        const default_action = psaregisterreadwrite2bmv2l78();
-    }
-    @hidden table tbl_psaregisterreadwrite2bmv2l82 {
-        actions = {
-            psaregisterreadwrite2bmv2l82();
-        }
-        const default_action = psaregisterreadwrite2bmv2l82();
-    }
-    @hidden table tbl_psaregisterreadwrite2bmv2l85 {
-        actions = {
-            psaregisterreadwrite2bmv2l85();
-        }
-        const default_action = psaregisterreadwrite2bmv2l85();
+        const default_action = psaregisterreadwrite2bmv2l84();
     }
     @hidden table tbl_psaregisterreadwrite2bmv2l88 {
         actions = {
@@ -93,17 +81,29 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
         }
         const default_action = psaregisterreadwrite2bmv2l88();
     }
-    @hidden table tbl_psaregisterreadwrite2bmv2l90 {
+    @hidden table tbl_psaregisterreadwrite2bmv2l91 {
         actions = {
-            psaregisterreadwrite2bmv2l90();
+            psaregisterreadwrite2bmv2l91();
         }
-        const default_action = psaregisterreadwrite2bmv2l90();
+        const default_action = psaregisterreadwrite2bmv2l91();
     }
-    @hidden table tbl_psaregisterreadwrite2bmv2l93 {
+    @hidden table tbl_psaregisterreadwrite2bmv2l94 {
         actions = {
-            psaregisterreadwrite2bmv2l93();
+            psaregisterreadwrite2bmv2l94();
         }
-        const default_action = psaregisterreadwrite2bmv2l93();
+        const default_action = psaregisterreadwrite2bmv2l94();
+    }
+    @hidden table tbl_psaregisterreadwrite2bmv2l96 {
+        actions = {
+            psaregisterreadwrite2bmv2l96();
+        }
+        const default_action = psaregisterreadwrite2bmv2l96();
+    }
+    @hidden table tbl_psaregisterreadwrite2bmv2l99 {
+        actions = {
+            psaregisterreadwrite2bmv2l99();
+        }
+        const default_action = psaregisterreadwrite2bmv2l99();
     }
     @hidden table tbl_send_to_port {
         actions = {
@@ -114,18 +114,18 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
     apply {
         if (hdr.ethernet.isValid()) {
             if (hdr.ethernet.dstAddr[15:8] >= 8w1 && hdr.ethernet.dstAddr[15:8] <= 8w3) {
-                tbl_psaregisterreadwrite2bmv2l78.apply();
+                tbl_psaregisterreadwrite2bmv2l84.apply();
             }
             if (hdr.ethernet.dstAddr[15:8] == 8w1) {
-                tbl_psaregisterreadwrite2bmv2l82.apply();
-            } else if (hdr.ethernet.dstAddr[15:8] == 8w2) {
-                tbl_psaregisterreadwrite2bmv2l85.apply();
-            } else if (hdr.ethernet.dstAddr[15:8] == 8w3) {
                 tbl_psaregisterreadwrite2bmv2l88.apply();
+            } else if (hdr.ethernet.dstAddr[15:8] == 8w2) {
+                tbl_psaregisterreadwrite2bmv2l91.apply();
+            } else if (hdr.ethernet.dstAddr[15:8] == 8w3) {
+                tbl_psaregisterreadwrite2bmv2l94.apply();
             } else {
-                tbl_psaregisterreadwrite2bmv2l90.apply();
+                tbl_psaregisterreadwrite2bmv2l96.apply();
             }
-            tbl_psaregisterreadwrite2bmv2l93.apply();
+            tbl_psaregisterreadwrite2bmv2l99.apply();
         }
         tbl_send_to_port.apply();
     }
@@ -137,18 +137,18 @@ control MyEC(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control MyID(packet_out pkt, out EMPTY clone_i2e_meta, out EMPTY resubmit_meta, out EMPTY normal_meta, inout headers_t hdr, in metadata_t user_meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaregisterreadwrite2bmv2l121() {
+    @hidden action psaregisterreadwrite2bmv2l127() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaregisterreadwrite2bmv2l121 {
+    @hidden table tbl_psaregisterreadwrite2bmv2l127 {
         actions = {
-            psaregisterreadwrite2bmv2l121();
+            psaregisterreadwrite2bmv2l127();
         }
-        const default_action = psaregisterreadwrite2bmv2l121();
+        const default_action = psaregisterreadwrite2bmv2l127();
     }
     apply {
-        tbl_psaregisterreadwrite2bmv2l121.apply();
+        tbl_psaregisterreadwrite2bmv2l127.apply();
     }
 }
 

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_
-#define BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_
 
 #include <sstream>
 #include <vector>
@@ -103,4 +103,4 @@ class BvContext {
 
 }  // namespace solver
 
-#endif /* BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_SYMBOLIC_BITVEC_H_ */

@@ -1,38 +1,38 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "parseInput.h"
 
 #include <cstdio>
 #include <sstream>
 
+#ifdef SUPPORT_P4_14
 #include "frontends/p4-14/fromv1.0/converters.h"
+#endif
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
 namespace P4 {
 
+#ifdef SUPPORT_P4_14
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
+#else
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input) {
+#endif
     std::istringstream stream(input);
-    const auto *result =
-        version == CompilerOptions::FrontendVersion::P4_14
-            ? parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine)
-            : P4ParserDriver::parse(stream, sourceFile, sourceLine);
+    const IR::P4Program *result = nullptr;
+#ifdef SUPPORT_P4_14
+    if (version == CompilerOptions::FrontendVersion::P4_14)
+        result =
+            parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine);
+    else
+#endif
+        result = P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
     if (::P4::errorCount() > 0) {
         ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
@@ -43,9 +43,24 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
     return result;
 }
 
+#ifdef SUPPORT_P4_14
 const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
     return parseP4String("(string)", 1, input, version);
 }
+#else
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input,
+                                   CompilerOptions::FrontendVersion /*version*/) {
+    return parseP4String(sourceFile, sourceLine, input);
+}
+const IR::P4Program *parseP4String(const std::string &input) {
+    return parseP4String("(string)", 1, input);
+}
+const IR::P4Program *parseP4String(const std::string &input,
+                                   CompilerOptions::FrontendVersion /*version*/) {
+    return parseP4String("(string)", 1, input, CompilerOptions::FrontendVersion::P4_16);
+}
+#endif
 
 }  // namespace P4

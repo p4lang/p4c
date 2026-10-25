@@ -1,6 +1,15 @@
-# Remove once #5066 is resolved.
-common --enable_workspace
-# Enable once #5066 is resolved.
-common --noenable_bzlmod
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
 
-build --action_env=BAZEL_CXXOPTS="-std=c++17"
+# Enable Bzlmod.
+common --enable_bzlmod
+common --noenable_workspace
+
+# Use C++20.
+build --cxxopt=-std=c++20
+build --host_cxxopt=-std=c++20
+
+# Force the use of Clang for all builds.
+build --action_env=CC=clang
+build --action_env=CXX=clang++

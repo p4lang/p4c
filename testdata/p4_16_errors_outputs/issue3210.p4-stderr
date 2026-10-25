@@ -1,3 +1,3 @@
-issue3210.p4(9): [--Werror=invalid] error: t: invalid declaration. Instantiations cannot be in a function or method.
+issue3210.p4(15): [--Werror=invalid] error: t: invalid declaration. Instantiations cannot be in a function or method.
     p() t;
         ^

@@ -104,19 +104,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action tunneling_ubpf134() {
+    @hidden action tunneling_ubpf125() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_tunneling_ubpf134 {
+    @hidden table tbl_tunneling_ubpf125 {
         actions = {
-            tunneling_ubpf134();
+            tunneling_ubpf125();
         }
-        const default_action = tunneling_ubpf134();
+        const default_action = tunneling_ubpf125();
     }
     apply {
-        tbl_tunneling_ubpf134.apply();
+        tbl_tunneling_ubpf125.apply();
     }
 }
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/smith/common/declarations.h"
 
 #include <cstddef>
@@ -454,7 +458,7 @@ IR::Type *DeclarationGenerator::genHeaderStackType() {
     auto stackSize = Utils::getRandInt(1, MAX_HEADER_STACK_SIZE);
     auto *hdrTypeName = new IR::Type_Name(hdrTp->name);
     auto *ret =
-        new IR::Type_Stack(hdrTypeName, new IR::Constant(IR::Type_InfInt::get(), stackSize));
+        new IR::Type_Array(hdrTypeName, new IR::Constant(IR::Type_InfInt::get(), stackSize));
 
     P4Scope::addToScope(ret);
 
@@ -491,7 +495,7 @@ IR::Type_Struct *DeclarationGenerator::genStructTypeDeclaration() {
     for (size_t i = 0; i < len; i++) {
         const auto *fieldTp = target().expressionGenerator().pickRndType(typePercent);
         cstring fieldName = getRandomString(4);
-        if (fieldTp->to<IR::Type_Stack>() != nullptr) {
+        if (fieldTp->to<IR::Type_Array>() != nullptr) {
             // Right now there is now way to initialize a header stack
             // So we have to add the entire structure to the banned expressions
             P4Scope::notInitializedStructs.insert(name);
@@ -615,7 +619,7 @@ const IR::Type *DeclarationGenerator::genType() {
             break;
         }
         case 2: {
-            // tp = headerStackType::gen();
+            // tp = arrayType::gen();
             break;
         }
     }
@@ -672,9 +676,21 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
         tp->is<IR::Type_Name>()) {
         auto *expr = target().expressionGenerator().genExpression(tp);
         ret = new IR::Declaration_Variable(name, tp, expr);
-    } else if (tp->is<IR::Type_Stack>()) {
-        // header stacks do !have an initializer yet
-        ret = new IR::Declaration_Variable(name, tp);
+    } else if (tp->is<IR::Type_Array>()) {
+        IR::Vector<IR::Expression> elems;
+        const IR::Type_Array *arrayTp = dynamic_cast<const IR::Type_Array *>(tp);
+        for (unsigned i = 0; i < arrayTp->getSize(); i++) {
+            const IR::Expression *elem =
+                target().expressionGenerator().genExpression(arrayTp->elementType);
+            // To be safe, cast tuple expressions to the element type
+            if (elem->is<IR::ListExpression>()) {
+                elems.push_back(new IR::Cast(arrayTp->elementType, elem));
+            } else {
+                elems.push_back(elem);
+            }
+        }
+        IR::ListExpression *init = new IR::ListExpression(elems);
+        ret = new IR::Declaration_Variable(name, tp, init);
     } else {
         BUG("Type %s not supported!", tp->node_type_name());
     }

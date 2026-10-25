@@ -9,17 +9,17 @@ control c(inout bit<32> y) {
             arg = arg + 32w1;
         }
     };
-    @hidden action issue21755l29() {
+    @hidden action issue21755l20() {
         x_0.a(y);
     }
-    @hidden table tbl_issue21755l29 {
+    @hidden table tbl_issue21755l20 {
         actions = {
-            issue21755l29();
+            issue21755l20();
         }
-        const default_action = issue21755l29();
+        const default_action = issue21755l20();
     }
     apply {
-        tbl_issue21755l29.apply();
+        tbl_issue21755l20.apply();
     }
 }
 

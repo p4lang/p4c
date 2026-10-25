@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* -*-C++-*- */
 /** \addtogroup irdefs
   * @{
@@ -147,6 +151,10 @@ class Type_Boolean : Type_Base {
     static Type_Boolean get();
     static Type_Boolean get(const Util::SourceInfo &si);
     int width_bits() const override { return 1; }
+    int min_width_bits() const override { BUG("min_width_bits() on fixed-width type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on fixed-width type: %1%", this); }
+    int min_or_fixed_width_bits() const override { return width_bits(); }
+    int max_or_fixed_width_bits() const override { return width_bits(); }
     toString{ return "bool"_cs; }
     dbprint { out << "bool"; }
 }
@@ -191,9 +199,10 @@ class Type_Bits : Type_Base {
     static Type_Bits get(int sz, bool isSigned = false);
     inline cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
+    int min_width_bits() const override { BUG("min_width_bits() on fixed-width type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on fixed-width type: %1%", this); }
 
     toString{ return absl::StrCat(baseName(), "<", size, ">"); }
-    dbprint { out << toString(); }
 }
 
 class Type_Varbits : Type_Base {
@@ -217,6 +226,11 @@ class Type_Varbits : Type_Base {
     toString{ return absl::StrCat("varbit<", size, ">"); }
     dbprint { out << "varbit<" << size << ">"; }
     int width_bits() const override { return size; }
+    int min_width_bits() const override { return 0; }
+    int max_width_bits() const override { return size; }
+    int min_or_fixed_width_bits() const override { return min_width_bits(); }
+    int max_or_fixed_width_bits() const override { return max_width_bits(); }
+    virtual bool variable() const override { return true; }
 }
 
 class Parameter : Declaration, IAnnotated {
@@ -237,9 +251,9 @@ class Parameter : Declaration, IAnnotated {
 class ParameterList : ISimpleNamespace {
     optional inline IndexedVector<Parameter> parameters;
     validate{ parameters.check_null(); }
-    inline Util::Enumerator<Parameter>* getEnumerator() const {
+    inline Util::EnumeratorPtr<Parameter> getEnumerator() const {
         return parameters.getEnumerator(); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return parameters.getDeclarations(); }
     inline size_t size() const { return parameters.size(); }
     inline bool empty() const { return size() == 0; }
@@ -306,6 +320,8 @@ class Type_InfInt : Type, ITypeVar {
     }
     const Type* getP4Type() const override { return this; }
     int width_bits() const override { return 0; }
+    int min_width_bits() const override { BUG("min_width_bits() on unsized type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on unsized type: %1%", this); }
 }
 
 class Type_Dontcare : Type_Base {
@@ -364,7 +380,7 @@ class Type_MatchKind : Type_Base {
 
 class TypeParameters : ISimpleNamespace {
     optional inline IndexedVector<Type_Var> parameters;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return parameters.getDeclarations(); }
     inline bool empty() const { return parameters.empty(); }
     inline size_t size() const { return parameters.size(); }
@@ -401,7 +417,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return fields.getDeclarations(); }
     inline StructField getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
@@ -430,12 +446,34 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         }
         return -1;
     }
+    virtual bool variable() const override {
+        for (auto f : fields) {
+            if (f->type->variable()) {
+                return true;
+            }
+        }
+        return false;
+    }
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {
             rv += f->type->width_bits();
         }
         return rv; }
+    int min_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+            rv += f->type->min_or_fixed_width_bits();
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+             rv += f->type->max_or_fixed_width_bits();
+        }
+        return rv;
+    }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return fields.getDeclaration(name); }
     IR::IDeclaration getDeclByName(std::string_view name) const override {
@@ -466,6 +504,24 @@ class Type_HeaderUnion : Type_StructLike {
         for (auto f : fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
+    int min_width_bits() const override {
+        if (fields.empty()) {
+            return 0;
+        }
+
+        int rv = INT_MAX;
+        for (auto f : fields) {
+            rv = std::min(rv, f->type->min_or_fixed_width_bits());
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+            rv = std::max(rv, f->type->max_or_fixed_width_bits());
+        }
+        return rv;
+    }
     /// start offset of any field in a union is 0
     inline int getFieldBitOffset(cstring name) const {
         for (auto f : fields) {
@@ -493,6 +549,8 @@ class Type_Set : Type {
         /// returning the width of the set elements, not the set itself, which doesn't
         /// really have a sensible size
         return elementType->width_bits(); }
+    int min_width_bits() const override { return elementType->min_width_bits(); }
+    int max_width_bits() const override { return elementType->max_width_bits(); }
 }
 
 interface Type_Indexed {
@@ -515,6 +573,20 @@ abstract Type_BaseList : Type, Type_Indexed {
             rv += f->width_bits();
         }
         return rv; }
+    int min_width_bits() const override {
+        int rv = 0;
+        for (auto f : components) {
+            rv += f->min_or_fixed_width_bits();
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : components) {
+            rv += f->max_or_fixed_width_bits();
+        }
+        return rv;
+    }
     cstring asString(const char* name) const {
         return
             absl::StrCat(name,
@@ -564,7 +636,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     TypeParameters getTypeParameters() const override { return typeParameters; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return typeParameters->getDeclByName(name); }
@@ -578,7 +650,7 @@ class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     toString{ return "package "_cs + externalName(); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = constructorParams->getDeclByName(name);
@@ -615,9 +687,17 @@ class Type_Name : Type {
         BUG("Type_Name is not a canonical type, use getTypeType()?");
         return 0;
     }
+    int min_width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
+    int max_width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
 }
 
-class Type_Stack : Type_Indexed, Type {
+class Type_Array : Type_Indexed, Type {
     Type        elementType;
     Expression  size;
     toString{
@@ -637,8 +717,10 @@ class Type_Stack : Type_Indexed, Type {
     static const cstring push_front;
     static const cstring pop_front;
     const Type* getP4Type() const override
-    { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
+    { return new IR::Type_Array(srcInfo, elementType->getP4Type(), size); }
     int width_bits() const override { return getSize() * elementType->width_bits(); }
+    int min_width_bits() const override { BUG("min_width_bits on a stack: %1%",this); }
+    int max_width_bits() const override { BUG("max_width_bits on a stack: %1%",this); }
 }
 
 /** Given a declaration
@@ -663,10 +745,14 @@ class Type_Specialized : Type {
     }
     Type_Specialized(cstring bt, std::initializer_list<Type> args)
     : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}
+    Type_Specialized(Util::SourceInfo si, const Type_Name *bt, Vector<Type> &&args)
+    : Type_Specialized(si, bt, new Vector<Type>(std::move(args))) {}
 }
 
-/** Canonical representation of a Type_Specialized;
-   only used by the type-checker, never in the IR tree. */
+/** The type checker's version of a Type_Specialized, for example Register<bit<32>>.
+   After type checking, Expression::type and the TypeMap can contain this type.
+   To use this type in the program, for example as the type of a declaration,
+   convert it to a Type_Specialized with getP4Type(). */
 class Type_SpecializedCanonical : Type {
     Type         baseType;     /// canonical baseType; always IMayBeGenericType
     Vector<Type> arguments;    /// canonical type arguments
@@ -712,7 +798,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
     inline IndexedVector<Declaration_ID> members;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
@@ -736,7 +822,7 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
     inline IndexedVector<SerEnumMember> members;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
@@ -745,6 +831,8 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
 #nodbprint
     validate{ members.check_null(); }
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
 }
 
 class Type_Table : Type, IApply {
@@ -787,7 +875,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     void dbprint(std::ostream& out) const override;
     toString { return "<Method>"_cs; }
     const IR::Type* getP4Type() const override { return nullptr; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = parameters->getDeclByName(name);
@@ -852,7 +940,7 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
         return type->parameters->getDeclByName(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
         return type->parameters->getDeclByName(name); }
-    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration>getDeclarations() const override {
         return type->parameters->getDeclarations(); }
 }
 
@@ -860,6 +948,8 @@ class Type_Typedef : Type_Declaration, IAnnotated {
     optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
@@ -874,21 +964,24 @@ class Type_Newtype : Type_Declaration, IAnnotated {
     optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
 }
+
 
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
                     IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
-    optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
+    optional inline NameMap<Declaration, ordered_map> attributes;  // P4_14 only, currently
     optional inline Vector<Annotation> annotations;
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return attributes.valueEnumerator()->as<const IDeclaration*>()
             ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
     TypeParameters getTypeParameters() const override { return typeParameters; }

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "evaluator.h"
 
@@ -159,9 +148,9 @@ const IR::Block *Evaluator::processConstructor(
             LOG2("Eliminating typedef " << dbp(decl));
             type = decl->to<IR::Type_Typedef>()->type;
         }
-        if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
-        if (type->is<IR::Type_Name>()) {
-            auto tn = type->to<IR::Type_Name>();
+        while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
+        if (auto st = type->to<IR::Type_Specialized>()) type = st->baseType;
+        if (auto tn = type->to<IR::Type_Name>()) {
             decl = refMap->getDeclaration(tn->path, true);
         } else {
             BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
@@ -176,8 +165,9 @@ const IR::Block *Evaluator::processConstructor(
         // We lookup the method in the instanceType, because it may contain compiler-synthesized
         // constructors with zero arguments that may not appear in the original extern declaration.
         auto canon = instanceType;
-        if (canon->is<IR::Type_SpecializedCanonical>())
-            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
+        if (auto at = canon->to<IR::Type_Array>()) canon = at->elementType;
+        if (auto tsc = canon->to<IR::Type_SpecializedCanonical>())
+            canon = tsc->substituted->to<IR::Type>();
         BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
         auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments);
         BUG_CHECK(constructor != nullptr, "Type %1% has no constructor with %2% arguments", exttype,
@@ -356,7 +346,9 @@ EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     setName("EvaluatorPass");
     if (!refMap) {
         selfRefMap.reset(new ReferenceMap);
+#ifdef SUPPORT_P4_14
         selfRefMap->setIsV1(P4CContext::get().options().isv1());
+#endif
         refMap = selfRefMap.get();
     }
     evaluator = new P4::Evaluator(refMap, typeMap);

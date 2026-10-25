@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # generate all the tests specified in the testsuites: builds a list of tests from the testsuite
 # patterns by calling p4c_find_test_names then pass the list to p4tools_add_test_list Arguments: -
 # tag is a label for the set of test suite where this test belongs (for example, p4ctest) - driver

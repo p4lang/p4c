@@ -22,17 +22,18 @@
 #include <sstream>
 #include <tuple>
 
+#include <boost/format.hpp>
 #include <boost/optional/optional_io.hpp>
 
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/scc_toposort.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/phv/cluster_phv_operations.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/solver/action_constraint_solver.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/algorithm.h"
 #include "lib/exceptions.h"
 

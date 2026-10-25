@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add test1 data.f1:0x01010101 op1(port:2)
 add test1 data.f1:0x02020202 op2(port:3)
 

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ir/ir.h"
 
@@ -70,21 +59,22 @@ const Type_Method *Type_Package::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), this, constructorParams, getName());
 }
 
-Util::Enumerator<const IR::IDeclaration *> *IGeneralNamespace::getDeclsByName(cstring name) const {
+Util::EnumeratorPtr<const IR::IDeclaration *> IGeneralNamespace::getDeclsByName(
+    cstring name) const {
     return getDeclarations()->where([name](const IDeclaration *d) {
         CHECK_NULL(d);
         return name == d->getName().name;
     });
 }
 
-Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() const {
-    Util::Enumerator<const IDeclaration *> *rv = nullptr;
+Util::EnumeratorPtr<const IDeclaration *> INestedNamespace::getDeclarations() const {
+    Util::EnumeratorPtr<const IDeclaration *> rv = nullptr;
     for (const auto *nested : getNestedNamespaces()) {
         if (nested == nullptr) continue;
 
         rv = rv ? rv->concat(nested->getDeclarations()) : nested->getDeclarations();
     }
-    return rv ? rv : new Util::EmptyEnumerator<const IDeclaration *>;
+    return rv ? rv : std::make_shared<Util::EmptyEnumerator<const IDeclaration *>>();
 }
 
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
@@ -116,7 +106,7 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
     absl::flat_hash_set<ID, Util::Hash> seen;
-    for (const auto *decl : *getDeclarations()) {
+    for (const auto *decl : getDeclarations()) {
         IR::ID name = decl->getName();
         auto [it, inserted] = seen.emplace(name);
         if (!inserted) {
@@ -135,9 +125,9 @@ void P4Parser::checkDuplicates() const {
     }
 }
 
-bool Type_Stack::sizeKnown() const { return size->is<Constant>(); }
+bool Type_Array::sizeKnown() const { return size->is<Constant>(); }
 
-size_t Type_Stack::getSize() const {
+size_t Type_Array::getSize() const {
     if (!sizeKnown()) BUG("%1%: Size not yet known", size);
     auto cst = size->to<IR::Constant>();
     if (!cst->fitsInt()) {
@@ -241,7 +231,7 @@ void Block::setValue(const Node *node, const CompileTimeValue *value) {
 void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue *> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
-    for (auto p : *getConstructorParameters()->getEnumerator()) {
+    for (auto p : getConstructorParameters()->getEnumerator()) {
         if (it == args->end()) {
             BUG_CHECK(p->isOptional(), "Missing nonoptional arg %s", p);
             continue;
@@ -266,7 +256,7 @@ const IR::CompileTimeValue *InstantiatedBlock::findParameterValue(cstring paramN
     return getValue(param->getNode());
 }
 
-Util::Enumerator<const IDeclaration *> *P4Program::getDeclarations() const {
+Util::EnumeratorPtr<const IDeclaration *> P4Program::getDeclarations() const {
     return objects.getEnumerator()->as<const IDeclaration *>()->where(
         [](const IDeclaration *d) { return d != nullptr; });
 }
@@ -281,7 +271,7 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     }
     auto main = mainDecls[0];
     if (mainDecls.size() > 1) {
-        ::P4::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
+        ::P4::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%1%' instances: %2%, %3%",
                     IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
         return nullptr;
     }

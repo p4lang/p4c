@@ -1,11 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <cstdio>
+#include <memory>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/parsers/parserDriver.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -17,7 +21,7 @@ struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
 
     const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        const auto *pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -36,6 +40,38 @@ struct P4CFrontendEnumValidation : P4CFrontend {
 
     P4::TypeMap typeMap;
 };
+
+TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
+    std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
+    ASSERT_NE(input, nullptr);
+    // Start after a stdio read to exercise buffering on the caller's FILE*.
+    const std::string source = "x/*" + std::string(16384, ' ') + "*/\nconst bit<8> value = 42;";
+    ASSERT_EQ(std::fwrite(source.data(), 1, source.size(), input.get()), source.size());
+    std::rewind(input.get());
+    ASSERT_EQ(std::fgetc(input.get()), 'x');
+
+    const auto *program = P4ParserDriver::parse(input.get(), "stdio.p4");
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(program->objects.size(), 1U);
+    const auto *constant = program->objects.at(0)->to<IR::Declaration_Constant>();
+    ASSERT_NE(constant, nullptr);
+    EXPECT_EQ(constant->name, "value");
+    EXPECT_EQ(constant->initializer->checkedTo<IR::Constant>()->value, 42);
+    EXPECT_EQ(errorCount(), 0U);
+
+    // Parsing must not close the caller's FILE*.
+    std::rewind(input.get());
+    EXPECT_EQ(std::fgetc(input.get()), 'x');
+}
+
+TEST_F(P4CFrontend, ParseEmptyStdio) {
+    std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
+    ASSERT_NE(input, nullptr);
+    const auto *program = P4ParserDriver::parse(input.get(), "empty.p4");
+    ASSERT_NE(program, nullptr);
+    EXPECT_TRUE(program->objects.empty());
+    EXPECT_EQ(errorCount(), 0U);
+}
 
 TEST_F(P4CFrontendEnumValidation, Bit) {
     std::string program = P4_SOURCE(R"(
@@ -192,6 +228,80 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
             ASSERT_TRUE(control->body->srcInfo.isValid());
         }
     }
+}
+
+// Tests for default_action checking with invalid header/union literals.
+struct P4CFrontendDefaultAction : P4CFrontend {
+    P4CFrontendDefaultAction() {
+        addPasses({new P4::DoConstantFolding(), new P4::TypeInference(&typeMap, false, false)});
+    }
+
+    P4::TypeMap typeMap;
+};
+
+TEST_F(P4CFrontendDefaultAction, InvalidHeaderActionArgs) {
+    std::string program = P4_SOURCE(R"(
+        header h_t {
+            bit<8> f;
+        }
+        header_union hu_t {
+            h_t h1;
+            h_t h2;
+        }
+        control C() {
+            action a(in h_t h, in hu_t hu) {
+            }
+            table t {
+                actions = {
+                    a((h_t) {#}, (hu_t) {#});
+                }
+                default_action = a((h_t) {#}, (hu_t) {#});
+            }
+            apply {
+                t.apply();
+            }
+        }
+        control proto();
+        package top(proto p);
+        top(C()) main;
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::P4::errorCount(), 0);
+}
+
+TEST_F(P4CFrontendDefaultAction, MismatchedInvalidHeaderActionArgs) {
+    std::string program = P4_SOURCE(R"(
+        header h1_t {
+            bit<8> f;
+        }
+        header h2_t {
+            bit<16> f;
+        }
+        control C() {
+            action a(in h1_t h) {
+            }
+            table t {
+                actions = {
+                    a((h1_t) {#});
+                }
+                default_action = a((h2_t) {#});
+            }
+            apply {
+                t.apply();
+            }
+        }
+        control proto();
+        package top(proto p);
+        top(C()) main;
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    EXPECT_GT(::P4::errorCount(), 0);
 }
 
 }  // namespace P4::Test

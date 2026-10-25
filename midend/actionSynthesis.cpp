@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "actionSynthesis.h"
 
@@ -96,7 +85,7 @@ bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement *statement) {
     return true;
 }
 
-bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
+bool DoSynthesizeActions::mustMove(const IR::BaseAssignmentStatement *assign) {
     if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
         auto mi = MethodInstance::resolve(mc, refMap, typeMap);
         if (!mi->is<ExternMethod>()) return true;
@@ -123,7 +112,7 @@ const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
 
     for (auto c : statement->components) {
         bool moveToAction = false;
-        if (auto *as = c->to<IR::AssignmentStatement>()) {
+        if (auto *as = c->to<IR::BaseAssignmentStatement>()) {
             moveToAction = mustMove(as);
         } else if (auto *mc = c->to<IR::MethodCallStatement>()) {
             moveToAction = mustMove(mc);
@@ -205,7 +194,7 @@ const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAd
     return result;
 }
 
-const IR::Node *DoSynthesizeActions::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::BaseAssignmentStatement *statement) {
     // don't move stuff from for init/update -- should be part of policy?
     auto *ctxt = getContext();
     if (ctxt->node->is<IR::ForStatement>() &&

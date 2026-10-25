@@ -1,1 +1,4 @@
+p4tc_samples/add_entry_2_errors.p4(79): [--Wwarn=unused] warning: 'default_route_drop' is unused
+    action default_route_drop() {
+           ^^^^^^^^^^^^^^^^^^
 [--Werror=unexpected] error: add_entry extern can only be applied for one of the hit action of table MainControlImpl_ipv4_tbl_1. default_route_drop is not hit action of table.

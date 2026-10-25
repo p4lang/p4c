@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_
-#define BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -41,4 +41,4 @@ class CopyBlockPragmas : public PassManager {
         : CopyBlockPragmas(refMap, typeMap, new P4::TypeChecking(refMap, typeMap), pragmas) {}
 };
 
-#endif /* BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_COPY_BLOCK_PRAGMAS_H_ */

@@ -1,18 +1,9 @@
 /*
-Copyright 2018-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+ * Copyright 2018-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_PATTERN_H_
 #define IR_PATTERN_H_
@@ -117,6 +108,24 @@ class Pattern {
         Pattern operator!=(int a) { return Pattern(*this) != Pattern(a); }
     };
 
+    template <class T = IR::AssignmentStatement>
+    class Assign : public Base {
+        static_assert(std::is_base_of_v<IR::BaseAssignmentStatement, T>);
+        Base *left, *right;
+
+     public:
+        bool match(const IR::Node *n) override {
+            if (auto as = n->to<T>()) {
+                if (left->match(as->left) && right->match(as->right)) return true;
+            }
+            return false;
+        }
+        Assign(Base *l, Base *r) : left(l), right(r) {}
+        Assign(const Pattern &l, const Pattern &r) : left(l.pattern), right(r.pattern) {}
+        Assign(Base *l, int val) : left(l), right(new Const(val)) {}
+        Assign(Base *l, big_int val) : left(l), right(new Const(val)) {}
+    };
+
     template <class T>
     Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
     template <class T>
@@ -182,6 +191,22 @@ class Pattern {
     }
     Pattern operator||(const Pattern &r) const {
         return Pattern(new Binary<IR::LOr>(pattern, r.pattern));
+    }
+    /// We use these templates to deal with amgigous overloads introduced by C++20.
+    /// https://en.cppreference.com/w/cpp/language/default_comparisons
+    // TODO: Ideally, we would fix these ambiguous overloads by making the Pattern class explicit in
+    // its initialization but that is a breaking change.
+    template <class T>
+    Pattern operator==(Match<T> &m) const {
+        return *this == Pattern(m);
+    }
+    template <class T>
+    Pattern operator!=(Match<T> &m) const {
+        return *this != Pattern(m);
+    }
+    template <class T>
+    Pattern operator==(const Match<T> &m) const {
+        return *this == Pattern(m);
     }
 
     bool match(const IR::Node *n) { return pattern->match(n); }

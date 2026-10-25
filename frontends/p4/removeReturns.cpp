@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "removeReturns.h"
 
@@ -25,8 +14,14 @@ bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
     for (auto it = block->components.begin(); it != block->components.end();) {
         if (movedToIfBranch)
             it = block->components.erase(it);
-        else
-            visit(*it++);
+        else {
+            auto statement = *it;
+            visit(statement);
+            if (statement == *it)
+                ++it;
+            else
+                it = block->components.replace(it, statement);
+        }
     }
     movedToIfBranch = false;
     return false;
@@ -78,12 +73,15 @@ bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
     // TBD: if there is exactly one case that falls through (all others end with a branch)
     // then we could move subsequent code into that case, as it done with 'if'
     bool canFallThrough = false;
+    bool hasDefault = false;
     for (auto &c : swch->cases) {
+        hasDefault |= c->label->is<IR::DefaultExpression>();
         hasJumped = false;
         visit(c, "cases");
         canFallThrough |= !hasJumped;
     }
-    hasJumped = !canFallThrough;
+    // Without a default case, an unmatched switch expression also falls through.
+    hasJumped = hasDefault && !canFallThrough;
     return false;
 }
 
@@ -215,7 +213,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::ExitStatement *statement) {
 }
 
 const IR::Node *DoRemoveReturns::preorder(IR::BlockStatement *statement) {
-    auto block = new IR::BlockStatement;
+    auto block = new IR::BlockStatement(statement->srcInfo, statement->annotations);
     auto currentBlock = block;
     TernaryBool ret = TernaryBool::No;
     for (auto s : statement->components) {

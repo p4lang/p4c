@@ -1,5 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #include <dpdk/psa.p4>
+@command_line("--loopsUnroll")
 
 typedef bit<48> eth_addr_t;
 

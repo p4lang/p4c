@@ -1,1 +1,5 @@
+# SPDX-FileCopyrightText: 2017 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # empty stf file, used to just validate the json produced by p4c-bm2-ss

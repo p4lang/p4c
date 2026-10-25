@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
-#define _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
 
 #include "ir/ir.h"
 
@@ -66,4 +66,4 @@ class RemoveActionTables : public PassManager {
     }
 };
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_ */

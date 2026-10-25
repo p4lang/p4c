@@ -107,17 +107,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnadpdkdirectmeterlearner97() {
+    @hidden action pnadpdkdirectmeterlearner88() {
         color_in_0 = PNA_MeterColor_t.RED;
     }
-    @hidden table tbl_pnadpdkdirectmeterlearner97 {
+    @hidden table tbl_pnadpdkdirectmeterlearner88 {
         actions = {
-            pnadpdkdirectmeterlearner97();
+            pnadpdkdirectmeterlearner88();
         }
-        const default_action = pnadpdkdirectmeterlearner97();
+        const default_action = pnadpdkdirectmeterlearner88();
     }
     apply {
-        tbl_pnadpdkdirectmeterlearner97.apply();
+        tbl_pnadpdkdirectmeterlearner88.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -126,18 +126,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectmeterlearner156() {
+    @hidden action pnadpdkdirectmeterlearner147() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectmeterlearner156 {
+    @hidden table tbl_pnadpdkdirectmeterlearner147 {
         actions = {
-            pnadpdkdirectmeterlearner156();
+            pnadpdkdirectmeterlearner147();
         }
-        const default_action = pnadpdkdirectmeterlearner156();
+        const default_action = pnadpdkdirectmeterlearner147();
     }
     apply {
-        tbl_pnadpdkdirectmeterlearner156.apply();
+        tbl_pnadpdkdirectmeterlearner147.apply();
     }
 }
 

@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef TYPECHECKING_TYPECONSTRAINTS_H_
-#define TYPECHECKING_TYPECONSTRAINTS_H_
+#ifndef FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
+#define FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 
 #include "ir/ir.h"
 #include "lib/castable.h"
@@ -92,10 +83,9 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// composed in reverse order, from bottom to top.  The top of the stack
         /// has no 'derivedFrom' field, and it contains the actual source
         /// position where the analysis started.
-        boost::format fmt(format);
-        return reportErrorImpl(subst,
-                               "  ---- Actual error:\n" +
-                                   ::P4::error_helper(fmt, std::forward<Args>(args)...).toString());
+        return reportErrorImpl(
+            subst, "  ---- Actual error:\n" +
+                       ::P4::error_helper(format, std::forward<Args>(args)...).toString());
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;
@@ -236,4 +226,4 @@ class TypeConstraints final : public IHasDbPrint {
 };
 }  // namespace P4
 
-#endif /* TYPECHECKING_TYPECONSTRAINTS_H_ */
+#endif /* FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_ */

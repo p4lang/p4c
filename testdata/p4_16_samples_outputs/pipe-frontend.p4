@@ -1,10 +1,5 @@
 #include <core.p4>
 
-match_kind {
-    ternary,
-    exact
-}
-
 typedef bit<9> BParamType;
 struct TArg1 {
     bit<9> field1;

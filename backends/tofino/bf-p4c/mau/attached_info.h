@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_ATTACHED_INFO_H_
-#define BF_P4C_MAU_ATTACHED_INFO_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ATTACHED_INFO_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ATTACHED_INFO_H_
 
 #include "attached_entries.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
@@ -354,4 +354,4 @@ class SplitAttachedInfo : public PassManager {
                                                const IR::MAU::Table *tbl, FormatType_t format_type);
 };
 
-#endif /* BF_P4C_MAU_ATTACHED_INFO_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ATTACHED_INFO_H_ */

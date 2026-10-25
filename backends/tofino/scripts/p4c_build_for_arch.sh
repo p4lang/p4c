@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # params:
 #  workspace
 #  architecture: one of x86_64-apple-darwin, x86_64-linux-gnu, i386-linux-gnu
@@ -33,7 +37,7 @@ chmod 755 bootstrap.${arch}.sh
 cd $WORKSPACE/bf-p4c-compilers/
 ./bootstrap.${arch}.sh  --prefix $install_dir --exec-prefix=$install_dir/$arch
 
-rm -f ./bootstrap.${arch}.sh p4c/bootstrap.${arch}.sh
+rm -f "./bootstrap.${arch}.sh" "p4c/bootstrap.${arch}.sh"
 
 cd ${build_dir}
 make -j $parallel_make install

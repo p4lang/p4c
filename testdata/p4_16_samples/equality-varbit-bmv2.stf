@@ -1,2 +1,6 @@
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 packet 0 01 23456789
 expect 1 01 23456789

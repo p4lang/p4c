@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
-#define BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
@@ -100,4 +100,4 @@ class UpdateDeparserStage : public Inspector {
 
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_ */

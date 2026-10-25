@@ -1,0 +1,12 @@
+call-on-constructor-with-different-type-parameter-arity.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+call-on-constructor-with-different-type-parameter-arity.p4(7): [--Wwarn=unused] warning: 'e' is unused
+  E<bit<16>, bit<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                                                                    ^
+call-on-constructor-with-different-type-parameter-arity.p4(7): [--Werror=type-error] error: E<bit<16>, bit<32>, bit<16>>: Type E has 2 type parameter(s), but it is specialized with 3
+  E<bit<16>, bit<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+call-on-constructor-with-different-type-parameter-arity.p4(3)
+extern E<T, S> {
+       ^

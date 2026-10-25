@@ -1,0 +1,3 @@
+decl-serenum-of-unsupported-type.p4(3): [--Werror=type-error] error: int: Illegal type for enum; only bit<> and int<> are allowed; note that the used type is unsized integral type
+enum int EthTypes {
+     ^^^

@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 # Copyright 2022-present Orange
 # Copyright 2022-present Open Networking Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: GPL-2.0-only
+# Reason-GPL: import-scapy
+# Note: This program was originally contributed with the expectation
+# that it would be licensed as Apache-2.0.  It is only licensed as
+# GPL-2.0-only because it imports the GPL-2.0-only module Scapy.  If
+# someone later modifies it so that it no longer uses Scapy, nor any
+# other GPL modules, please change the license to Apache-2.0.
 
 from common import *
 from scapy.layers.l2 import Ether
@@ -200,7 +195,7 @@ class SimpleActionSelectorPSATest(ActionSelectorTest):
         output_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, output_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, output_ports)
         # send again, output port should be the same
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, output_ports[port])
@@ -302,7 +297,7 @@ class ActionSelectorMultipleSelectorsPSATest(ActionSelectorTest):
         allowed_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, allowed_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, allowed_ports)
         allowed_ports.pop(port)
 
         # change separately every selector key and test if output port has been changed
@@ -339,7 +334,7 @@ class ActionSelectorMultipleSelectorsTwoTablesPSATest(ActionSelectorTest):
 
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, self.default_group_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, self.default_group_ports)
         # Match second table, same selectors set, so output port should be the same
         pkt[Ether].src = "AA:BB:CC:DD:EE:FF"
         testutils.send_packet(self, PORT0, pkt)

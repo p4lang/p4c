@@ -1,24 +1,13 @@
 /*
-* Copyright 2019, MNK Consulting
-* http://mnkcg.com
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*
-*    How to test this P4 code:
-* $ ./p4c-bm2-ss --std p4-16 ../testdata/p4_16_samples/ipv6-switch-ml-bmv2.p4 -o tmp.json
-*
-*/
+ * Copyright 2019 MNK Consulting http://mnkcg.com
+ * SPDX-FileCopyrightText: 2019 MNK Consulting
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ *    How to test this P4 code:
+ * $ ./p4c-bm2-ss --std p4-16 ../testdata/p4_16_samples/ipv6-switch-ml-bmv2.p4 -o tmp.json
+ *
+ */
 
 #include <v1model.p4>
 #include "ml-headers.p4"

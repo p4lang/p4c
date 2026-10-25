@@ -1,23 +1,15 @@
 /*
-Copyright 2018-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+ * Copyright 2018-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef CONTROL_PLANE_TYPESPECCONVERTER_H_
 #define CONTROL_PLANE_TYPESPECCONVERTER_H_
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "ir/ir.h"
@@ -52,7 +44,7 @@ class TypeSpecConverter : public Inspector {
     ::p4::config::v1::P4TypeInfo *p4RtTypeInfo;
     /// after translating an Expression to P4DataTypeSpec, save the result to
     /// 'map'.
-    std::map<const IR::Type *, ::p4::config::v1::P4DataTypeSpec *> map;
+    std::map<const IR::Type *, std::shared_ptr<::p4::config::v1::P4DataTypeSpec>> map;
 
     TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       ::p4::config::v1::P4TypeInfo *p4RtTypeInfo);
@@ -65,7 +57,7 @@ class TypeSpecConverter : public Inspector {
     bool preorder(const IR::Type_Varbits *type) override;
     bool preorder(const IR::Type_Boolean *type) override;
     bool preorder(const IR::Type_BaseList *type) override;
-    bool preorder(const IR::Type_Stack *type) override;
+    bool preorder(const IR::Type_Array *type) override;
 
     bool preorder(const IR::Type_Name *type) override;
     bool preorder(const IR::Type_Newtype *type) override;
@@ -83,10 +75,9 @@ class TypeSpecConverter : public Inspector {
     /// Generates the appropriate p4.P4DataTypeSpec message for @type. If
     /// @typeInfo is nullptr, then the relevant information is not generated for
     /// named types.
-    static const ::p4::config::v1::P4DataTypeSpec *convert(const P4::ReferenceMap *refMap,
-                                                           P4::TypeMap *typeMap,
-                                                           const IR::Type *type,
-                                                           ::p4::config::v1::P4TypeInfo *typeInfo);
+    static std::shared_ptr<const ::p4::config::v1::P4DataTypeSpec> convert(
+        const P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::Type *type,
+        ::p4::config::v1::P4TypeInfo *typeInfo);
 };
 
 /// See section "User-defined types" in P4RT specification.

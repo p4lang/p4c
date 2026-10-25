@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add test1 data:1 data2:1 setb1(val:0xaa, port:3)
 add test1 data:1 data2:0 setb1(val:0xbb, port:2)
 

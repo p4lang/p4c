@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-const bit<16> TYPE_IPV4 = 16w0x800;
+@command_line("--loopsUnroll") const bit<16> TYPE_IPV4 = 16w0x800;
 const bit<16> TYPE_SRCROUTING = 16w0x1234;
 const bit<16> MAX_HOPS = 16w3;
 typedef bit<9> egressSpec_t;
@@ -58,7 +58,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[index]);
-        index = index + 32s1;
+        index = (int<32>)((int)index + 1);
+        hdr.srcRoutes[index + -32s1].port = (bit<15>)((int)hdr.srcRoutes[index + -32s1].port + 1);
         transition select(hdr.srcRoutes[index + -32s1].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting;

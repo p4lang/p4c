@@ -1,29 +1,19 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_NODE_H_
 #define IR_NODE_H_
 
 #include <iosfwd>
 
-#include "ir-tree-macros.h"
 #include "ir/gen-tree-macro.h"
-#include "lib/castable.h"
+#include "ir/inode.h"
+#include "ir/ir-tree-macros.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
 #include "lib/source_file.h"
 
 namespace P4 {
@@ -50,46 +40,6 @@ template <class T>
 class Vector;  // IWYU pragma: keep
 template <class T>
 class IndexedVector;  // IWYU pragma: keep
-
-/// SFINAE helper to check if given class has a `static_type_name`
-/// method. Definite node classes have them while interfaces do not
-template <class, class = void>
-struct has_static_type_name : std::false_type {};
-
-template <class T>
-struct has_static_type_name<T, std::void_t<decltype(T::static_type_name())>> : std::true_type {};
-
-template <class T>
-inline constexpr bool has_static_type_name_v = has_static_type_name<T>::value;
-
-// node interface
-class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
- public:
-    virtual ~INode() {}
-    virtual const Node *getNode() const = 0;
-    virtual Node *getNode() = 0;
-    virtual void toJSON(JSONGenerator &) const = 0;
-    virtual cstring node_type_name() const = 0;
-    virtual void validate() const {}
-
-    // default checkedTo implementation for nodes: just fallback to generic ICastable method
-    template <typename T>
-    std::enable_if_t<!has_static_type_name_v<T>, const T *> checkedTo() const {
-        return ICastable::checkedTo<T>();
-    }
-
-    // alternative checkedTo implementation that produces slightly better error message
-    // due to node_type_name() / static_type_name() being available
-    template <typename T>
-    std::enable_if_t<has_static_type_name_v<T>, const T *> checkedTo() const {
-        const auto *result = to<T>();
-        BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.", this, node_type_name(),
-                  T::static_type_name());
-        return result;
-    }
-
-    DECLARE_TYPEINFO_WITH_TYPEID(INode, NodeKind::INode);
-};
 
 class Node : public virtual INode {
  public:
@@ -148,6 +98,7 @@ class Node : public virtual INode {
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
     void sourceInfoToJSON(JSONGenerator &json) const;
+    void sourceInfoFromJSON(JSONLoader &json);
     Util::JsonObject *sourceInfoJsonObj() const;
     /* operator== does a 'shallow' comparison, comparing two Node subclass objects for equality,
      * and comparing pointers in the Node directly for equality */
@@ -159,8 +110,8 @@ class Node : public virtual INode {
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
-    virtual void visit_children(Visitor &) {}
-    virtual void visit_children(Visitor &) const {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 

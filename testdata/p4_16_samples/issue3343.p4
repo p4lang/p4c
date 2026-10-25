@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 parser MyParser1(in bit<6> ttt) {
   value_set<bit<6>>(4) myvs;
   state start {

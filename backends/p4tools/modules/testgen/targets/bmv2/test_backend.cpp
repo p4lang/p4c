@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
 #include <cstdlib>
@@ -32,8 +36,6 @@
 
 namespace P4::P4Tools::P4Testgen::Bmv2 {
 
-const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
-const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF",
                                                                    "PROTOBUF_IR", "METADATA"};
 
@@ -73,16 +75,6 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
-    // This is a hack to deal with a behavioral model quirk.
-    // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
-    if (testInfo.outputPacket->type->width_bits() == 0 &&
-        TestgenOptions::get().testBackend == "STF") {
-        int outPktSize = ZERO_PKT_WIDTH;
-        testInfo.outputPacket =
-            IR::Constant::get(IR::Type_Bits::get(outPktSize), Bmv2TestBackend::ZERO_PKT_VAL);
-        testInfo.packetTaintMask =
-            IR::Constant::get(IR::Type_Bits::get(outPktSize), Bmv2TestBackend::ZERO_PKT_MAX);
-    }
     return testInfo;
 }
 

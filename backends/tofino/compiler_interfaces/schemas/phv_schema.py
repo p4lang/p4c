@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 phv_schema.py: Generates a JSON Schema model for structured PHV allocation result information.
 TODO:
@@ -58,12 +62,12 @@ Version Notes:
 """
 
 major_version = 3
-medium_version = 0
 minor_version = 0
+patch_version = 0
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(medium_version), str(minor_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################

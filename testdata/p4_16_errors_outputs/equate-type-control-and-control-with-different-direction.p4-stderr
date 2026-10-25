@@ -1,0 +1,12 @@
+equate-type-control-and-control-with-different-direction.p4(3): [--Werror=type-error] error: s: a parameter with type string cannot have a direction
+control C(inout string s);
+                       ^
+equate-type-control-and-control-with-different-direction.p4(3)
+control C(inout string s);
+                ^^^^^^
+equate-type-control-and-control-with-different-direction.p4(5): [--Werror=type-error] error: s: a parameter with type string cannot have a direction
+control c(out string s)() {
+                     ^
+equate-type-control-and-control-with-different-direction.p4(5)
+control c(out string s)() {
+              ^^^^^^

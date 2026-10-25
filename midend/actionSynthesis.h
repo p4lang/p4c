@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_ACTIONSYNTHESIS_H_
 #define MIDEND_ACTIONSYNTHESIS_H_
@@ -128,7 +119,7 @@ class DoSynthesizeActions : public Transform {
  public:
     // If true the statement must be moved to an action
     bool mustMove(const IR::MethodCallStatement *statement);
-    bool mustMove(const IR::AssignmentStatement *statement);
+    bool mustMove(const IR::BaseAssignmentStatement *statement);
 
     DoSynthesizeActions(ReferenceMap *refMap, TypeMap *typeMap, ActionSynthesisPolicy *policy)
         : refMap(refMap), typeMap(typeMap), policy(policy) {
@@ -148,7 +139,7 @@ class DoSynthesizeActions : public Transform {
     }  // skip actions
     // We do not handle return: this pass should be called after it has been removed
     const IR::Node *preorder(IR::BlockStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::ExitStatement *statement) override;
     const IR::Node *preorder(IR::Function *function) override {

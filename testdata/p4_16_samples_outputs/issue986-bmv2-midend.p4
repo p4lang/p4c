@@ -44,31 +44,31 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action issue986bmv2l42() {
+    @hidden action issue986bmv2l33() {
         sm.egress_spec = 9w1;
     }
-    @hidden action issue986bmv2l45() {
+    @hidden action issue986bmv2l36() {
         sm.egress_spec = 9w2;
     }
-    @hidden table tbl_issue986bmv2l42 {
+    @hidden table tbl_issue986bmv2l33 {
         actions = {
-            issue986bmv2l42();
+            issue986bmv2l33();
         }
-        const default_action = issue986bmv2l42();
+        const default_action = issue986bmv2l33();
     }
-    @hidden table tbl_issue986bmv2l45 {
+    @hidden table tbl_issue986bmv2l36 {
         actions = {
-            issue986bmv2l45();
+            issue986bmv2l36();
         }
-        const default_action = issue986bmv2l45();
+        const default_action = issue986bmv2l36();
     }
     apply {
         if (m.b == 1w0) {
             t1_0.apply();
-            tbl_issue986bmv2l42.apply();
+            tbl_issue986bmv2l33.apply();
         } else {
             t1_0.apply();
-            tbl_issue986bmv2l45.apply();
+            tbl_issue986bmv2l36.apply();
         }
     }
 }

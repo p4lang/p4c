@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +14,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Contains different eBPF models and specifies their individual behavior
-    Currently five phases are defined:
-   1. Invokes the specified compiler on a provided p4 file.
-   2. Parses an stf file and generates an pcap output.
-   3. Loads the generated template or compiles it to a runnable binary.
-   4. Feeds the generated pcap test packets into the P4 "filter"
-   5. Evaluates the output with the expected result from the .stf file
+"""Contains different eBPF models and specifies their individual behavior
+ Currently five phases are defined:
+1. Invokes the specified compiler on a provided p4 file.
+2. Parses an stf file and generates an pcap output.
+3. Loads the generated template or compiles it to a runnable binary.
+4. Feeds the generated pcap test packets into the P4 "filter"
+5. Evaluates the output with the expected result from the .stf file
 """
 
 import os
@@ -27,7 +28,7 @@ import sys
 from glob import glob
 from pathlib import Path
 
-import scapy.utils as scapy_util
+from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 
 from .ebpfstf import create_table_file, parse_stf_file
 
@@ -122,12 +123,10 @@ class EBPFTarget:
         for iface, pkts in iface_pkts_map.items():
             direction = "in"
             infile = self.filename(iface, direction)
-            # Linktype 1 the Ethernet Link Type, see also 'man pcap-linktype'
-            fp = scapy_util.RawPcapWriter(infile, linktype=1)
-            fp._write_header(None)
+            fp = PcapWriter(infile, linktype=LINKTYPE_ETHERNET)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(pkt_data)
+                    fp.write(pkt_data)
                 except ValueError:
                     testutils.log.error(f"Invalid packet data {pkt_data}")
                     return testutils.FAILURE
@@ -180,7 +179,7 @@ class EBPFTarget:
                 packets = []
             else:
                 try:
-                    packets = scapy_util.rdpcap(file)
+                    packets = rdpcap(file)
                 except Exception as e:
                     testutils.log.error("Corrupt pcap file %s\n%s", file, e)
                     return testutils.FAILURE

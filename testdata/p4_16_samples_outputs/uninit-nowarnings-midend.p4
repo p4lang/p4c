@@ -8,12 +8,12 @@ header Header {
 
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
-@noWarn("uninitialized_use") parser p1(packet_in p, out Header h) {
+@noWarn("uninitialized-use") parser p1(packet_in p, out Header h) {
     @name("p1.stack") Header[2] stack_0;
     @name("p1.tmp") bit<32> tmp;
     @name("p1.tmp_0") bit<32> tmp_0;
     @name("p1.tmp_1") bit<32> tmp_1;
-    @noWarn("invalid_header") @noWarn("ordering") state start {
+    @noWarn("invalid-header") @noWarn("ordering") state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();
         h.data1 = 32w0;
@@ -24,7 +24,7 @@ extern bit<32> g(inout bit<32> v, in bit<32> w);
         g(tmp, tmp_1);
         transition next;
     }
-    @noWarn("invalid_header") state next {
+    @noWarn("invalid-header") state next {
         h.data2 = h.data3 + 32w1;
         transition select((bit<1>)h.isValid()) {
             1w1: next1;
@@ -62,23 +62,23 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    @hidden action uninitnowarnings93() {
+    @hidden action uninitnowarnings84() {
         e_0 = 32w1;
     }
-    @hidden action uninitnowarnings98() {
+    @hidden action uninitnowarnings89() {
         e_0 = e_0 + 32w1;
     }
-    @hidden table tbl_uninitnowarnings93 {
+    @hidden table tbl_uninitnowarnings84 {
         actions = {
-            uninitnowarnings93();
+            uninitnowarnings84();
         }
-        const default_action = uninitnowarnings93();
+        const default_action = uninitnowarnings84();
     }
-    @hidden table tbl_uninitnowarnings98 {
+    @hidden table tbl_uninitnowarnings89 {
         actions = {
-            uninitnowarnings98();
+            uninitnowarnings89();
         }
-        const default_action = uninitnowarnings98();
+        const default_action = uninitnowarnings89();
     }
     @hidden table tbl_a1 {
         actions = {
@@ -86,13 +86,13 @@ control c(out bit<32> v) {
         }
         const default_action = a1_1();
     }
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         if (e_0 > 32w0) {
-            tbl_uninitnowarnings93.apply();
+            tbl_uninitnowarnings84.apply();
         } else {
             ;
         }
-        tbl_uninitnowarnings98.apply();
+        tbl_uninitnowarnings89.apply();
         switch (t_0.apply().action_run) {
             a1: {
             }

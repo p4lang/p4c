@@ -25,7 +25,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_action") action simple_action() {
     }
-    @hidden action gauntlet_exit_combination_20bmv2l41() {
+    @hidden action gauntlet_exit_combination_20bmv2l47() {
         h.eth_hdr.eth_type = 16w2;
     }
     @hidden table tbl_simple_action {
@@ -34,15 +34,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = simple_action();
     }
-    @hidden table tbl_gauntlet_exit_combination_20bmv2l41 {
+    @hidden table tbl_gauntlet_exit_combination_20bmv2l47 {
         actions = {
-            gauntlet_exit_combination_20bmv2l41();
+            gauntlet_exit_combination_20bmv2l47();
         }
-        const default_action = gauntlet_exit_combination_20bmv2l41();
+        const default_action = gauntlet_exit_combination_20bmv2l47();
     }
     apply {
         tbl_simple_action.apply();
-        tbl_gauntlet_exit_combination_20bmv2l41.apply();
+        tbl_gauntlet_exit_combination_20bmv2l47.apply();
     }
 }
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<1>  v; }
 
 # t_ternary tests: if packets come on port 0, we missed!

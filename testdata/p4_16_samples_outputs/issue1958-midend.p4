@@ -52,17 +52,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1958l99() {
+    @hidden action issue1958l90() {
         stdmeta.egress_spec = 9w0;
     }
-    @hidden table tbl_issue1958l99 {
+    @hidden table tbl_issue1958l90 {
         actions = {
-            issue1958l99();
+            issue1958l90();
         }
-        const default_action = issue1958l99();
+        const default_action = issue1958l90();
     }
     apply {
-        tbl_issue1958l99.apply();
+        tbl_issue1958l90.apply();
         foo2_inst_foo2_table.apply();
     }
 }

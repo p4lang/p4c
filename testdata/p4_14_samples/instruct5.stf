@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 add test1 data.f1:0x01010101 push1(x1:0x21)
 add test1 data.f1:0x01010102 push2(x1:0x22, x2:0x32)

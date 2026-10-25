@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Runs the compiler on a sample P4-16 program
 
@@ -73,9 +65,12 @@ def isError(p4filename):
     return "_errors" in p4filename
 
 
+ignoreStderrDirective = 'P4TEST_IGNORE_STDERR'
+
+
 def ignoreStderr(options):
     for line in open(options.p4filename):
-        if "P4TEST_IGNORE_STDERR" in line:
+        if ignoreStderrDirective in line:
             return True
     return False
 
@@ -210,9 +205,16 @@ def check_generated_files(options, tmpdir, expecteddir):
                 ' or rerun all tests using "P4TEST_REPLACE=True make check".' % expected
             )
             return FAILURE
-        result = compare_files(options, produced, expected, file[-7:] == "-stderr")
-        if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
-            return result
+        is_stderr = file[-7:] == "-stderr"
+        result = compare_files(options, produced, expected, is_stderr)
+        if result != SUCCESS:
+            if is_stderr and ignoreStderr(options):
+                print(
+                    '(Ignoring stderr differences for file %s due to %s in sample file)'
+                    % (file, ignoreStderrDirective)
+                )
+            else:
+                return result
     return SUCCESS
 
 

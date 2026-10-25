@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typeMap.h"
 
@@ -30,7 +19,7 @@ bool TypeMap::typeIsEmpty(const IR::Type *type) const {
             if (!typeIsEmpty(t)) return false;
         }
         return true;
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
+    } else if (auto ts = type->to<IR::Type_Array>()) {
         if (!ts->sizeKnown()) return false;
         return ts->getSize() == 0;
     } else if (auto tst = type->to<IR::Type_Struct>()) {
@@ -123,6 +112,7 @@ const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
 const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
     auto result = getType(element, notNull);
+    if (!result) return result;
     auto typeType = result->to<IR::Type_Type>();
     BUG_CHECK(typeType, "%1%: expected a TypeType", result);
     return typeType->type;
@@ -157,8 +147,8 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
         auto rv = right->to<IR::ITypeVar>();
         return lv->getVarName() == rv->getVarName() && lv->getDeclId() == rv->getDeclId();
     }
-    if (auto ls = left->to<IR::Type_Stack>()) {
-        auto rs = right->to<IR::Type_Stack>();
+    if (auto ls = left->to<IR::Type_Array>()) {
+        auto rs = right->to<IR::Type_Array>();
         if (!ls->sizeKnown()) {
             ::P4::error(ErrorType::ERR_TYPE_ERROR,
                         "%1%: Size of header stack type should be a constant", left);
@@ -335,7 +325,7 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type *from, const IR::Type *to) 
 const IR::Type *TypeMap::getCanonical(const IR::Type *type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
     std::vector<const IR::Type *> *searchIn;
-    if (type->is<IR::Type_Stack>())
+    if (type->is<IR::Type_Array>())
         searchIn = &canonicalStacks;
     else if (type->is<IR::Type_Tuple>())
         searchIn = &canonicalTuples;
@@ -391,7 +381,7 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
     } else if (auto vb = type->to<IR::Type_Varbits>()) {
         if (max) return vb->size;
         return 0;
-    } else if (auto ths = t->to<IR::Type_Stack>()) {
+    } else if (auto ths = t->to<IR::Type_Array>()) {
         auto w = widthBits(ths->elementType, errorPosition, max);
         return w * ths->getSize();
     }

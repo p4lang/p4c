@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "constantFolding.h"
 
@@ -51,6 +40,19 @@ class CloneConstants : public Transform {
         return expression->apply(cc)->to<IR::Expression>();
     }
 };
+
+const IR::Type *DoConstantFolding::resolveType(const IR::Type *type) {
+    type = ResolutionContext::resolveType(type);
+    while (auto *tdef = type->to<IR::Type_Typedef>())
+        type = ResolutionContext::resolveType(tdef->type);
+    // DANGER -- because ResolutionContext::resolve methods on a Modifier or Transform always
+    // return the original node (as it existed at the start of the pass), we use visit here to
+    // get any updated type -- specifically a Type_Bits with the size expression constant-folded
+    // into the type.  It would be nice if resolve methods could return the updated node, at
+    // least as an option
+    visit(type);
+    return type;
+}
 
 const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
@@ -103,6 +105,7 @@ const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
                 // type checking; maybe it's wrong.
                 return e;
         }
+        LOG4("cfold path " << e->path << " -> " << cst);
         return CloneConstants::clone(cst, this);
     }
     return e;
@@ -113,6 +116,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Bits *type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
+            LOG4("cfold type " << getOriginal<IR::Type_Bits>() << " -> " << type);
             if (type->width_bits() < 0 || (type->width_bits() == 0 && type->isSigned)) {
                 ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
@@ -120,7 +124,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Bits *type) {
                 type->size = 64;
             }
         } else {
-            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
+            error(ErrorType::ERR_EXPECTED, "%1%: expected a %2%constant", type->expression,
+                  type->expression->is<IR::Literal>() ? "numeric " : "");
         }
     }
     return type;
@@ -133,7 +138,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Varbits *type) {
             type->expression = nullptr;
             if (type->size < 0) ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
-            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
+            error(ErrorType::ERR_EXPECTED, "%1%: expected a %2%constant", type->expression,
+                  type->expression->is<IR::Literal>() ? "numeric " : "");
         }
     }
     return type;
@@ -153,13 +159,14 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
         // casts, but if we run this before typechecking we have to be
         // more conservative.
         if (auto cst = init->to<IR::Constant>()) {
-            if (auto dtype = d->type->to<IR::Type_Bits>()) {
+            auto dtype = resolveType(d->type);
+            if (auto bittype = dtype->to<IR::Type_Bits>()) {
                 auto cstBits = cst->type->to<IR::Type_Bits>();
-                if (cstBits && !(*dtype == *cstBits))
+                if (cstBits && !(*bittype == *cstBits))
                     ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: initializer has wrong type %2%", d,
                                 cst->type);
                 else if (cst->type->is<IR::Type_InfInt>())
-                    init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
+                    init = new IR::Constant(init->srcInfo, bittype, cst->value, cst->base);
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
@@ -189,7 +196,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
     return d;
 }
 
-const IR::Node *DoConstantFolding::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoConstantFolding::preorder(IR::BaseAssignmentStatement *statement) {
     assignmentTarget = true;
     visit(statement->left);
     assignmentTarget = false;
@@ -340,8 +347,8 @@ const IR::Node *DoConstantFolding::postorder(IR::UPlus *e) {
 }
 
 const IR::Constant *DoConstantFolding::cast(const IR::Constant *node, unsigned base,
-                                            const IR::Type_Bits *type) const {
-    return new IR::Constant(node->srcInfo, type, node->value, base);
+                                            const IR::Type_Bits *type, bool noWarning) const {
+    return new IR::Constant(node->srcInfo, type, node->value, base, noWarning);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
@@ -709,6 +716,10 @@ const IR::Node *DoConstantFolding::postorder(IR::PlusSlice *e) {
 
     int w = cwidth->asInt();
     int l = clsb->asInt();
+    if (w < 0) {
+        ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected slice width to be non-negative", e->e2);
+        return e;
+    }
     if (l < 0) {
         ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative",
                     e->e2);
@@ -729,8 +740,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
-        auto st = type->to<IR::Type_Stack>();
+    if (type->is<IR::Type_Array>() && e->member == IR::Type_Array::arraySize) {
+        auto st = type->to<IR::Type_Array>();
         auto size = st->getSize();
         return new IR::Constant(st->size->srcInfo, origtype, size);
     }
@@ -778,13 +789,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     const auto *lstr = eleft->to<IR::StringLiteral>();
     const auto *rstr = eright->to<IR::StringLiteral>();
 
-    const auto *left = eleft->to<IR::Constant>();
-    const auto *right = eright->to<IR::Constant>();
-
     // handle string concatenations
     if (lstr && rstr) {
         return new IR::StringLiteral(e->srcInfo, IR::Type_String::get(), lstr->value + rstr->value);
     }
+
+    const auto *left = eleft->to<IR::Constant>();
+    const auto *right = eright->to<IR::Constant>();
 
     if (left == nullptr || right == nullptr) {
         // Could be a SerEnum
@@ -798,10 +809,20 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
         return e;
     }
 
+    // The concatenation result would be wrong if the negative value was used for the second
+    // argument (because the big_int binary representation does not match what the P4 spec expects).
+    // Therefore, we convert the second argument to a unsigned literal with the same binary
+    // representation as the P4 mandates for the signed value and concatenate these.
+    big_int rvalue = right->value;
+    if (rt->isSigned) {
+        // Reuse conversion from Constant's ctor. Temporary Type & Constant -> allocate on stack.
+        IR::Type_Bits utype(rt->width_bits(), false);
+        rvalue = IR::Constant(&utype, rvalue, 10, true /* no warning */).value;
+    }
+
     auto resultType = IR::Type_Bits::get(lt->width_bits() + rt->width_bits(), lt->isSigned);
     if (overflowWidth(e, resultType->width_bits())) return e;
-    big_int value =
-        Util::shift_left(left->value, static_cast<unsigned>(rt->width_bits())) + right->value;
+    big_int value = (left->value << rt->width_bits()) | rvalue;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
@@ -894,7 +915,7 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
             }
         }
     }
-    return new IR::Constant(e->srcInfo, left->type, value, cl->base);
+    return new IR::Constant(e->srcInfo, left->type, value, cl->base, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
@@ -902,15 +923,17 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (expr == nullptr) return e;
 
     const IR::Type *etype;
-    if (typesKnown)
+    if (typesKnown) {
         etype = typeMap->getType(getOriginal(), true);
-    else
-        etype = e->destType;
+    } else {
+        etype = resolveType(e->destType);
+    }
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
         if (auto arg = expr->to<IR::Constant>()) {
-            return cast(arg, arg->base, type);
+            // Do not emit overflow or mismatch warnings for explicit casts.
+            return cast(arg, arg->base, type, /* noWarning */ !e->implicit);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             if (type->isSigned || type->size != 1)
                 error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
@@ -931,7 +954,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             const auto *ctype = constant->type;
             if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
                 ::P4::error(ErrorType::ERR_INVALID,
-                            "%1%: Cannot cast %1% to arbitrary presion integer", ctype);
+                            "%1%: Cannot cast %1% to arbitrary precision integer", ctype);
                 return e;
             }
             return new IR::Constant(e->srcInfo, etype, constant->value, constant->base);
@@ -966,6 +989,12 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), v == 1);
         }
     } else if (etype->is<IR::Type_StructLike>()) {
+        if (!typesKnown) {
+            if (auto structExpr = expr->to<IR::StructExpression>())
+                return new IR::StructExpression(structExpr->srcInfo, e->destType,
+                                                structExpr->components);
+            return e;
+        }
         return CloneConstants::clone(expr, this);
     }
     return e;
@@ -1108,15 +1137,47 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     return result;
 }
 
+class FilterLikelyAnnot : public Transform {
+    IR::Statement *preorder(IR::Statement *stmt) {
+        prune();
+        return stmt;
+    }
+    IR::BlockStatement *preorder(IR::BlockStatement *stmt) {
+        prune();
+        visit(stmt->annotations, "annotations");
+        return stmt;
+    }
+    IR::Annotation *preorder(IR::Annotation *annot) {
+        prune();
+        if (annot->name == IR::Annotation::likelyAnnotation) return nullptr;
+        if (annot->name == IR::Annotation::unlikelyAnnotation) {
+            // FIXME -- disable this warning due to worries it will trigger too often
+            warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on always taken statement", annot);
+            return nullptr;
+        }
+        return annot;
+    }
+};
+
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
         if (cond->value) {
-            return ifstmt->ifTrue;
+            if (auto blk = ifstmt->ifFalse ? ifstmt->ifFalse->to<IR::BlockStatement>() : nullptr) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
+            }
+            return ifstmt->ifTrue->apply(FilterLikelyAnnot());
         } else {
+            if (auto blk = ifstmt->ifTrue->to<IR::BlockStatement>()) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
+            }
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
             } else {
-                return ifstmt->ifFalse;
+                return ifstmt->ifFalse->apply(FilterLikelyAnnot());
             }
         }
     }

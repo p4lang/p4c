@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -44,6 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -61,6 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name("ingress.set_port") action set_port(@name("output_port") bit<9> output_port) {
         standard_metadata.egress_spec = output_port;
@@ -75,20 +78,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = my_drop_0();
     }
-    @hidden action issue1538l90() {
+    @hidden action issue1538l81() {
         hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + (hdr.ethernet.srcAddr[15:0] + 16w1);
         hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + 16w1;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
     }
-    @hidden table tbl_issue1538l90 {
+    @hidden table tbl_issue1538l81 {
         actions = {
-            issue1538l90();
+            issue1538l81();
         }
-        const default_action = issue1538l90();
+        const default_action = issue1538l81();
     }
     apply {
         mac_da_0.apply();
-        tbl_issue1538l90.apply();
+        tbl_issue1538l81.apply();
     }
 }
 

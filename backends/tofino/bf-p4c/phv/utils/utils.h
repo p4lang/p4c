@@ -16,18 +16,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_UTILS_UTILS_H_
-#define BF_P4C_PHV_UTILS_UTILS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_
 
 #include <optional>
 
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/phv/error.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"
 
@@ -160,7 +160,7 @@ class Allocation {
         ConditionalConstraintData()
             : bitPosition(-1), rotationAllowed(false), container(std::nullopt) {}
 
-        bool operator==(ConditionalConstraintData &other) const {
+        bool operator==(const ConditionalConstraintData &other) const {
             return bitPosition == other.bitPosition && rotationAllowed == other.rotationAllowed &&
                    container == other.container;
         }
@@ -1277,4 +1277,4 @@ std::ostream &operator<<(std::ostream &out, const ordered_set<T> &set) {
 }
 }  // namespace P4
 
-#endif /* BF_P4C_PHV_UTILS_UTILS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_ */

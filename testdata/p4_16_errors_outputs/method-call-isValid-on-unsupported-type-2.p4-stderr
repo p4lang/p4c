@@ -1,0 +1,9 @@
+method-call-isValid-on-unsupported-type-2.p4(3): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+method-call-isValid-on-unsupported-type-2.p4(4): [--Werror=type-error] error: Cannot extract field isValid from {} which has type tuple<>
+  return {}.isValid();
+            ^^^^^^^
+method-call-isValid-on-unsupported-type-2.p4(4)
+  return {}.isValid();
+         ^^

@@ -24,6 +24,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") bit<32> retval;
     @name("ingress.tmp1") H[2] tmp1_0;
     @name("ingress.tmp2") H[2] tmp2_0;
+    @name("ingress.inlinedRetval") bit<32> inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
@@ -35,7 +36,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             tmp1_0[0] = tmp2_0[1];
         }
         retval = tmp1_0[0].a;
-        h.h.a = retval;
+        inlinedRetval_0 = retval;
+        h.h.a = inlinedRetval_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {

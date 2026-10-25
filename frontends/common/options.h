@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* -*-C++-*- */
 
@@ -20,6 +11,7 @@ limitations under the License.
 #define FRONTENDS_COMMON_OPTIONS_H_
 
 #include <filesystem>
+#include <unordered_set>
 
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
@@ -80,6 +72,10 @@ class CompilerOptions : public ParserOptions {
     cstring arch = nullptr;
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
+    // List of code metrics input by user.
+    cstring inputMetrics = nullptr;
+    // Code metrics to be collected.
+    std::set<cstring> selectedMetrics;
 
     // General optimization options -- can be interpreted by backends in various ways
     int optimizationLevel = 1;

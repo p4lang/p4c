@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control c(inout bit<32> b) {
     action a() {
         b = 1;

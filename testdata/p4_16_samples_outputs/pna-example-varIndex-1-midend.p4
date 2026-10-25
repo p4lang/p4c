@@ -85,69 +85,69 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         const default_action = execute_1();
         size = 1000000;
     }
-    @hidden action pnaexamplevarIndex1l102() {
+    @hidden action pnaexamplevarIndex1l93() {
         key_0 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action pnaexamplevarIndex1l102_0() {
+    @hidden action pnaexamplevarIndex1l93_0() {
         key_0 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action pnaexamplevarIndex1l102_1() {
+    @hidden action pnaexamplevarIndex1l93_1() {
         key_0 = hsVar;
     }
-    @hidden action pnaexamplevarIndex1l102_2() {
+    @hidden action pnaexamplevarIndex1l93_2() {
         hsiVar = meta.depth;
     }
-    @hidden table tbl_pnaexamplevarIndex1l102 {
+    @hidden table tbl_pnaexamplevarIndex1l93 {
         actions = {
-            pnaexamplevarIndex1l102_2();
+            pnaexamplevarIndex1l93_2();
         }
-        const default_action = pnaexamplevarIndex1l102_2();
+        const default_action = pnaexamplevarIndex1l93_2();
     }
-    @hidden table tbl_pnaexamplevarIndex1l102_0 {
+    @hidden table tbl_pnaexamplevarIndex1l93_0 {
         actions = {
-            pnaexamplevarIndex1l102();
+            pnaexamplevarIndex1l93();
         }
-        const default_action = pnaexamplevarIndex1l102();
+        const default_action = pnaexamplevarIndex1l93();
     }
-    @hidden table tbl_pnaexamplevarIndex1l102_1 {
+    @hidden table tbl_pnaexamplevarIndex1l93_1 {
         actions = {
-            pnaexamplevarIndex1l102_0();
+            pnaexamplevarIndex1l93_0();
         }
-        const default_action = pnaexamplevarIndex1l102_0();
+        const default_action = pnaexamplevarIndex1l93_0();
     }
-    @hidden table tbl_pnaexamplevarIndex1l102_2 {
+    @hidden table tbl_pnaexamplevarIndex1l93_2 {
         actions = {
-            pnaexamplevarIndex1l102_1();
+            pnaexamplevarIndex1l93_1();
         }
-        const default_action = pnaexamplevarIndex1l102_1();
+        const default_action = pnaexamplevarIndex1l93_1();
     }
     apply {
-        tbl_pnaexamplevarIndex1l102.apply();
+        tbl_pnaexamplevarIndex1l93.apply();
         if (hsiVar == 2w0) {
-            tbl_pnaexamplevarIndex1l102_0.apply();
+            tbl_pnaexamplevarIndex1l93_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_pnaexamplevarIndex1l102_1.apply();
+            tbl_pnaexamplevarIndex1l93_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_pnaexamplevarIndex1l102_2.apply();
+            tbl_pnaexamplevarIndex1l93_2.apply();
         }
         stub_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplevarIndex1l124() {
+    @hidden action pnaexamplevarIndex1l115() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<vlan_tag_h>(hdr.vlan_tag[0]);
         pkt.emit<vlan_tag_h>(hdr.vlan_tag[1]);
     }
-    @hidden table tbl_pnaexamplevarIndex1l124 {
+    @hidden table tbl_pnaexamplevarIndex1l115 {
         actions = {
-            pnaexamplevarIndex1l124();
+            pnaexamplevarIndex1l115();
         }
-        const default_action = pnaexamplevarIndex1l124();
+        const default_action = pnaexamplevarIndex1l115();
     }
     apply {
-        tbl_pnaexamplevarIndex1l124.apply();
+        tbl_pnaexamplevarIndex1l115.apply();
     }
 }
 

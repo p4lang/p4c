@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 macro(p4c_obtain_protobuf)
   set(P4C_PROTOBUF_VERSION 25.3)
   option(

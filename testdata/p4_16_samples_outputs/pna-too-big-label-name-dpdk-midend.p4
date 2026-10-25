@@ -82,39 +82,39 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnatoobiglabelnamedpdk138() {
+    @hidden action pnatoobiglabelnamedpdk129() {
         tmpDir_0 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnatoobiglabelnamedpdk140() {
+    @hidden action pnatoobiglabelnamedpdk131() {
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
-    @hidden action pnatoobiglabelnamedpdk113() {
+    @hidden action pnatoobiglabelnamedpdk104() {
         eth_0.setInvalid();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk113 {
+    @hidden table tbl_pnatoobiglabelnamedpdk104 {
         actions = {
-            pnatoobiglabelnamedpdk113();
+            pnatoobiglabelnamedpdk104();
         }
-        const default_action = pnatoobiglabelnamedpdk113();
+        const default_action = pnatoobiglabelnamedpdk104();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk138 {
+    @hidden table tbl_pnatoobiglabelnamedpdk129 {
         actions = {
-            pnatoobiglabelnamedpdk138();
+            pnatoobiglabelnamedpdk129();
         }
-        const default_action = pnatoobiglabelnamedpdk138();
+        const default_action = pnatoobiglabelnamedpdk129();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk140 {
+    @hidden table tbl_pnatoobiglabelnamedpdk131 {
         actions = {
-            pnatoobiglabelnamedpdk140();
+            pnatoobiglabelnamedpdk131();
         }
-        const default_action = pnatoobiglabelnamedpdk140();
+        const default_action = pnatoobiglabelnamedpdk131();
     }
     apply {
-        tbl_pnatoobiglabelnamedpdk113.apply();
+        tbl_pnatoobiglabelnamedpdk104.apply();
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnatoobiglabelnamedpdk138.apply();
+            tbl_pnatoobiglabelnamedpdk129.apply();
         } else {
-            tbl_pnatoobiglabelnamedpdk140.apply();
+            tbl_pnatoobiglabelnamedpdk131.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
@@ -123,18 +123,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnatoobiglabelnamedpdk155() {
+    @hidden action pnatoobiglabelnamedpdk146() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_dddddddddddddddddddddddddddddddddddddddddd_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk155 {
+    @hidden table tbl_pnatoobiglabelnamedpdk146 {
         actions = {
-            pnatoobiglabelnamedpdk155();
+            pnatoobiglabelnamedpdk146();
         }
-        const default_action = pnatoobiglabelnamedpdk155();
+        const default_action = pnatoobiglabelnamedpdk146();
     }
     apply {
-        tbl_pnatoobiglabelnamedpdk155.apply();
+        tbl_pnatoobiglabelnamedpdk146.apply();
     }
 }
 

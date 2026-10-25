@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "validate-p4c"
 
 on:
@@ -8,6 +12,11 @@ on:
     branches: [main]
   push:
     branches: [main]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   # We run validation in parallel with the normal tests.
@@ -20,23 +29,18 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       VALIDATION: ON
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: validation-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 20.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "ubuntu-22.04-gcc-unity-validation"
 
       - name: Validate
         run: |
-          ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+          uv run ctest -R toz3-validate-p4c --output-on-failure --schedule-random
         working-directory: ./build

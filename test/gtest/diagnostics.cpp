@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
 
@@ -66,7 +55,7 @@ class Diagnostics : public P4CTest {};
 
 TEST_F(Diagnostics, P4_16_Disable) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "disable")
+        @diagnostic("uninitialized-out-param", "disable")
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(0u, diagnosticCount());
@@ -77,7 +66,7 @@ TEST_F(Diagnostics, P4_16_Disable) {
 
 TEST_F(Diagnostics, P4_16_Warn) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "warn")
+        @diagnostic("uninitialized-out-param", "warn")
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -87,7 +76,7 @@ TEST_F(Diagnostics, P4_16_Warn) {
 
 TEST_F(Diagnostics, P4_16_Error) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "error")
+        @diagnostic("uninitialized-out-param", "error")
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -97,7 +86,7 @@ TEST_F(Diagnostics, P4_16_Error) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use disable
+        @pragma diagnostic uninitialized-use disable
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(0u, diagnosticCount());
@@ -105,7 +94,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use warn
+        @pragma diagnostic uninitialized-use warn
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -115,7 +104,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Error) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use error
+        @pragma diagnostic uninitialized-use error
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -127,15 +116,15 @@ TEST_F(Diagnostics, NestedCompileContexts) {
     // Check that diagnostic actions set in nested compilation contexts don't
     // affect outer contexts.
 
-    AutoCompileContext autoWarnContext(new GTestContext);
+    AutoCompileContext autoWarnContext(std::make_unique<GTestContext>());
     {
-        AutoCompileContext autoDisableContext(new GTestContext);
+        AutoCompileContext autoDisableContext(std::make_unique<GTestContext>());
         {
-            AutoCompileContext autoErrorContext(new GTestContext);
+            AutoCompileContext autoErrorContext(std::make_unique<GTestContext>());
 
-            // Run a test with `uninitialized_out_param` set to trigger an error.
+            // Run a test with `uninitialized-out-param` set to trigger an error.
             auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-                @diagnostic("uninitialized_out_param", "error")
+                @diagnostic("uninitialized-out-param", "error")
             )"));
             EXPECT_FALSE(test);
             EXPECT_EQ(1u, diagnosticCount());
@@ -143,16 +132,16 @@ TEST_F(Diagnostics, NestedCompileContexts) {
             EXPECT_EQ(1u, errorCount());
         }
 
-        // Run a test with `uninitialized_out_param` disabled. The error from
+        // Run a test with `uninitialized-out-param` disabled. The error from
         // the previous test should be gone, and no new error should appear.
         auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-            @diagnostic("uninitialized_out_param", "disable")
+            @diagnostic("uninitialized-out-param", "disable")
         )"));
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, diagnosticCount());
     }
 
-    // Run a test with no diagnostic pragma for `uninitialized_out_param`. It
+    // Run a test with no diagnostic pragma for `uninitialized-out-param`. It
     // should default to triggering a warning; the diagnostic actions configured
     // by the previous tests should be gone.
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
@@ -168,7 +157,7 @@ TEST_F(Diagnostics, CompilerOptions) {
     auto parseWithCompilerOptions =
         [](const CommandLineOptions &args) -> std::optional<FrontendTestCase> {
         auto &options = GTestContext::get().options();
-        options.process(args.size(), const_cast<char *const *>(args.data()));
+        options.process_options(args.size(), const_cast<char *const *>(args.data()));
         return createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     };
 
@@ -176,14 +165,14 @@ TEST_F(Diagnostics, CompilerOptions) {
     // arguments, change the default behavior for warnings.
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Wdisable"});
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, diagnosticCount());
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Wwarn"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, diagnosticCount());
@@ -192,7 +181,7 @@ TEST_F(Diagnostics, CompilerOptions) {
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Werror"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, diagnosticCount());
@@ -204,14 +193,14 @@ TEST_F(Diagnostics, CompilerOptions) {
     // argument, change the behavior only for a specific diagnostic.
 
     {
-        AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=uninitialized_out_param"});
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=uninitialized-out-param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, diagnosticCount());
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Wdisable=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, diagnosticCount());
@@ -220,8 +209,8 @@ TEST_F(Diagnostics, CompilerOptions) {
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized_out_param"});
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
+        auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized-out-param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, diagnosticCount());
         EXPECT_EQ(1u, warningCount());
@@ -229,8 +218,8 @@ TEST_F(Diagnostics, CompilerOptions) {
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized_out_param"});
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
+        auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized-out-param"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, diagnosticCount());
         EXPECT_EQ(0u, warningCount());
@@ -238,7 +227,7 @@ TEST_F(Diagnostics, CompilerOptions) {
     }
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Werror=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, diagnosticCount());
@@ -250,25 +239,54 @@ TEST_F(Diagnostics, CompilerOptions) {
     // behaving the same as `--Wdisable=foo`.
 
     {
-        AutoCompileContext autoContext(new GTestContext);
+        AutoCompileContext autoContext(std::make_unique<GTestContext>());
         auto test = parseWithCompilerOptions({"(test)", "--Wdisable", "unknown_diagnostic"});
         EXPECT_TRUE(test);
 
         // We expect all warnings to be disabled. If `unknown_diagnostic` was
         // treated as an argument to `--Wdisable`, then
-        // `uninitialized_out_param` would still be enabled and a warning would
+        // `uninitialized-out-param` would still be enabled and a warning would
         // fire.
         EXPECT_EQ(0u, diagnosticCount());
     }
 }
 
 TEST_F(Diagnostics, BasicInfo) {
-    AutoCompileContext autoContext(new GTestContext);
+    AutoCompileContext autoContext(std::make_unique<GTestContext>());
     info(P4::ErrorType::INFO_INFERRED, "test");
     EXPECT_EQ(1u, diagnosticCount());
     EXPECT_EQ(1u, infoCount());
     EXPECT_EQ(0u, warningCount());
     EXPECT_EQ(0u, errorCount());
+}
+
+TEST_F(Diagnostics, CompileContextOwnership) {
+    struct TrackedContext : BaseCompileContext {
+        int &destroyed;
+        explicit TrackedContext(int &destroyed) : destroyed(destroyed) {}
+        ~TrackedContext() override { ++destroyed; }
+    };
+    auto *parent = &BaseCompileContext::get();
+    int destroyed = 0;
+    {
+        auto context = std::make_unique<TrackedContext>(destroyed);
+        auto *active = context.get();
+        AutoCompileContext scope(std::move(context));
+        EXPECT_EQ(&BaseCompileContext::get(), active);
+        EXPECT_EQ(destroyed, 0);
+    }
+    EXPECT_EQ(destroyed, 1);
+    EXPECT_EQ(&BaseCompileContext::get(), parent);
+    {
+        TrackedContext borrowed(destroyed);
+        {
+            AutoCompileContext scope(&borrowed);
+            EXPECT_EQ(&BaseCompileContext::get(), &borrowed);
+        }
+        EXPECT_EQ(destroyed, 1);
+        EXPECT_EQ(&BaseCompileContext::get(), parent);
+    }
+    EXPECT_EQ(destroyed, 2);
 }
 
 }  // namespace P4::Test

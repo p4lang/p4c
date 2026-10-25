@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "inlining.h"
 
@@ -90,9 +79,9 @@ class FindLocationSets : public Inspector {
         auto storage = get(expression->expr);
 
         auto basetype = storageMap->typeMap->getType(expression->expr, true);
-        if (basetype->is<IR::Type_Stack>()) {
-            if (expression->member.name == IR::Type_Stack::next ||
-                expression->member.name == IR::Type_Stack::last) {
+        if (basetype->is<IR::Type_Array>()) {
+            if (expression->member.name == IR::Type_Array::next ||
+                expression->member.name == IR::Type_Array::last) {
                 set(expression, storage);
                 return false;
             }
@@ -280,7 +269,7 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        decl->name = newName;
+        decl->name = IR::ID(decl->name.srcInfo, newName, decl->name.originalName);
         IR::Annotations::addOrReplace(decl->annotations, IR::Annotation::nameAnnotation,
                                       new IR::StringLiteral(extName));
         return decl;
@@ -290,8 +279,22 @@ class Substitutions : public SubstituteParameters {
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->to<IR::Parameter>();
         if (param != nullptr && subst->contains(param)) {
-            // This path is the same as in SubstituteParameters
-            auto value = subst->lookup(param)->expression;
+            auto value = subst->lookup(param)->expression->clone();
+            // Keep the argument's source location unless it is a compiler temporary.
+            // For temporaries, use the location and original name of the parameter reference.
+            if (useParameterSourceInfo(value)) {
+                value->srcInfo = expression->srcInfo;
+                if (auto path = value->to<IR::PathExpression>()) {
+                    auto oldPath = path->path;
+                    auto newPath = oldPath->clone();
+                    // Keep the identifier's location: name resolution uses it to check
+                    // declaration order.
+                    newPath->name.originalName = expression->path->name.originalName;
+                    path->path = newPath;
+                    if (auto replacementDecl = refMap->getDeclaration(oldPath, false))
+                        refMap->setDeclaration(newPath, replacementDecl);
+                }
+            }
             LOG3("(Substitutions) Replaced " << dbp(expression) << " for parameter " << decl
                                              << " with " << dbp(value));
             return value;
@@ -304,7 +307,7 @@ class Substitutions : public SubstituteParameters {
             newName = expression->path->name;
         IR::ID newid(expression->path->srcInfo, newName, expression->path->name.originalName);
         auto newpath = new IR::Path(newid, expression->path->absolute);
-        auto result = new IR::PathExpression(newpath);
+        auto result = new IR::PathExpression(expression->srcInfo, newpath);
         refMap->setDeclaration(newpath, decl);
         LOG3("(Substitutions) replaced " << dbp(getOriginal()) << " with " << dbp(result));
         return result;
@@ -523,15 +526,15 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 std::map<const IR::Parameter *, const LocationSet *> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
-                for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+                for (auto param : mi->substitution.getParametersInArgumentOrder()) {
                     auto arg = mi->substitution.lookup(param);
                     auto ls = fls.locations(arg->expression);
                     locationSets.emplace(param, ls);
                 }
 
-                for (auto param1 : *mi->substitution.getParametersInArgumentOrder()) {
+                for (auto param1 : mi->substitution.getParametersInArgumentOrder()) {
                     auto ls1 = ::P4::get(locationSets, param1);
-                    for (auto param2 : *mi->substitution.getParametersInArgumentOrder()) {
+                    for (auto param2 : mi->substitution.getParametersInArgumentOrder()) {
                         if (param1 == param2) continue;
                         auto ls2 = ::P4::get(locationSets, param2);
                         if (ls1->overlaps(ls2)) {
@@ -565,12 +568,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 } else {
                     // use a temporary variable
                     cstring newName = refMap->newName(param->name.name.string_view());
-                    auto path = new IR::PathExpression(
-                        param->srcInfo, new IR::Path(param->srcInfo, IR::ID(newName)));
+                    // Use the parameter declaration as a fallback for generated copies.
+                    // Substitution gives references in the callee their use-site locations.
+                    auto path = new IR::PathExpression(param->srcInfo,
+                                                       new IR::Path(IR::ID(newName, nullptr)));
                     substs->paramSubst.add(param, new IR::Argument(path));
                     LOG3("Replacing " << param->name << " with " << newName);
-                    auto vardecl =
-                        new IR::Declaration_Variable(newName, param->annotations, param->type);
+                    auto vardecl = new IR::Declaration_Variable(IR::ID(newName, nullptr),
+                                                                param->annotations, param->type);
                     locals.push_back(vardecl);
                 }
             }
@@ -624,13 +629,14 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         LOG3("Looking for " << param->name);
         auto initializer = substs->paramSubst.lookup(param);
         auto arg = mi->substitution.lookup(param);
         if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut)) {
             if (!initializer->expression->equiv(*arg->expression)) {
-                auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
+                auto stat = new IR::AssignmentStatement(arg->srcInfo, initializer->expression,
+                                                        arg->expression);
                 body.push_back(stat);
             }
         } else if (param->direction == IR::Direction::Out) {
@@ -658,13 +664,13 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
     body.append(callee->body->components);
 
     // Copy values of out and inout parameters
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             auto left = mi->substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);
             if (!left->expression->equiv(*arg->expression)) {
-                auto copyout =
-                    new IR::AssignmentStatement(left->expression, arg->expression->clone());
+                auto copyout = new IR::AssignmentStatement(left->srcInfo, left->expression,
+                                                           arg->expression->clone());
                 body.push_back(copyout);
             }
         }
@@ -794,8 +800,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!arg->expression->equiv(*initializer->expression)) {
-                    auto stat =
-                        new IR::AssignmentStatement(arg->expression, initializer->expression);
+                    auto stat = new IR::AssignmentStatement(initializer->srcInfo, arg->expression,
+                                                            initializer->expression);
                     current.push_back(stat);
                 }
             } else if (param->direction == IR::Direction::Out) {
@@ -891,7 +897,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
                 param->direction == IR::Direction::Out) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!left->equiv(*arg->expression)) {
-                    auto copyout = new IR::AssignmentStatement(left, arg->expression->clone());
+                    auto copyout =
+                        new IR::AssignmentStatement(left->srcInfo, left, arg->expression->clone());
                     current.push_back(copyout);
                 }
             }

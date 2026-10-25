@@ -1,0 +1,3 @@
+struct_assignment_optimization.p4(4): [--Wwarn=unused] warning: 'EthernetAddress' is unused
+typedef bit<48> EthernetAddress;
+                ^^^^^^^^^^^^^^^

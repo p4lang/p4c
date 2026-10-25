@@ -81,6 +81,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.hdr_0") headers_t hdr_3;
     @name("MainControlImpl.user_meta_0") main_metadata_t user_meta_3;
     @name("MainControlImpl.retval") bit<1> retval;
+    @name("MainControlImpl.inlinedRetval") bit<1> inlinedRetval_0;
     @name(".do_range_checks_0") action do_range_checks_1(@name("min1") bit<16> min1_2, @name("max1") bit<16> max1_2) {
         hdr_2 = hdr;
         user_meta_2 = user_meta;
@@ -89,7 +90,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         retval = (bit<1>)(min1_2 <= hdr_3.tcp.srcPort && hdr_3.tcp.srcPort <= max1_2);
         hdr_2 = hdr_3;
         user_meta_2 = user_meta_3;
-        user_meta_2.rng_result1 = retval;
+        inlinedRetval_0 = retval;
+        user_meta_2.rng_result1 = inlinedRetval_0;
         hdr = hdr_2;
         user_meta = user_meta_2;
     }

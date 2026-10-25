@@ -1,0 +1,89 @@
+
+Cyclomatic Complexity:
+  TopParser: 7
+
+Halstead Metrics:
+  Unique Operators: 7
+  Unique Operands: 21
+  Total Operators: 20
+  Total Operands: 36
+  Vocabulary: 28
+  Length: 56
+  Difficulty: 6
+  Volume: 269.212
+  Effort: 1615.27
+  Estimated Bugs: 0.0897373
+
+Unused Code Instances:
+  Program Structure:
+	Actions: 0
+	Functions: 0
+	Parser states: 0
+  Declarations:
+	Variables: 0
+	Enums: 0
+  Other:
+	Conditionals: 0
+	Parameters: 0
+	Returns: 0
+
+Nesting Depth Metrics:
+  Average: 2
+  Global Max: 2
+  Individual blocks: 
+	TopParser: 2
+
+Header Metrics:
+  Total Headers: 1
+  Avg Fields Per Header: 3
+  Avg Field Size: 37.3333
+  Per-header metrics:
+	Ethernet_h:
+	  Fields: 3
+	  Fields size sum: 112
+
+Header Manipulation Metrics:
+  Total Operations: 1
+  Total Size: 112
+  Per-packet metrics:
+	ethernet:
+	  Operations: 1
+	  Size: 112
+
+Header Modification Metrics:
+  Total Operations: 0
+  Total Size: 0
+  Per-packet metrics:
+
+Match-Action Table Metrics:
+  Number of Tables: 0
+  Total Keys: 0
+  Total Key Size: 0
+  Avg Key Size: 0
+  Avg Keys Per Table: 0
+  Max Keys Per Table: 0
+  Total Actions: 0
+  Avg Actions Per Table: 0
+  Max Actions Per Table: 0
+  Per-table Metrics:
+
+Parser Metrics:
+  States: 9
+  Per-parser complexities:
+	start: 5
+	dispatch_value_sets: 3
+	parse_ipv4: 1
+	parse_arp: 1
+	parse_ipv6: 1
+	parse_trill: 1
+	parse_vlan_tag: 1
+	accept: 1
+	reject: 1
+
+Extern Metrics:
+  Extern Functions: 3
+  Function Calls: 2
+  Extern Structures: 3
+  Structure Uses: 3
+
+Number of Inlined Actions: 0

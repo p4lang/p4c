@@ -1,28 +1,19 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_BMV2_COMMON_HELPERS_H_
 #define BACKENDS_BMV2_COMMON_HELPERS_H_
 
 #include "JsonObjects.h"
+#include "backends/bmv2/common/v1model.h"
 #include "backends/common/programStructure.h"
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/json.h"
@@ -90,9 +81,9 @@ template <>
 struct ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
-        return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        return P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_profile.name; }
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
@@ -118,7 +109,7 @@ struct ActionSelectorTraits;
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL> : public ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action selector"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_selector.name; }
 };
 
 template <>
@@ -140,7 +131,7 @@ struct RegisterTraits;
 template <>
 struct RegisterTraits<Arch::V1MODEL> {
     static const cstring name() { return "register"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().registers.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     /// the index of the type parameter for the data stored in the register, in
     /// the type parameter list of the extern type declaration.
@@ -198,10 +189,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
@@ -210,10 +201,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
@@ -243,10 +234,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
@@ -255,10 +246,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };

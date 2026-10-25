@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "methodInstance.h"
 
@@ -37,10 +26,9 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     if (typeMap && !mce->typeArguments->empty()) {
         auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
-        actualType = t->to<IR::Type_MethodBase>();
+        actualType = t->checkedTo<IR::Type_MethodBase>();
         ReadOnlyTypeInference tc(typeMap);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
-        CHECK_NULL(actualType);
     }
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
@@ -61,31 +49,34 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
-        } else if (basetype->is<IR::Type_Stack>()) {
-            if (mem->member == IR::Type_Stack::push_front ||
-                mem->member == IR::Type_Stack::pop_front)
+        } else if (basetype->is<IR::Type_Array>()) {
+            if (mem->member == IR::Type_Array::push_front ||
+                mem->member == IR::Type_Array::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else {
             const IR::IDeclaration *decl = nullptr;
             const IR::Type *type = nullptr;
-            if (auto th = mem->expr->to<IR::This>()) {
+            const IR::Expression *receiver = mem->expr;
+            while (auto ai = receiver->to<IR::ArrayIndex>()) receiver = ai->left;
+            if (auto th = receiver->to<IR::This>()) {
                 type = basetype;
                 decl = refMap->getDeclaration(th, true);
-            } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
+            } else if (auto pe = receiver->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
                 type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
-            } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
+            } else if (auto mc = receiver->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
                 type = mi->actualMethodType->returnType;
-            } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
+            } else if (auto cce = receiver->to<IR::ConstructorCallExpression>()) {
                 auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
                 decl = cc->to<ExternConstructorCall>()->type;
                 type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
             } else {
-                BUG("unexpected expression %1% resolving method instance", mem->expr);
+                BUG("unexpected expression %1% resolving method instance", receiver);
             }
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
+            while (auto st = type->to<IR::Type_Array>()) type = st->elementType;
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             if (type->is<IR::IApply>() && mem->member == IR::IApply::applyMethodName) {
@@ -172,9 +163,10 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
 Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, DeclarationLookup *,
                                       TypeMap *typeMap) {
     auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
-    auto simpleType = type;
     const IR::Vector<IR::Type> *typeArguments;
 
+    while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
+    auto simpleType = type;
     if (auto st = type->to<IR::Type_SpecializedCanonical>()) {
         simpleType = st->baseType;
         typeArguments = st->arguments;

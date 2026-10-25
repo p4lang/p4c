@@ -9,17 +9,17 @@ struct S {
 
 control c() {
     @name("c.r2") Random<bit<16>>(16w256) r2_0;
-    @hidden action methodArgs13() {
+    @hidden action methodArgs19() {
         r2_0.read();
     }
-    @hidden table tbl_methodArgs13 {
+    @hidden table tbl_methodArgs19 {
         actions = {
-            methodArgs13();
+            methodArgs19();
         }
-        const default_action = methodArgs13();
+        const default_action = methodArgs19();
     }
     apply {
-        tbl_methodArgs13.apply();
+        tbl_methodArgs19.apply();
     }
 }
 

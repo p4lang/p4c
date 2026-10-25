@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2019 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type test_t {
     fields {
         f : 8;

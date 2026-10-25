@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # enum bit<8> MyEnum1B { MBR1 = 0, MBR2 = 0xff }
 # enum bit<16> MyEnum2B { MBR1 = 10, MBR2 = 0xab00 }
 # header hdr { MyEnum1B f1; MyEnum2B f2; }

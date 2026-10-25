@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
 #include <string>
@@ -10,6 +14,7 @@
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
 #include "lib/error.h"
+#include "midend/midEndLast.h"
 
 namespace P4::P4Tools {
 
@@ -26,7 +31,11 @@ CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName,
                                                   const std::string &source) {
+#ifdef SUPPORT_P4_14
     const auto *program = parseP4String(source, options.langVersion);
+#else
+    const auto *program = parseP4String(source);
+#endif
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -65,7 +74,7 @@ const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
 
 const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
                                                  const IR::P4Program *program) const {
-    P4COptionPragmaParser optionsPragmaParser;
+    P4COptionPragmaParser optionsPragmaParser(false);
     program->apply(ApplyOptionsPragmas(optionsPragmaParser));
 
     auto frontEnd = mkFrontEnd();
@@ -93,6 +102,9 @@ MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
 const IR::P4Program *CompilerTarget::runMidEnd(const CompilerOptions &options,
                                                const IR::P4Program *program) const {
     auto midEnd = mkMidEnd(options);
+    midEnd.addPasses({
+        new P4::MidEndLast(),
+    });
     midEnd.addDebugHook(options.getDebugHook(), true);
     return program->apply(midEnd);
 }

@@ -91,7 +91,7 @@ TEST(RTTI, JsonRestore) {
     IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
 
     std::stringstream ss;
-    JSONGenerator(ss) << e1 << '\n';
+    JSONGenerator(ss).emit(e1);
 
     JSONLoader loader(ss);
 

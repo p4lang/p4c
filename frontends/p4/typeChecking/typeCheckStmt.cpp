@@ -18,6 +18,15 @@ limitations under the License.
 
 namespace P4 {
 
+const IR::Node *TypeInferenceBase::postorder(const IR::ForStatement *stmt) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto type = getType(stmt->condition);
+    if (type == nullptr) return stmt;
+    if (!type->is<IR::Type_Boolean>())
+        typeError("Condition of %1% does not evaluate to a bool but %2%", stmt, type->toString());
+    return stmt;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(conditional->condition);
@@ -35,31 +44,22 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> foundLabels;
-        const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
-                if (foundDefault)
-                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
-                foundDefault = c->label;
                 continue;
             } else if (auto pe = c->label->to<IR::PathExpression>()) {
                 cstring label = pe->path->name.name;
-                auto [it, inserted] = foundLabels.emplace(label, c->label);
-                if (!inserted)
-                    typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
                 if (!ae->contains(label))
                     typeError("%1% is not a legal label (action name)", c->label);
             } else {
                 typeError("%1%: 'switch' label must be an action name or 'default'", c->label);
             }
         }
-    } else {
+    } else if (type->is<IR::Type::Bits>() || type->is<IR::Type_InfInt>() ||
+               type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>()) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
-        if (isCompileTimeConstant(stat->expression))
-            warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
         auto *sclone = stat->clone();
         bool changed = false;
@@ -69,8 +69,10 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
             auto lt = getType(c->label);
             if (lt == nullptr) continue;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
-                c = new IR::SwitchCase(c->srcInfo, new IR::Cast(c->label->srcInfo, type, c->label),
-                                       c->statement);
+                c = new IR::SwitchCase(
+                    c->srcInfo,
+                    new IR::Cast(c->label->srcInfo, type, c->label, /* implicit */ true),
+                    c->statement);
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
                 changed = true;
@@ -87,6 +89,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
             }
         }
         if (changed) stat = sclone;
+    } else {
+        typeError("%1%: 'switch' type can't be %2%", stat->expression, type);
     }
     return stat;
 }
@@ -125,9 +129,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statemen
     return statement;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
-    LOG3("TI Visiting " << dbp(getOriginal()));
-    auto ltype = getType(assign->left);
+const IR::Node *TypeInferenceBase::common_assign(const IR::BaseAssignmentStatement *assign,
+                                                 const IR::Type *ltype) {
     if (ltype == nullptr) return assign;
 
     if (!isLeftValue(assign->left)) {
@@ -137,8 +140,45 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     }
 
     auto newInit = assignment(assign, ltype, assign->right);
-    if (newInit != assign->right)
-        assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
+    if (newInit != assign->right) {
+        auto *clone = assign->clone();
+        clone->right = newInit;
+        assign = clone;
+    }
+    return assign;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    return TypeInferenceBase::common_assign(assign, getType(assign->left));
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(assign->left);
+    if (ltype && !ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+        return assign;
+    }
+    return TypeInferenceBase::common_assign(assign, ltype);
+}
+
+const IR::Node *TypeInferenceBase::shiftAssign(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(assign->left);
+    auto rtype = getType(assign->right);
+    if (!ltype) return assign;
+    if (!isLeftValue(assign->left)) {
+        typeError("Expression %1% cannot be the target of an assignment", assign->left);
+        LOG2(assign->left);
+    } else if (!ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+    } else if (rtype && !rtype->is<IR::Type_Bits>() && !rtype->is<IR::Type_InfInt>()) {
+        typeError("%1%=: cannot be applied with '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->right, rtype->toString());
+    }
     return assign;
 }
 
@@ -163,7 +203,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
                                            forin->body);
         else
             delete rclone;
-    } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
+    } else if (auto *stack = ctype->to<IR::Type_Array>()) {
         if (!canCastBetween(stack->elementType, ltype))
             typeError("%1% does not match header stack type %2%", forin->ref, ctype);
     } else if (auto *list = ctype->to<IR::Type_P4List>()) {
@@ -191,6 +231,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectCase *sc) {
     auto type = getType(sc->state);
     if (type != nullptr && type != IR::Type_State::get()) typeError("%1% must be state", sc);
     return sc;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::ParserState *state) {
+    // A direct transition ("transition name;") is a PathExpression that must name a parser state.
+    // Select expressions check their cases separately and are always typed as Type_State.
+    if (state->selectExpression == nullptr) return state;
+    auto type = getType(state->selectExpression);
+    if (type != nullptr && type != IR::Type_State::get())
+        typeError("%1%: transition target must be a parser state", state->selectExpression);
+    return state;
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
@@ -281,7 +331,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     auto listInstance =
         MethodInstance::resolve(actionListCall, this, typeMap, getChildContext(), true);
 
-    for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
+    for (auto param : listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
@@ -295,7 +345,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
         }
     }
 
-    for (auto param : *callInstance->substitution.getParametersInOrder()) {
+    for (auto param : callInstance->substitution.getParametersInOrder()) {
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
             typeError("%1%: parameter should be assigned in call %2%", param, call);

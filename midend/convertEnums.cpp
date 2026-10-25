@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "convertEnums.h"
 
 #include "frontends/p4/enumInstance.h"

@@ -1,16 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 ################################################################################
 # GTests
@@ -26,11 +17,13 @@ set (GTEST_UNITTEST_SOURCES
   gtest/constant_folding.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
+  gtest/diagnostic_options_test.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
   gtest/equiv_test.cpp
   gtest/exception_test.cpp
   gtest/expr_uses_test.cpp
+  gtest/fdstream.cpp
   gtest/flat_map.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
@@ -38,8 +31,11 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
+  gtest/ir.cpp
+  gtest/ir-splitter.cpp
   gtest/ir-traversal.cpp
   gtest/json_test.cpp
+  gtest/log_test.cpp
   gtest/map.cpp
   gtest/midend_def_use.cpp
   gtest/midend_pass.cpp
@@ -49,7 +45,6 @@ set (GTEST_UNITTEST_SOURCES
   gtest/ordered_map.cpp
   gtest/ordered_set.cpp
   gtest/parser_unroll.cpp
-  gtest/p4runtime.cpp
   gtest/remove_dontcare_args_test.cpp
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
@@ -58,8 +53,14 @@ set (GTEST_UNITTEST_SOURCES
   gtest/rtti_test.cpp
   gtest/nethash.cpp
   gtest/visitor.cpp
+  gtest/metrics_test.cpp
 )
 
+if (ENABLE_CONTROL_PLANE)
+set (GTEST_UNITTEST_SOURCES ${GTEST_UNITTEST_SOURCES}
+  gtest/p4runtime.cpp
+)
+endif ()
 # Combine the executable and the non-backend-specific unit tests into a single
 # unity compilation group.
 set (GTEST_BASE_SOURCES
@@ -84,7 +85,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
 configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/gtest/env.h)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
-add_dependencies(gtestp4c gtest genIR frontend controlplane)
 
 # The load_ir_from_json test needs this file. Easier to copy to build directory
 # rather than pass absolute path in the case where build/ isn't located in the

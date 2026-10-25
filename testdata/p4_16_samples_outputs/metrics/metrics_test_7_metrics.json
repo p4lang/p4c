@@ -1,0 +1,79 @@
+{
+  "lines_of_code" : 19,
+  "cyclomatic_complexity" : {
+    "c" : 1
+  },
+  "halstead" : {
+    "unique_operators" : 5,
+    "unique_operands" : 8,
+    "total_operators" : 10,
+    "total_operands" : 15,
+    "vocabulary" : 13,
+    "length" : 25,
+    "difficulty" : 4.6875,
+    "volume" : 92.511,
+    "effort" : 433.645,
+    "estimated_bugs" : 0.030837
+  },
+  "unused_code" : {
+    "actions" : 0,
+    "functions" : 0,
+    "states" : 0,
+    "variables" : 0,
+    "enums" : 0,
+    "conditionals" : 0,
+    "parameters" : 0,
+    "returns" : 0
+  },
+  "nesting_depth" : {
+    "average" : 1,
+    "global_max" : 1,
+    "individual_blocks" : {
+      "c" : 1
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 0,
+    "avg_fields_per_header" : 0,
+    "avg_field_size" : 0,
+    "per_header_metrics" : {
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 0,
+    "total_size" : 0,
+    "per_packet" : {
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 0,
+    "total_size" : 0,
+    "per_packet" : {
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 0,
+    "total_keys" : 0,
+    "total_key_size" : 0,
+    "avg_key_size" : 0,
+    "avg_keys_per_table" : 0,
+    "max_keys_per_table" : 0,
+    "total_actions" : 0,
+    "avg_actions_per_table" : 0,
+    "max_actions_per_table" : 0,
+    "per_table_metrics" : {
+    }
+  },
+  "parser" : {
+    "total_states" : 0,
+    "state_complexities" : {
+    }
+  },
+  "extern" : {
+    "functions" : 1,
+    "function_calls" : 2,
+    "structures" : 0,
+    "structure_uses" : 0
+  },
+  "inlined_actions" : 0
+}

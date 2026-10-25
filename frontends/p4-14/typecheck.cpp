@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typecheck.h"
 
@@ -153,7 +142,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             if (!ext && !global) return prop;
             if (!ext && di->type->is<IR::Type_Name>()) return prop;
             BUG_CHECK(ext, "%s is not an extern", di);
-            if (auto attr = ext->attributes[prop->name]) {
+            if (auto attr = ext->attributes.get<IR::Attribute>(prop->name)) {
                 if (attr->type->is<IR::Type::String>())
                     prune();
                 else if (attr->type->is<IR::Type_AnyTable>())
@@ -247,7 +236,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             setType(ref, ht);
-        else if (auto hst = ref->base()->type->to<IR::Type_Stack>())
+        else if (auto hst = ref->base()->type->to<IR::Type_Array>())
             setType(ref, hst->elementType);
         else
             error(ErrorType::ERR_TYPE_ERROR, "%s: %s is not a header", ref->base()->srcInfo,

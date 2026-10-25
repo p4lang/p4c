@@ -55,17 +55,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue995bmv2l76() {
+    @hidden action issue995bmv2l67() {
         hdr.ethernet.etherType = meta.transition_taken;
     }
-    @hidden table tbl_issue995bmv2l76 {
+    @hidden table tbl_issue995bmv2l67 {
         actions = {
-            issue995bmv2l76();
+            issue995bmv2l67();
         }
-        const default_action = issue995bmv2l76();
+        const default_action = issue995bmv2l67();
     }
     apply {
-        tbl_issue995bmv2l76.apply();
+        tbl_issue995bmv2l67.apply();
     }
 }
 

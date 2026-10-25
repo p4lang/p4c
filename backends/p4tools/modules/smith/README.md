@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!--!
 \page p4smith  P4Smith                                                               
 -->
@@ -28,7 +34,6 @@ Refer to the full page here: [P4Smith](https://p4lang.github.io/p4c/p4smith.html
 - [Installation](#installation)
 - [Extensions](#extensions)
 - [Usage](#usage)
-- [Limitations](#limitations)
 - [Further Reading](#further-reading)
 - [Contributing](#contributing)
 - [License](#license)
@@ -65,7 +70,7 @@ The [DPDK-SoftNIC](https://github.com/p4lang/p4-dpdk-target) is a new target imp
 ### tna.p4 on Tofino 1
 [targets/tna](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith/targets/tofino)
 
-P4Smith can also generate programs for the `tna` architecture on Tofino 1. The programs are intended to be compiled on the proprietary Barefoot Tofino compiler.
+P4Smith can also generate programs for the `tna` architecture on Tofino 1. The programs are intended to be compiled on the Tofino compiler.
 
 ## Usage
 To access the possible options for `p4smith` use `p4smith --help`. To generate a test for a particular target and P4 architecture, run the following command:

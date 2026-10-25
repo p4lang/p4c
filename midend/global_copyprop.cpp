@@ -58,10 +58,15 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
 }
 
 // Removes values if they are used as Out/InOut parameter
-void checkParametersForMap(const IR::ParameterList *params,
+void checkParametersForMap(const MethodInstance *mi,
                            std::map<cstring, const IR::Expression *> *vars) {
-    for (auto param : params->parameters)
-        if (param->hasOut()) removeVarsContaining(vars, param->name.name);
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
+        if (param->hasOut()) {
+            auto arg = mi->substitution.lookup(param);
+            if (auto name = GlobalCopyProp::lValueName(arg->expression))
+                removeVarsContaining(vars, name);
+        }
+    }
 }
 
 bool FindVariableValues::preorder(const IR::P4Control *ctrl) {
@@ -172,12 +177,24 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     return false;
 }
 
+// Update the value for the 'stat->left' variable.
+bool FindVariableValues::preorder(const IR::OpAssignmentStatement *stat) {
+    if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
+
+    LOG5("Working on statement: " << stat);
+    // Remove old values
+    if (vars[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+        !(stat->right->equiv(*(vars[GlobalCopyProp::lValueName(stat->left)]))))
+        removeVarsContaining(&vars, GlobalCopyProp::lValueName(stat->left));
+    return false;
+}
+
 // The core idea of this pass is represented here, it works on 'ActionCall' nodes by accessing
 // the body of the action using the pointer acquired by resolving the 'MethodCallExpression'.
 // An entry in the 'actions' map is set for the action node that was acquired by resolving
 // the 'ActionCall'.
 void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
-    if (!working || mc->method->is<IR::Member>()) return;
+    if (!working) return;
 
     LOG5("Working on 'MethodCallexpression': " << mc);
     auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
@@ -193,13 +210,8 @@ void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
         } else {
             LOG6("  Is 'ActionCall'. Entry already exists for this action: " << aCall->action);
         }
-    } else if (auto eFun = mi->to<ExternFunction>()) {
-        LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-        checkParametersForMap(eFun->method->getParameters(), &vars);
-    } else if (auto fCall = mi->to<FunctionCall>()) {
-        LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-        checkParametersForMap(fCall->function->getParameters(), &vars);
     }
+    checkParametersForMap(mi, &vars);
     LOG5("Finished 'MethodCallExpression': " << mc);
 }
 
@@ -259,21 +271,25 @@ const IR::P4Action *DoGlobalCopyPropagation::postorder(IR::P4Action *act) {
     return act;
 }
 
-IR::MethodCallExpression *DoGlobalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
-    if (!performRewrite || mc->method->is<IR::Member>()) return mc;
+IR::MethodCallExpression *DoGlobalCopyPropagation::preorder(IR::MethodCallExpression *mc) {
+    if (!performRewrite) return mc;
 
     auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     LOG5("Working on 'MethodCallExpression' : " << mc);
-    // Remove entries in the 'vars' map for variables that are used as 'Out' or 'InOut' parameters.
-    if (auto eFun = mi->to<ExternFunction>()) {
-        LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-        checkParametersForMap(eFun->method->getParameters(), vars);
-    } else if (auto fCall = mi->to<P4::FunctionCall>()) {
-        LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-        checkParametersForMap(fCall->function->getParameters(), vars);
+    visit(mc->method);
+    visit(mc->typeArguments);
+    auto *args = new IR::Vector<IR::Argument>();
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(param);
+        if (!param->hasOut()) visit(arg);
+        args->push_back(arg);
     }
+    mc->arguments = args;
+    // Copy-out invalidation must follow all copy-in argument visits.
+    checkParametersForMap(mi, vars);
     LOG5("Finished 'MethodCallExpression' : " << mc);
 
+    prune();
     return mc;
 }
 
@@ -312,7 +328,7 @@ class RemoveModifiedValues : public Inspector {
     TypeMap *typeMap;
     std::map<cstring, const IR::Expression *> *vars;
 
-    bool preorder(const IR::AssignmentStatement *stat) override {
+    bool preorder(const IR::BaseAssignmentStatement *stat) override {
         if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
             !(stat->right->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)]))))
             removeVarsContaining(vars, GlobalCopyProp::lValueName(stat->left));
@@ -320,13 +336,7 @@ class RemoveModifiedValues : public Inspector {
     }
     bool preorder(const IR::MethodCallExpression *mc) override {
         auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
-        if (auto eFun = mi->to<ExternFunction>()) {
-            LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-            checkParametersForMap(eFun->method->getParameters(), vars);
-        } else if (auto fCall = mi->to<P4::FunctionCall>()) {
-            LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-            checkParametersForMap(fCall->function->getParameters(), vars);
-        }
+        checkParametersForMap(mi, vars);
         return true;
     }
 
@@ -363,7 +373,7 @@ IR::ForInStatement *DoGlobalCopyPropagation::preorder(IR::ForInStatement *stat) 
 
 // Propagate values for variables on the right side of the statement
 // and update value for 'stat->left' variable if needed.
-const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat) {
+IR::BaseAssignmentStatement *DoGlobalCopyPropagation::preorder(IR::BaseAssignmentStatement *stat) {
     if (!performRewrite) return stat;
 
     LOG5("Working on statement: " << stat);
@@ -378,6 +388,13 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     visit(stat->left);
     performRewrite = true;
     prune();
+    return stat;
+}
+
+IR::Statement *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *assgn) {
+    if (!performRewrite) return assgn;
+    auto *stat = preorder(static_cast<IR::BaseAssignmentStatement *>(assgn));
+
     // Store the value for 'stat->left' if it is now a constant. If it is an assignment to an
     // identical literal as already stored in the 'vars' container the statement is removed.
     if (auto lit = stat->right->to<IR::Literal>()) {

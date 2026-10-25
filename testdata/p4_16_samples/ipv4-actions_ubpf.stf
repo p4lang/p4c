@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add pipe_filter_tbl 0 key.headers_ipv4_srcAddr:0x01020304 pipe_set_ipv4_version(version:0x6)
 add pipe_filter_tbl 0 key.headers_ipv4_srcAddr:0x01020305 pipe_set_ihl(ihl:0x3)
 add pipe_filter_tbl 0 key.headers_ipv4_srcAddr:0x01020306 pipe_set_diffserv(diffserv:0x1)

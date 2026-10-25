@@ -1,16 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # bin_SCRIPTS += p4c
 # CLEANFILES += $(bin_SCRIPTS)
@@ -74,5 +65,6 @@ add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_s
 add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4 ${P4C_DRIVER_PATH})
+add_test(NAME driver_quoting_test COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_quoting_test ${P4C_DRIVER_PATH})
 
 

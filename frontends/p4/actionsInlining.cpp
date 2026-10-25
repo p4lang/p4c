@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "actionsInlining.h"
 
@@ -90,13 +79,14 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     for (const auto *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
+        IR::ID parameterName(newName, param->name.originalName);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            const auto *vardecl = new IR::Declaration_Variable(newName, param->annotations,
-                                                               param->type, argument->expression);
+            const auto *vardecl = new IR::Declaration_Variable(
+                argument->srcInfo, newName, param->annotations, param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            subst.add(param,
+                      new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
@@ -108,10 +98,10 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            const auto *vardecl =
-                new IR::Declaration_Variable(newName, param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            const auto *vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                               param->annotations, param->type);
+            subst.add(param,
+                      new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
             body.push_back(vardecl);
         }
     }
@@ -136,17 +126,22 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::P4::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(left->expression, right);
+            // FIXME: Technically, location should be just after the call
+            auto copyout = new IR::AssignmentStatement(statement->srcInfo, left->expression, right);
             body.push_back(copyout);
         }
     }
 
-    auto annotations = callee->annotations.where([&](const IR::Annotation *a) {
-        return !(a->name == IR::Annotation::nameAnnotation ||
-                 (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
-    });
-    auto result = new IR::BlockStatement(statement->srcInfo,
-                                         {annotations->begin(), annotations->end()}, body);
+    IR::Vector<IR::Annotation> annotations =
+        callee->annotations.where([&](const IR::Annotation *a) {
+            return !(
+                a->name == IR::Annotation::nameAnnotation ||
+                (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
+        });
+    annotations.push_back(new IR::Annotation(statement->srcInfo,
+                                             IR::Annotation::inlinedFromAnnotation,
+                                             {new IR::StringLiteral(callee->name.originalName)}));
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;
 }

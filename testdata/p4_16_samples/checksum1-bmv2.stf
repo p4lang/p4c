@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # The packets in the 'packet' lines below were created using the
 # Python Scapy library.
 #

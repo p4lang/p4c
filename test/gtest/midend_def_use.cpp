@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Intel Corp.
+// SPDX-FileCopyrightText: 2024 Intel Corp.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
 
@@ -34,17 +23,19 @@ using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 class P4CMidendDefUse : public P4CTest {};
 
 /// Run the midend and return the ComputeDefUse object
+#ifdef SUPPORT_P4_14
 P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVersion langVersion =
                                                          CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
-
     auto *program = P4::parseP4String(source, langVersion);
+#else
+P4::ComputeDefUse *computeDefUse(std::string source) {
+    auto *program = P4::parseP4String(source);
+#endif
     CHECK_NULL(program);
     BUG_CHECK(::P4::errorCount() == 0, "Unexpected errors");
 
     auto &options = P4TestContext::get().options();
-    const char *argv = "./gtestp4c";
-    options.process(1, (char *const *)&argv);
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
 
     P4::FrontEnd frontend;
@@ -263,7 +254,7 @@ TEST_F(P4CMidendDefUse, whole_field_1) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program, CompilerOptions::FrontendVersion::P4_16);
+    auto *defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);
@@ -318,7 +309,7 @@ TEST_F(P4CMidendDefUse, whole_field_2) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program, CompilerOptions::FrontendVersion::P4_16);
+    auto *defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);
@@ -392,7 +383,7 @@ TEST_F(P4CMidendDefUse, slice_1) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program, CompilerOptions::FrontendVersion::P4_16);
+    auto *defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
 
@@ -32,7 +36,6 @@ p4tools_add_xfail_reason(
   bmv2_hs1.p4
   control-hs-index-test1.p4
   control-hs-index-test2.p4
-  action_selector_shared-bmv2.p4
 
   # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
   issue2726-bmv2.p4
@@ -44,7 +47,6 @@ p4tools_add_xfail_reason(
   "Exception in thread"
   # The error here is unclear. It looks like a segmentation fault.
   extract_for_header_union.p4
-  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -67,7 +69,6 @@ p4tools_add_xfail_reason(
   # Unexpected error in RPC handling
   issue3374.p4
   control-hs-index-test6.p4
-  parser-unroll-test1.p4
 )
 
 p4tools_add_xfail_reason(
@@ -77,10 +78,21 @@ p4tools_add_xfail_reason(
   v1model-digest-custom-type.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error encountered when cleaning up action profile group"
+)
+
 ####################################################################################################
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "with type .* is not a Constant"
+  issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
@@ -104,8 +116,17 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
   issue4739.p4
   loop-3-clause-tricky2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "nested stack"
+  # testgen has issues with arrays
+  array1.p4
+  array2.p4
 )
 
 ####################################################################################################
@@ -183,14 +204,20 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
+  # P4Testgen reaches this error only if it skips the generic extern argument.
+  "Unknown or unimplemented extern method: observe"
+  generic-extern-instance-argument.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
   issue3225.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "with type Type_Specialized is not a Type_Declaration"
+  "P4Testgen back end only supports a 'V1Switch' main"
   # Pipeline as a parameter of a switch, not a valid v1model program
   issue1304.p4
 )

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 #include <optional>
@@ -34,9 +38,9 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     if (!context.has_value()) {
         return std::nullopt;
     }
-    AutoCompileContext autoContext(context.value());
+    AutoCompileContext autoContext(context.value().get());
     auto *compileContext =
-        dynamic_cast<P4Tools::CompileContext<P4Testgen::TestgenOptions> *>(context.value());
+        dynamic_cast<P4Tools::CompileContext<P4Testgen::TestgenOptions> *>(context.value().get());
     compileContext->options().langVersion = langVersion;
 
     auto compilerResults = P4Tools::CompilerTarget::runCompiler(

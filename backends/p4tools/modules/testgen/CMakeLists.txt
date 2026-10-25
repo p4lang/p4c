@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # CMake file for P4Testgen.
 
 include(common)
@@ -50,11 +54,16 @@ set(
 
   test/gtest_utils.cpp
   test/lib/format_int.cpp
-  test/lib/p4info_api.cpp
+  test/lib/logging.cpp
   test/lib/taint.cpp
+  test/lib/random.cpp
   test/small-step/util.cpp
   test/z3-solver/constraints.cpp
 )
+
+if(ENABLE_CONTROL_PLANE)
+  list(APPEND TESTGEN_GTEST_SOURCES test/lib/p4info_api.cpp)
+endif()
 
 # Inja is needed to produce test templates.
 set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enabled.")
@@ -71,11 +80,16 @@ fetchcontent_makeavailable_but_exclude_install(inja)
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
-  PRIVATE p4tools-control-plane
   # Make sure the testgen library and anything that links to it see both the Inja includes.
   PUBLIC inja
 )
 set(TESTGEN_INCLUDES)
+
+# Only enable Tofino tests if the Tofino backend is enabled.
+# FIXME: Can we make this part of the extension?
+if (NOT ENABLE_TOFINO)
+  set (ENABLE_TOOLS_TARGET_TOFINO OFF)
+endif()
 
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
 foreach(ext ${testgen_targets})
@@ -88,8 +102,15 @@ foreach(ext ${testgen_targets})
     string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " target")
     option(${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
     if(${ENABLE_EXT_OPTION})
-      message("-- Enabling target ${ext}")
+      # Targets may check their own requirements (e.g., the control-plane library) and skip
+      # themselves by setting TESTGEN_TARGET_DISABLED.
+      set(TESTGEN_TARGET_DISABLED OFF)
       add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${ext})
+      if(TESTGEN_TARGET_DISABLED)
+        message("-- Skipping target ${ext}: its requirements are not met.")
+        continue()
+      endif()
+      message("-- Enabling target ${ext}")
       set(include_statements_var "${include_statements_var}#include \"backends/p4tools/modules/testgen/targets/${ext}/register.h\"\n")
       set(testgen_targets_var "${testgen_targets_var}    ${ext}RegisterTestgenTarget();\n")
     endif()
@@ -108,9 +129,8 @@ target_link_libraries(testgen
   ${TESTGEN_LIBS}
   # For Abseil includes.
   PRIVATE frontend
-  # For Protobuf includes.
-  PRIVATE controlplane
 )
+
 if (TESTGEN_INCLUDES)
   target_include_directories(testgen ${TESTGEN_INCLUDES})
 endif()
@@ -148,6 +168,10 @@ if(ENABLE_GTESTS)
     PRIVATE ${P4C_LIBRARIES}
     PRIVATE ${P4C_LIB_DEPS}
   )
+  if(ENABLE_CONTROL_PLANE)
+    # For the P4Info API tests.
+    target_link_libraries(testgen-gtest PRIVATE p4tools-control-plane)
+  endif()
 
   if(ENABLE_TESTING)
     add_test(NAME testgen-gtest COMMAND testgen-gtest)

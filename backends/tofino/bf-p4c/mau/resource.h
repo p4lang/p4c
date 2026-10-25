@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_RESOURCE_H_
-#define BF_P4C_MAU_RESOURCE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_
 
 /* clang-format off */
 
@@ -74,7 +74,7 @@ struct TableResourceAlloc {
         meter_format.clear();
         meter_xbar.reset();
     }
-    void toJSON(P4::JSONGenerator &json) const { json << "null"; }
+    void toJSON(P4::JSONGenerator &json) const { json.emit(nullptr); }
     static TableResourceAlloc *fromJSON(P4::JSONLoader &) { return nullptr; }
 
     void merge_instr(const TableResourceAlloc *);
@@ -90,4 +90,4 @@ std::ostream &operator<<(std::ostream &, const TableResourceAlloc &);
 
 /* clang-format on */
 
-#endif /* BF_P4C_MAU_RESOURCE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_ */

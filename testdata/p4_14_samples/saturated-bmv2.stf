@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Test saturating arithmetic
 # Entries
 add t data.op:0x01 sat_plus()

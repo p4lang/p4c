@@ -1,3 +1,9 @@
+/**
+ * SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 %{
 #define YY_USER_ACTION                                                          \
     { auto tmp = sources->getCurrentPosition();                                 \
@@ -64,6 +70,7 @@ static std::string      comment_block;
 
 "//".*           { yylval.str = cstring(yytext); return COMMENTBLOCK; }
 
+"&&"            { return ANDAND; }
 "::"            { return DBLCOL; }
 "abstract"      { return ABSTRACT; }
 "class"         { return CLASS; }

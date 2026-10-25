@@ -1,0 +1,3 @@
+xor_test.p4(98): [--Wwarn=unused] warning: 'drop' is unused
+    action drop() {
+           ^^^^

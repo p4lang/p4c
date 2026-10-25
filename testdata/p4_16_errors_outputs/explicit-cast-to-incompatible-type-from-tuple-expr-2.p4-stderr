@@ -1,0 +1,20 @@
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(12): [--Wwarn=unused] warning: control 'c' is unused
+control c(inout Headers h) {
+        ^
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(14): [--Werror=type-error] error: '(EthTypes){}'
+    h.eth.type = (EthTypes) { };
+                 ^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(14): Cannot unify type 'tuple<>' with type 'EthTypes'
+      h.eth.type = (EthTypes) { };
+                              ^^^
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(3)
+  enum bit<16> EthTypes {
+               ^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(14): Cannot cast from 'tuple<>' to 'EthTypes'
+      h.eth.type = (EthTypes) { };
+                              ^^^
+explicit-cast-to-incompatible-type-from-tuple-expr-2.p4(3)
+  enum bit<16> EthTypes {
+               ^^^^^^^^

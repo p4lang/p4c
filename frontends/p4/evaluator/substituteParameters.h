@@ -1,23 +1,14 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* -*-C++-*- */
 
-#ifndef EVALUATOR_SUBSTITUTEPARAMETERS_H_
-#define EVALUATOR_SUBSTITUTEPARAMETERS_H_
+#ifndef FRONTENDS_P4_EVALUATOR_SUBSTITUTEPARAMETERS_H_
+#define FRONTENDS_P4_EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
@@ -30,6 +21,10 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor, public Reso
  protected:
     const DeclarationLookup *refMap;     // input
     const ParameterSubstitution *subst;  // input
+
+    /// Use the parameter's location for compiler temporaries or arguments with no source location.
+    bool useParameterSourceInfo(const IR::Expression *replacement) const;
+
  public:
     SubstituteParameters(const DeclarationLookup *refMap, const ParameterSubstitution *subst,
                          const TypeVariableSubstitution *tvs)
@@ -48,4 +43,4 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor, public Reso
 
 }  // namespace P4
 
-#endif /* EVALUATOR_SUBSTITUTEPARAMETERS_H_ */
+#endif /* FRONTENDS_P4_EVALUATOR_SUBSTITUTEPARAMETERS_H_ */

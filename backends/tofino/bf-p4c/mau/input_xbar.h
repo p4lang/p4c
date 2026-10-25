@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_INPUT_XBAR_H_
-#define BF_P4C_MAU_INPUT_XBAR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_INPUT_XBAR_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_INPUT_XBAR_H_
 
 #include <array>
 #include <map>
@@ -28,13 +28,13 @@
 #include "backends/tofino/bf-p4c/common/alloc.h"
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/slice.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/lib/autoclone.h"
 #include "backends/tofino/bf-p4c/lib/dyn_vector.h"
 #include "backends/tofino/bf-p4c/mau/attached_entries.h"
 #include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 #include "lib/hex.h"
 #include "lib/safe_vector.h"
@@ -560,4 +560,4 @@ inline std::ostream &operator<<(std::ostream &out, const IXBar &i) {
     return out;
 }
 
-#endif /* BF_P4C_MAU_INPUT_XBAR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_INPUT_XBAR_H_ */

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This script generates a JSON schema for the BF-RT schema file. It can also
 # validate the BF-RT schema produced by the compiler (from the P4Info message)
 # against the JSON schema.
@@ -35,12 +39,12 @@ Version Notes:
 """
 
 major_version = 1
-medium_version = 5
-minor_version = 1
+minor_version = 5
+patch_version = 1
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(medium_version), str(minor_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################

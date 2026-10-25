@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/expr_stepper.h"
 
 #include "ir/solver.h"
@@ -34,8 +38,6 @@ void PnaDpdkExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
 }
 
 bool PnaDpdkExprStepper::preorder(const IR::P4Table *table) {
-    // Delegate to the tableStepper.
-    PnaDpdkTableStepper tableStepper(this, table);
     return PnaDpdkTableStepper(this, table).eval();
 }
 

@@ -39,14 +39,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         h.eth_hdr.eth_type = tmp;
     }
-    @hidden action gauntlet_mux_validitybmv2l37() {
+    @hidden action gauntlet_mux_validitybmv2l43() {
         b_0 = false;
     }
-    @hidden table tbl_gauntlet_mux_validitybmv2l37 {
+    @hidden table tbl_gauntlet_mux_validitybmv2l43 {
         actions = {
-            gauntlet_mux_validitybmv2l37();
+            gauntlet_mux_validitybmv2l43();
         }
-        const default_action = gauntlet_mux_validitybmv2l37();
+        const default_action = gauntlet_mux_validitybmv2l43();
     }
     @hidden table tbl_dummy {
         actions = {
@@ -55,7 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = dummy_2();
     }
     apply {
-        tbl_gauntlet_mux_validitybmv2l37.apply();
+        tbl_gauntlet_mux_validitybmv2l43.apply();
         tbl_dummy.apply();
     }
 }

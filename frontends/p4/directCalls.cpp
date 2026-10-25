@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2017 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "directCalls.h"
 
 namespace P4 {

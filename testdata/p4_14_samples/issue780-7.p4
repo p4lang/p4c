@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2017 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type exact {
   fields {
     counterrevolution : 32;

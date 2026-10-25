@@ -24,19 +24,10 @@
 #include "lib/bitvec.h"
 #include "backends/tofino/bf-p4c/common/debug_info.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot.h"
 #include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/lib/error_macros.h"
-
-struct StageUse {
-    static constexpr int MAX_LOGICAL_IDS = 16;
-    static constexpr int MAX_SRAMS = 80;
-    static constexpr int MAX_TCAMS = 24;
-    static constexpr int MAX_MAPRAMS = 48;
-    static constexpr int MAX_IXBAR_BYTES = 128;
-    static constexpr int MAX_TERNARY_GROUPS = 12;
-};
 
 /**
  * @namespace IR::BFN
@@ -95,19 +86,6 @@ class BFN::Pipe {
             return parsers == a.parsers && mau == a.mau && deparser == a.deparser &&
                 hw_constrained_fields == a.hw_constrained_fields;
         }
-        toJSON {
-            json << json.indent << "\"parser\" : " << parsers << "," << std::endl
-                 << json.indent << "\"mau\" : " << mau << "," << std::endl
-                 << json.indent << "\"deparser\" : " << deparser << std::endl
-                 << json.indent << "\"hw_constrained_fields\" : " <<  hw_constrained_fields; }
-        fromJSON {
-            IR::BFN::Pipe::thread_t * thread = new IR::BFN::Pipe::thread_t();
-            json.load("parsers", thread->parsers);
-            json.load("mau", thread->mau);
-            json.load("deparser", thread->deparser);
-            json.load("hw_constrained_fields", thread->hw_constrained_fields);
-            return thread;
-        }
     }
     thread_t[2] thread = {};
 
@@ -160,7 +138,7 @@ class BFN::Pipe {
                 v.visit(ghost_thread.ghost_parser, "ghost_parser");
                 v.visit(ghost_thread.ghost_mau, "ghost_mau");
             } else {
-                thread[th->thread].parsers.parallel_visit_children(v);
+                thread[th->thread].parsers.parallel_visit_children(v, n);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
                 v.visit(thread[th->thread].mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
@@ -171,7 +149,7 @@ class BFN::Pipe {
             // FIXME -- doesn't do flow_clone/merge properly, but fixing will
             // break ParserGraph (at least) as it doesn't do merge properly
             for (auto &th : thread) {
-                th.parsers.parallel_visit_children(v);
+                th.parsers.parallel_visit_children(v, n);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
                 v.visit(th.mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
@@ -196,13 +174,13 @@ class BFN::BridgePath : BFN::Pipe {
     visit_children {
         // does not have support for ghost thread yet.
         for (auto &th : threads.at(INGRESS)) {
-            th.parsers.parallel_visit_children(v);
+            th.parsers.parallel_visit_children(v, n);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
             v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
             v.visit(th.deparser, "deparser"); }
         for (auto &th : threads.at(EGRESS)) {
-            th.parsers.parallel_visit_children(v);
+            th.parsers.parallel_visit_children(v, n);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
             v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
@@ -231,7 +209,7 @@ class BFN::Toplevel {
 
 #apply
     visit_children {
-        v.visit(pipes);
+        v.visit(pipes, n);
     }
 }
 
@@ -398,16 +376,19 @@ class BFN::ContainerRef : BFN::Reference {
     static size_t nextId;
 #end
 
-    PHV::Container container;
+    PHV::SerializableContainer container;
 
     std::optional<nw_bitrange> range;
 
     size_t id;
 
 #noconstructor
-    ContainerRef(PHV::Container c) : BFN::Reference(), container(c), id(nextId++) { }
-    ContainerRef(Util::SourceInfo si, PHV::Container c) :
+    ContainerRef(PHV::SerializableContainer c) : BFN::Reference(), container(c), id(nextId++) { }
+    ContainerRef(PHV::Container c) : BFN::Reference(), container(PHV::SerializableContainer(c)), id(nextId++) { }
+    ContainerRef(Util::SourceInfo si, PHV::SerializableContainer c) :
         BFN::Reference(si), container(c), id(nextId++) { }
+    ContainerRef(Util::SourceInfo si, PHV::Container c) :
+        BFN::Reference(si), container(PHV::SerializableContainer(c)), id(nextId++) { }
 
     validate {
         BUG_CHECK(bool(container), "Invalid PHV container in ContainerRef");
@@ -467,7 +448,7 @@ class BFN::AliasMember : IR::Member {
     }
 
     visit_children {
-        IR::Member::visit_children(v);
+        IR::Member::visit_children(v, n);
     }
 
 #noequiv
@@ -504,7 +485,7 @@ class BFN::AliasSlice : IR::Slice {
     }
 
     visit_children {
-        IR::Slice::visit_children(v);
+        IR::Slice::visit_children(v, n);
     }
 
 #emit

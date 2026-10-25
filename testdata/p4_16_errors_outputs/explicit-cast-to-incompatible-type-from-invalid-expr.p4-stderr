@@ -1,0 +1,36 @@
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c(inout bit<8> a)() {
+        ^
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(9): [--Werror=type-error] error: '{ x = Invalid, y = 0 }'
+    a = (S2<int<6>>) { x = {#}, y = 0 };
+                     ^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot unify type 'Unknown type' with type 'int<6>'
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(4): Type of initializer 'Unknown type' does not match type 'int<6>' of field 'x' in 'struct S2'
+    T x;
+      ^
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(3)
+  struct S2<T> {
+         ^^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(9): Initializer type 'unknown struct' does not match expected type 'struct S2'
+      a = (S2<int<6>>) { x = {#}, y = 0 };
+                       ^^^^^^^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(3)
+  struct S2<T> {
+         ^^
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(9): [--Werror=type-error] error: 'a = { x = Invalid, y = 0 }'
+    a = (S2<int<6>>) { x = {#}, y = 0 };
+      ^
+  ---- Actual error:
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(3): Cannot cast implicitly type 'struct S2' to type 'bit<8>'
+  struct S2<T> {
+         ^^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(9): Source expression '{ x = Invalid, y = 0 }' produces a result of type 'struct S2' which cannot be assigned to a left-value with type 'bit<8>'
+      a = (S2<int<6>>) { x = {#}, y = 0 };
+                       ^^^^^^^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-invalid-expr.p4(3)
+  struct S2<T> {
+         ^^

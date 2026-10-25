@@ -23,18 +23,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_arithref_castbmv2l30() {
+    @hidden action gauntlet_arithref_castbmv2l36() {
         h.eth_hdr.eth_type = (bit<16>)(h.eth_hdr.dst_addr << 8w2);
     }
-    @hidden table tbl_gauntlet_arithref_castbmv2l30 {
+    @hidden table tbl_gauntlet_arithref_castbmv2l36 {
         actions = {
-            gauntlet_arithref_castbmv2l30();
+            gauntlet_arithref_castbmv2l36();
         }
-        const default_action = gauntlet_arithref_castbmv2l30();
+        const default_action = gauntlet_arithref_castbmv2l36();
     }
     apply {
         if (h.eth_hdr.src_addr < 48w10) {
-            tbl_gauntlet_arithref_castbmv2l30.apply();
+            tbl_gauntlet_arithref_castbmv2l36.apply();
         }
     }
 }

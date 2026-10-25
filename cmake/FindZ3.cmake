@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 find_package(PkgConfig)
 pkg_check_modules(PC_Z3 QUIET Z3)
 

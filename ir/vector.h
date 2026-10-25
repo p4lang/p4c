@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_VECTOR_H_
 #define IR_VECTOR_H_
@@ -67,16 +58,18 @@ class Vector : public VectorBase {
     explicit Vector(JSONLoader &json);
     Vector &operator=(const Vector &) = default;
     Vector &operator=(Vector &&) = default;
-    explicit Vector(const T *a) { vec.emplace_back(std::move(a)); }
+    explicit Vector(const T *a) { vec.emplace_back(a); }
     explicit Vector(const safe_vector<const T *> &a) { vec.insert(vec.end(), a.begin(), a.end()); }
     Vector(std::initializer_list<const T *> a) : vec(a) {}
     template <class InputIt>
     Vector(InputIt first, InputIt last) : vec(first, last) {}
-    Vector(Util::Enumerator<const T *> *e)  // NOLINT(runtime/explicit)
-        : vec(e->begin(), e->end()) {}
-    static Vector<T> *fromJSON(JSONLoader &json);
-    typedef typename safe_vector<const T *>::iterator iterator;
-    typedef typename safe_vector<const T *>::const_iterator const_iterator;
+    Vector(Util::EnumeratorPtr<const T *> e)  // NOLINT(runtime/explicit)
+        : vec(Util::begin(e), Util::end(e)) {}
+    static Node *fromJSON(JSONLoader &json);
+
+    using iterator = typename safe_vector<const T *>::iterator;
+    using const_iterator = typename safe_vector<const T *>::const_iterator;
+
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
     VectorBase::iterator VectorBase_begin() const override {
@@ -103,11 +96,7 @@ class Vector : public VectorBase {
     iterator erase(iterator s, iterator e) { return vec.erase(s, e); }
     template <typename ForwardIter>
     iterator insert(iterator i, ForwardIter b, ForwardIter e) {
-        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
-         * FIXME -- rather than an iterator.  So we recalculate it from an index */
-        int index = i - vec.begin();
-        vec.insert(i, b, e);
-        return vec.begin() + index;
+        return vec.insert(i, b, e);
     }
 
     template <typename Container>
@@ -135,20 +124,8 @@ class Vector : public VectorBase {
         push_back(item->to<T>());
     }
 
-    iterator insert(iterator i, const T *v) {
-        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
-         * FIXME -- rather than an iterator.  So we recalculate it from an index */
-        int index = i - vec.begin();
-        vec.insert(i, v);
-        return vec.begin() + index;
-    }
-    iterator insert(iterator i, size_t n, const T *v) {
-        /* FIXME -- GCC prior to 4.9 is broken and the insert routine returns void
-         * FIXME -- rather than an iterator.  So we recalculate it from an index */
-        int index = i - vec.begin();
-        vec.insert(i, n, v);
-        return vec.begin() + index;
-    }
+    iterator insert(iterator i, const T *v) { return vec.insert(i, v); }
+    iterator insert(iterator i, size_t n, const T *v) { return vec.insert(i, n, v); }
 
     const T *const &operator[](size_t idx) const { return vec[idx]; }
     const T *&operator[](size_t idx) { return vec[idx]; }
@@ -201,14 +178,14 @@ class Vector : public VectorBase {
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }
-    void visit_children(Visitor &v) override;
-    void visit_children(Visitor &v) const override;
-    virtual void parallel_visit_children(Visitor &v);
-    virtual void parallel_visit_children(Visitor &v) const;
+    void visit_children(Visitor &v, const char *name) override;
+    void visit_children(Visitor &v, const char *name) const override;
+    virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
+    virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;
-    Util::Enumerator<const T *> *getEnumerator() const { return Util::enumerate(vec); }
+    Util::EnumeratorPtr<const T *> getEnumerator() const { return Util::enumerate(vec); }
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::EnumeratorPtr<const S *> only() const {
         return getEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }
@@ -228,16 +205,6 @@ class Vector : public VectorBase {
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
-}  // namespace P4::IR
-
-// XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
-// 4.8 has a bug which causes these overloads to be considered when get() is
-// called on a type in the global namespace, even if the number of arguments
-// doesn't match up, which can trigger template instantiations that cause
-// errors.
-namespace P4 {
-namespace GetImpl {
-
 template <class T, class U>
 const T *get(const IR::Vector<T> &vec, U name) {
     for (auto el : vec)
@@ -252,9 +219,6 @@ const T *get(const IR::Vector<T> *vec, U name) {
     return nullptr;
 }
 
-}  // namespace GetImpl
-using namespace GetImpl;  // NOLINT(build/namespaces)
-
-}  // namespace P4
+}  // namespace P4::IR
 
 #endif /* IR_VECTOR_H_ */

@@ -1,18 +1,9 @@
 /*
-Copyright 2020 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2020 Intel Corp.
+ * SPDX-FileCopyrightText: 2020 Intel Corp.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_DPDK_DPDKARCH_H_
 #define BACKENDS_DPDK_DPDKARCH_H_
@@ -410,8 +401,7 @@ class LogicalExpressionUnroll : public Inspector {
     IR::Expression *root;
     static bool is_logical(const IR::Operation_Binary *bin) {
         if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() || bin->is<IR::Equ>() ||
-            bin->is<IR::Neq>() || bin->is<IR::Grt>() || bin->is<IR::Lss>() || bin->is<IR::Geq>() ||
-            bin->is<IR::Leq>())
+            bin->is<IR::Neq>() || bin->is<IR::Grt>() || bin->is<IR::Lss>() || bin->is<IR::Geq>())
             return true;
         else
             return false;
@@ -722,7 +712,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
             auto sub = new IR::LOr(lor2->right, lor->right);
             return new IR::LOr(lor2->left, sub);
         } else if (!lor->left->is<IR::LAnd>() && !lor->left->is<IR::Equ>() &&
-                   !lor->left->is<IR::Neq>() && !lor->left->is<IR::Lss>() &&
+                   !lor->left->is<IR::Neq>() && !lor->left->is<IR::Leq>() &&
+                   !lor->left->is<IR::Geq>() && !lor->left->is<IR::Lss>() &&
                    !lor->left->is<IR::Grt>() && !lor->left->is<IR::MethodCallExpression>() &&
                    !lor->left->is<IR::PathExpression>() && !lor->left->is<IR::Member>()) {
             BUG("Logical Expression Unroll pass failed");

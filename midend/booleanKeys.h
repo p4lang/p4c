@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef MIDEND_BOOLEANKEYS_H_
 #define MIDEND_BOOLEANKEYS_H_
 

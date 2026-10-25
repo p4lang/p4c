@@ -16,16 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_ASM_OUTPUT_H_
-#define BF_P4C_PHV_ASM_OUTPUT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ASM_OUTPUT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ASM_OUTPUT_H_
 
 #include <iosfwd>
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/ordered_set.h"
 
 class PhvAsmOutput {
@@ -81,4 +81,4 @@ class PhvAsmOutput {
                           bool have_ghost = false);
 };
 
-#endif /* BF_P4C_PHV_ASM_OUTPUT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_ASM_OUTPUT_H_ */

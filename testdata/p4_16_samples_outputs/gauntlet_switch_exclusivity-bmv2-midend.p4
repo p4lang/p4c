@@ -40,19 +40,19 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_switch_exclusivitybmv2l39() {
+    @hidden action gauntlet_switch_exclusivitybmv2l45() {
         h.eth_hdr.src_addr = 48w20;
     }
-    @hidden table tbl_gauntlet_switch_exclusivitybmv2l39 {
+    @hidden table tbl_gauntlet_switch_exclusivitybmv2l45 {
         actions = {
-            gauntlet_switch_exclusivitybmv2l39();
+            gauntlet_switch_exclusivitybmv2l45();
         }
-        const default_action = gauntlet_switch_exclusivitybmv2l39();
+        const default_action = gauntlet_switch_exclusivitybmv2l45();
     }
     apply {
         switch (simple_table_0.apply().action_run) {
             action_0: {
-                tbl_gauntlet_switch_exclusivitybmv2l39.apply();
+                tbl_gauntlet_switch_exclusivitybmv2l45.apply();
             }
             action_1: {
             }

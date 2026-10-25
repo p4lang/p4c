@@ -34,10 +34,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_3") bit<48> tmp_3;
     @name("ingress.tmp_4") bit<16> tmp_4;
     @name("ingress.retval") bit<48> retval;
+    @name("ingress.inlinedRetval") bit<48> inlinedRetval_1;
     apply {
         tmp_1 = h.eth_hdr.dst_addr;
         retval = 48w2;
-        tmp_3 = retval;
+        inlinedRetval_1 = retval;
+        tmp_3 = inlinedRetval_1;
         tmp_2 = tmp_3;
         tmp_4 = 16w1;
         tmp_0.setValid();

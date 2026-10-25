@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2013-present Barefoot Networks, Inc.
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "local_copyprop.h"
 
@@ -31,7 +20,9 @@ using namespace literals;
 /* helper function to get the 'outermost' containing expression in an lvalue */
 static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
+#ifdef SUPPORT_P4_14
     if (auto hsr = exp->to<IR::HeaderStackItemRef>()) return lvalue_out(hsr->base());
+#endif
     if (auto sl = exp->to<IR::AbstractSlice>()) return lvalue_out(sl->e0);
     if (auto mem = exp->to<IR::Member>()) return lvalue_out(mem->expr);
     return exp;
@@ -80,7 +71,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return var;
     }
-    const IR::Statement *postorder(IR::AssignmentStatement *as) override {
+    const IR::Statement *postorder(IR::BaseAssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
             if (auto var = ::P4::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
@@ -136,6 +127,16 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             return nullptr;
         }
         return act;
+    }
+    IR::ForStatement *postorder(IR::ForStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForStatement>()->body->srcInfo);
+        return fstmt;
+    }
+    IR::ForInStatement *postorder(IR::ForInStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForInStatement>()->body->srcInfo);
+        return fstmt;
     }
 
  public:
@@ -342,7 +343,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
     }
     if (auto var = ::P4::getref(available, name)) {
         if (var->val) {
-            if (policy(getChildContext(), var->val)) {
+            if (policy(getChildContext(), var->val, this)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
                 CopySrcInfo copy(srcInfo);
                 return var->val->apply(copy);
@@ -389,7 +390,7 @@ IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
     return s;
 }
 
-IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
+const IR::Node *DoLocalCopyPropagation::preorder(IR::BaseAssignmentStatement *as) {
     visitAgain();
     if (!working) return as;
     // visit the source subtree first, before the destination subtree
@@ -402,7 +403,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     visit(as->right, "right", 1);
     visit(as->left, "left", 0);
     prune();
-    return postorder(as);
+    return as->apply_visitor_postorder(*this);
 }
 
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
@@ -443,7 +444,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     return as;
 }
 
-void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
+void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::BaseAssignmentStatement *as) {
     if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
 }
 
@@ -472,10 +473,12 @@ IR::ForStatement *DoLocalCopyPropagation::preorder(IR::ForStatement *s) {
     s->apply(LoopPrepass(*this), getContext());
     ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
     visit(s->condition, "condition");
+    auto &after_cond = flow_clone();
     visit(s->body, "body");
     flow_merge_global_from("-CONTINUE-"_cs);
     visit(s->updates, "updates");
     flow_merge_global_from("-BREAK-"_cs);
+    flow_merge(after_cond);
     prune();
     return s;
 }
@@ -561,7 +564,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     if (inferForFunc) inferForFunc->writes.insert(obj);
                 }
                 return mc;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 dropValuesUsing(obj);
@@ -643,12 +646,13 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                 }
             } else if (mem->expr->type->is<IR::Type_Header>() ||
                        mem->expr->type->is<IR::Type_HeaderUnion>()) {
+                if (mem->member == "isValid") return;
                 BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
                           "Unexpected header method %s", mem->member);
                 LOG3("loop prepass header method call " << mc->method << " writes to " << obj);
                 self.dropValuesUsing(obj);
                 return;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 self.dropValuesUsing(obj);
@@ -811,7 +815,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;
@@ -837,7 +841,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;

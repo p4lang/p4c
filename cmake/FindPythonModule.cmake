@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 function(find_python_module module)
   string(TOUPPER ${module} module_upper)
   if(NOT PY_${module_upper})

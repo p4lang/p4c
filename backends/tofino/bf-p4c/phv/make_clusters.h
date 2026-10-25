@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_MAKE_CLUSTERS_H_
-#define BF_P4C_PHV_MAKE_CLUSTERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
@@ -30,11 +30,11 @@
 #include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
 #include "backends/tofino/bf-p4c/phv/alloc_setting.h"
 #include "backends/tofino/bf-p4c/phv/analysis/pack_conflicts.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_byte_pack.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/map.h"
@@ -555,4 +555,4 @@ class Clustering : public PassManager {
     }
 };
 
-#endif /* BF_P4C_PHV_MAKE_CLUSTERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_ */

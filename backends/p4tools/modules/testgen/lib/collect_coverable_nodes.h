@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
 
@@ -34,7 +40,7 @@ class CoverableNodesScanner : public Inspector {
 
     /// Statement coverage.
     bool preorder(const IR::ParserState *parserState) override;
-    bool preorder(const IR::AssignmentStatement *stmt) override;
+    bool preorder(const IR::BaseAssignmentStatement *stmt) override;
     bool preorder(const IR::MethodCallStatement *stmt) override;
     bool preorder(const IR::ExitStatement *stmt) override;
     bool preorder(const IR::MethodCallExpression *call) override;

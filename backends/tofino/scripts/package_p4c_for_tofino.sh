@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 set -e
 
 topdir=$(readlink -f $(dirname $0)/..)
@@ -14,7 +18,7 @@ else
 fi
 
 install_prefix=/usr/local
-barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF"
+barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF -DENABLE_DUMP_PIPE=OFF"
 enable_cb="-DENABLE_CLOUDBREAK=OFF"
 enable_fr="-DENABLE_FLATROCK=OFF"
 pgo=false

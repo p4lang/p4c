@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 action NoAction() {}
 action a() {}
 action b() {}
@@ -10,7 +16,6 @@ control c()
   apply {
    switch(t.apply().action_run) {
       1: {} // { dg-error "" }
-      a: {}
       a: {}
       default: {}
     }

@@ -82,39 +82,39 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnaelimhdrcopydpdk139() {
+    @hidden action pnaelimhdrcopydpdk130() {
         tmpDir_0 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnaelimhdrcopydpdk141() {
+    @hidden action pnaelimhdrcopydpdk132() {
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
-    @hidden action pnaelimhdrcopydpdk114() {
+    @hidden action pnaelimhdrcopydpdk105() {
         eth_0.setInvalid();
     }
-    @hidden table tbl_pnaelimhdrcopydpdk114 {
+    @hidden table tbl_pnaelimhdrcopydpdk105 {
         actions = {
-            pnaelimhdrcopydpdk114();
+            pnaelimhdrcopydpdk105();
         }
-        const default_action = pnaelimhdrcopydpdk114();
+        const default_action = pnaelimhdrcopydpdk105();
     }
-    @hidden table tbl_pnaelimhdrcopydpdk139 {
+    @hidden table tbl_pnaelimhdrcopydpdk130 {
         actions = {
-            pnaelimhdrcopydpdk139();
+            pnaelimhdrcopydpdk130();
         }
-        const default_action = pnaelimhdrcopydpdk139();
+        const default_action = pnaelimhdrcopydpdk130();
     }
-    @hidden table tbl_pnaelimhdrcopydpdk141 {
+    @hidden table tbl_pnaelimhdrcopydpdk132 {
         actions = {
-            pnaelimhdrcopydpdk141();
+            pnaelimhdrcopydpdk132();
         }
-        const default_action = pnaelimhdrcopydpdk141();
+        const default_action = pnaelimhdrcopydpdk132();
     }
     apply {
-        tbl_pnaelimhdrcopydpdk114.apply();
+        tbl_pnaelimhdrcopydpdk105.apply();
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnaelimhdrcopydpdk139.apply();
+            tbl_pnaelimhdrcopydpdk130.apply();
         } else {
-            tbl_pnaelimhdrcopydpdk141.apply();
+            tbl_pnaelimhdrcopydpdk132.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
@@ -123,18 +123,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaelimhdrcopydpdk156() {
+    @hidden action pnaelimhdrcopydpdk147() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaelimhdrcopydpdk156 {
+    @hidden table tbl_pnaelimhdrcopydpdk147 {
         actions = {
-            pnaelimhdrcopydpdk156();
+            pnaelimhdrcopydpdk147();
         }
-        const default_action = pnaelimhdrcopydpdk156();
+        const default_action = pnaelimhdrcopydpdk147();
     }
     apply {
-        tbl_pnaelimhdrcopydpdk156.apply();
+        tbl_pnaelimhdrcopydpdk147.apply();
     }
 }
 

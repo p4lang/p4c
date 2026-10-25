@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TABLE_MUTEX_H_
-#define BF_P4C_MAU_TABLE_MUTEX_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_MUTEX_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_MUTEX_H_
 
 #include <map>
 
@@ -198,4 +198,4 @@ class SharedIndirectAttachedAnalysis : public MauInspector {
                                             const ActionMutuallyExclusive &a, LayoutChoices &lc)
         : mutex(m), ignore(i), action_mutex(a), lc(lc) {}
 };
-#endif /* BF_P4C_MAU_TABLE_MUTEX_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_MUTEX_H_ */

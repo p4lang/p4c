@@ -1,0 +1,7 @@
+name-duplicate-type-parameter-names-2.p4(3): [--Werror=duplicate] error: T: Duplicates declaration T
+struct S<T, T
+            ^
+name-duplicate-type-parameter-names-2.p4(3)
+struct S<T, T
+         ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

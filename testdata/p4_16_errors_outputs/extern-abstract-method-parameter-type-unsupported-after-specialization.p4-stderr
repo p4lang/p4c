@@ -1,0 +1,21 @@
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(7): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress()() {
+        ^^^^^^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(8): [--Wwarn=unused] warning: 'read' is unused
+  StackAction<bit<16>, string>() read = {};
+                                 ^^^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(5): [--Werror=type-error] error: rv: a parameter with type string cannot have a direction
+  abstract void underflow(inout T value, out U rv);
+                                               ^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(8)
+  StackAction<bit<16>, string>() read = {};
+                       ^^^^^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(8): [--Werror=type-error] error: Error while analyzing StackAction<...>
+  StackAction<bit<16>, string>() read = {};
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(8): [--Werror=type-error] error: read: underflow abstract method not implemented
+  StackAction<bit<16>, string>() read = {};
+                                 ^^^^
+extern-abstract-method-parameter-type-unsupported-after-specialization.p4(5)
+  abstract void underflow(inout T value, out U rv);
+                ^^^^^^^^^

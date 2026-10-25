@@ -1,18 +1,7 @@
-/*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2016 VMware, Inc.
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "simplifyDefUse.h"
 
@@ -57,7 +46,7 @@ class HasUses {
             if (!isActive()) return false;
             if (previous.isBeforeStart()) return false;
             auto last = previous.last();
-            if (auto *assign_stmt = last->to<IR::AssignmentStatement>()) {
+            if (auto *assign_stmt = last->to<IR::BaseAssignmentStatement>()) {
                 if (auto *slice_stmt = assign_stmt->left->to<IR::Slice>()) {
                     // two slice stmts writing to same location
                     // skip use of previous if it gets overwritten
@@ -144,9 +133,9 @@ class HeaderDefinitions : public IHasDbPrint {
             for (auto bs : base_storage) {
                 if (auto struct_storage = bs->to<StructLocation>()) {
                     struct_storage->addField(expr->member, &result);
-                } else if (bs->is<ArrayLocation>() && (expr->member == IR::Type_Stack::next ||
-                                                       expr->member == IR::Type_Stack::last ||
-                                                       expr->member == IR::Type_Stack::lastIndex)) {
+                } else if (bs->is<ArrayLocation>() && (expr->member == IR::Type_Array::next ||
+                                                       expr->member == IR::Type_Array::last ||
+                                                       expr->member == IR::Type_Array::lastIndex)) {
                     auto array_storage = bs->to<ArrayLocation>();
                     for (auto element : *array_storage) result.add(element);
                 }
@@ -198,9 +187,9 @@ class HeaderDefinitions : public IHasDbPrint {
         auto member = expr->to<IR::Member>();
         auto base = member ? member->expr : nullptr;
 
-        if (member && base && typeMap->getType(base, true)->is<IR::Type_Stack>() &&
-            (member->member == IR::Type_Stack::next || member->member == IR::Type_Stack::last ||
-             member->member == IR::Type_Stack::lastIndex)) {
+        if (member && base && typeMap->getType(base, true)->is<IR::Type_Array>() &&
+            (member->member == IR::Type_Array::next || member->member == IR::Type_Array::last ||
+             member->member == IR::Type_Array::lastIndex)) {
             return true;
         }
 
@@ -440,6 +429,22 @@ class FindUninitialized : public Inspector {
             }
     }
 
+    // Local headers start invalid, including temporaries created after ResetHeaders.
+    void initHeaderLocal(const IR::Declaration_Variable *variable) {
+        if (auto storage = definitions->getStorage(variable))
+            headerDefs->setValueToStorage(storage, TernaryBool::No);
+    }
+
+    void initHeaderLocals(const IR::IndexedVector<IR::Declaration> &locals) {
+        for (auto local : locals)
+            if (auto variable = local->to<IR::Declaration_Variable>()) initHeaderLocal(variable);
+    }
+
+    bool preorder(const IR::Declaration_Variable *variable) override {
+        initHeaderLocal(variable);
+        return false;
+    }
+
     void checkOutParameters(const IR::IDeclaration *block, const IR::ParameterList *parameters,
                             Definitions *defs) {
         LOG2("Checking output parameters of " << block << "; definitions are " << IndentCtl::endl
@@ -471,6 +476,7 @@ class FindUninitialized : public Inspector {
         currentPoint.assign(control);
         headerDefs->clear();
         initHeaderParams(control->getApplyMethodType()->parameters);
+        initHeaderLocals(control->controlLocals);
         visitVirtualMethods(control->controlLocals);
         unreachable = false;
         visit(control->body);
@@ -542,6 +548,7 @@ class FindUninitialized : public Inspector {
         currentPoint.assign(parser);
         headerDefs->clear();
         initHeaderParams(parser->getApplyMethodType()->parameters);
+        initHeaderLocals(parser->parserLocals);
         visitVirtualMethods(parser->parserLocals);
         unreachable = false;
 
@@ -743,12 +750,16 @@ class FindUninitialized : public Inspector {
             return;
         }
 
-        if (auto st = dst_type->to<IR::Type_Stack>()) {
-            if (src->is<IR::MethodCallExpression>()) {
+        if (auto st = dst_type->to<IR::Type_Array>()) {
+            if (!st->elementType->is<IR::Type_Header>() &&
+                !st->elementType->is<IR::Type_HeaderUnion>()) {
+                // Generalized arrays means we can have array of any type, and we only
+                // care about arrays of headers or header_unions here
+            } else if (src->is<IR::MethodCallExpression>()) {
                 for (const auto *storage : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                 }
-            } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
+            } else if (auto stack_exp = src->to<IR::ArrayExpression>()) {
                 for (size_t index = 0; index < st->getSize(); index++) {
                     auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant((uint64_t)index));
                     auto source = stack_exp->components.at(index);
@@ -756,7 +767,7 @@ class FindUninitialized : public Inspector {
                     typeMap->setType(dst_elem, st->elementType);
                     processHeadersInAssignment(dst_elem, source, st->elementType, src_type);
                 }
-            } else if (src_type->is<IR::Type_Stack>()) {
+            } else if (src_type->is<IR::Type_Array>()) {
                 auto dst_locations = headerDefs->getStorageLocation(dst);
                 auto src_locations = headerDefs->getStorageLocation(src);
 
@@ -771,8 +782,8 @@ class FindUninitialized : public Inspector {
                         for (auto dst_element : *dst_array_storage) {
                             auto dst_header_union = dst_element->to<StructLocation>();
                             auto src_header_union = (*it)->to<StructLocation>();
-                            if (dst_header_union->isHeaderUnion() &&
-                                src_header_union->isHeaderUnion()) {
+                            if (dst_header_union && dst_header_union->isHeaderUnion() &&
+                                src_header_union && src_header_union->isHeaderUnion()) {
                                 auto field_it = src_header_union->fields().begin();
                                 for (auto field : dst_header_union->fields()) {
                                     headerDefs->update(field, headerDefs->find(*field_it));
@@ -790,10 +801,11 @@ class FindUninitialized : public Inspector {
         }
     }
 
-    bool preorder(const IR::AssignmentStatement *statement) override {
+    bool preorder(const IR::BaseAssignmentStatement *statement) override {
         Log::TempIndent indent;
         LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
         if (!unreachable) {
+            if (statement->is<IR::OpAssignmentStatement>()) visit(statement->left);
             lhs = true;
             visit(statement->left);
             checkHeaderFieldWrite(statement->left, statement->left);
@@ -994,6 +1006,43 @@ class FindUninitialized : public Inspector {
         return true;
     }
 
+    // For whole-header copies, ignore uninitialized fields on control-flow
+    // paths where the source header is invalid: the destination stays invalid.
+    // On paths where the source is valid, its fields must be initialized;
+    // setValid() alone does not initialize them.
+    // Check field definitions at validity updates, before control-flow joins
+    // lose the relationship between validity and field initialization.
+    bool hasUninitializedFields(const StorageLocation *storage, const Definitions *defs) {
+        if (!defs->getPoints(LocationSet(storage))->containsBeforeStart()) return false;
+        if (auto structure = storage->to<StructLocation>()) {
+            if (structure->isHeader()) {
+                if (headerDefs->find(storage) == TernaryBool::No) return false;
+                auto validPoints = defs->getPoints(storage->getValidBits());
+                for (const auto &point : *validPoints) {
+                    if (point.isBeforeStart()) return true;
+                    if (auto call = point.last()->to<IR::MethodCallStatement>()) {
+                        auto method = MethodInstance::resolve(call, refMap, typeMap);
+                        if (auto builtin = method->to<BuiltInMethod>())
+                            if (builtin->name == IR::Type_Header::setInvalid) continue;
+                    }
+                    auto validDefs = definitions->getDefinitions(point);
+                    if (validDefs->getPoints(LocationSet(storage))->containsBeforeStart())
+                        return true;
+                }
+                return false;
+            }
+            for (auto field : structure->fields())
+                if (hasUninitializedFields(field, defs)) return true;
+            return false;
+        }
+        if (auto array = storage->to<ArrayLocation>()) {
+            for (auto element : *array)
+                if (hasUninitializedFields(element, defs)) return true;
+            return false;
+        }
+        return true;
+    }
+
     // Keeps track of which expression producers have uses in the given expression
     void registerUses(const IR::Expression *expression, bool reportUninitialized = true) {
         LOG3("FU Registering uses for '" << expression << "'");
@@ -1017,17 +1066,24 @@ class FindUninitialized : public Inspector {
 
         auto points = currentDefinitions->getPoints(*read);
 
-        if (reportUninitialized && !lhs && points->containsBeforeStart() &&
+        // Copying a whole invalid header leaves the destination invalid. Its fields need not
+        // be initialized, including when copying back an unwritten out header parameter.
+        // Still register its uses below, and still diagnose explicit reads of its fields.
+        auto type = typeMap->getType(expression, true);
+        bool invalidHeader =
+            type->is<IR::Type_Header>() && headerDefs->find(expression) == TernaryBool::No;
+        if (reportUninitialized && !lhs && !invalidHeader && points->containsBeforeStart() &&
             hasUninitializedHeaderUnion(expression, currentDefinitions, read)) {
             // Do not report uninitialized values on the LHS.
             // This could happen if we are writing to an array element
             // with an unknown index.
-            auto type = typeMap->getType(expression, true);
             if (auto structType = type->to<IR::Type_StructLike>()) {
                 for (auto field : structType->fields) {
                     auto fieldLoc = read->getField(field->name);
-                    auto fieldPoints = currentDefinitions->getPoints(*fieldLoc);
-                    if (fieldPoints->containsBeforeStart()) {
+                    bool uninitialized = false;
+                    for (auto storage : *fieldLoc)
+                        uninitialized |= hasUninitializedFields(storage, currentDefinitions);
+                    if (uninitialized) {
                         warn(ErrorType::WARN_UNINITIALIZED_USE, "%1%.%2% may be uninitialized",
                              expression, field->name.toString());
                     }
@@ -1059,7 +1115,7 @@ class FindUninitialized : public Inspector {
             } else {
                 return false;
             }
-        } else if (type->is<IR::Type_Stack>()) {
+        } else if (type->is<IR::Type_Array>()) {
             if (isHeaderUnionStackUninitialized(type, currentDefinitions, read)) {
                 return true;
             } else {
@@ -1088,7 +1144,7 @@ class FindUninitialized : public Inspector {
     bool isHeaderUnionStackUninitialized(const IR::Type *type,
                                          const P4::Definitions *currentDefinitions,
                                          const LocationSet *read) {
-        auto sType = type->to<IR::Type_Stack>();
+        auto sType = type->to<IR::Type_Array>();
         for (unsigned int i = 0; i < sType->getSize(); i++) {
             if (sType->at(i)->is<IR::Type_HeaderUnion>()) {
                 auto stackLoc = read->getIndex(i);
@@ -1171,24 +1227,35 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    void reportWarningIfInvalidHeader(const IR::Expression *expression) {
+    void reportWarningIfInvalidHeader(const IR::Member *expression) {
         if (!reportInvalidHeaders) return;
 
-        LOG3("Checking if [" << expression->id << "]: " << expression << " is valid");
-        auto valid = headerDefs->find(expression);
-        if (valid == TernaryBool::No) {
-            LOG3("accessing a field of an invalid header [" << expression->id
-                                                            << "]: " << expression);
-            warn(ErrorType::WARN_INVALID_HEADER, "accessing a field of an invalid header %1%",
-                 expression);
-        } else if (valid == TernaryBool::Maybe) {
-            LOG3("accessing a field of a potentially invalid header [" << expression->id
-                                                                       << "]: " << expression);
-            warn(ErrorType::WARN_INVALID_HEADER,
-                 "accessing a field of a potentially invalid header %1%", expression);
-        } else {
-            LOG3("acessing a field of a valid header [" << expression->id << "]: " << expression);
+        const auto *header = expression->expr;
+        LOG3("Checking if [" << header->id << "]: " << header << " is valid");
+        auto valid = headerDefs->find(header);
+        if (valid == TernaryBool::Yes) {
+            LOG3("accessing a field of a valid header [" << header->id << "]: " << header);
+            return;
         }
+
+        const IR::Expression *location = header;
+        Util::SourceInfo argumentSource;
+        const auto &accessSource = expression->srcInfo;
+        const auto &headerSource = header->srcInfo;
+        // After inlining, the header may point to a call argument rather than this field access.
+        // Report the field access first and include the argument's location as context.
+        if (accessSource.isValid() &&
+            (!headerSource.isValid() ||
+             accessSource.getSourceFile() != headerSource.getSourceFile() ||
+             headerSource.getStart() < accessSource.getStart() ||
+             accessSource.getEnd() < headerSource.getEnd())) {
+            location = expression;
+            argumentSource = headerSource;
+        }
+        const char *message = valid == TernaryBool::No
+                                  ? "accessing a field of an invalid header %2%%3%"
+                                  : "accessing a field of a potentially invalid header %2%%3%";
+        warn(ErrorType::WARN_INVALID_HEADER, message, location, header->toString(), argumentSource);
     }
 
     bool preorder(const IR::MethodCallExpression *expression) override {
@@ -1198,7 +1265,7 @@ class FindUninitialized : public Inspector {
         if (auto bim = mi->to<BuiltInMethod>()) {
             auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;
-            if (name == IR::Type_Stack::push_front || name == IR::Type_Stack::pop_front) {
+            if (name == IR::Type_Array::push_front || name == IR::Type_Array::pop_front) {
                 // Reads all array fields
                 reads(expression, base);
                 registerUses(expression, false);
@@ -1228,7 +1295,7 @@ class FindUninitialized : public Inspector {
             auto am = mi->to<ApplyMethod>();
             isControlOrParserApply = !am->isTableApply();
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction != IR::Direction::Out) {
                 visit(expr);
@@ -1292,7 +1359,7 @@ class FindUninitialized : public Inspector {
             fu.setCalledBy(this);
             for (auto c : callee) (void)c->getNode()->apply(fu);
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 bool save = lhs;
@@ -1348,9 +1415,9 @@ class FindUninitialized : public Inspector {
         auto storage = getReads(expression->expr, true);
 
         auto basetype = typeMap->getType(expression->expr, true);
-        if (basetype->is<IR::Type_Stack>()) {
-            if (expression->member.name == IR::Type_Stack::next ||
-                expression->member.name == IR::Type_Stack::last) {
+        if (basetype->is<IR::Type_Array>()) {
+            if (expression->member.name == IR::Type_Array::next ||
+                expression->member.name == IR::Type_Array::last) {
                 // Accessing these fields implies reading the whole stack
                 auto save = lhs;
                 lhs = false;
@@ -1359,18 +1426,18 @@ class FindUninitialized : public Inspector {
                 lhs = save;
                 reads(expression, storage);
                 registerUses(expression, false);
-                if (!lhs && expression->member.name == IR::Type_Stack::next)
+                if (!lhs && expression->member.name == IR::Type_Array::next)
                     warn(ErrorType::WARN_UNINITIALIZED, "%1%: reading uninitialized value",
                          expression);
                 return false;
-            } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+            } else if (expression->member.name == IR::Type_Array::lastIndex) {
                 auto index = storage->getArrayLastIndex();
                 reads(expression, index);
                 registerUses(expression, false);
                 return false;
             }
         } else if (basetype->is<IR::Type_Header>()) {
-            reportWarningIfInvalidHeader(expression->expr);
+            reportWarningIfInvalidHeader(expression);
         }
 
         auto fields = storage->getField(expression->member);
@@ -1382,7 +1449,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::AbstractSlice *expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
 
-        auto *slice_stmt = findContext<IR::AssignmentStatement>();
+        auto *slice_stmt = findContext<IR::BaseAssignmentStatement>();
         auto *slice = expression->to<IR::Slice>();
         if (slice_stmt != nullptr && lhs && slice) {
             // track this slice statement
@@ -1450,9 +1517,7 @@ class FindUninitialized : public Inspector {
 
     void postorder(const IR::P4ListExpression *expression) override { otherExpression(expression); }
 
-    void postorder(const IR::HeaderStackExpression *expression) override {
-        otherExpression(expression);
-    }
+    void postorder(const IR::ArrayExpression *expression) override { otherExpression(expression); }
 
     void postorder(const IR::Operation_Unary *expression) override { otherExpression(expression); }
 
@@ -1471,13 +1536,13 @@ class RemoveUnused : public Transform {
         CHECK_NULL(typeMap);
         setName("RemoveUnused");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         if (!hasUses.hasUses(getOriginal())) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);
-            SideEffects se(refMap, typeMap);
+            SideEffects se(typeMap);
             se.setCalledBy(this);
-            (void)statement->right->apply(se);
+            (void)statement->right->apply(se, getChildContext());
 
             if (se.nodeWithSideEffect != nullptr) {
                 // We expect that at this point there can't be more than 1
@@ -1496,7 +1561,7 @@ class RemoveUnused : public Transform {
     }
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override {
         if (!hasUses.hasUses(getOriginal())) {
-            if (SideEffects::hasSideEffect(mcs->methodCall, refMap, typeMap)) {
+            if (SideEffects::mayHaveSideEffect(mcs->methodCall, refMap, typeMap)) {
                 return mcs;
             }
             // removing

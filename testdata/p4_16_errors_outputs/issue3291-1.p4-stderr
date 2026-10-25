@@ -1,0 +1,6 @@
+issue3291-1.p4(13): [--Werror=type-error] error: v.f and a: values of a type variable cannot be compared
+    return v.f == a;
+           ^^^
+issue3291-1.p4(13)
+    return v.f == a;
+                  ^

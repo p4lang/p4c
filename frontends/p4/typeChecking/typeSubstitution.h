@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef TYPECHECKING_TYPESUBSTITUTION_H_
-#define TYPECHECKING_TYPESUBSTITUTION_H_
+#ifndef FRONTENDS_P4_TYPECHECKING_TYPESUBSTITUTION_H_
+#define FRONTENDS_P4_TYPECHECKING_TYPESUBSTITUTION_H_
 
 #include <map>
 #include <sstream>
@@ -57,12 +48,12 @@ class TypeSubstitution : public IHasDbPrint {
         return true;
     }
 
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         if (isIdentity()) out << "Empty substitution";
         bool first = true;
         for (auto it : binding) {
             if (!first) out << std::endl;
-            out << dbp(it.first) << " " << it.first << " -> " << dbp(it.second) << " " << it.second;
+            out << dbp(it.first) << " -> " << dbp(it.second);
             first = false;
         }
     }
@@ -93,4 +84,4 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
 
 }  // namespace P4
 
-#endif /* TYPECHECKING_TYPESUBSTITUTION_H_ */
+#endif /* FRONTENDS_P4_TYPECHECKING_TYPESUBSTITUTION_H_ */

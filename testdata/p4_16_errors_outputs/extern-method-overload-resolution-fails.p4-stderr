@@ -1,0 +1,21 @@
+extern-method-overload-resolution-fails.p4(12): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+extern-method-overload-resolution-fails.p4(11): [--Wwarn=unused] warning: parser 'p' is unused
+parser p(packet_in b, out Headers h)() {
+       ^
+extern-method-overload-resolution-fails.p4(13): [--Werror=duplicate] error: Ambiguous method extract
+    b.extract(h.h);
+      ^^^^^^^
+extern-method-overload-resolution-fails.p4(4): [--Werror=duplicate] error: Candidate is extract
+  void extract<T>(out T hdr);
+       ^^^^^^^
+extern-method-overload-resolution-fails.p4(5): [--Werror=duplicate] error: Candidate is extract
+  void extract<T>(out T variableSizeHeader);
+       ^^^^^^^
+extern-method-overload-resolution-fails.p4(13): [--Werror=type-error] error: b.extract: extern packet_in does not have method matching this call
+    b.extract(h.h);
+    ^^^^^^^^^
+extern-method-overload-resolution-fails.p4(3)
+extern packet_in {
+       ^^^^^^^^^

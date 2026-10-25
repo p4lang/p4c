@@ -1,19 +1,7 @@
-/*
-Copyright 2022-present Orange
-Copyright 2022-present Open Networking Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2022 Open Networking Foundation
+// SPDX-FileCopyrightText: 2022 Orange
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfPsaControl.h"
 
@@ -53,7 +41,20 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement *a) {
         }
     }
 
-    return CodeGenInspector::preorder(a);
+    emittingExpression = true;
+    auto result = CodeGenInspector::preorder(a);
+    emittingExpression = false;
+    return result;
+}
+
+bool ControlBodyTranslatorPSA::preorder(const IR::MethodCallExpression *expression) {
+    auto wasEmittingExpression = emittingExpression;
+    // Propagate expression context so nested Register.read() calls do not emit
+    // standalone statements into the surrounding C expression.
+    emittingExpression = true;
+    auto result = ControlBodyTranslator::preorder(expression);
+    emittingExpression = wasEmittingExpression;
+    return result;
 }
 
 void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
@@ -79,6 +80,12 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
         return;
     } else if (declType->name.name == "Register") {
         auto reg = control->to<EBPFControlPSA>()->getRegister(name);
+        if (method->method->type->name == "read" && emittingExpression) {
+            // Emit a value-producing expression for nested reads; the normal
+            // path emits statements for reads assigned to a standalone lvalue.
+            reg->emitRegisterReadExpression(builder, method, this);
+            return;
+        }
         if (method->method->type->name == "write") {
             reg->emitRegisterWrite(builder, method, this);
         } else if (method->method->type->name == "read") {

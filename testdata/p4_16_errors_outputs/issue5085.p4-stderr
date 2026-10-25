@@ -1,0 +1,7 @@
+issue5085.p4(11): [--Werror=duplicate] error: foo: Duplicates declaration foo
+  foo
+  ^^^
+issue5085.p4(6)
+  foo,
+  ^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

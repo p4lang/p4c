@@ -1,18 +1,9 @@
 /*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2016 VMware, Inc.
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_COPYSTRUCTURES_H_
 #define MIDEND_COPYSTRUCTURES_H_
@@ -44,7 +35,8 @@ namespace P4 {
  *
  *   Further, struct initialization is converted to assignment on struct fields
  *
- *   Note, header assignments are not converted in this pass.
+ *   header assignments and tuple assignments are optionally converted in this pass, based
+ *   on constructor argument
  *
  * @pre none
  * @post
@@ -62,13 +54,22 @@ class DoCopyStructures : public Transform {
 
     /// Do not only copy normal structures but also perform copy assignments for headers.
     bool copyHeaders;
+    /// Also split up assignments of tuples
+    bool copyTuples;
 
  public:
-    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false)
-        : typeMap(typeMap), errorOnMethodCall(errorOnMethodCall), copyHeaders(copyHeaders) {
+    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false,
+                              bool copyTuples = true)
+        : typeMap(typeMap),
+          errorOnMethodCall(errorOnMethodCall),
+          copyHeaders(copyHeaders),
+          copyTuples(copyTuples) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
+    // FIXME -- this should be a preorder so we can deal with nested structs directly,
+    // but that fails because we depend on the typeMap which will be out of date after
+    // expanding outer copies.  So we need to repeat this pass in a loop
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
@@ -117,14 +118,13 @@ class RemoveAliases : public Transform {
 class CopyStructures : public PassRepeated {
  public:
     explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
-                            bool copyHeaders = false, TypeChecking *typeChecking = nullptr) {
+                            bool copyHeaders = false, bool copyTuples = false,
+                            TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
         setName("CopyStructures");
         if (typeChecking == nullptr) typeChecking = new TypeChecking(nullptr, typeMap);
-        passes.emplace_back(typeChecking);
-        passes.emplace_back(new RemoveAliases(typeMap));
-        passes.emplace_back(typeChecking);
-        passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall, copyHeaders));
+        addPasses({typeChecking, new RemoveAliases(typeMap), typeChecking,
+                   new DoCopyStructures(typeMap, errorOnMethodCall, copyHeaders, copyTuples)});
     }
 };
 

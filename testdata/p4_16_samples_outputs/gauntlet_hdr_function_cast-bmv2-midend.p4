@@ -27,25 +27,25 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") ethernet_t retval;
     @name("ingress.retval_0") ethernet_t retval_0;
-    @hidden action gauntlet_hdr_function_castbmv2l22() {
+    @hidden action gauntlet_hdr_function_castbmv2l28() {
         retval.setValid();
         retval.dst_addr = 48w1;
         retval.src_addr = 48w1;
         retval.eth_type = 16w1;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l24() {
+    @hidden action gauntlet_hdr_function_castbmv2l30() {
         retval.setValid();
         retval.dst_addr = 48w2;
         retval.src_addr = 48w2;
         retval.eth_type = 16w2;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l26() {
+    @hidden action gauntlet_hdr_function_castbmv2l32() {
         retval.setValid();
         retval.dst_addr = 48w3;
         retval.src_addr = 48w3;
         retval.eth_type = 16w3;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l30() {
+    @hidden action gauntlet_hdr_function_castbmv2l36() {
         h.eth_hdr1 = retval;
         retval_0.setValid();
         retval_0.dst_addr = 48w1;
@@ -53,23 +53,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval_0.eth_type = 16w1;
         h.eth_hdr2 = retval_0;
     }
-    @hidden table tbl_gauntlet_hdr_function_castbmv2l22 {
+    @hidden table tbl_gauntlet_hdr_function_castbmv2l28 {
         actions = {
-            gauntlet_hdr_function_castbmv2l22();
+            gauntlet_hdr_function_castbmv2l28();
         }
-        const default_action = gauntlet_hdr_function_castbmv2l22();
-    }
-    @hidden table tbl_gauntlet_hdr_function_castbmv2l24 {
-        actions = {
-            gauntlet_hdr_function_castbmv2l24();
-        }
-        const default_action = gauntlet_hdr_function_castbmv2l24();
-    }
-    @hidden table tbl_gauntlet_hdr_function_castbmv2l26 {
-        actions = {
-            gauntlet_hdr_function_castbmv2l26();
-        }
-        const default_action = gauntlet_hdr_function_castbmv2l26();
+        const default_action = gauntlet_hdr_function_castbmv2l28();
     }
     @hidden table tbl_gauntlet_hdr_function_castbmv2l30 {
         actions = {
@@ -77,15 +65,27 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_hdr_function_castbmv2l30();
     }
+    @hidden table tbl_gauntlet_hdr_function_castbmv2l32 {
+        actions = {
+            gauntlet_hdr_function_castbmv2l32();
+        }
+        const default_action = gauntlet_hdr_function_castbmv2l32();
+    }
+    @hidden table tbl_gauntlet_hdr_function_castbmv2l36 {
+        actions = {
+            gauntlet_hdr_function_castbmv2l36();
+        }
+        const default_action = gauntlet_hdr_function_castbmv2l36();
+    }
     apply {
         if (h.eth_hdr1.eth_type == 16w1) {
-            tbl_gauntlet_hdr_function_castbmv2l22.apply();
+            tbl_gauntlet_hdr_function_castbmv2l28.apply();
         } else if (h.eth_hdr1.eth_type == 16w2) {
-            tbl_gauntlet_hdr_function_castbmv2l24.apply();
+            tbl_gauntlet_hdr_function_castbmv2l30.apply();
         } else {
-            tbl_gauntlet_hdr_function_castbmv2l26.apply();
+            tbl_gauntlet_hdr_function_castbmv2l32.apply();
         }
-        tbl_gauntlet_hdr_function_castbmv2l30.apply();
+        tbl_gauntlet_hdr_function_castbmv2l36.apply();
     }
 }
 

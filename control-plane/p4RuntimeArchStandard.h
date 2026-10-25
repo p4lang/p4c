@@ -1,24 +1,15 @@
 /*
-Copyright 2018-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+ * Copyright 2018-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "p4RuntimeArchHandler.h"
@@ -74,10 +65,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
@@ -96,10 +87,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
@@ -165,10 +156,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
@@ -185,10 +176,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
@@ -310,9 +301,9 @@ template <>
 struct ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
-        return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        return P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_profile.name; }
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
@@ -320,9 +311,9 @@ template <>
 struct ActionProfileTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
-        return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        return P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_profile.name; }
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
@@ -350,13 +341,13 @@ struct ActionSelectorTraits;
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL> : public ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action selector"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_selector.name; }
 };
 
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL2020> : public ActionProfileTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "action selector"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_selector.name; }
 };
 
 template <>
@@ -378,7 +369,7 @@ struct RegisterTraits;
 template <>
 struct RegisterTraits<Arch::V1MODEL> {
     static const cstring name() { return "register"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().registers.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
@@ -389,7 +380,7 @@ struct RegisterTraits<Arch::V1MODEL> {
 template <>
 struct RegisterTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "register"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().registers.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
@@ -421,10 +412,10 @@ struct RegisterTraits<Arch::PNA> {
 
 //// The information about a digest call which is needed to serialize it.
 struct Digest {
-    const cstring name;                          // The fully qualified external name of the digest
-                                                 // *data* - in P4-14, the field list name, or in
-                                                 // P4-16, the type of the 'data' parameter.
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    const cstring name;  // The fully qualified external name of the digest
+                         // *data* - in P4-14, the field list name, or in
+                         // P4-16, the type of the 'data' parameter.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this digest
                                         // declaration.
 };
@@ -434,7 +425,7 @@ struct Register {
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied
                                         // to this field.
     const int64_t size;
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the stored data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the stored data.
     // If the type of the index is a user-defined type, this is the name of the type. Otherwise it
     // is nullptr.
     const cstring index_type_name;
@@ -586,7 +577,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     }
 
     void collectAssignmentStatement(P4RuntimeSymbolTableIface *,
-                                    const IR::AssignmentStatement *) override {}
+                                    const IR::BaseAssignmentStatement *) override {}
 
     void collectExternMethod(P4RuntimeSymbolTableIface *, const P4::ExternMethod *) override {}
 
@@ -1051,7 +1042,7 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
         auto typeSpec =
             TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
-                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeArg);
 
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }

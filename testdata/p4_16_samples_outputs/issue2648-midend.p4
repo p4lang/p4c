@@ -22,17 +22,17 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    @hidden action issue2648l36() {
+    @hidden action issue2648l42() {
         h.h[8w1].a = 8w1;
     }
-    @hidden table tbl_issue2648l36 {
+    @hidden table tbl_issue2648l42 {
         actions = {
-            issue2648l36();
+            issue2648l42();
         }
-        const default_action = issue2648l36();
+        const default_action = issue2648l42();
     }
     apply {
-        tbl_issue2648l36.apply();
+        tbl_issue2648l42.apply();
     }
 }
 

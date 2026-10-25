@@ -1,5 +1,6 @@
 /* -*- Mode:C; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 #include <v1model.p4>
+@command_line("--loopsUnroll")
 
 header test_header_t {
   bit<8> value;

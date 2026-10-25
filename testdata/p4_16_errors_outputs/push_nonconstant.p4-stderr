@@ -1,11 +1,11 @@
-push_nonconstant.p4(10): [--Werror=type-error] error: 'h.push_front(x)'
+push_nonconstant.p4(16): [--Werror=type-error] error: 'h.push_front(x)'
         h.push_front(x);
         ^^^^^^^^^^^^^^^
   ---- Actual error:
-push_nonconstant.p4(10): x: argument used for directionless parameter 'count' must be a compile-time constant
+push_nonconstant.p4(16): x: argument used for directionless parameter 'count' must be a compile-time constant
           h.push_front(x);
                        ^
   ---- Originating from:
-push_nonconstant.p4(10): Function type 'push_front' does not match invocation type '<Method call>'
+push_nonconstant.p4(16): Function type 'push_front' does not match invocation type '<Method call>'
           h.push_front(x);
           ^^^^^^^^^^^^^^^

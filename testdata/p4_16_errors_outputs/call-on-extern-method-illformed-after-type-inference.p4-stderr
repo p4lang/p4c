@@ -1,0 +1,6 @@
+call-on-extern-method-illformed-after-type-inference.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c(packet_out p)() {
+        ^
+call-on-extern-method-illformed-after-type-inference.p4(8): [--Werror=type-error] error: 2: could not infer a width
+    p.emit(2);
+           ^

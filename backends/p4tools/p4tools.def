@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /// Represents a reference to an object in a P4 program.
 ///
 /// This is a thin wrapper around a 'const Member*' to (1) enforce invariants on which forms of
@@ -23,9 +27,8 @@ class StateVariable : Expression {
     StateVariable(ArrayIndex arr) : Expression(arr->getSourceInfo(), arr->type), ref(arr) {}
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    // Delegate to IR's notion of equality.
     bool operator==(const StateVariable &other) const override {
-        return *ref == *other.ref;
+        return compare(ref, other.ref) == 0;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
@@ -219,7 +222,7 @@ public:
         out << "Concolic_" << label << "(" << arguments << ")";
     }
 
-    visit_children { v.visit(type, "type"); }
+    visit_children { (void)n; v.visit(type, "type"); }
 
     ConcolicVariable(const Type *type, cstring methodName,
                      const Vector<Argument> *arguments, int srcIdentifier, int concolicId,
@@ -272,8 +275,11 @@ class InOutReference : Expression {
     /// The value of the reference after it was resolved.
     Expression resolvedRef;
 
+    // FIXME -- this will fail trying to deserialize `ref` from the json.  There's no
+    // good way of getting to the `ref` field in the json object that can be done in the
+    // ctor initializer list -- need to call `json.load("ref", ref);`
     InOutReference(JSONLoader & json) : Expression(json), ref(json) {
-        json.load("resolvedRef", resolvedRef);
+        json.load("resolvedRef", resolvedRef) || json.error("missing field resolvedRef");
     }
 
     InOutReference(Util::SourceInfo srcInfo, IR::StateVariable &ref, const Expression* resolvedRef) :

@@ -43,46 +43,46 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control sw(inout Headers_t headers, in xdp_input imd, out xdp_output omd) {
-    @hidden action xdp_dec_ttl_ebpfkernel29() {
+    @hidden action xdp_dec_ttl_ebpfkernel35() {
         headers.ipv4.ttl = headers.ipv4.ttl + 8w255;
     }
-    @hidden action xdp_dec_ttl_ebpfkernel32() {
+    @hidden action xdp_dec_ttl_ebpfkernel38() {
         omd.output_action = xdp_action.XDP_PASS;
         omd.output_port = imd.input_port;
     }
-    @hidden table tbl_xdp_dec_ttl_ebpfkernel29 {
+    @hidden table tbl_xdp_dec_ttl_ebpfkernel35 {
         actions = {
-            xdp_dec_ttl_ebpfkernel29();
+            xdp_dec_ttl_ebpfkernel35();
         }
-        const default_action = xdp_dec_ttl_ebpfkernel29();
+        const default_action = xdp_dec_ttl_ebpfkernel35();
     }
-    @hidden table tbl_xdp_dec_ttl_ebpfkernel32 {
+    @hidden table tbl_xdp_dec_ttl_ebpfkernel38 {
         actions = {
-            xdp_dec_ttl_ebpfkernel32();
+            xdp_dec_ttl_ebpfkernel38();
         }
-        const default_action = xdp_dec_ttl_ebpfkernel32();
+        const default_action = xdp_dec_ttl_ebpfkernel38();
     }
     apply {
         if (headers.ipv4.isValid()) {
-            tbl_xdp_dec_ttl_ebpfkernel29.apply();
+            tbl_xdp_dec_ttl_ebpfkernel35.apply();
         }
-        tbl_xdp_dec_ttl_ebpfkernel32.apply();
+        tbl_xdp_dec_ttl_ebpfkernel38.apply();
     }
 }
 
 control deprs(in Headers_t headers, packet_out packet) {
-    @hidden action xdp_dec_ttl_ebpfkernel40() {
+    @hidden action xdp_dec_ttl_ebpfkernel46() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_xdp_dec_ttl_ebpfkernel40 {
+    @hidden table tbl_xdp_dec_ttl_ebpfkernel46 {
         actions = {
-            xdp_dec_ttl_ebpfkernel40();
+            xdp_dec_ttl_ebpfkernel46();
         }
-        const default_action = xdp_dec_ttl_ebpfkernel40();
+        const default_action = xdp_dec_ttl_ebpfkernel46();
     }
     apply {
-        tbl_xdp_dec_ttl_ebpfkernel40.apply();
+        tbl_xdp_dec_ttl_ebpfkernel46.apply();
     }
 }
 

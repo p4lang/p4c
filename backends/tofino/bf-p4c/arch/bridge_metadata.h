@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_BRIDGE_METADATA_H_
-#define BF_P4C_ARCH_BRIDGE_METADATA_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_BRIDGE_METADATA_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_BRIDGE_METADATA_H_
 
 #include "backends/tofino/bf-p4c/arch/program_structure.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
@@ -45,4 +45,4 @@ struct AddTnaBridgeMetadata : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_BRIDGE_METADATA_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_BRIDGE_METADATA_H_ */

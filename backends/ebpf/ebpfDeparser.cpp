@@ -1,19 +1,7 @@
-/*
-Copyright 2022-present Orange
-Copyright 2022-present Open Networking Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2022 Open Networking Foundation
+// SPDX-FileCopyrightText: 2022 Orange
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfDeparser.h"
 
@@ -38,6 +26,75 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression
     return ControlBodyTranslator::preorder(expression);
 }
 
+namespace {
+
+class EmitFinder : public Inspector {
+ public:
+    bool found = false;
+    bool preorder(const IR::MethodCallExpression *mce) override {
+        auto method = mce->method;
+        if (auto mem = method->to<IR::Member>()) {
+            if (mem->member.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
+                found = true;
+            }
+        }
+        return !found;
+    }
+};
+
+static bool hasEmitInBlock(const IR::Node *node) {
+    EmitFinder finder;
+    node->apply(finder);
+    return finder.found;
+}
+
+}  // namespace
+
+bool DeparserBodyTranslator::preorder(const IR::IfStatement *ifstmt) {
+    // Skip if-blocks containing only emit calls -- they are handled by
+    // DeparserHdrEmitTranslator. Delegate everything else to ControlBodyTranslator.
+    if (!hasEmitInBlock(ifstmt)) {
+        return ControlBodyTranslator::preorder(ifstmt);
+    }
+
+    // Check if there are any non-emit statements in the if-block.
+    auto hasNonEmitStmts = [this](const IR::Node *node) -> bool {
+        auto block = node->to<IR::BlockStatement>();
+        if (block) {
+            for (auto stmt : block->components) {
+                if (auto mcs = stmt->to<IR::MethodCallStatement>()) {
+                    auto mi = P4::MethodInstance::resolve(mcs->methodCall, control->program->refMap,
+                                                          control->program->typeMap);
+                    auto ext = mi->to<P4::ExternMethod>();
+                    if (ext && ext->method->name.name == p4lib.packetOut.emit.name) {
+                        continue;
+                    }
+                    return true;
+                } else if (!stmt->is<IR::BlockStatement>()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (auto mcs = node->to<IR::MethodCallStatement>()) {
+            auto mi = P4::MethodInstance::resolve(mcs->methodCall, control->program->refMap,
+                                                  control->program->typeMap);
+            auto ext = mi->to<P4::ExternMethod>();
+            return !(ext && ext->method->name.name == p4lib.packetOut.emit.name);
+        }
+        return true;
+    };
+
+    bool trueHasNonEmit = hasNonEmitStmts(ifstmt->ifTrue);
+    bool falseHasNonEmit = (ifstmt->ifFalse != nullptr) && hasNonEmitStmts(ifstmt->ifFalse);
+
+    if (trueHasNonEmit || falseHasNonEmit) {
+        return ControlBodyTranslator::preorder(ifstmt);
+    }
+
+    return false;
+}
+
 DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
@@ -47,11 +104,41 @@ DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDepar
 
 bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement *s) {
     for (auto a : s->components) {
-        if (a->is<IR::MethodCallStatement>()) {
+        if (a->is<IR::MethodCallStatement>() || a->is<IR::IfStatement>()) {
             visit(a);
         }
     }
 
+    return false;
+}
+
+bool DeparserPrepareBufferTranslator::preorder(const IR::IfStatement *ifstmt) {
+    if (!hasEmitInBlock(ifstmt)) return false;
+
+    builder->emitIndent();
+    builder->append("if (");
+    ifstmt->condition->apply(*deparser->codeGen);
+    builder->append(") ");
+    builder->blockStart();
+    visit(ifstmt->ifTrue);
+    builder->blockEnd(true);
+    if (ifstmt->ifFalse != nullptr) {
+        builder->emitIndent();
+        builder->append("else ");
+        builder->blockStart();
+        visit(ifstmt->ifFalse);
+        builder->blockEnd(true);
+    }
+    return false;
+}
+
+bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallStatement *s) {
+    auto mce = s->methodCall;
+    auto mi = P4::MethodInstance::resolve(mce, control->program->refMap, control->program->typeMap);
+    auto ext = mi->to<P4::ExternMethod>();
+    if (ext != nullptr && ext->method->name.name == p4lib.packetOut.emit.name) {
+        visit(mce);
+    }
     return false;
 }
 
@@ -104,6 +191,37 @@ DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparse
       DeparserPrepareBufferTranslator(deparser),
       deparser(deparser) {
     setName("DeparserHdrEmitTranslator");
+}
+
+bool DeparserHdrEmitTranslator::preorder(const IR::IfStatement *ifstmt) {
+    if (!hasEmitInBlock(ifstmt)) return false;
+
+    builder->emitIndent();
+    builder->append("if (");
+    ifstmt->condition->apply(*deparser->codeGen);
+    builder->append(") ");
+    builder->blockStart();
+    visit(ifstmt->ifTrue);
+    builder->blockEnd(true);
+    if (ifstmt->ifFalse != nullptr) {
+        builder->emitIndent();
+        builder->append("else ");
+        builder->blockStart();
+        visit(ifstmt->ifFalse);
+        builder->blockEnd(true);
+    }
+    return false;
+}
+
+bool DeparserHdrEmitTranslator::preorder(const IR::MethodCallExpression *expression) {
+    auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
+                                          control->program->typeMap);
+    auto ext = mi->to<P4::ExternMethod>();
+    if (ext != nullptr) {
+        processMethod(ext);
+        return false;
+    }
+    return CodeGenInspector::preorder(expression);
 }
 
 void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {

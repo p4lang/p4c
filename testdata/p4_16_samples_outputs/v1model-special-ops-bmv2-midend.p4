@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -78,6 +79,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -95,6 +97,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name(".my_drop") action my_drop_3() {
         smeta_3.ingress_port = standard_metadata.ingress_port;
@@ -113,6 +116,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_3.checksum_error = standard_metadata.checksum_error;
         smeta_3.parser_error = standard_metadata.parser_error;
         smeta_3.priority = standard_metadata.priority;
+        smeta_3.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_3);
         standard_metadata.ingress_port = smeta_3.ingress_port;
         standard_metadata.egress_spec = smeta_3.egress_spec;
@@ -130,6 +134,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_3.checksum_error;
         standard_metadata.parser_error = smeta_3.parser_error;
         standard_metadata.priority = smeta_3.priority;
+        standard_metadata.lag_hash = smeta_3.lag_hash;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_2) {
         meta._fwd_l2ptr0 = l2ptr_2;
@@ -174,31 +179,31 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop_3();
     }
-    @hidden action v1modelspecialopsbmv2l292() {
+    @hidden action v1modelspecialopsbmv2l282() {
         hdr.ipv4.srcAddr = 32w184320258;
         meta._fwd_l2ptr0 = 32w0xe50b;
     }
-    @hidden action v1modelspecialopsbmv2l295() {
+    @hidden action v1modelspecialopsbmv2l285() {
         hdr.ipv4.srcAddr = 32w180835939;
         meta._fwd_l2ptr0 = 32w0xec1c;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l292 {
+    @hidden table tbl_v1modelspecialopsbmv2l282 {
         actions = {
-            v1modelspecialopsbmv2l292();
+            v1modelspecialopsbmv2l282();
         }
-        const default_action = v1modelspecialopsbmv2l292();
+        const default_action = v1modelspecialopsbmv2l282();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l295 {
+    @hidden table tbl_v1modelspecialopsbmv2l285 {
         actions = {
-            v1modelspecialopsbmv2l295();
+            v1modelspecialopsbmv2l285();
         }
-        const default_action = v1modelspecialopsbmv2l295();
+        const default_action = v1modelspecialopsbmv2l285();
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
-            tbl_v1modelspecialopsbmv2l292.apply();
+            tbl_v1modelspecialopsbmv2l282.apply();
         } else if (standard_metadata.instance_type == 32w4) {
-            tbl_v1modelspecialopsbmv2l295.apply();
+            tbl_v1modelspecialopsbmv2l285.apply();
         } else {
             ipv4_da_lpm_0.apply();
         }
@@ -229,6 +234,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         smeta_4.checksum_error = standard_metadata.checksum_error;
         smeta_4.parser_error = standard_metadata.parser_error;
         smeta_4.priority = standard_metadata.priority;
+        smeta_4.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_4);
         standard_metadata.ingress_port = smeta_4.ingress_port;
         standard_metadata.egress_spec = smeta_4.egress_spec;
@@ -246,6 +252,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         standard_metadata.checksum_error = smeta_4.checksum_error;
         standard_metadata.parser_error = smeta_4.parser_error;
         standard_metadata.priority = smeta_4.priority;
+        standard_metadata.lag_hash = smeta_4.lag_hash;
     }
     @name("egress.set_out_bd") action set_out_bd(@name("bd") bit<24> bd_2) {
         meta._fwd_out_bd1 = bd_2;
@@ -284,33 +291,33 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         }
         default_action = my_drop_4();
     }
-    @hidden action v1modelspecialopsbmv2l367() {
+    @hidden action v1modelspecialopsbmv2l358() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0x12e012e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden action v1modelspecialopsbmv2l373() {
+    @hidden action v1modelspecialopsbmv2l364() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l367 {
+    @hidden table tbl_v1modelspecialopsbmv2l358 {
         actions = {
-            v1modelspecialopsbmv2l367();
+            v1modelspecialopsbmv2l358();
         }
-        const default_action = v1modelspecialopsbmv2l367();
+        const default_action = v1modelspecialopsbmv2l358();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l373 {
+    @hidden table tbl_v1modelspecialopsbmv2l364 {
         actions = {
-            v1modelspecialopsbmv2l373();
+            v1modelspecialopsbmv2l364();
         }
-        const default_action = v1modelspecialopsbmv2l373();
+        const default_action = v1modelspecialopsbmv2l364();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_v1modelspecialopsbmv2l367.apply();
+            tbl_v1modelspecialopsbmv2l358.apply();
         } else if (standard_metadata.instance_type == 32w2) {
-            tbl_v1modelspecialopsbmv2l373.apply();
+            tbl_v1modelspecialopsbmv2l364.apply();
         } else {
             if (standard_metadata.instance_type == 32w5) {
                 get_multicast_copy_out_bd_0.apply();

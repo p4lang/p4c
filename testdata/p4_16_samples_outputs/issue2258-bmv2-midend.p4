@@ -35,17 +35,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action issue2258bmv2l35() {
+    @hidden action issue2258bmv2l41() {
         key_0 = 16w1;
     }
-    @hidden table tbl_issue2258bmv2l35 {
+    @hidden table tbl_issue2258bmv2l41 {
         actions = {
-            issue2258bmv2l35();
+            issue2258bmv2l41();
         }
-        const default_action = issue2258bmv2l35();
+        const default_action = issue2258bmv2l41();
     }
     apply {
-        tbl_issue2258bmv2l35.apply();
+        tbl_issue2258bmv2l41.apply();
         simple_table_0.apply();
     }
 }

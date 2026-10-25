@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import os
 import shutil
 import sys
@@ -30,7 +34,6 @@ def copy_directories_and_files(source, dest):
         'LICENSE',
         'README',
         'bootstrap_bfn_env.sh',
-        'CPackOptions.cmake',
         'LICENSE.in',
         'README.md',
         'bootstrap_bfn_compilers.sh',

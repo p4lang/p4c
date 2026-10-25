@@ -1,0 +1,6 @@
+expr-binary-shift-on-unsupported-type.p4(3): [--Wwarn=unused] warning: 'a' is unused
+action a(inout bit<32> x) {
+       ^
+expr-binary-shift-on-unsupported-type.p4(4): [--Werror=expected] error: {}: expected an integer value
+  x = { } >> 8;
+      ^^^

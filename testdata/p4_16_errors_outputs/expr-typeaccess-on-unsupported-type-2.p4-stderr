@@ -1,0 +1,12 @@
+expr-typeaccess-on-unsupported-type-2.p4(4): [--Wwarn=unused] warning: 'PSA_CPU_PORT' is unused
+const Narrow PSA_CPU_PORT = .Narrow.Narrow_t;
+             ^^^^^^^^^^^^
+expr-typeaccess-on-unsupported-type-2.p4(4): [--Werror=type-error] error: Cannot extract field Narrow_t from Narrow which has type Type(Narrow)
+const Narrow PSA_CPU_PORT = .Narrow.Narrow_t;
+                                    ^^^^^^^^
+expr-typeaccess-on-unsupported-type-2.p4(4)
+const Narrow PSA_CPU_PORT = .Narrow.Narrow_t;
+                            ^^^^^^^
+expr-typeaccess-on-unsupported-type-2.p4(4): [--Werror=type-error] error: Narrow.Narrow_t: Cannot evaluate initializer to a compile-time constant
+const Narrow PSA_CPU_PORT = .Narrow.Narrow_t;
+                            ^^^^^^^^^^^^^^^^

@@ -12,7 +12,7 @@
 # specific language governing permissions and limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-# # # #### Barefoot back-end
+# # ##### Barefoot back-end
 
 MESSAGE("-- Adding p4c-barefoot")
 
@@ -42,12 +42,12 @@ endif()
 # Note that we need to do this early, before we process any of the rules
 # using schemas (context, manifest, phv, etc.) and packaging the compiler
 # interfaces tools.
-set (INTERFACES_DIR ${BFN_P4C_SOURCE_DIR}/compiler_interfaces)
 set(COMPILER_SCHEMA_TARGETS "${INTERFACES_DIR}/schemas/targets.py")
 set(DEFAULT_SCHEMA_TARGETS "['tofino', 'tofino2', 'tofino2m', 'tofino2u', 'tofino2a0']")
 set(DEFAULT_SCHEMA_P4ARCH "['tna', 't2na', 'psa', 'PISA', 'v1model']")
 file(WRITE ${COMPILER_SCHEMA_TARGETS} "TARGETS = ${DEFAULT_SCHEMA_TARGETS}\n")
 file(APPEND ${COMPILER_SCHEMA_TARGETS} "P4ARCHITECTURES = ${DEFAULT_SCHEMA_P4ARCH}\n")
+
 
 get_schema_version(manifest_schema MANIFEST_SCHEMA_VERSION)
 MESSAGE(STATUS "Found manifest schema version ${MANIFEST_SCHEMA_VERSION}")
@@ -89,6 +89,21 @@ set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
+
+set (BF_P4C_SPEC_SRCS
+  specs/arch_spec.cpp
+  specs/device.cpp
+  specs/gress.cpp
+  specs/mau_spec.cpp
+  specs/match_register_spec.cpp
+  specs/phv.cpp
+  specs/phv_spec.cpp
+)
+
+add_library(tofinospecs STATIC ${BF_P4C_SPEC_SRCS})
+target_link_libraries(tofinospecs PUBLIC p4ctoolkit)
+# We depend on the gen-tree-macro.h file, which is generated.
+add_dependencies(tofinospecs genIR)
 
 set (BF_P4C_MIDEND_SRCS
   midend/annotate_with_in_hash.cpp
@@ -150,7 +165,6 @@ set (BF_P4C_BACKEND_COMMON_SRCS
   common/check_field_corruption.cpp
   common/check_for_unimplemented_features.cpp
   common/check_uninitialized_read.cpp
-  common/dump_pipe.cpp
   common/pragma/collect_global_pragma.cpp
   common/elim_unused.cpp
   common/empty_tableseq.cpp
@@ -214,7 +228,6 @@ set (BF_P4C_BACKEND_MAU_SRCS
   mau/jbay_next_table.cpp
   mau/mau_alloc.cpp
   mau/mau_power.cpp
-  mau/mau_spec.cpp
   mau/memories.cpp
   mau/payload_gateway.cpp
   mau/reduction_or.cpp
@@ -242,7 +255,6 @@ set (BF_P4C_BACKEND_MAU_TOFINO_SRCS
   mau/tofino/action_data_bus.cpp
   mau/tofino/asm_output.cpp
   mau/tofino/input_xbar.cpp
-  mau/tofino/mau_spec.cpp
   mau/tofino/memories.cpp
   )
 
@@ -325,7 +337,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
   phv/phv_analysis.cpp
   phv/phv_fields.cpp
   phv/phv_parde_mau_use.cpp
-  phv/phv_spec.cpp
   phv/split_padding.cpp
   phv/table_phv_constraints.cpp
   phv/validate_allocation.cpp
@@ -391,7 +402,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
 
 set (BF_P4C_BACKEND_ARCH_SRCS
   arch/arch.cpp
-  arch/arch_spec.cpp
   arch/add_t2na_meta.cpp
   arch/intrinsic_metadata.cpp
   arch/bridge_metadata.cpp
@@ -443,7 +453,6 @@ set (BF_P4C_BACKEND_MAIN_SRCS
   asm.cpp
   backend.cpp
   bf-p4c-options.cpp
-  device.cpp
   midend.cpp
   )
 
@@ -557,9 +566,6 @@ target_compile_definitions(bfp4c
   INTERFACE "-DPHV_SCHEMA_VERSION=\"${PHV_SCHEMA_VERSION}\""
   INTERFACE "-DCONFIG_PREFIX=\"${CMAKE_INSTALL_PREFIX}\""
   INTERFACE "-DCONFIG_PKGDATADIR=\"${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}\""
-)
-target_compile_definitions(bfp4c
-  INTERFACE "-DHAVE_JBAY=1"
 )
 if (ENABLE_BAREFOOT_INTERNAL)
   target_compile_definitions(bfp4c
@@ -733,12 +739,16 @@ if (EXISTS ${COMPILER_SCHEMA_TARGETS})
   list(APPEND SCHEMA_FILES ${COMPILER_SCHEMA_TARGETS})
 endif()
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist/p4c-build-logs
-  POST_BUILD
-  COMMAND PYTHONPATH=${INTERFACES_DIR}:$ENV{PYTHONPATH} pyinstaller --workpath=${CMAKE_CURRENT_BINARY_DIR}/build --distpath=${CMAKE_CURRENT_BINARY_DIR}/dist ${INTERFACES_DIR}/p4c-build-logs.spec
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dist/p4c-build-logs
+  COMMAND PYTHONPATH=${INTERFACES_DIR}:$ENV{PYTHONPATH} pyinstaller
+          --workpath=${CMAKE_CURRENT_BINARY_DIR}/build
+          --distpath=${CMAKE_CURRENT_BINARY_DIR}/dist
+          ${INTERFACES_DIR}/p4c-build-logs.spec
   DEPENDS ${LOGGING_FILES} ${SCHEMA_FILES} ${INTERFACES_DIR}/p4c-build-logs.spec
   WORKING_DIRECTORY ${INTERFACES_DIR}
-  COMMENT "Package logging tools")
+  COMMENT "Packaging logging tools"
+)
 
 add_custom_target(p4c-build-logs
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dist/p4c-build-logs)
@@ -795,18 +805,18 @@ add_custom_target(set_p4c_default_target ALL
 
 # On internal builds, symlink bf-p4c to p4c.
 if (ENABLE_BAREFOOT_INTERNAL)
-  add_custom_command(OUTPUT ${P4C_BINARY_DIR}/p4c
-    COMMAND ${CMAKE_COMMAND} -E create_symlink bf-p4c ${P4C_BINARY_DIR}/p4c
+  add_custom_command(OUTPUT ${P4C_BINARY_DIR}/bf-p4c
+    COMMAND ${CMAKE_COMMAND} -E create_symlink p4c ${P4C_BINARY_DIR}/bf-p4c
     DEPENDS p4c_driver
   )
-  add_custom_target(bf-p4c_symlink ALL DEPENDS ${P4C_BINARY_DIR}/p4c)
-  install (PROGRAMS ${P4C_BINARY_DIR}/p4c DESTINATION bin)
+  add_custom_target(bf-p4c_symlink ALL DEPENDS ${P4C_BINARY_DIR}/bf-p4c)
+  install (PROGRAMS ${P4C_BINARY_DIR}/bf-p4c DESTINATION bin)
 endif()
 
 install (FILES ${P4C_BINARY_DIR}/p4c_src/main.py
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 
-# # # ############# Proto
+# # ############## Proto
 set (BFN_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (BFN_P4RUNTIME_INFO_PROTO ${BFN_P4RUNTIME_DIR}/barefoot/p4info.proto)
 set (BFN_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/barefoot/p4info.pb.cc)
@@ -840,7 +850,7 @@ target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefet
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
-# # # ############# Testing
+# # ############## Testing
 
 if (ENABLE_GTESTS)
   # # Tofino-specific GTests.
@@ -925,7 +935,8 @@ if (ENABLE_GTESTS)
     # This is necessary because the z3 target itself does not export its includes.
     SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
   )
-  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen)  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
+  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
+  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen genLogging)
 
   set (GTEST_BF_P4C_SOURCES
     # Currently all gtests need to be built directly into the gtestp4c binary.

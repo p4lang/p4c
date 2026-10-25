@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_HELPERS_H_
-#define BF_P4C_ARCH_HELPERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_HELPERS_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_HELPERS_H_
 
 #include <optional>
 
@@ -52,4 +52,4 @@ std::vector<const IR::Expression *> convertConcatToList(const IR::Concat *expr);
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_HELPERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_HELPERS_H_ */

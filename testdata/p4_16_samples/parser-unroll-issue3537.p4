@@ -1,5 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
+@command_line("--loopsUnroll")
 
 header h1_t {}
 header h2_t {

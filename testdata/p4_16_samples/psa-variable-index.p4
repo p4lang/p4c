@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2022 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #include <core.p4>
 #include <bmv2/psa.p4>

@@ -1,17 +1,9 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/*
+ * Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_LOCAL_COPYPROP_H_
 #define MIDEND_LOCAL_COPYPROP_H_
@@ -23,7 +15,8 @@ limitations under the License.
 #include "ir/visitor.h"
 
 namespace P4 {
-
+using LocalCopyPropPolicyCallbackFn = std::function<bool(
+    const Visitor::Context *, const IR::Expression *, const DeclarationLookup *)>;
 /**
 Local copy propagation and dead code elimination within a single pass.
 This pass is designed to be run after all declarations have received unique
@@ -84,7 +77,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     TableInfo *inferForTable = nullptr;
     FuncInfo *inferForFunc = nullptr;
     bool need_key_rewrite = false;
-    std::function<bool(const Context *, const IR::Expression *)> policy;
+    LocalCopyPropPolicyCallbackFn policy;
     bool elimUnusedTables = false;
     int uid = -1;
     static int uid_ctr;
@@ -108,7 +101,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
 
     class LoopPrepass : public Inspector {
         DoLocalCopyPropagation &self;
-        void postorder(const IR::AssignmentStatement *) override;
+        void postorder(const IR::BaseAssignmentStatement *) override;
         void postorder(const IR::MethodCallExpression *) override;
         void apply_table(TableInfo *tbl);
         void apply_function(FuncInfo *tbl);
@@ -125,7 +118,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     const IR::Expression *preorder(IR::Member *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     IR::Statement *preorder(IR::Statement *) override;
-    IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
     IR::IfStatement *postorder(IR::IfStatement *) override;
     IR::ForStatement *preorder(IR::ForStatement *) override;
@@ -150,9 +143,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation(TypeMap *typeMap,
-                           std::function<bool(const Context *, const IR::Expression *)> policy,
-                           bool eut)
+    DoLocalCopyPropagation(TypeMap *typeMap, LocalCopyPropPolicyCallbackFn policy, bool eut)
         : typeMap(typeMap),
           tables(std::make_shared<std::map<cstring, TableInfo>>()),
           actions(std::make_shared<std::map<cstring, FuncInfo>>()),
@@ -166,15 +157,16 @@ class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(
         TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-        std::function<bool(const Context *, const IR::Expression *)> policy =
-            [](const Context *, const IR::Expression *) -> bool { return true; },
+        LocalCopyPropPolicyCallbackFn policy = [](const Context *, const IR::Expression *,
+                                                  const DeclarationLookup *) -> bool {
+            return true;
+        },
         bool elimUnusedTables = false) {
         if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(typeMap, policy, elimUnusedTables));
     }
-    LocalCopyPropagation(TypeMap *typeMap,
-                         std::function<bool(const Context *, const IR::Expression *)> policy)
+    LocalCopyPropagation(TypeMap *typeMap, LocalCopyPropPolicyCallbackFn policy)
         : LocalCopyPropagation(typeMap, nullptr, policy) {}
 };
 

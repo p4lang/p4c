@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type data_t { fields { bit<32> x; } }
 header data_t data;
 

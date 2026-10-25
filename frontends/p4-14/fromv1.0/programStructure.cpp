@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "programStructure.h"
 
@@ -43,7 +32,7 @@ static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *n
 }
 
 ProgramStructure::ProgramStructure()
-    : v1model(P4V1::V1Model::instance),
+    : v1model(P4V1::V1Model::instance()),
       p4lib(P4::P4CoreLibrary::instance()),
       types(&allNames),
       metadata(&allNames),
@@ -345,7 +334,7 @@ void ProgramStructure::createStructures() {
         auto ht = type->to<IR::Type_Header>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
-        auto stack = new IR::Type_Stack(id.srcInfo, tn, new IR::Constant(size));
+        auto stack = new IR::Type_Array(id.srcInfo, tn, new IR::Constant(size));
         auto annos = addGlobalNameAnnotation(id, it.first->annotations);
         auto field = new IR::StructField(id.srcInfo, id, annos, stack);
         headers->fields.push_back(field);
@@ -699,7 +688,7 @@ void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     std::stringstream versionArg;
     versionArg << "-DV1MODEL_VERSION=" << V1Model::versionCurrent;
-    include(V1Model::instance.file.name, versionArg.str());
+    include(V1Model::instance().file.name, versionArg.str());
 
     metadataInstances.insert(v1model.standardMetadataType.name);
     metadataTypes.insert(v1model.standardMetadataType.name);
@@ -1530,7 +1519,7 @@ CONVERT_PRIMITIVE(push, ) {  // NOLINT(whitespace/parens), remove with C++20 upg
     auto hdr = conv.convert(primitive->operands.at(0));
     auto count = push_pop_size(conv, primitive);
     IR::IndexedVector<IR::StatOrDecl> block;
-    auto methodName = IR::Type_Stack::push_front;
+    auto methodName = IR::Type_Array::push_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
     block.push_back(
         new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(count)}));
@@ -1547,7 +1536,7 @@ CONVERT_PRIMITIVE(pop, ) {  // NOLINT(whitespace/parens), remove with C++20 upgr
               "Expected 1 or 2 operands for %1%", primitive);
     auto hdr = conv.convert(primitive->operands.at(0));
     auto count = push_pop_size(conv, primitive);
-    auto methodName = IR::Type_Stack::pop_front;
+    auto methodName = IR::Type_Array::pop_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
     return new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(count)});
 }
@@ -2077,8 +2066,9 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::Register *re
         args->push_back(
             new IR::Argument(new IR::Constant(v1model.registers.size_type, reg->instance_count)));
     }
-    return new IR::Declaration_Instance(
-        newName, addGlobalNameAnnotation(reg->name, reg->annotations), spectype, args, nullptr);
+    return new IR::Declaration_Instance(reg->srcInfo, newName,
+                                        addGlobalNameAnnotation(reg->name, reg->annotations),
+                                        spectype, args, nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMeter *cm,
@@ -2103,7 +2093,8 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMet
         if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
         if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
     }
-    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
+    return new IR::Declaration_Instance(cm->srcInfo, newName, std::move(annos), type, args,
+                                        nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::Meter *m,
@@ -2131,7 +2122,8 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::M
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
         if (meterPreColor != nullptr) annos.emplace_back("pre_color"_cs, meterPreColor);
     }
-    return new IR::Declaration_Instance(newName, std::move(annos), specType, args, nullptr);
+    return new IR::Declaration_Instance(m->srcInfo, newName, std::move(annos), specType, args,
+                                        nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR::Counter *c,
@@ -2147,7 +2139,7 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR:
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
     if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
-    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
+    return new IR::Declaration_Instance(c->srcInfo, newName, std::move(annos), type, args, nullptr);
 }
 
 IR::Vector<IR::Argument> *ProgramStructure::createApplyArguments(cstring /* name unused */) {

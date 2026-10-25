@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_DUMP_JSON_GRAPH_H_
-#define BF_P4C_MAU_DUMP_JSON_GRAPH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_DUMP_JSON_GRAPH_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_DUMP_JSON_GRAPH_H_
 
 #include "backends/tofino/bf-p4c/logging/pass_manager.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
@@ -37,4 +37,4 @@ class DumpJsonGraph : public PassManager {
     DumpJsonGraph(DependencyGraph &dg, Util::JsonObject *dgJson, cstring passContext, bool placed);
 };
 
-#endif /* BF_P4C_MAU_DUMP_JSON_GRAPH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_DUMP_JSON_GRAPH_H_ */

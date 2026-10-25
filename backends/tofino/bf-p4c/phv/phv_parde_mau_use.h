@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
-#define BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
 
 #include "backends/tofino/bf-p4c/common/header_stack.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/ir/thread_visitor.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 
 using namespace P4;
@@ -163,4 +163,4 @@ class PhvUse : public Phv_Parde_Mau_Use {
     void postorder(const IR::BFN::Digest *digest) override;
 };
 
-#endif /* BF_P4C_PHV_PHV_PARDE_MAU_USE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PHV_PARDE_MAU_USE_H_ */

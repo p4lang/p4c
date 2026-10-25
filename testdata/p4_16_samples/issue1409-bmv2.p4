@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* -*- Mode:C; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 #include <v1model.p4>
 

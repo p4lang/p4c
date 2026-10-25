@@ -24,10 +24,10 @@
 #include <set>
 #include <vector>
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
-#include "backends/tofino/bf-p4c/device.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/ir/unique_id.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
@@ -38,6 +38,8 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/version.h"
 #include "lib/json.h"
 #include "lib/set.h"
@@ -444,10 +446,8 @@ double WalkPowerGraph::estimate_power() {
     always_powered_on_.clear();
     if (Device::currentDevice() == Device::TOFINO) {
         return estimate_power_tofino();
-#if HAVE_JBAY
     } else if (Device::currentDevice() == Device::JBAY) {
         return estimate_power_non_tofino();
-#endif /* HAVE_JBAY */
     } else {
         BUG("estimate_power -- invalid device %d", Device::currentDevice());
     }

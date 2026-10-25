@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2017 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!--!
 \page getting_started Getting Started                                    
 -->
@@ -188,28 +194,22 @@ sudo dpkg -i /path/to/package.deb
 ```
 
 ### Installing P4C from source
-1.  Clone the repository. It includes submodules, so be sure to use
-    `--recursive` to pull them in:
+1.  Clone the repository.
     ```
-    git clone --recursive https://github.com/p4lang/p4c.git
-    ```
-    If you forgot `--recursive`, you can update the submodules at any time using:
-    ```
-    git submodule update --init --recursive
+    git clone https://github.com/p4lang/p4c.git
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
+    for Ubuntu [here](#ubuntu-dependencies) and for macOS
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```
-    mkdir build
-    cd build
-    cmake .. <optional arguments>
-    make -j4
-    make -j4 check
+    mkdir -p build
+    cmake -B build <optional arguments>
+    cmake --build build
+    cmake --build build --target check
     ```
     The cmake command takes the following optional arguments to
     further customize the build (see file `CMakeLists.txt` for the full list):
@@ -217,7 +217,7 @@ sudo dpkg -i /path/to/package.deb
       Release or Debug to build with optimizations or with debug
       symbols to run in gdb. Default is Release.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
-       `make install` installs the compiler. Defaults to /usr/local.
+     `cmake --build build --target install` installs the compiler. Defaults to /usr/local.
      - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2 backend](backends/bmv2/README.md). Default ON.
      - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf backend](backends/ebpf/README.md). Default ON.
      - `-DENABLE_P4TC=ON|OFF`. Enable [the TC backend](backends/tc/README.md). Default ON.
@@ -250,7 +250,7 @@ sudo dpkg -i /path/to/package.deb
 
 4.  (Optional) Install the compiler and the P4 shared headers globally.
     ```
-    sudo make install
+    sudo cmake --build build --target install
     ```
     The compiler driver `p4c` and binaries for each of the backends are
     installed in `/usr/local/bin` by default; the P4 headers are placed in
@@ -267,11 +267,11 @@ If you plan to contribute to P4C, you'll find more useful information
 
 ## Dependencies
 
-Ubuntu 20.04 is the officially supported platform for P4C. There's also
-unofficial support for macOS 11. Other platforms are untested; you can try to
-use them, but YMMV.
+Ubuntu 22.04 and Ubuntu 24.04 are the officially supported platforms for P4C.
+There's also unofficial support for macOS, including Apple Silicon. Other
+platforms are untested; you can try to use them, but YMMV.
 
-- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
+- A C++20 compiler. P4C is built with `CMAKE_CXX_STANDARD 20`.
 
 - `git` for version control
 
@@ -285,9 +285,9 @@ use them, but YMMV.
 
 - C++ boost library
 
-- Python 3 for scripting and running tests
+- Python 3 and uv for scripting and running tests
 
-- Optional: Documentation generation requires Doxygen (1.13.0) and Graphviz (2.38.0 or higher).
+- Optional: Documentation generation requires Doxygen (1.13.2) and Graphviz (2.38.0 or higher).
 
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
@@ -305,20 +305,25 @@ libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
-pip3 install --user -r requirements.txt
 ```
+Python dependencies can be installed using `uv`:
+```bash
+curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+uv sync
+```
+The Python dependency versions are pinned in `pyproject.toml`.
 
 **For documentation building:**
 
 **Tools**
-- Download the Doxygen 1.13.0 binary 
+- Download the Doxygen 1.13.2 binary 
 ```bash
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.0.linux.bin.tar.gz
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
 ```
 - Extract and install Doxygen 
 ```bash
-tar xzvf doxygen-1.13.0.linux.bin.tar.gz
-cd doxygen-1.13.0
+tar xzvf doxygen-1.13.2.linux.bin.tar.gz
+cd doxygen-1.13.2
 sudo make install
 cd .. 
 ```
@@ -332,7 +337,7 @@ git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
-3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
+3.0 or higher, so the packaged version provided in Ubuntu 22.04 **should**
 work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
 (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
 [here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
@@ -344,32 +349,32 @@ Please note that while all Protobuf versions newer than 3.0 should work for
 P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
-P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
+P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240722.1 at the moment).
 
 #### CMake
-P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
+P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`, but there is no guarantee that this will lead to a successful build.
 
 ### Fedora dependencies
 
 ```bash
 sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
 libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
-python3 python3-pip tcpdump
+python3 python3-pip tcpdump uv
 
-sudo pip3 install -r requirements.txt
+uv sync
 ```
 
 **For documentation building:**
 
 **Tools**
-- Download the Doxygen 1.13.0 binary
+- Download the Doxygen 1.13.2 binary
 ```bash 
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.0.linux.bin.tar.gz
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
 ```
 - Extract and install Doxygen
 ```bash
-tar xzvf doxygen-1.13.0.linux.bin.tar.gz
-cd doxygen-1.13.0
+tar xzvf doxygen-1.13.2.linux.bin.tar.gz
+cd doxygen-1.13.2
 sudo make install
 cd ..
 ```
@@ -411,8 +416,8 @@ Installing on macOS:
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
   they would conflict with a version provided by the base system. This
-  includes Bison, since an older version ships with macOS. `make
-  check` depends on the newer Bison we just installed from Homebrew
+  includes Bison, since an older version ships with macOS. `cmake --build build --target check`
+  depends on the newer Bison we just installed from Homebrew
   (see [#83](http://github.com/p4lang/p4c/issues/83)), so you'll want
   to add it to your `$PATH` one way or another. One simple way to do
   that is to request that Homebrew link it into `/usr/local/bin`:
@@ -421,7 +426,7 @@ Installing on macOS:
   ```
 
   **Optional documentation building tools:**
-  -  Download and install the Doxygen 1.13.0 DMG file from [here](https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/Doxygen-1.13.0.dmg).
+  -  Download and install the Doxygen 1.13.2 DMG file from [here](https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/Doxygen-1.13.2.dmg).
   - Install Graphviz
   ```
   brew install graphviz
@@ -476,10 +481,11 @@ We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb),
 because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
-apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
-etags` generate tags for vi and Emacs respectively.  (Make sure that you are
-using the correct version of ctags; there are several competing programs with
-the same name in existence.)
+apt-get install exuberant-ctags.` The CMake targets `ctags` and `etags` generate
+tags for vi and Emacs respectively via `cmake --build build --target ctags` or
+`cmake --build build --target etags`.  (Make sure that you are using the correct
+version of ctags; there are several competing programs with the same name in
+existence.)
 
 To build code documentation, after installing Doxygen and the other
 required packages:
@@ -582,9 +588,9 @@ The P4C CMakeLists.txt will use that name to figure the full path of the files t
 
 clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
 ```
-pip3 install --user "clang-format==18.1.0" "black==24.3.0" "isort==5.13.2"
+uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
 ```
-clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. black and isort can be checked using the `make black` or `make isort` command respectively. Complaints can be fixed by running `make black-fix-errors` or `make isort-fix-errors`.
+clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
 
 cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
@@ -613,9 +619,9 @@ add_dependencies(p4c-mybackend genIR)
 
 #### Tests
 
-We implemented support equivalent to the automake `make check` rules.
-All tests should be included in `make check` and in addition, we support
-`make check-*` rules. To enable this support, add the following rules:
+We implemented support equivalent to the automake `cmake --build build --target check` rules.
+All tests should be included in `cmake --build build --target check` and in addition, we support
+`cmake --build build --target check-*` rules. To enable this support, add the following rules:
 
 ```
 set(MY_DRIVER <driver or compiler executable>)
@@ -646,7 +652,7 @@ arguments to these macros.
 
 To pass custom arguments to P4C, you can set the environment variable `P4C_ARGS`:
 ```
-make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
+P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG" cmake --build build --target check
 ```
 
 When making changes to P4C, it is sometimes useful to be able to run
@@ -658,7 +664,7 @@ tests, assign a value to the shell environment variable
 `P4TEST_REPLACE`.  Here is one example Bash command to do so:
 
 ```
-P4TEST_REPLACE=1 make check
+P4TEST_REPLACE=1 cmake --build build --target check
 ```
 
 #### Installation
@@ -739,4 +745,3 @@ We appreciate your contributions and look forward to working with you to improve
 - For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4lang.zulipchat.com/).  [Joining link](https://p4lang.zulipchat.com/join/kjtv2reafrylssget425wx6c/) .
 - For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
 - For other communication channels click [here](https://p4.org/join/).
-

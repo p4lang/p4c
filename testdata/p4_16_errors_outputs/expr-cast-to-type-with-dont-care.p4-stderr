@@ -1,0 +1,12 @@
+expr-cast-to-type-with-dont-care.p4(3): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+expr-cast-to-type-with-dont-care.p4(4): [--Werror=type-error] error: Cannot apply operation '~' to expression '{ ... }' with type 'tuple<ANYTYPE>'
+  return (list<_>) ~{ ... };
+                    ^^^^^^^
+expr-cast-to-type-with-dont-care.p4(4): [--Werror=type-error] error: Cannot apply operation '~' to expression '{ ... }' with type 'tuple<ANYTYPE>'
+  return (list<_>) ~{ ... };
+                    ^^^^^^^
+expr-cast-to-type-with-dont-care.p4(4): [--Werror=type-error] error: Error while analyzing ~{ ... }
+  return (list<_>) ~{ ... };
+                   ^^^^^^^^

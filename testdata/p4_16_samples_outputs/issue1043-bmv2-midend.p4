@@ -43,18 +43,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue1043bmv2l33() {
+    @hidden action issue1043bmv2l39() {
         resubmit_preserving_field_list(8w0);
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_issue1043bmv2l33 {
+    @hidden table tbl_issue1043bmv2l39 {
         actions = {
-            issue1043bmv2l33();
+            issue1043bmv2l39();
         }
-        const default_action = issue1043bmv2l33();
+        const default_action = issue1043bmv2l39();
     }
     apply {
-        tbl_issue1043bmv2l33.apply();
+        tbl_issue1043bmv2l39.apply();
     }
 }
 

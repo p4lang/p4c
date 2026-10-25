@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_BLOCKMAP_H_
-#define BF_P4C_MIDEND_BLOCKMAP_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_BLOCKMAP_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_BLOCKMAP_H_
 
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
@@ -41,7 +41,7 @@ class FillFromBlockMap : public Transform {
             else
                 BUG("Type_Name %1% maps to %2% rather than a type decl", type, decl);
         } else {
-            BUG("Type_Name %1% doesn't map to a declaration", type, decl);
+            BUG("Type_Name %1% doesn't map to a declaration", type);
         }
     }
 
@@ -83,4 +83,4 @@ class FillFromBlockMap : public Transform {
     }
 };
 
-#endif /* BF_P4C_MIDEND_BLOCKMAP_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_BLOCKMAP_H_ */

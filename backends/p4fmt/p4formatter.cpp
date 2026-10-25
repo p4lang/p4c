@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/getV1ModelVersion.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
@@ -67,7 +67,7 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
             if (includesEmitted.count(sourceFile.string()) == 0) {
                 if (sourceFile.parent_path() == p4includePath) {
                     std::filesystem::path p = sourceFile.filename();
-                    if (P4V1::V1Model::instance.file.name == p) {
+                    if (P4V1::V1Model::instance().file.name == p) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
@@ -144,7 +144,7 @@ bool P4Formatter::preorder(const IR::Type_Name *t) {
     return false;
 }
 
-bool P4Formatter::preorder(const IR::Type_Stack *t) {
+bool P4Formatter::preorder(const IR::Type_Array *t) {
     visit(t->elementType);
     builder.append("[");
     visit(t->size);
@@ -514,7 +514,7 @@ bool P4Formatter::preorder(const IR::Declaration_Variable *v) {
 
 bool P4Formatter::preorder(const IR::Type_Error *d) {
     bool first = true;
-    for (auto a : *d->getDeclarations()) {
+    for (auto a : d->getDeclarations()) {
         if (!ifSystemFile(a->getNode()).empty())
             // only print if not from a system file
             continue;
@@ -749,11 +749,11 @@ bool P4Formatter::preorder(const IR::StructExpression *e) {
     return false;
 }
 
-bool P4Formatter::preorder(const IR::HeaderStackExpression *e) {
+bool P4Formatter::preorder(const IR::ArrayExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
-    if (e->headerStackType != nullptr) {
+    if (e->arrayType != nullptr) {
         builder.append("(");
-        visit(e->headerStackType);
+        visit(e->arrayType);
         builder.append(")");
     }
     builder.append("{");
@@ -915,6 +915,16 @@ bool P4Formatter::preorder(const IR::Cast *c) {
 bool P4Formatter::preorder(const IR::AssignmentStatement *a) {
     visit(a->left);
     builder.append(" = ");
+    visit(a->right);
+    builder.endOfStatement();
+    return false;
+}
+
+bool P4Formatter::preorder(const IR::OpAssignmentStatement *a) {
+    visit(a->left);
+    builder.append(" ");
+    builder.append(a->getStringOp());
+    builder.append("= ");
     visit(a->right);
     builder.endOfStatement();
     return false;

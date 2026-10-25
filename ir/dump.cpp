@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "dump.h"
 
@@ -22,6 +11,7 @@ limitations under the License.
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
+#include "lib/gc.h"
 #include "lib/indent.h"
 #include "lib/source_file.h"
 
@@ -32,11 +22,13 @@ using namespace P4::literals;
 namespace {
 class IRDumper : public Inspector {
     std::ostream &out;
-    std::set<const IR::Node *> dumped;
     unsigned maxdepth;
     cstring ignore;
     bool source;
-    bool preorder(const IR::Node *n) override {
+    // @brief (maybe) output a one-line summary of a node (no newline or children)
+    // @return false if the node should not be printed (nothing output)
+    // @return true if the node is printed
+    bool firstLine(const IR::Node *n) const {
         if (auto ctxt = getContext()) {
             if (unsigned(ctxt->depth) > maxdepth) return false;
             if (ctxt->parent && ctxt->parent->child_name && ignore == ctxt->parent->child_name)
@@ -48,13 +40,18 @@ class IRDumper : public Inspector {
         if (source && n->srcInfo) out << "(" << n->srcInfo.toPositionString() << ") ";
         out << n->node_type_name();
         n->dump_fields(out);
-        if (dumped.count(n)) {
-            out << "..." << std::endl;
-            return false;
-        }
-        dumped.insert(n);
+        return true;
+    }
+    bool preorder(const IR::Node *n) override {
+        if (!firstLine(n)) return false;
         out << std::endl;
         return true;
+    }
+    void revisit(const IR::Node *n) override {
+        if (firstLine(n)) out << "..." << std::endl;
+    }
+    void loop_revisit(const IR::Node *n) override {
+        if (firstLine(n)) out << "...(loop)" << std::endl;
     }
     bool preorder(const IR::Expression *e) override {
         if (!preorder(static_cast<const IR::Node *>(e))) return false;
@@ -64,15 +61,13 @@ class IRDumper : public Inspector {
     bool preorder(const IR::Constant *c) override {
         return preorder(static_cast<const IR::Node *>(c));
     }
-    void postorder(const IR::Node *n) override {
-        if (getChildrenVisited() == 0) dumped.erase(n);
+    void postorder(const IR::Node *) override {
+        if (getChildrenVisited() == 0) visitAgain();
     }
 
  public:
     IRDumper(std::ostream &o, unsigned m, cstring ign, bool src)
-        : out(o), maxdepth(m), ignore(ign), source(src) {
-        visitDagOnce = false;
-    }
+        : out(o), maxdepth(m), ignore(ign), source(src) {}
 };
 }  // namespace
 
@@ -136,6 +131,27 @@ std::string dumpToString(const IR::Node *n) {
     std::stringstream str;
     dump(str, n);
     return str.str();
+}
+
+bool DumpPipe::preorder(const IR::Node *pipe) {
+#if ENABLE_DUMP_PIPE
+    if (LOGGING(1)) {
+        if (heading) {
+            LOG1("-------------------------------------------------");
+            LOG1(heading);
+            LOG1("-------------------------------------------------");
+            size_t maxMem = 0;
+            size_t memUsed = gc_mem_inuse(&maxMem) / (1024 * 1024);
+            maxMem = maxMem / (1024 * 1024);
+            LOG1("*** mem in use = " << memUsed << "MB, heap size = " << maxMem << "MB");
+        }
+        if (LOGGING(2))
+            dump(Log::Detail::fileLogOutput(__FILE__), pipe);
+        else
+            LOG1(*pipe);
+    }
+#endif  // ENABLE_DUMP_PIPE
+    return false;
 }
 
 }  // namespace P4

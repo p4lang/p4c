@@ -81,18 +81,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplemirrorpacket1l114() {
+    @hidden action pnaexamplemirrorpacket1l120() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaexamplemirrorpacket1l114 {
+    @hidden table tbl_pnaexamplemirrorpacket1l120 {
         actions = {
-            pnaexamplemirrorpacket1l114();
+            pnaexamplemirrorpacket1l120();
         }
-        const default_action = pnaexamplemirrorpacket1l114();
+        const default_action = pnaexamplemirrorpacket1l120();
     }
     apply {
-        tbl_pnaexamplemirrorpacket1l114.apply();
+        tbl_pnaexamplemirrorpacket1l120.apply();
     }
 }
 

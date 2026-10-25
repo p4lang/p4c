@@ -52,20 +52,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action issue2044bmv2l37() {
+    @hidden action issue2044bmv2l43() {
         h.h.setInvalid();
     }
-    @hidden table tbl_issue2044bmv2l37 {
+    @hidden table tbl_issue2044bmv2l43 {
         actions = {
-            issue2044bmv2l37();
+            issue2044bmv2l43();
         }
-        const default_action = issue2044bmv2l37();
+        const default_action = issue2044bmv2l43();
     }
     apply {
         if (t_0.apply().hit) {
             ;
         } else {
-            tbl_issue2044bmv2l37.apply();
+            tbl_issue2044bmv2l43.apply();
         }
     }
 }

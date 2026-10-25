@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # SDE version number.
 
 # Note added Jan. 25 2023: as per Steve Licking, this version is no longer to be incremented,

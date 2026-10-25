@@ -1,18 +1,7 @@
-/*
-Copyright 2018 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2018 VMware, Inc.
+// SPDX-FileCopyrightText: 2018 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "defaultArguments.h"
 
@@ -26,6 +15,7 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     const TypeMap *typeMap;
 
  public:
+    using TypeVariableSubstitutionVisitor::preorder;
     explicit TypeNameSubstitutionVisitor(const TypeVariableSubstitution *bindings,
                                          const TypeMap *typeMap)
         : TypeVariableSubstitutionVisitor(bindings, true), typeMap(typeMap) {
@@ -54,7 +44,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
                                                     const TypeVariableSubstitution *tsv) {
     auto args = new IR::Vector<IR::Argument>();
     bool changed = false;
-    for (auto param : *subst->getParametersInOrder()) {
+    for (auto param : subst->getParametersInOrder()) {
         auto arg = subst->lookup(param);
         if (arg != nullptr) {
             // there is a matching argument
@@ -66,7 +56,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
             const IR::Expression *value = param->defaultValue;
             TypeNameSubstitutionVisitor tsvv(tsv, typeMap);
             value = param->defaultValue->apply(tsvv);
-            arg = new IR::Argument(param->srcInfo, param->name, value);
+            arg = new IR::Argument(param->srcInfo, param->name, value->clone());
             changed = true;
         }
         args->push_back(arg);

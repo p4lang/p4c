@@ -30,17 +30,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.reg") register<bit<16>>(32w1) reg_0;
-    @hidden action registerserenumbmv2l44() {
+    @hidden action registerserenumbmv2l50() {
         reg_0.write(32w0, h.eth_hdr.eth_type);
     }
-    @hidden table tbl_registerserenumbmv2l44 {
+    @hidden table tbl_registerserenumbmv2l50 {
         actions = {
-            registerserenumbmv2l44();
+            registerserenumbmv2l50();
         }
-        const default_action = registerserenumbmv2l44();
+        const default_action = registerserenumbmv2l50();
     }
     apply {
-        tbl_registerserenumbmv2l44.apply();
+        tbl_registerserenumbmv2l50.apply();
     }
 }
 

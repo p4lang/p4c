@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
 name: "static-build-test-p4c"
 
 on:
@@ -15,7 +18,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build a p4c release on Ubuntu 20.04.
+  # Build a p4c release on Ubuntu 22.04.
   build-linux:
     # Only run on pull requests with the "run-static" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-static') }}
@@ -25,8 +28,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dynamic: [{glibc: ON, stdlib: OFF}, {glibc: OFF, stdlib: ON}]
-    runs-on: ubuntu-20.04
+        dynamic: [{ glibc: ON, stdlib: OFF }, { glibc: OFF, stdlib: ON }]
+    runs-on: ubuntu-22.04
     env:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
@@ -35,19 +38,18 @@ jobs:
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-static-${{ runner.os }}
+          ccache-key: "ubuntu-22.04-gcc-unity-static-${{ matrix.dynamic.glibc == 'ON' && 'glibc' || 'stdlib' }}"
           max-size: 1000M
 
       - shell: bash
-        name: Build (Ubuntu 20.04)
+        name: Post-build static verification tests
         run: |
-          sudo -E tools/ci-build.sh
           ./tools/ci-check-static.sh ./build/p4c-bm2-ss ./build/p4c-dpdk ./build/p4c-ebpf \
               ./build/p4c-pna-p4tc ./build/p4c-ubpf ./build/p4test ./build/p4testgen

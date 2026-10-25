@@ -43,6 +43,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct main_metadata_t *user_meta;
@@ -66,7 +67,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                 struct MainControlImpl_tbl_default_key key;
                 __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 128;
-                __builtin_memcpy(&(key.field0[0]), &(hdr->ipv6.srcAddr[0]), 16);
+                __builtin_memcpy(&(key.field0), &(hdr->ipv6.srcAddr), 16);
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct MainControlImpl_tbl_default_value *value = NULL;
@@ -84,8 +85,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                     switch (value->action) {
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST: 
                             {
-                                __builtin_memcpy(&hdr->ipv6.dstAddr, &value->u.MainControlImpl_set_dst.addr6, 16);
-                                                                hdr->ipv6.hopLimit = (hdr->ipv6.hopLimit + 255);
+assign_128(&hdr->ipv6.dstAddr[0], loadfrom_128(&value->u.MainControlImpl_set_dst.addr6[0]));
+                                                                hdr->ipv6.hopLimit = hdr->ipv6.hopLimit + 255;
                             }
                             break;
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION: 
@@ -109,13 +110,9 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             return TC_ACT_SHOT;
         }
         int outHeaderLength = 0;
-        if (hdr->ethernet.ebpf_valid) {
-            outHeaderLength += 112;
-        }
-;        if (hdr->ipv6.ebpf_valid) {
-            outHeaderLength += 320;
-        }
-;
+        if (hdr->ethernet.ebpf_valid) outHeaderLength += 112;
+        if (hdr->ipv6.ebpf_valid) outHeaderLength += 320;
+
         __u16 saved_proto = 0;
         bool have_saved_proto = false;
         // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
@@ -145,48 +142,50 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
+// emitting header ethernet_t
         if (hdr->ethernet.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112)) {
                 return TC_ACT_SHOT;
             }
             
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
-            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->ipv6.ebpf_valid) {
+;// emitting header ipv6_t
+        if (hdr->ipv6.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 320)) {
                 return TC_ACT_SHOT;
             }
@@ -200,22 +199,22 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
-            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
+            storePrimitive32((u8 *)&hdr->ipv6.flowLabel, 20, (htonl(getPrimitive32(hdr->ipv6.flowLabel, 20) << 12)));
+            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[2];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2 + 1, 4, 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[1];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 4, 0, (ebpf_byte >> 4));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 4, 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[2];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
+            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
             ebpf_packetOffsetInBits += 20;
 
             hdr->ipv6.payloadLength = bpf_htons(hdr->ipv6.payloadLength);
-            ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->ipv6.nextHeader))[0];
@@ -226,72 +225,72 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[5];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[6];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[7];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[8];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[9];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[10];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[11];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[12];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[13];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[14];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[15];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 128;
 
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[5];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[6];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[7];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[8];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[9];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[10];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[11];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[12];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[13];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[14];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[15];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 128;
 
         }

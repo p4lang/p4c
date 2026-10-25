@@ -24,8 +24,8 @@
 #include <boost/optional/optional_io.hpp>
 
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace PHV {
 

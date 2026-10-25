@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_
 #define FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_
@@ -110,6 +101,8 @@ class ExternConverter {
         return false;
     }
     ExternConverter() {}
+    virtual ~ExternConverter() = default;
+
     /// register a converter for a p4_14 extern_type
     /// @type: extern_type that the converter works on
     static void addConverter(cstring type, ExternConverter *);
@@ -429,8 +422,8 @@ class ComputeTableCallGraph : public Inspector {
 
         // skip control block that is unused.
         if (!structure->calledControls.isCallee(parent->name) &&
-            parent->name != P4V1::V1Model::instance.ingress.name &&
-            parent->name != P4V1::V1Model::instance.egress.name)
+            parent->name != P4V1::V1Model::instance().ingress.name &&
+            parent->name != P4V1::V1Model::instance().egress.name)
             return;
 
         if (ctrl != nullptr && ctrl != parent) {
@@ -548,9 +541,8 @@ class FixExtracts final : public Transform {
                 fixedHeaderType = new IR::Type_Header(IR::ID(hname), fields);
                 // extract length from annotation
                 auto anno = f->getAnnotation(IR::Annotation::lengthAnnotation);
-                BUG_CHECK(anno != nullptr, "No length annotation on varbit field", f);
-                BUG_CHECK(anno->getExpr().size() == 1, "Expected exactly 1 argument",
-                          anno->getExpr());
+                BUG_CHECK(anno != nullptr, "%1%: no length annotation on varbit field", f);
+                BUG_CHECK(anno->getExpr().size() == 1, "%1%: expected exactly 1 argument", anno);
                 headerLength = anno->getExpr(0);
                 // We keep going through the loop just to check whether there is another
                 // varbit field in the header.
@@ -771,7 +763,7 @@ class CheckIfMultiEntryPoint : public Inspector {
     explicit CheckIfMultiEntryPoint(ProgramStructure *structure) : structure(structure) {
         setName("CheckIfMultiEntryPoint");
     }
-    bool preorder(const IR::ParserState *state) {
+    bool preorder(const IR::ParserState *state) override {
         for (const auto *anno : state->getAnnotations()) {
             if (anno->name == "packet_entry") {
                 structure->parserEntryPoints.emplace(state->name, state);

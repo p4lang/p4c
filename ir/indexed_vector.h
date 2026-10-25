@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_INDEXED_VECTOR_H_
 #define IR_INDEXED_VECTOR_H_
@@ -74,11 +65,15 @@ class IndexedVector : public Vector<T> {
     }
     IndexedVector &operator=(const IndexedVector &) = default;
     IndexedVector &operator=(IndexedVector &&) = default;
-    explicit IndexedVector(const T *a) { push_back(std::move(a)); }
+    explicit IndexedVector(const T *a) { push_back(a); }
     explicit IndexedVector(const safe_vector<const T *> &a) {
         insert(Vector<T>::end(), a.begin(), a.end());
     }
     explicit IndexedVector(const Vector<T> &a) { insert(Vector<T>::end(), a.begin(), a.end()); }
+    template <typename It>
+    explicit IndexedVector(It start, It end) {
+        insert(Vector<T>::end(), start, end);
+    }
     explicit IndexedVector(JSONLoader &json);
 
     void clear() {
@@ -88,7 +83,8 @@ class IndexedVector : public Vector<T> {
     // TODO: Although this is not a const_iterator, it should NOT
     // be used to modify the vector directly.  I don't know
     // how to enforce this property, though.
-    typedef typename Vector<T>::iterator iterator;
+    using iterator = typename Vector<T>::iterator;
+    using const_iterator = typename Vector<T>::const_iterator;
 
     const IDeclaration *getDeclaration(cstring name) const {
         auto it = declarations.find(name);
@@ -112,7 +108,7 @@ class IndexedVector : public Vector<T> {
         if (it == declarations.end()) return nullptr;
         return it->second->template to<U>();
     }
-    Util::Enumerator<const IDeclaration *> *getDeclarations() const {
+    Util::EnumeratorPtr<const IDeclaration *> getDeclarations() const {
         return Util::enumerate(Values(declarations));
     }
     iterator erase(iterator from, iterator to) {
@@ -211,11 +207,11 @@ class IndexedVector : public Vector<T> {
         return "IndexedVector<" + T::static_type_name() + ">";
     }
     static cstring static_type_name() { return "IndexedVector<" + T::static_type_name() + ">"; }
-    void visit_children(Visitor &v) override;
-    void visit_children(Visitor &v) const override;
+    void visit_children(Visitor &v, const char *name) override;
+    void visit_children(Visitor &v, const char *name) const override;
 
     void toJSON(JSONGenerator &json) const override;
-    static IndexedVector<T> *fromJSON(JSONLoader &json);
+    static Node *fromJSON(JSONLoader &json);
     void validate() const override {
         if (invalid) return;  // don't crash the compiler because an error happened
         for (auto el : *this) {

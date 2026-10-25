@@ -1,24 +1,13 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
@@ -28,17 +17,21 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/dump.h"
 #include "midend/actionSynthesis.h"
+#include "midend/checkTableEntries.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/def_use.h"
+#include "midend/eliminateActionRun.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateTypedefs.h"
+#include "midend/eliminateUnreachable.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
 #include "midend/flattenHeaders.h"
@@ -76,23 +69,28 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
+MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
+#ifdef SUPPORT_P4_14
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
+#endif
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
     auto v1controls = new std::set<cstring>();
     auto defUse = new P4::ComputeDefUse;
+    ParserConfig config;
 
     addPasses(
-        {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+        {new P4::DumpPipe("MidEnd start"),
+         options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
          new P4::RemoveMiss(&typeMap),
          new P4::EliminateNewtype(&typeMap),
          new P4::EliminateInvalidHeaders(&typeMap),
          new P4::EliminateSerEnums(&typeMap),
          new P4::SimplifyKey(
              &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
+         new P4::CheckTableEntries(true),
          new P4::RemoveExits(&typeMap),
          new P4::ConstantFolding(&typeMap),
          new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets
@@ -101,10 +99,10 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::HandleNoMatch(),
          new P4::SimplifyParsers(),
          new P4::StrengthReduction(&typeMap),
-         new P4::EliminateTuples(&typeMap),
+         options.keepTuples ? nullptr : new P4::EliminateTuples(&typeMap),
          new P4::FlattenLogMsg(&typeMap),
          new P4::SimplifyComparisons(&typeMap),
-         new P4::CopyStructures(&typeMap, false),
+         new P4::CopyStructures(&typeMap, false, false, options.keepTuples),
          new P4::NestedStructs(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::SimplifySelectList(&typeMap),
@@ -116,16 +114,18 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::ConstantFolding(&typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),
+         new P4::ElimUnreachableStmts,
          new PassRepeated({
              new P4::LocalCopyPropagation(&typeMap),
              new P4::ConstantFolding(&typeMap),
          }),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::SimplifyControlFlow(&typeMap),
+         new P4::SimplifyControlFlow(&typeMap, true),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
-         new P4::EliminateSwitch(&typeMap),
+         !options.preferSwitch ? new P4::EliminateSwitch(&typeMap) : nullptr,
+         options.preferSwitch ? new P4::ElimActionRun() : nullptr,
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
          new PassRepeated({
@@ -138,17 +138,19 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
-             auto toplevel = evaluator->getToplevelBlock();
-             auto main = toplevel->getMain();
-             if (main == nullptr)
-                 // nothing further to do
-                 return nullptr;
+             const auto *toplevel = evaluator->getToplevelBlock();
+             const auto *main = toplevel->getMain();
+             if (main == nullptr) {
+                 // nothing further to do.
+                 return root;
+             }
              // Special handling when compiling for v1model.p4
-             if (main->type->name == P4V1::V1Model::instance.sw.name) {
+             if (main->type->name == P4V1::V1Model::instance().sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;
-                 auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
-                 auto update = main->getParameterValue(P4V1::V1Model::instance.sw.compute.name);
-                 auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                 auto verify = main->getParameterValue(P4V1::V1Model::instance().sw.verify.name);
+                 auto update = main->getParameterValue(P4V1::V1Model::instance().sw.compute.name);
+                 auto deparser =
+                     main->getParameterValue(P4V1::V1Model::instance().sw.deparser.name);
                  if (verify == nullptr || update == nullptr || deparser == nullptr ||
                      !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
                      !deparser->is<IR::ControlBlock>()) {
@@ -163,12 +165,13 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::HSIndexSimplifier(&typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
-         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+         options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
-         new P4::SimplifyControlFlow(&typeMap),
-         new P4::MidEndLast()});
+         new P4::SimplifyControlFlow(&typeMap, true),
+         new P4::MidEndLast(),
+         new P4::DumpPipe("MidEnd end")});
     if (options.listMidendPasses) {
         listPasses(*outStream, cstring::newline);
         *outStream << std::endl;

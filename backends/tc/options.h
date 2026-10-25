@@ -1,24 +1,19 @@
 /*
-Copyright (C) 2023 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+ * Copyright (C) 2023 Intel Corporation
+ * SPDX-FileCopyrightText: 2023 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_TC_OPTIONS_H_
 #define BACKENDS_TC_OPTIONS_H_
 
+#include <cstdlib>
+#include <limits>
+
 #include "backends/ebpf/ebpfOptions.h"
 #include "frontends/common/options.h"
+#include "lib/error.h"
 
 namespace P4::TC {
 
@@ -64,6 +59,12 @@ class TCOptions : public CompilerOptions {
                     xdp2tcMode = XDP2TC_HEAD;
                 } else if (!strcmp(arg, "cpumap")) {
                     xdp2tcMode = XDP2TC_CPUMAP;
+                } else {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "Unknown --xdp2tc mode '%1%'; expected one of: meta, head, "
+                                "cpumap",
+                                arg);
+                    return false;
                 }
                 return true;
             },
@@ -72,7 +73,16 @@ class TCOptions : public CompilerOptions {
         registerOption(
             "--num-timer-profiles", "profiles",
             [this](const char *arg) {
-                timerProfiles = std::atoi(arg);
+                char *end = nullptr;
+                long value = strtol(arg, &end, 0);
+                if (*end != 0 || value <= 0 ||
+                    static_cast<unsigned long>(value) >
+                        static_cast<unsigned long>(std::numeric_limits<unsigned>::max())) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--num-timer-profiles expects a positive integer, got '%1%'", arg);
+                    return false;
+                }
+                timerProfiles = static_cast<unsigned>(value);
                 return true;
             },
             "Defines the number of timer profiles. Default is 4.");

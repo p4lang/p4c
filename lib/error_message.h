@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 #ifndef LIB_ERROR_MESSAGE_H_
 #define LIB_ERROR_MESSAGE_H_
 
@@ -27,8 +18,8 @@ namespace P4 {
  *  Structure populated via error_helper functions
  *
  *  Typically, calls to ::P4::error/::P4::warning have many parameters, some of them
- *  might have SourceInfo attribute. ::P4::error_helper parse those parameters, format
- *  parameters to output message and extracts SourceInfo wherever possible.
+ *  might have SourceInfo. ::P4::error_helper parses those parameters, formats the
+ *  message, and extracts SourceInfo wherever possible.
  *
  *  Populated structure can be serialized to canonical error message with toString() method.
  *

@@ -145,17 +145,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psadpdktablekeyconsolidationif158() {
+    @hidden action psadpdktablekeyconsolidationif164() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psadpdktablekeyconsolidationif158 {
+    @hidden table tbl_psadpdktablekeyconsolidationif164 {
         actions = {
-            psadpdktablekeyconsolidationif158();
+            psadpdktablekeyconsolidationif164();
         }
-        const default_action = psadpdktablekeyconsolidationif158();
+        const default_action = psadpdktablekeyconsolidationif164();
     }
     apply {
-        tbl_psadpdktablekeyconsolidationif158.apply();
+        tbl_psadpdktablekeyconsolidationif164.apply();
     }
 }
 

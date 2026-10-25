@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfProgram.h"
 
@@ -102,7 +91,7 @@ void EBPFProgram::emitC(CodeBuilder *builder, const std::filesystem::path &heade
     if (model.arch == ModelArchitecture::XdpSwitch)
         builder->target->emitCodeSection(builder, "xdp"_cs);
     else
-        builder->target->emitCodeSection(builder, "prog"_cs);
+        builder->target->emitCodeSection(builder, "tc"_cs);
     builder->emitIndent();
     builder->target->emitMain(builder, functionName, model.CPacketName.toString());
     builder->blockStart();
@@ -219,7 +208,7 @@ class ErrorCodesVisitor : public Inspector {
  public:
     explicit ErrorCodesVisitor(CodeBuilder *builder) : builder(builder) {}
     bool preorder(const IR::Type_Error *errors) override {
-        for (auto m : *errors->getDeclarations()) {
+        for (auto m : errors->getDeclarations()) {
             builder->emitIndent();
             builder->appendFormat("%s,\n", m->getName().name.c_str());
         }

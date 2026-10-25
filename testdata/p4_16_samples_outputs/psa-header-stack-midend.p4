@@ -88,19 +88,19 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 }
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaheaderstack119() {
+    @hidden action psaheaderstack125() {
         buffer.emit<ethernet_t>(d.ethernet);
         buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
         buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
     }
-    @hidden table tbl_psaheaderstack119 {
+    @hidden table tbl_psaheaderstack125 {
         actions = {
-            psaheaderstack119();
+            psaheaderstack125();
         }
-        const default_action = psaheaderstack119();
+        const default_action = psaheaderstack125();
     }
     apply {
-        tbl_psaheaderstack119.apply();
+        tbl_psaheaderstack125.apply();
     }
 }
 

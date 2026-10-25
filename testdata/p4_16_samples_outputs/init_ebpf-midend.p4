@@ -39,17 +39,17 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w64);
         default_action = NoAction_1();
     }
-    @hidden action init_ebpf58() {
+    @hidden action init_ebpf49() {
         pass = true;
     }
-    @hidden table tbl_init_ebpf58 {
+    @hidden table tbl_init_ebpf49 {
         actions = {
-            init_ebpf58();
+            init_ebpf49();
         }
-        const default_action = init_ebpf58();
+        const default_action = init_ebpf49();
     }
     apply {
-        tbl_init_ebpf58.apply();
+        tbl_init_ebpf49.apply();
         tbl_0.apply();
     }
 }

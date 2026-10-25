@@ -1,10 +1,5 @@
 #include <core.p4>
 
-match_kind {
-    ternary,
-    exact
-}
-
 struct TArg1 {
     bit<9> field1;
     bool   drop;

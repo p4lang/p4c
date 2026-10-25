@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef PARDE_MARSHAL_H_
-#define PARDE_MARSHAL_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_
 
 #include <iostream>
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -52,7 +52,6 @@ struct MarshaledFrom {
     static MarshaledFrom fromJSON(JSONLoader &json);
 
     friend std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m);
-    friend P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const MarshaledFrom &c);
 
     MarshaledFrom() : gress(INGRESS), field_name(cstring::empty), pre_padding(0) {}
     MarshaledFrom(gress_t gress, cstring name) : gress(gress), field_name(name), pre_padding(0) {}
@@ -65,11 +64,6 @@ inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {
     return s;
 }
 
-inline JSONGenerator &operator<<(JSONGenerator &out, const MarshaledFrom &c) {
-    c.toJSON(out);
-    return out;
-}
-
 }  // namespace P4
 
-#endif /* PARDE_MARSHAL_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_ */

@@ -1,16 +1,6 @@
-# Copyright 2013-present Barefoot Networks, Inc.
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # compiling for the simple_switch target.
@@ -139,15 +129,21 @@ add_custom_target(linkbmv2
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-pna ${P4C_BINARY_DIR}/p4c-bm2-pna
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   DEPENDS update_includes
   )
 add_dependencies(p4c_driver linkbmv2)
 
+if (SUPPORT_P4_14)
+add_custom_target(linkp414bmv2
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  DEPENDS update_includes
+  )
+add_dependencies(p4c_driver linkp414bmv2)
+endif()
 
 # Tests
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
-set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
+set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py --use-veth")
 
 set (V1_INCLUDE_PATTERNS "include.*v1model.p4")
 set (P4TESTS_FOR_V1MODEL "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
@@ -159,18 +155,46 @@ set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   ${v1tests}
   )
 
+if (SUPPORT_P4_14)
+  list(APPEND BMV2_V1MODEL_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
+    )
+endif()
+
 set (PSA_INCLUDE_PATTERNS "include.*psa.p4")
-set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4")
-set (P4TESTS_FOR_PSA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
+set (P4TESTS_FOR_PSA
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4"
+  )
 p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" EXCLUDE "${PSA_EXCLUDE_PATTERNS}")
 
 set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
+)
+
+set (PNA_INCLUDE_PATTERNS "include.*pna.p4")
+set (PNA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
+set (P4TESTS_FOR_PNA
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4"
+  )
+p4c_find_tests("${P4TESTS_FOR_PNA}" pna_test_candidates INCLUDE "${PNA_INCLUDE_PATTERNS}" EXCLUDE "${PNA_EXCLUDE_PATTERNS}")
+# Exclude dpdk tests from PNA test candidates
+# FIXME: some of these work with BMv2 -- potentially enable later
+set (pna_tests "")
+foreach (t ${pna_test_candidates})
+  if (NOT t MATCHES ".*-dpdk-.*.p4")
+    list (APPEND pna_tests ${t})
+  endif()
+endforeach()
+
+set (BMV2_PNA_TEST_SUITES
+  ${pna_tests}
 )
 
 # Execute PTF tests for these files.
@@ -178,17 +202,13 @@ set (BMV2_PTF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary2-bmv2.p4"
 )
 
-# -p to use psa switch model
-# -a to pass flags to compiler
-set (testExtraFlags "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
+# --target and --arch pick the compiler and switch model, and are passed to the compiler
+set (testExtraFlagsPSA "${testExtraFlags} --target bmv2 --arch psa")
+set (testExtraFlagsPNA "${testExtraFlags} --target bmv2 --arch pna")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
   # Even though the P4 spec allows it, it doesn't really make sense in a switch
-  # so we allow it to fail on BMv2.
-  testdata/p4_14_samples/issue60.p4
-  # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
-  testdata/p4_14_samples/issue-1426.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
@@ -197,12 +217,15 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1062-bmv2.p4
   # This test uses an undefined extern
   testdata/p4_16_samples/issue1193-bmv2.p4
-  # This test also uses a custom extern
-  testdata/p4_14_samples/issue604.p4
   # This test uses an incorrect model
   testdata/p4_16_samples/issue1205-bmv2.p4
   # These psa tests are not ready to run on bmv2 yet
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
+  testdata/p4_16_samples/psa-example-parser-checksum.p4 # error: error.NoError: unsupported exact key expression
+  testdata/p4_16_samples/psa-meter4.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-meter5.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-table-hit-miss.p4 # error: Program can not be implemented on this target since it
+                                               # contains a path from table MyIC.tbl back to itself
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
   # These test use computations in the verify/update checksum controls - unsupported
@@ -216,7 +239,26 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/hashing-non-tuple-bmv2.p4
   # Similarly, this test hashes on a bit input.
   testdata/p4_16_samples/issue584-1-bmv2.p4
+  # These pna tests are not ready to run on bmv2 yet
+  testdata/p4_16_samples/pna-example-SelectByDirection.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-SelectByDirection1.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-SelectByDirection2.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-header-union.p4  # Error -11
+  testdata/p4_16_samples/pna-example-header-union1.p4  # Error -11
+  testdata/p4_16_samples/pna-example-pass-2.p4  # Conditional execution in actions not supported
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking.p4  # Conditional execution in actions not supported
+  testdata/p4_16_samples/pna-extract-local-header.p4  # error: IfStatement: not supported within a deparser on this target
 )
+if (SUPPORT_P4_14)
+  list(APPEND XFAIL_TESTS
+    # so we allow it to fail on BMv2.
+    testdata/p4_14_samples/issue60.p4
+    # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
+    testdata/p4_14_samples/issue-1426.p4
+    # This test also uses a custom extern
+    testdata/p4_14_samples/issue604.p4
+  )
+endif()
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
 
@@ -244,9 +286,15 @@ else()
 endif()
 
 if (HAVE_PSA_SWITCH)
-  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPSA})
 else()
   MESSAGE(WARNING "BMv2 PSA switch is not available, not adding PSA BMv2 tests")
+endif()
+
+if (HAVE_PNA_NIC)
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PNA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPNA})
+else()
+  MESSAGE(WARNING "BMv2 PNA switch is not available, not adding PNA BMv2 tests")
 endif()
 
 set (GTEST_BMV2_SOURCES

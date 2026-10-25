@@ -36,15 +36,6 @@
 
 using namespace P4;
 
-struct DumpPipe : public Inspector {
-    const char *heading;
-    DumpPipe() : heading(nullptr) {}
-    explicit DumpPipe(const char *h) : heading(h) {}
-#if BAREFOOT_INTERNAL
-    bool preorder(const IR::Node *pipe) override;
-#endif  // BAREFOOT_INTERNAL
-};
-
 /// Used to end the compiler after a fatal error is raised. Usually, this just trows an exception
 /// \ref Util::CompilationError. In internal builds when a program contains "expect error" and all
 /// the errors are expected (including the fatal one) then this function just exits (calls

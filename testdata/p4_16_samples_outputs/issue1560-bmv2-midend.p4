@@ -156,19 +156,19 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         size = 16;
         default_action = NoAction_3();
     }
-    @hidden action issue1560bmv2l175() {
+    @hidden action issue1560bmv2l181() {
         meta._hash12 = hdr.ipv4.dstAddr[15:0];
     }
-    @hidden table tbl_issue1560bmv2l175 {
+    @hidden table tbl_issue1560bmv2l181 {
         actions = {
-            issue1560bmv2l175();
+            issue1560bmv2l181();
         }
-        const default_action = issue1560bmv2l175();
+        const default_action = issue1560bmv2l181();
     }
     apply {
         t0_0.apply();
         t1_0.apply();
-        tbl_issue1560bmv2l175.apply();
+        tbl_issue1560bmv2l181.apply();
         t2_0.apply();
     }
 }

@@ -1,18 +1,9 @@
 /*
-Copyright 2022 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2022 Intel Corp.
+ * SPDX-FileCopyrightText: 2022 Intel Corp.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_FLATTENUNIONS_H_
 #define MIDEND_FLATTENUNIONS_H_
@@ -49,6 +40,8 @@ class DoFlattenHeaderUnion : public Transform {
  protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    // A field name is only unique within its declaring struct.
+    std::map<std::pair<cstring, cstring>, std::map<cstring, cstring>> structReplacementMap;
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
     // Replacement map needed to add element-wise header declaration in right context
     std::map<IR::Declaration_Variable *, IR::IndexedVector<IR::Declaration>> replaceDVMap;
@@ -92,6 +85,7 @@ class DoFlattenHeaderUnion : public Transform {
  *
  */
 class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
+    std::map<std::pair<cstring, cstring>, std::vector<cstring>> stackFieldMap;
     std::map<cstring, std::vector<cstring>> stackMap;
 
  public:
@@ -134,17 +128,21 @@ class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
  *   b) if(u.isValid())               | if (tmp == 1)
  * 3) When setValid method is called on a header element, it is translated to setValid for the
  *    given element and setInvalid for rest of the elements
- * 4) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
+ * 4) Extracting into a header element is followed by setInvalid for rest of the elements
+ * 5) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
  *    earlier passes and hence no-action required here.
  */
 class HandleValidityHeaderUnion : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    bool flattenStacks;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
 
+    bool isFlattened(const IR::Expression *u) const;
+
  public:
-    HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+    HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool flattenStacks)
+        : refMap(refMap), typeMap(typeMap), flattenStacks(flattenStacks) {
         setName("HandleValidityHeaderUnion");
     }
     const IR::Node *postorder(IR::AssignmentStatement *assn) override;
@@ -162,6 +160,21 @@ class HandleValidityHeaderUnion : public Transform {
                                       bool setValidforCurrMem);
     const IR::Node *expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce,
                                   IR::IndexedVector<IR::StatOrDecl> &code_block);
+};
+
+/** Lower push_front/pop_front on a header union stack into member-wise element
+ * copies plus setInvalid on the vacated elements. Runs before
+ * HandleValidityHeaderUnion (so the copies get validity handling) and before
+ * DoFlattenHeaderUnionStack (which only rewrites [] index accesses).
+ */
+class DoExpandHeaderUnionStackPushPop : public Transform {
+    P4::TypeMap *typeMap;
+
+ public:
+    explicit DoExpandHeaderUnionStackPushPop(P4::TypeMap *typeMap) : typeMap(typeMap) {
+        setName("DoExpandHeaderUnionStackPushPop");
+    }
+    const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
@@ -200,7 +213,15 @@ class FlattenHeaderUnion : public PassManager {
  public:
     FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool loopsUnroll = true) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
+        // Lower push_front/pop_front on header union stacks first; the new nodes need
+        // types before HandleValidityHeaderUnion.
+        if (loopsUnroll) {
+            passes.push_back(new DoExpandHeaderUnionStackPushPop(typeMap));
+            passes.push_back(new P4::ClearTypeMap(typeMap));
+            passes.push_back(new P4::TypeInference(typeMap, false));
+            passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        }
+        passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap, loopsUnroll));
         // Stack flattening is only applicable if parser loops are unrolled and
         // header union stack elements are accessed using [] notation. This pass does not handle
         // .next .last etc accessors for stack elements.

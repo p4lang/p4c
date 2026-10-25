@@ -1,6 +1,6 @@
-action-bind.p4(23): [--Werror=type-error] error: y: argument does not match declaration in actions list: x
+action-bind.p4(14): [--Werror=type-error] error: y: argument does not match declaration in actions list: x
         default_action = a(y, 0); // error: different bound argument
                            ^
-action-bind.p4(22)
+action-bind.p4(13)
         actions = { a(x); }
                       ^

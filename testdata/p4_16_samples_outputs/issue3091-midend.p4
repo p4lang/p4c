@@ -56,20 +56,20 @@ struct tuple_0 {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.lut3") ValueLookupTable<tuple_0, bit<8>, bit<16>>((tuple_0){f0 = exact}, 1024) lut3_0;
-    @hidden action issue3091l229() {
+    @hidden action issue3091l220() {
         hdr.ethernet.dstAddr[47:40] = 8w5;
         hdr.ethernet.etherType[7:0] = fn_foo<match_kind>(ternary);
         hdr.ethernet.dstAddr[15:0] = lut3_0.lookup(hdr.ethernet.etherType[7:0]);
     }
-    @hidden table tbl_issue3091l229 {
+    @hidden table tbl_issue3091l220 {
         actions = {
-            issue3091l229();
+            issue3091l220();
         }
-        const default_action = issue3091l229();
+        const default_action = issue3091l220();
     }
     apply {
         if (hdr.ethernet.isValid()) {
-            tbl_issue3091l229.apply();
+            tbl_issue3091l220.apply();
         }
     }
 }

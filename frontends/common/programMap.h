@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_COMMON_PROGRAMMAP_H_
 #define FRONTENDS_COMMON_PROGRAMMAP_H_
@@ -27,7 +18,6 @@ namespace P4 {
 // If the program has not changed, the map is up-to-date.
 class ProgramMap : public IHasDbPrint {
  protected:
-    const IR::P4Program *fake = new IR::P4Program();
     const IR::P4Program *program = nullptr;
     cstring mapKind;
     explicit ProgramMap(std::string_view kind) : mapKind(kind) {}
@@ -46,21 +36,16 @@ class ProgramMap : public IHasDbPrint {
         return false;
     }
     void validateMap(const IR::Node *node) const {
-        if (node == nullptr || !node->is<IR::P4Program>() || program == nullptr) return;
         if (program != node)
             BUG("Invalid map %1%: computed for %2%, used for %3%", mapKind, dbp(program),
                 dbp(node));
     }
     void updateMap(const IR::Node *node) {
         if (node == nullptr || !node->is<IR::P4Program>()) return;
-        program = node->to<IR::P4Program>();
+        program = node ? node->to<IR::P4Program>() : nullptr;
         LOG2(mapKind << " updated to " << dbp(node));
     }
-    void clear() {
-        // This ensures that a clear map is never up-to-date,
-        // since the 'fake' node cannot appear in a program.
-        program = fake;
-    }
+    void clear() { program = nullptr; }
 };
 
 }  // namespace P4

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "ir/irutils.h"
 
 #include <cmath>
@@ -21,6 +25,20 @@ const Type_Bits *getBitTypeToFit(int value) {
     // To represent a number N, we need ceil(log2(N + 1)) bits.
     int width = ceil(log2(value + 1));
     return Type_Bits::get(width);
+}
+
+const Type_Extern *getExternType(const Type *type) {
+    CHECK_NULL(type);
+    if (const auto *externType = type->to<Type_Extern>()) {
+        return externType;
+    }
+    if (const auto *specialized = type->to<Type_SpecializedCanonical>()) {
+        if (!specialized->baseType->is<Type_Extern>()) {
+            return nullptr;
+        }
+        return specialized->substituted->checkedTo<Type_Extern>();
+    }
+    return nullptr;
 }
 
 /* =============================================================================================
@@ -104,22 +122,18 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         }
         return new IR::ListExpression(srcInfo, *vec);
     }
-    if (const auto *ts = type->to<IR::Type_Stack>()) {
+    if (const auto *ta = type->to<IR::Type_Array>()) {
         auto *vec = new IR::Vector<IR::Expression>();
-        const auto *elementType = ts->elementType;
-        for (size_t i = 0; i < ts->getSize(); i++) {
-            const IR::Expression *invalid = nullptr;
-            if (elementType->is<IR::Type_Header>()) {
-                invalid = new IR::InvalidHeader(elementType->getP4Type());
-            } else {
-                BUG_CHECK(elementType->is<IR::Type_HeaderUnion>(),
-                          "%1%: expected a header or header union stack", elementType);
-                invalid = new IR::InvalidHeaderUnion(srcInfo, elementType->getP4Type());
+        const auto *elementType = ta->elementType;
+        for (size_t i = 0; i < ta->getSize(); i++) {
+            const IR::Expression *value = getDefaultValue(elementType, srcInfo);
+            if (value == nullptr) {
+                return nullptr;
             }
-            vec->push_back(invalid);
+            vec->push_back(value);
         }
-        const auto *resultType = ts->getP4Type();
-        return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
+        const auto *resultType = ta->getP4Type();
+        return new IR::ArrayExpression(srcInfo, resultType, *vec, resultType);
     }
     if (valueRequired) {
         P4C_UNIMPLEMENTED("%1%: No default value for type %2% (%3%).", srcInfo, type,
@@ -143,7 +157,7 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
         if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else if (const auto *subListExpr = listElem->to<BaseListExpression>()) {
+        } else if (const auto *subListExpr = listElem->expression->to<BaseListExpression>()) {
             auto subList = flattenListExpression(subListExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
@@ -231,7 +245,8 @@ std::vector<const Expression *> flattenListOrStructExpression(const Expression *
 
 template <typename Stmts>
 const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
-    if (stmts.size() == 1) {
+    if (stmts.size() == 1 && !t.getParent<IR::SwitchCase>()) {
+        // the child of a SwitchCase *must* be a BlockStatement
         // it could also be a declaration, and it that case, we need to wrap it in a block anyway
         if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
             return stmt;

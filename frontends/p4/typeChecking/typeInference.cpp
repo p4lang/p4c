@@ -12,6 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ir/dump.h"
 #include "typeChecker.h"
 
 namespace P4 {
@@ -38,6 +39,7 @@ DEFINE_POSTORDER(IR::Declaration_Variable)
 DEFINE_POSTORDER(IR::Declaration_Constant)
 DEFINE_POSTORDER(IR::P4Control)
 DEFINE_POSTORDER(IR::P4Parser)
+DEFINE_POSTORDER(IR::ParserState)
 DEFINE_POSTORDER(IR::Method)
 
 DEFINE_POSTORDER(IR::Type_Type)
@@ -53,7 +55,7 @@ DEFINE_POSTORDER(IR::Type_Enum)
 DEFINE_POSTORDER(IR::Type_Extern)
 DEFINE_POSTORDER(IR::StructField)
 DEFINE_POSTORDER(IR::Type_Header)
-DEFINE_POSTORDER(IR::Type_Stack)
+DEFINE_POSTORDER(IR::Type_Array)
 DEFINE_POSTORDER(IR::Type_Struct)
 DEFINE_POSTORDER(IR::Type_HeaderUnion)
 DEFINE_POSTORDER(IR::Type_Typedef)
@@ -64,6 +66,8 @@ DEFINE_POSTORDER(IR::Type_P4List)
 DEFINE_POSTORDER(IR::Type_List)
 DEFINE_POSTORDER(IR::Type_Set)
 DEFINE_POSTORDER(IR::Type_ArchBlock)
+DEFINE_POSTORDER(IR::Type_Parser)
+DEFINE_POSTORDER(IR::Type_Control)
 DEFINE_POSTORDER(IR::Type_Newtype)
 DEFINE_POSTORDER(IR::Type_Package)
 DEFINE_POSTORDER(IR::Type_ActionEnum)
@@ -116,20 +120,26 @@ DEFINE_POSTORDER(IR::InvalidHeaderUnion)
 DEFINE_POSTORDER(IR::Invalid)
 DEFINE_POSTORDER(IR::P4ListExpression)
 DEFINE_POSTORDER(IR::StructExpression)
-DEFINE_POSTORDER(IR::HeaderStackExpression)
+DEFINE_POSTORDER(IR::ArrayExpression)
 DEFINE_POSTORDER(IR::MethodCallStatement)
 DEFINE_POSTORDER(IR::MethodCallExpression)
 DEFINE_POSTORDER(IR::ConstructorCallExpression)
 DEFINE_POSTORDER(IR::SelectExpression)
 DEFINE_POSTORDER(IR::DefaultExpression)
 DEFINE_POSTORDER(IR::This)
+#ifdef SUPPORT_P4_14
 DEFINE_POSTORDER(IR::AttribLocal)
+#endif
 DEFINE_POSTORDER(IR::ActionList)
 
 DEFINE_POSTORDER(IR::ReturnStatement)
 DEFINE_POSTORDER(IR::IfStatement)
 DEFINE_POSTORDER(IR::SwitchStatement)
 DEFINE_POSTORDER(IR::AssignmentStatement)
+DEFINE_POSTORDER(IR::OpAssignmentStatement)
+DEFINE_POSTORDER(IR::ShlAssign)
+DEFINE_POSTORDER(IR::ShrAssign)
+DEFINE_POSTORDER(IR::ForStatement)
 DEFINE_POSTORDER(IR::ForInStatement)
 DEFINE_POSTORDER(IR::ActionListElement)
 DEFINE_POSTORDER(IR::KeyElement)
@@ -140,6 +150,7 @@ DEFINE_POSTORDER(IR::Annotation)
 Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
     TypeInferenceBase::start(node);
+    LOG5(Dump(node));
 
     return rv;
 }

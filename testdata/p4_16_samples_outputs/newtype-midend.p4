@@ -22,29 +22,29 @@ control c(out bit<32> x) {
         }
         default_action = NoAction_1();
     }
-    @hidden action newtype34() {
+    @hidden action newtype40() {
         k_0 = 32w0;
         x = 32w0;
     }
-    @hidden action newtype43() {
+    @hidden action newtype49() {
         x = 32w3;
     }
-    @hidden table tbl_newtype34 {
+    @hidden table tbl_newtype40 {
         actions = {
-            newtype34();
+            newtype40();
         }
-        const default_action = newtype34();
+        const default_action = newtype40();
     }
-    @hidden table tbl_newtype43 {
+    @hidden table tbl_newtype49 {
         actions = {
-            newtype43();
+            newtype49();
         }
-        const default_action = newtype43();
+        const default_action = newtype49();
     }
     apply {
-        tbl_newtype34.apply();
+        tbl_newtype40.apply();
         t_0.apply();
-        tbl_newtype43.apply();
+        tbl_newtype49.apply();
     }
 }
 

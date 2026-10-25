@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 project(libdynhash VERSION 0.1 LANGUAGES C)
 add_library(dynhash_o OBJECT
   dynamic_hash.cpp

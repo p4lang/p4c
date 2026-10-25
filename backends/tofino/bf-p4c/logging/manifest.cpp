@@ -91,7 +91,7 @@ Manifest::InputFiles::InputFiles(const BFN_Options &options) {
     const char *const sep = " ";
     for (const auto *word = strtok_r(ppFlags, sep, &brkt); word;
          word = strtok_r(nullptr, sep, &brkt)) {
-        if ('0' == word[0]) {
+        if ('-' == word[0]) {
             if ('I' == word[1])
                 m_includePaths.insert(cstring(word + 2));
             else if ('D' == word[1])

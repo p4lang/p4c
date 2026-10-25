@@ -1,0 +1,102 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited] # Runs when an issue is created or modified
+  pull_request_target:
+    types: [opened, edited] # Runs when a PR is created or modified
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  issues: write # Ensure the token has write access to issues
+  pull-requests: write # Ensure the token has write access to PRs
+  contents: read
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label Issues and PRs
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Label mapping data. Shared keywords apply to both issues and
+            // PRs, so they're defined once instead of being duplicated
+            // (which previously caused drift, e.g. "[Tofino]" vs "[tofino]").
+            const SHARED_MAPPINGS = {
+              "[core]": "core",
+              "[frontend]": "core",
+              "[midend]": "core",
+              "[parser]": "core",
+              "[infra]": "infrastructure",
+              "[infrastructure]": "infrastructure",
+              "[docs]": "documentation",
+              "[documentation]": "documentation",
+              "[dpdk]": "dpdk",
+              "[bmv2]": "bmv2",
+              "[ebpf]": "ebpf",
+              "[p4testgen]": "p4tools",
+              "[p4smith]": "p4tools",
+              "[p4tools]": "p4tools",
+              "[p4tc]": "p4tc",
+              "[p4fmt]": "p4fmt",
+              "[p4-spec]": "p4-spec",
+              "[control-plane]": "control-plane",
+              "[p4runtime]": "control-plane",
+              "[tofino]": "tofino",
+            };
+
+            // Issue-only mappings (kept separate since issue semantics
+            // differ from PR semantics, e.g. "bug" vs "fix").
+            const ISSUE_ONLY_MAPPINGS = {
+              "[bug]": "bug",
+              "[feature]": "enhancement",
+            };
+
+            // PR-only mappings.
+            const PR_ONLY_MAPPINGS = {};
+
+            // pull_request_target events can carry both pull_request and
+            // issue-shaped payload data, so PR is checked first.
+            const isPR = !!context.payload.pull_request;
+            const isIssue = !!context.payload.issue;
+
+            let itemToLabel;
+            let itemNumber;
+
+            if (isPR) {
+              itemToLabel = context.payload.pull_request;
+              itemNumber = context.payload.pull_request.number;
+            } else if (isIssue) {
+              itemToLabel = context.payload.issue;
+              itemNumber = context.issue.number;
+            } else {
+              console.log("Not an issue or PR event, exiting");
+              return;
+            }
+
+            const labelMappings = {
+              ...SHARED_MAPPINGS,
+              ...(isPR ? PR_ONLY_MAPPINGS : ISSUE_ONLY_MAPPINGS),
+            };
+
+            const title = itemToLabel.title.toLowerCase();
+            const labelsToAdd = new Set();
+
+            for (const [keyword, label] of Object.entries(labelMappings)) {
+              if (title.includes(keyword.toLowerCase())) {
+                labelsToAdd.add(label);
+              }
+            }
+
+            if (labelsToAdd.size > 0) {
+              const labels = [...labelsToAdd];
+              await github.rest.issues.addLabels({
+                issue_number: itemNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels,
+              });
+              console.log(`Added labels to #${itemNumber}: ${labels.join(", ")}`);
+            }

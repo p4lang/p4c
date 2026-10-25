@@ -32,19 +32,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.n") bit<8> n_0;
-    @hidden action gauntlet_nested_slicebmv2l36() {
+    @hidden action gauntlet_nested_slicebmv2l42() {
         n_0 = 8w0b11111111;
         n_0[7:4] = 4w0;
         h.h.a = n_0;
     }
-    @hidden table tbl_gauntlet_nested_slicebmv2l36 {
+    @hidden table tbl_gauntlet_nested_slicebmv2l42 {
         actions = {
-            gauntlet_nested_slicebmv2l36();
+            gauntlet_nested_slicebmv2l42();
         }
-        const default_action = gauntlet_nested_slicebmv2l36();
+        const default_action = gauntlet_nested_slicebmv2l42();
     }
     apply {
-        tbl_gauntlet_nested_slicebmv2l36.apply();
+        tbl_gauntlet_nested_slicebmv2l42.apply();
     }
 }
 

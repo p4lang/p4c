@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef TOOLS_IR_GENERATOR_IRCLASS_H_
 #define TOOLS_IR_GENERATOR_IRCLASS_H_
@@ -263,6 +254,7 @@ class CommentBlock : public IrElement {
 
 // Represents a C++ class for an IR node.
 class IrClass : public IrElement {
+    bool resolved = false;
     std::vector<const IrClass *> parentClasses;
     std::vector<const Type *> parents;
     const IrClass *concreteParent;
@@ -274,6 +266,7 @@ class IrClass : public IrElement {
     void generateMethods();
     bool shouldSkip(cstring feature) const;
     bool hasNoDirective(cstring feature) const;
+    friend class IrDefinitions;
 
  public:
     const IrClass *getParent() const {
@@ -346,8 +339,8 @@ class IrClass : public IrElement {
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;
-    Util::Enumerator<IrField *> *getFields() const;
-    Util::Enumerator<IrMethod *> *getUserMethods() const;
+    Util::EnumeratorPtr<IrField *> getFields() const;
+    Util::EnumeratorPtr<IrMethod *> getUserMethods() const;
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
     // name with scope qual if needed in the context
 };
@@ -369,10 +362,11 @@ class IrEnumType : public IrElement {
 
 class IrDefinitions {
     std::vector<IrElement *> elements;
-    Util::Enumerator<IrClass *> *getClasses() const;
+    Util::EnumeratorPtr<IrClass *> getClasses() const;
 
  public:
     explicit IrDefinitions(std::vector<IrElement *> classes) : elements(classes) {}
+    void toposort();
     void resolve() {
         IrClass::nodeClass()->resolve();
         IrClass::vectorClass()->resolve();
@@ -380,7 +374,8 @@ class IrDefinitions {
         IrClass::nodemapClass()->resolve();
         IrClass::ideclaration()->resolve();
         IrClass::indexedVectorClass()->resolve();
-        for (auto cls : *getClasses()) cls->resolve();
+        for (auto cls : getClasses()) cls->resolve();
+        toposort();
     }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;
 };

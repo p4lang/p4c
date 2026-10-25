@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _MIDEND_NORMALIZE_PARAMS_H_
-#define _MIDEND_NORMALIZE_PARAMS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_NORMALIZE_PARAMS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_NORMALIZE_PARAMS_H_
 
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -97,4 +97,4 @@ class RenameArchParams : public PassManager {
     }
 };
 
-#endif /* _MIDEND_NORMALIZE_PARAMS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_NORMALIZE_PARAMS_H_ */

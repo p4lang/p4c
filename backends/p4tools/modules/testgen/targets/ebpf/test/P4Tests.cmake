@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # General test utilities.
 include(${P4TOOLS_SOURCE_DIR}/cmake/TestUtils.cmake)
 # This file defines how we write the tests we generate.

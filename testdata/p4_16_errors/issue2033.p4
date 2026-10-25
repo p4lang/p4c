@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2019 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 match_kind { exact, ternary, lpm }
 struct Header_t {
     bit<8> fieldname;

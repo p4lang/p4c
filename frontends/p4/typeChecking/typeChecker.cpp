@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typeChecker.h"
 
@@ -27,6 +16,21 @@ limitations under the License.
 #include "typeUnification.h"
 
 namespace P4 {
+
+namespace {
+/// True if the type contains any type variables, i.e., Type_Var, Type_InfInt or Type_Any.
+class HasTypeVariables : public Inspector {
+    bool found = false;
+    void postorder(const IR::Type *type) override { found = found || type->is<IR::ITypeVar>(); }
+
+ public:
+    static bool find(const IR::Type *type) {
+        HasTypeVariables htv;
+        type->apply(htv);
+        return htv.found;
+    }
+};
+}  // namespace
 
 #if DEBUG_TYPES
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
@@ -81,7 +85,7 @@ const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeG
         BUG_CHECK(b, "%1%: failed replacing %2% with %3%", type, v, tv);
     }
 
-    TypeVariableSubstitutionVisitor sv(&tvs, true);
+    TypeVariableSubstitutionVisitor sv(&tvs, true, true);
     sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv, getChildContext());
     CHECK_NULL(cl);
@@ -149,6 +153,8 @@ const IR::Type *TypeInferenceBase::getTypeType(const IR::Node *element) const {
     const IR::Type *result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
+        if (auto *us = element->to<IR::Type_UnknownStruct>())
+            typeError("%1%: Cannot infer type for unknown struct type initializer", us);
         if (::P4::errorCount() == 0) BUG("Could not find type of %1%", element);
         return nullptr;
     }
@@ -259,19 +265,19 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     } else if (auto set = type->to<IR::Type_Set>()) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr) return nullptr;
-        if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
+        if (et->is<IR::Type_Array>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType) return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
-    } else if (auto stack = type->to<IR::Type_Stack>()) {
+    } else if (auto stack = type->to<IR::Type_Array>()) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr) return nullptr;
         const IR::Type *canon;
         if (et == stack->elementType)
             canon = type;
         else
-            canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
+            canon = new IR::Type_Array(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
     } else if (auto vec = type->to<IR::Type_P4List>()) {
@@ -449,14 +455,29 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         }
 
         IR::Vector<IR::Type> *args = new IR::Vector<IR::Type>();
+        const bool specializingPackage = baseCanon->is<IR::Type_Package>();
         for (const IR::Type *a : *st->arguments) {
             auto atype = getTypeType(a);
             if (atype == nullptr) return nullptr;
+            // Control/parser implementations are IContainers used for instantiation; as type
+            // arguments they denote their signatures (Type_Control / Type_Parser).
+            if (auto *ctrl = atype->to<IR::P4Control>())
+                atype = ctrl->type;
+            else if (auto *parser = atype->to<IR::P4Parser>())
+                atype = parser->type;
             auto checkType = atype;
             if (auto tsc = atype->to<IR::Type_SpecializedCanonical>()) checkType = tsc->baseType;
-            if (checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
+            // Packages may take control/parser/package types as type arguments; other generics
+            // may not.
+            const bool archTypeArg =
+                checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
                 checkType->is<IR::Type_Package>() || checkType->is<IR::P4Parser>() ||
-                checkType->is<IR::P4Control>()) {
+                checkType->is<IR::P4Control>();
+            const bool allowedForPackage =
+                specializingPackage &&
+                (checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
+                 checkType->is<IR::Type_Package>());
+            if (archTypeArg && !allowedForPackage) {
                 typeError("%1%: Cannot use %2% as a type parameter", type, checkType);
                 return nullptr;
             }
@@ -472,7 +493,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         learn(result, this, getChildContext());
         return result;
     } else {
-        BUG_CHECK(::P4::errorCount(), "Unexpected type %1%", dbp(type));
+        BUG_CHECK(errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
@@ -493,7 +514,7 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::P4Progra
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_MatchKind *decl) {
     if (done()) return decl;
-    for (auto id : *decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
+    for (auto id : decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
 }
 
@@ -541,11 +562,47 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
+const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                               const IR::Type *destType) {
+    // Guard: only act on untyped Invalid literals
+    if (!expr->is<IR::Invalid>()) return expr;
+    if (!expr->type->is<IR::Type_Unknown>()) return expr;
+
+    // Resolve the destination type fully (unwrap Type_Name, typedefs, etc.)
+    auto concreteType = typeMap->getTypeType(destType, true);
+    if (concreteType == nullptr) return expr;
+
+    // Handle specialized canonical types
+    if (auto tsc = concreteType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+
+    // Set common type information before creating result
+    auto type = destType->getP4Type();
+    setType(type, new IR::Type_Type(destType));
+
+    IR::Expression *result = nullptr;
+    if (concreteType->is<IR::Type_Header>()) {
+        result = new IR::InvalidHeader(expr->srcInfo, type, type);
+    } else if (concreteType->is<IR::Type_HeaderUnion>()) {
+        result = new IR::InvalidHeaderUnion(expr->srcInfo, type, type);
+    } else {
+        // destType is not a header/header_union — leave expr untyped for normal error handling
+        return expr;
+    }
+
+    // Set common properties after creating result
+    setType(result, destType);
+    setCompileTimeConstant(result);
+    return result;
+}
+
 const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
                                                     const IR::Type *destType,
                                                     const IR::Expression *sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
+    // Convert untyped {#} literals to typed InvalidHeader/InvalidHeaderUnion
+    sourceExpression = convertUntypedInvalid(sourceExpression, destType);
     const IR::Type *initType = getType(sourceExpression);
     if (initType == nullptr) return sourceExpression;
 
@@ -569,7 +626,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
 
     if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         auto toType = destType->getP4Type();
-        sourceExpression = new IR::Cast(toType, sourceExpression);
+        sourceExpression = new IR::Cast(toType, sourceExpression, /* implicit */ true);
         setType(toType, new IR::Type_Type(destType));
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
@@ -584,7 +641,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
         if (initType->is<IR::Type_UnknownStruct>() ||
             (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
-            // we still need to recurse over its fields; they many not have
+            // we still need to recurse over its fields; they may not have
             // the right type.
             CHECK_NULL(si);
             bool hasDots = si->containsDots();
@@ -597,8 +654,13 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             bool changes = false;
             for (const IR::StructField *fieldI : ts->fields) {
                 auto compI = si->components.getDeclaration<IR::NamedExpression>(fieldI->name);
-                if (hasDots && compI == nullptr) {
-                    continue;
+                if (compI == nullptr) {
+                    if (hasDots) {
+                        continue;
+                    } else {
+                        typeError("No initializer for field %1%", fieldI->name);
+                        return sourceExpression;
+                    }
                 }
                 auto src = assignment(sourceExpression, fieldI->type, compI->expression);
                 if (src != compI->expression) changes = true;
@@ -607,7 +669,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             if (hasDots) vec.push_back(si->getField("..."_cs));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
-                sourceExpression = new IR::StructExpression(type, type, vec);
+                sourceExpression =
+                    new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
                 setType(sourceExpression, destType);
             }
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
@@ -630,7 +693,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            sourceExpression = new IR::StructExpression(type, type, vec);
+            sourceExpression = new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
             setType(sourceExpression, destType);
             assignment(errorPosition, destType, sourceExpression);
         }
@@ -665,18 +728,18 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             }
         }
         // else this is some other expression that evaluates to a tuple
-    } else if (auto tstack = concreteType->to<IR::Type_Stack>()) {
+    } else if (auto tArray = concreteType->to<IR::Type_Array>()) {
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             bool hasDots = li->containsDots();
-            if (tstack->getSize() != li->components.size() && !hasDots) {
+            if (tArray->getSize() != li->components.size() && !hasDots) {
                 typeError("%1%: destination type expects %2% elements, but source only has %3%",
-                          errorPosition, tstack->getSize(), li->components.size());
+                          errorPosition, tArray->getSize(), li->components.size());
                 return sourceExpression;
             }
             IR::Vector<IR::Expression> vec;
             size_t sourceSize = li->size();
-            auto elementType = tstack->elementType;
-            for (size_t i = 0; i < tstack->getSize(); i++) {
+            auto elementType = tArray->elementType;
+            for (size_t i = 0; i < tArray->getSize(); i++) {
                 auto compI = li->components.at(i);
                 if (hasDots && (i == sourceSize - 1)) {
                     vec.push_back(compI);  // this is '...'
@@ -685,8 +748,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 auto src = assignment(sourceExpression, elementType, compI);
                 vec.push_back(src);
             }
-            auto p4stack = tstack->getP4Type();
-            sourceExpression = new IR::HeaderStackExpression(p4stack, vec, p4stack);
+            auto p4array = tArray->getP4Type();
+            sourceExpression = new IR::ArrayExpression(p4array, vec, p4array);
             setType(sourceExpression, destType);
             if (cst) setCompileTimeConstant(sourceExpression);
         }
@@ -756,7 +819,7 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
 
     auto args = new IR::Vector<IR::ArgumentInfo>();
     size_t i = 0;
-    for (auto pi : *methodType->parameters->getEnumerator()) {
+    for (auto pi : methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
             BUG_CHECK(pi->isOptional() || pi->defaultValue != nullptr, "Missing nonoptional arg %s",
                       pi);
@@ -839,8 +902,38 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
         if (!named) ++paramIt;
     }
     if (changed) arguments = newArgs;
-    auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
-                                          freshExtern->methods);
+    const IR::Type *objectType = nullptr;
+    if (!methodType->typeParameters->empty()) {
+        // The extern type is generic.  If all of its type parameters have been inferred from the
+        // constructor arguments, then the type of the constructed object is the extern type
+        // specialized with the inferred type arguments -- exactly as if those arguments had been
+        // supplied explicitly in the program.
+        auto typeArgs = new IR::Vector<IR::Type>();
+        bool allInferred = true;
+        for (auto tv : methodType->typeParameters->parameters) {
+            const IR::Type *arg = tvs->lookup(tv);
+            if (arg != nullptr) {
+                // The binding may itself contain type variables.
+                arg = arg->apply(substVisitor, getChildContext())->to<IR::Type>();
+            }
+            if (arg == nullptr || HasTypeVariables::find(arg)) {
+                allInferred = false;
+                break;
+            }
+            typeArgs->push_back(arg);
+        }
+        if (allInferred) {
+            auto specialized = specialize(ext, typeArgs, getChildContext());
+            if (specialized == nullptr) return none;
+            objectType =
+                new IR::Type_SpecializedCanonical(ext->srcInfo, ext, typeArgs, specialized);
+        }
+    }
+    // Some type parameters could not be inferred: they are preserved as free type variables in the
+    // type, so that they can be bound (or diagnosed) later.
+    if (objectType == nullptr)
+        objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
+                                         freshExtern->methods);
     learn(objectType, this, getChildContext());
     return {objectType, arguments};
 }
@@ -867,7 +960,7 @@ TypeInferenceBase::containerInstantiation(
             if (auto v = param->type->to<IR::Type_InfInt>()) {
                 auto tv = IR::Type_InfInt::get(param->type->srcInfo);
                 bool b = tvs.setBinding(v, tv);
-                BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
+                BUG_CHECK(b, "failed replacing %1% with %2%", v, tv);
             }
         }
         TypeVariableSubstitutionVisitor sv(&tvs, true);
@@ -927,7 +1020,39 @@ TypeInferenceBase::containerInstantiation(
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(returnType, newArgs);
+
+    // The package is generic.  If all of its type parameters have been inferred from the
+    // constructor arguments, then the type of the constructed object is the package type
+    // specialized with the inferred type arguments -- exactly as if those arguments had been
+    // supplied explicitly in the program.
+    if (const auto *package = container->to<IR::Type_Package>()) {
+        if (!constructor->typeParameters->empty()) {
+            auto typeArgs = new IR::Vector<IR::Type>();
+            bool allInferred = true;
+            TypeVariableSubstitutionVisitor substVisitor(tvs);
+            substVisitor.setCalledBy(this);
+            for (auto tv : constructor->typeParameters->parameters) {
+                const IR::Type *arg = tvs->lookup(tv);
+                if (arg != nullptr) {
+                    // The binding may itself contain type variables.
+                    arg = arg->apply(substVisitor, getChildContext())->to<IR::Type>();
+                }
+                if (arg == nullptr || HasTypeVariables::find(arg)) {
+                    allInferred = false;
+                    break;
+                }
+                typeArgs->push_back(arg);
+            }
+            if (allInferred) {
+                auto specialized = specialize(package, typeArgs, getChildContext());
+                if (specialized == nullptr) return {nullptr, nullptr};
+                returnType = new IR::Type_SpecializedCanonical(package->srcInfo, package, typeArgs,
+                                                               specialized);
+            }
+        }
+    }
+
+    return {returnType, newArgs};
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Argument *arg) {

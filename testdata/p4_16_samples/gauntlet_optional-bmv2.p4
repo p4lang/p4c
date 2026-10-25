@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 header ethernet_t {
     bit<48> dst_addr;

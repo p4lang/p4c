@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_IR_INLINE_H_
 #define IR_IR_INLINE_H_
@@ -80,9 +71,9 @@ namespace P4 {
 IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS, inline)
 
 template <class T>
-void IR::Vector<T>::visit_children(Visitor &v) {
+void IR::Vector<T>::visit_children(Visitor &v, const char *name) {
     for (auto i = vec.begin(); i != vec.end();) {
-        const IR::Node *n = v.apply_visitor(*i);
+        const IR::Node *n = v.apply_visitor(*i, name);
         if (!n && *i) {
             i = erase(i);
             continue;
@@ -124,41 +115,34 @@ void IR::Vector<T>::visit_children(Visitor &v) {
     }
 }
 template <class T>
-void IR::Vector<T>::visit_children(Visitor &v) const {
-    for (auto &a : vec) v.visit(a);
+void IR::Vector<T>::visit_children(Visitor &v, const char *name) const {
+    for (auto &a : vec) v.visit(a, name);
 }
 template <class T>
-void IR::Vector<T>::parallel_visit_children(Visitor &v) {
+void IR::Vector<T>::parallel_visit_children(Visitor &v, const char *) {
     SplitFlowVisitVector<T>(v, *this).run_visit();
 }
 template <class T>
-void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
+void IR::Vector<T>::parallel_visit_children(Visitor &v, const char *) const {
     SplitFlowVisitVector<T>(v, *this).run_visit();
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>
 void IR::Vector<T>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Node::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"vec\" : [";
-    for (auto &k : vec) {
-        json << sep << std::endl << json.indent << k;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep) {
-        json << std::endl << json.indent;
-    }
-    json << "]";
+    json.emit_tag("vec");
+    auto state = json.begin_vector();
+    for (auto &k : vec) json.emit(k);
+    json.end_vector(state);
 }
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Annotation> &v);
 
 template <class T>
-void IR::IndexedVector<T>::visit_children(Visitor &v) {
+void IR::IndexedVector<T>::visit_children(Visitor &v, const char *name) {
     for (auto i = begin(); i != end();) {
-        auto n = v.apply_visitor(*i);
+        auto n = v.apply_visitor(*i, name);
         if (!n && *i) {
             i = erase(i);
             continue;
@@ -183,23 +167,16 @@ void IR::IndexedVector<T>::visit_children(Visitor &v) {
     }
 }
 template <class T>
-void IR::IndexedVector<T>::visit_children(Visitor &v) const {
-    for (auto &a : *this) v.visit(a);
+void IR::IndexedVector<T>::visit_children(Visitor &v, const char *name) const {
+    for (auto &a : *this) v.visit(a, name);
 }
 template <class T>
 void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Vector<T>::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"declarations\" : {";
-    for (const auto &k : declarations) {
-        json << sep << std::endl << json.indent << k.first << " : " << k.second;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep != 0) {
-        json << std::endl << json.indent;
-    }
-    json << "}";
+    json.emit_tag("declarations");
+    auto state = json.begin_object();
+    for (auto &k : declarations) json.emit(k.first, k.second);
+    json.end_object(state);
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template <class T>, <T>)
 
@@ -233,7 +210,7 @@ static inline void namemap_insert_helper(typename ordered_map<cstring, T>::itera
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<const cstring, const T*>>*/>
-void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
+void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *) {
     map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
         const IR::Node *n = v.apply_visitor(i->second, i->first.c_str());
@@ -269,7 +246,7 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) const {
+void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *) const {
     for (auto &k : symbols) {
         v.visit(k.second, k.first.c_str());
     }
@@ -278,29 +255,22 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Node::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"symbols\" : {";
-    for (auto &k : symbols) {
-        json << sep << std::endl << json.indent << k.first << " : " << k.second;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep) {
-        json << std::endl << json.indent;
-    }
-    json << "}";
+    json.emit_tag("symbols");
+    auto state = json.begin_object();
+    for (auto &k : symbols) json.emit(k.first, k.second);
+    json.end_object(state);
 }
 
 template <class KEY, class VALUE,
           template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
+void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *name) {
     map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
         auto nk = i->first;
-        v.visit(nk);
+        v.visit(nk, name);
         if (!nk && i->first) {
             i = symbols.erase(i);
         } else if (nk == i->first) {
@@ -312,7 +282,7 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
             }
         } else {
             auto nv = i->second;
-            v.visit(nv);
+            v.visit(nv, name);
             if (nv) new_symbols.emplace(nk, nv);
             i = symbols.erase(i);
         }
@@ -323,10 +293,10 @@ template <class KEY, class VALUE,
           template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) const {
+void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *name) const {
     for (auto &k : symbols) {
-        v.visit(k.first);
-        v.visit(k.second);
+        v.visit(k.first, name);
+        v.visit(k.second, name);
     }
 }
 

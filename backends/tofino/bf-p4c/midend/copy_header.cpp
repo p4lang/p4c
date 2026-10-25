@@ -108,7 +108,7 @@ const IR::Node *DoCopyHeaders::postorder(IR::AssignmentStatement *statement) {
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
         return new IR::BlockStatement(statement->srcInfo, *retval);
-    } else if (auto stk = ltype->to<IR::Type_Stack>()) {
+    } else if (auto stk = ltype->to<IR::Type_Array>()) {
         auto size = stk->size->to<IR::Constant>();
         BUG_CHECK(size && size->value > 0, "stack %s size is not positive constant", ltype);
         auto retval = new IR::IndexedVector<IR::StatOrDecl>();
@@ -196,7 +196,7 @@ const IR::Node *DoCopyHeaders::postorder(IR::MethodCallExpression *mc) {
     auto validtype = IR::Type::Bits::get(1);
     auto member = new IR::Member(mc->srcInfo, validtype, mem->expr, "$valid");
 
-    if (findContext<IR::IfStatement>() || findContext<IR::AssignmentStatement>()) {
+    if (findContext<IR::IfStatement>() || findContext<IR::BaseAssignmentStatement>()) {
         // Maintain the Boolean type of the expression - a ReinterpretCast is not enough!
         // But if it is already a ReinterpretCast, don't add an expression.
         if (!getContext()->node->is<IR::BFN::ReinterpretCast>())

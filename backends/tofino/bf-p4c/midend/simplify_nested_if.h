@@ -25,10 +25,10 @@
  */
 #include <stack>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "backends/tofino/bf-p4c/midend/type_categories.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/strengthReduction.h"
@@ -37,8 +37,8 @@
 #include "ir/ir.h"
 #include "ir/pattern.h"
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_
-#define _BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_
 
 namespace P4 {
 
@@ -145,7 +145,8 @@ class UniqueAndValidDest : public SimplifyComplexConditionPolicy {
             if (!valid_fields->count(mem->member.name)) {
                 error(
                     "Invalid field name %1%, the valid fields to use are "
-                    "digest_type, resubmit_type and mirror_type");
+                    "digest_type, resubmit_type and mirror_type",
+                    mem);
             }
         }
 
@@ -215,4 +216,4 @@ class SimplifyNestedIf : public PassManager {
 
 }  // namespace P4
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_NESTED_IF_H_ */

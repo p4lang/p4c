@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 #include "backends/p4tools/common/lib/model.h"
@@ -173,7 +177,9 @@ Bmv2V1ModelActionSelector::Bmv2V1ModelActionSelector(const IR::IDeclaration *sel
                                                      const Bmv2V1ModelActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"_cs; }
+cstring Bmv2V1ModelActionSelector::getObjectName() const {
+    return selectorDecl->controlPlaneName();
+}
 
 const IR::IDeclaration *Bmv2V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
 

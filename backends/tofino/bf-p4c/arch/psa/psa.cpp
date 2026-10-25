@@ -25,8 +25,8 @@
 #include "backends/tofino/bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
 #include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
 #include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "midend/convertEnums.h"
@@ -714,7 +714,7 @@ class TranslateProgram : public Inspector {
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")
-                BUG("Selector mode provided for the selector is not supported", node);
+                BUG("%1%: selector mode provided for the selector is not supported", node);
         } else {
             LOG1("WARNING: No mode specified for the selector %s. Assuming fair" << node);
         }
@@ -900,13 +900,10 @@ class LoadTargetArchitecture : public Inspector {
         if (Device::currentDevice() == Device::TOFINO) {
             filenames.push_back("tofino1_specs.p4");
             filenames.push_back("tofino1_base.p4");
-        }
-#if HAVE_JBAY
-        else {
+        } else {
             filenames.push_back("tofino2_specs.p4");
             filenames.push_back("tofino2_base.p4");
         }
-#endif  // HAVE_JBAY
         filenames.push_back("tofino/stratum.p4");
         filenames.push_back("tofino/p4_14_prim.p4");
 

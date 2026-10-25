@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* -*-C++-*- */
 
@@ -47,9 +38,8 @@ inline unsigned diagnosticCount() {
     return BaseCompileContext::get().errorReporter().getDiagnosticCount();
 }
 
-// Errors, warnings, and infos are specified using boost::format format strings, i.e.,
-// %1%, %2%, etc (starting at 1, not at 0).
-// Some compatibility for printf-style arguments is also supported.
+// Errors, warnings, and infos support boost-style placeholders (%1%, %2%, ...)
+// and printf/absl::StrFormat-style placeholders (%s, %d, ...).
 
 /// Report an error with the given message.
 // LEGACY: once we transition to error types, this should be deprecated
@@ -116,6 +106,12 @@ void error(const int kind, const char *format, Args &&...args) {
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
 
+/// Report an error if condition e is false.
+#define ERROR_CHECK(e, ...)                 \
+    do {                                    \
+        if (!(e)) ::P4::error(__VA_ARGS__); \
+    } while (0)
+
 #if LEGACY
 /// Report a warning with the given message.
 template <typename... Args>
@@ -149,6 +145,12 @@ void warning(const int kind, const char *format, Args &&...args) {
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
+
+/// Report a warning if condition e is false.
+#define WARN_CHECK(e, ...)                    \
+    do {                                      \
+        if (!(e)) ::P4::warning(__VA_ARGS__); \
+    } while (0)
 
 /// Report info messages of type kind. Requires that the node argument have source info.
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>

@@ -1,0 +1,18 @@
+generic-extern-inference-abstract_e.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+generic-extern-inference-abstract_e.p4(11): [--Wwarn=unused] warning: 'wrongAbstractType' is unused
+    AbstractExtern(16w1) wrongAbstractType = {
+                         ^^^^^^^^^^^^^^^^^
+generic-extern-inference-abstract_e.p4(11): [--Werror=type-error] error: 'wrongAbstractType'
+    AbstractExtern(16w1) wrongAbstractType = {
+                         ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot unify type 'bit<8>' with type 'bit<16>'
+  ---- Originating from:
+generic-extern-inference-abstract_e.p4(12): Method 'handle' does not have the expected type 'handle'
+          void handle(in bit<8> v) {}
+               ^^^^^^
+generic-extern-inference-abstract_e.p4(6)
+      abstract void handle(in AbsT v);
+                    ^^^^^^

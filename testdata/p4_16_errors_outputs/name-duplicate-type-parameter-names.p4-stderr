@@ -1,0 +1,13 @@
+name-duplicate-type-parameter-names.p4(9): [--Werror=duplicate] error: reject: Duplicates declaration reject
+    t f<reject, reject
+                ^^^^^^
+name-duplicate-type-parameter-names.p4(9)
+    t f<reject, reject
+        ^^^^^^
+name-duplicate-type-parameter-names.p4(9): [--Werror=duplicate] error: Duplicate declaration of reject; previous at 
+    t f<reject, reject>
+                ^^^^^^
+name-duplicate-type-parameter-names.p4(9)
+    t f<reject, reject>
+        ^^^^^^
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

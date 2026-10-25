@@ -3,9 +3,11 @@ header h {
 
 control c(out bool b) {
     @name("c.retval") bool retval;
+    @name("c.inlinedRetval") bool inlinedRetval_0;
     apply {
         retval = true;
-        b = retval;
+        inlinedRetval_0 = retval;
+        b = inlinedRetval_0;
     }
 }
 

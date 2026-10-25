@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control ingress(inout bit<8> h) {
     action a(inout bit<8> b) {
     }

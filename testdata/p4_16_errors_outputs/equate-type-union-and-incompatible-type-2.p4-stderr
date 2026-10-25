@@ -1,0 +1,26 @@
+equate-type-union-and-incompatible-type-2.p4(5): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+equate-type-union-and-incompatible-type-2.p4(4): [--Wwarn=unused] warning: parser 'p' is unused
+parser p(inout tuple<> hu)() {
+       ^
+equate-type-union-and-incompatible-type-2.p4(6): [--Werror=type-error] error: 'hu = InvalidHeaderUnion'
+    hu = (HU) {#};
+       ^
+  ---- Actual error:
+equate-type-union-and-incompatible-type-2.p4(3): Cannot cast implicitly type 'header_union HU' to type 'tuple<>'
+  header_union HU {}
+               ^^
+equate-type-union-and-incompatible-type-2.p4(4)
+  parser p(inout tuple<> hu)() {
+                 ^^^^^^^
+  ---- Originating from:
+equate-type-union-and-incompatible-type-2.p4(6): Source expression 'InvalidHeaderUnion' produces a result of type 'header_union HU' which cannot be assigned to a left-value with type 'tuple<>'
+      hu = (HU) {#};
+                ^^^
+equate-type-union-and-incompatible-type-2.p4(3)
+  header_union HU {}
+               ^^
+equate-type-union-and-incompatible-type-2.p4(4)
+  parser p(inout tuple<> hu)() {
+                 ^^^^^^^

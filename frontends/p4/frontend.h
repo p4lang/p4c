@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef P4_FRONTEND_H_
-#define P4_FRONTEND_H_
+#ifndef FRONTENDS_P4_FRONTEND_H_
+#define FRONTENDS_P4_FRONTEND_H_
 
 #include "../common/options.h"
 #include "ir/ir.h"
@@ -24,7 +15,8 @@ limitations under the License.
 
 namespace P4 {
 
-class ConstantFoldingPolicy;  // forward declare to avoid having to include
+class ConstantFoldingPolicy;    // forward declare to avoid having to include
+class StrengthReductionPolicy;  // forward declare to avoid having to include
 
 /// A customization point for frontend. The each tool can provide their own implementation of the
 /// policy that customizes its behaviour, or use instance of this class directly to provide the
@@ -43,14 +35,24 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to nullptr.
     virtual ParseAnnotations *getParseAnnotations() const { return nullptr; }
 
+    /// Indicates whether OpAssignmentExpressions should be expanded and replaced
+    /// by simple assignments.  This depends on SideEffectOrdering to be correct, so
+    /// should probably be false if skipSideEffectOrdering is true.
+    virtual bool removeOpAssign() const { return true; }
+
     /// Indicates whether the side-effect-ordering pass should be skipped.
     /// @returns Defaults to false.
     // TODO: This should probably not be allowed to be skipped at all.
     virtual bool skipSideEffectOrdering() const { return false; }
 
-    /// Indicates whether to enable the `a - constant` to `a + (-constant)` in StrengthReduction.
-    /// @returns Defaults to true.
-    virtual bool enableSubConstToAddTransform() const { return true; }
+    /// Indicates whether control flow should fold blocks marked with @inlinedFrom annotation
+    /// @returns Defaults to true
+    virtual bool foldInlinedFrom() const { return true; }
+
+    /// Returns whether static_assert() should be fully evaluated in the frontend.
+    /// If false, evaluation may be deferred to a later pass.
+    /// @returns Defaults to true
+    virtual bool isStaticAssertFinal() const { return true; }
 
     /// Indicates whether the frontend should run some optimizations (inlining, action localization,
     /// etc.).
@@ -64,14 +66,20 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to nullptr, which causes constant folding to use the default policy, which
     /// does not modify the pass defaults in any way.
     virtual ConstantFoldingPolicy *getConstantFoldingPolicy() const { return nullptr; }
+
+    /// Get policy for the strength reduction pass. @see StrengthReductionPolicy
+    /// @returns Defaults to nullptr, which causes strength reduction to use the default policy,
+    /// which does not modify the pass defaults in any way.
+    virtual StrengthReductionPolicy *getStrengthReductionPolicy() const { return nullptr; }
 };
 
 class FrontEnd {
+    inline static FrontEndPolicy defaultPolicy;
     FrontEndPolicy *policy;
     std::vector<DebugHook> hooks;
 
  public:
-    FrontEnd() : FrontEnd(new FrontEndPolicy()) {}
+    FrontEnd() : FrontEnd(&defaultPolicy) {}
     explicit FrontEnd(FrontEndPolicy *policy) : policy(policy), hooks(policy->getDebugHooks()) {}
 
     void addDebugHook(const DebugHook &hook) { hooks.push_back(hook); }
@@ -82,4 +90,4 @@ class FrontEnd {
 
 }  // namespace P4
 
-#endif /* P4_FRONTEND_H_ */
+#endif /* FRONTENDS_P4_FRONTEND_H_ */

@@ -16,15 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_WALK_POWER_GRAPH_H_
-#define BF_P4C_MAU_WALK_POWER_GRAPH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_WALK_POWER_GRAPH_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_WALK_POWER_GRAPH_H_
 
 #include <map>
 #include <ostream>
 #include <set>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
 #include "backends/tofino/bf-p4c/mau/build_power_graph.h"
 #include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
@@ -33,6 +32,7 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 
 namespace MauPower {
 
@@ -179,4 +179,4 @@ class WalkPowerGraph : public MauInspector {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_WALK_POWER_GRAPH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_WALK_POWER_GRAPH_H_ */

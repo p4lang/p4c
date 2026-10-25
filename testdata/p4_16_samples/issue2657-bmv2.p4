@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>

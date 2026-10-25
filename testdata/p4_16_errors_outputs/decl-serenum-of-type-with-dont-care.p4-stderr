@@ -1,0 +1,3 @@
+decl-serenum-of-type-with-dont-care.p4(3): [--Werror=type-error] error: list<_>: Illegal type for enum; only bit<> and int<> are allowed
+enum list<_> e { a = 1 };
+     ^^^^^^^

@@ -1,18 +1,7 @@
-/*
-Copyright 2019 Orange
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2019 Orange
+// SPDX-FileCopyrightText: 2019 Orange
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ubpfTable.h"
 
@@ -299,7 +288,7 @@ void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Acti
     builder->append("struct ");
     builder->blockStart();
 
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = UBPFTypeFactory::instance->create(p->type);
         type->declare(builder, p->externalName(), false);
@@ -474,7 +463,7 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     cg.setBuilder(builder);
     builder->emitIndent();
     builder->appendFormat(".u = {.%s = {", name.c_str());
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
         builder->append(",");

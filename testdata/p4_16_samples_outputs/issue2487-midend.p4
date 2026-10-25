@@ -16,46 +16,46 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.tmp") ethernet_t tmp;
-    @hidden action issue2487l19() {
+    @hidden action issue2487l25() {
         tmp.setValid();
         tmp.dst_addr = 48w1;
         tmp.src_addr = 48w1;
         tmp.eth_type = 16w1;
     }
-    @hidden action issue2487l19_0() {
+    @hidden action issue2487l25_0() {
         tmp.setValid();
         tmp.dst_addr = 48w2;
         tmp.src_addr = 48w2;
         tmp.eth_type = 16w2;
     }
-    @hidden action issue2487l19_1() {
+    @hidden action issue2487l25_1() {
         h.eth_hdr = tmp;
     }
-    @hidden table tbl_issue2487l19 {
+    @hidden table tbl_issue2487l25 {
         actions = {
-            issue2487l19();
+            issue2487l25();
         }
-        const default_action = issue2487l19();
+        const default_action = issue2487l25();
     }
-    @hidden table tbl_issue2487l19_0 {
+    @hidden table tbl_issue2487l25_0 {
         actions = {
-            issue2487l19_0();
+            issue2487l25_0();
         }
-        const default_action = issue2487l19_0();
+        const default_action = issue2487l25_0();
     }
-    @hidden table tbl_issue2487l19_1 {
+    @hidden table tbl_issue2487l25_1 {
         actions = {
-            issue2487l19_1();
+            issue2487l25_1();
         }
-        const default_action = issue2487l19_1();
+        const default_action = issue2487l25_1();
     }
     apply {
         if (h.eth_hdr.eth_type == 16w1) {
-            tbl_issue2487l19.apply();
+            tbl_issue2487l25.apply();
         } else {
-            tbl_issue2487l19_0.apply();
+            tbl_issue2487l25_0.apply();
         }
-        tbl_issue2487l19_1.apply();
+        tbl_issue2487l25_1.apply();
     }
 }
 

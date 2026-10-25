@@ -26,11 +26,6 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("cIngress.tmp") bit<48> tmp;
-    @name("cIngress.tmp_0") bit<48> tmp_0;
-    @name("cIngress.tmp_1") bit<48> tmp_1;
-    @name("cIngress.tmp_2") bit<48> tmp_2;
-    @name("cIngress.tmp_3") bit<48> tmp_3;
     @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
     @name("cIngress.egress_port") PortId_t egress_port_0;
     @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
@@ -45,12 +40,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     apply {
         regfile_0.write(32w1, 48w3);
         regfile_0.write(32w2, 48w4);
-        tmp_0 = regfile_0.read(32w1);
-        tmp = tmp_0;
-        tmp_1 = regfile_0.read(32w2);
-        tmp_2 = tmp + tmp_1;
-        tmp_3 = tmp_2 + 48w281474976710651;
-        hdr.ethernet.dstAddr = tmp_3;
+        hdr.ethernet.dstAddr = regfile_0.read(32w1) + regfile_0.read(32w2) + 48w281474976710651;
         if (hdr.ethernet.dstAddr == 48w2) {
             send_to_port_0();
         }

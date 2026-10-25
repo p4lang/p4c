@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Schema review board members must approve pull requests
 # before they can be merged.
 schemas/* @simuthus @saynb @slicking @amreshk @MichalKekely @awjreynolds

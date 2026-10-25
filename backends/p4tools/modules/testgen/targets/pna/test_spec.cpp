@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 #include "backends/p4tools/common/lib/model.h"

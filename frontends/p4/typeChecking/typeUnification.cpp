@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typeUnification.h"
 
@@ -165,7 +154,7 @@ bool TypeUnification::unifyFunctions(const BinaryConstraint *constraint, bool sk
         constraints->add(constraint->create(dest->returnType, src->returnType));
 
     auto sit = src->parameters->parameters.begin();
-    for (auto dit : *dest->parameters->getEnumerator()) {
+    for (auto dit : dest->parameters->getEnumerator()) {
         if (sit == src->parameters->parameters.end()) {
             if (dit->isOptional()) continue;
             if (dit->defaultValue != nullptr) continue;
@@ -445,18 +434,14 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         bool success = (*src) == (*dest);
         if (!success) return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (auto se = dest->to<IR::Type_SerEnum>()) {
-        if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
-            constraints->add(constraint->create(se->type, src));
-            return true;
-        }
-        return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         if (dest->to<IR::Type_Declaration>()->name != src->to<IR::Type_Declaration>()->name)
             return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (auto dstack = dest->to<IR::Type_Stack>()) {
-        if (auto sstack = src->to<IR::Type_Stack>()) {
+    } else if (auto dstack = dest->to<IR::Type_Array>()) {
+        if (auto sstack = src->to<IR::Type_Array>()) {
+            if (!dstack->sizeKnown() || !sstack->sizeKnown()) return false;
+
             if (dstack->getSize() != sstack->getSize())
                 return constraint->reportError(
                     constraints->getCurrentSubstitution(),
@@ -478,7 +463,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 constraints->add(constraint->create(dstack->elementType, comp));
             }
             if (hasDots) {
-                auto dotsType = new IR::Type_Stack(
+                auto dotsType = new IR::Type_Array(
                     dstack->elementType,
                     new IR::Constant((unsigned)(dstack->getSize() - listSize + 1)));
                 auto dotsField = list->components.at(listSize - 1);

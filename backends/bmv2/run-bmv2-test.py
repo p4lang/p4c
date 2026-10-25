@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Runs the compiler on a sample P4 program generating code for the BMv2
 # behavioral model simulator
@@ -19,6 +11,7 @@
 import argparse
 import logging
 import os
+import re
 import sys
 import tempfile
 import traceback
@@ -83,7 +76,15 @@ PARSER.add_argument(
     action="store_true",
     help="replace reference outputs with newly generated ones",
 )
-PARSER.add_argument("-p", "--use_psa", dest="use_psa", action="store_true", help="Use psa switch")
+PARSER.add_argument(
+    "--target",
+    help="The target, also passed to the compiler. Defaults to bmv2.",
+)
+PARSER.add_argument(
+    "--arch",
+    help="The architecture, also passed to the compiler. Picks the compiler and the switch. "
+    "Defaults to v1model.",
+)
 PARSER.add_argument(
     "-bd",
     "--buildir",
@@ -136,9 +137,7 @@ FILE_DIR = Path(__file__).resolve().parent
 ROOT_DIR = Path(ARGS.rootdir).absolute()
 sys.path.append(str(ROOT_DIR))
 
-from bmv2stf import Options, RunBMV2
-from scapy.layers.all import *
-from scapy.utils import *
+from bmv2stf import BMV2_TARGETS, Options, RunBMV2
 
 from tools import testutils  # pylint: disable=wrong-import-position
 
@@ -196,6 +195,35 @@ def isError(p4_file: Path) -> bool:
     return "_errors" in str(p4_file)
 
 
+def check_error_reference(options: Options, output: str) -> int:
+    # Compare the diagnostics of a negative test against its reference.
+    expected_dir = Path(str(options.p4_file.parent).replace("_errors", "_errors_outputs", 1))
+    expected_file = expected_dir.joinpath(options.p4_file.name + "-stderr")
+    # Reduce leading paths to basenames, as run-p4-sample.py does with sed.
+    produced = re.sub(r"^.*/(?=[^/\s]+\.[ph]4?[:(]\d+)", "", output, flags=re.MULTILINE).strip()
+
+    if options.replace:
+        testutils.check_and_create_dir(expected_dir)
+        expected_file.write_text(produced + "\n", encoding="utf-8")
+        testutils.log.info("Wrote %s", expected_file)
+        return testutils.SUCCESS
+
+    if not expected_file.is_file():
+        testutils.log.error(
+            "Expected output file %s does not exist. Rerun with --replace to create it.",
+            expected_file,
+        )
+        return testutils.FAILURE
+
+    expected = expected_file.read_text(encoding="utf-8").strip()
+    if expected != produced:
+        testutils.log.error("Error output mismatch.")
+        testutils.log.error("Expected:\n%s", expected)
+        testutils.log.error("Produced:\n%s", produced)
+        return testutils.FAILURE
+    return testutils.SUCCESS
+
+
 def run_model(options: Options, tmpdir: Path, jsonfile: Path) -> int:
     if not options.test_file:
         return testutils.SUCCESS
@@ -250,10 +278,7 @@ def process_file(options: Options) -> int:
     if not options.p4_file.is_file():
         raise Exception(f"No such file {options.p4_file}")
 
-    if options.use_psa:
-        binary = options.compiler_build_dir.joinpath("p4c-bm2-psa")
-    else:
-        binary = options.compiler_build_dir.joinpath("p4c-bm2-ss")
+    binary = options.compiler_build_dir.joinpath(options.bmv2_target.compiler)
 
     cmd: str = f"{binary} -o {jsonfile}"
     for opt in options.compiler_options:
@@ -281,6 +306,8 @@ def process_file(options: Options) -> int:
             returnvalue = testutils.FAILURE
         else:
             returnvalue = testutils.SUCCESS
+        if returnvalue == testutils.SUCCESS:
+            returnvalue = check_error_reference(options, result.output)
 
     if returnvalue == testutils.SUCCESS and not expected_error:
         return run_model(options, tmpdir, jsonfile)
@@ -347,6 +374,19 @@ def create_options(test_args: Any) -> Optional[Options]:
     options.replace = test_args.replace
     options.cleanupTmp = test_args.nocleanup
 
+    options.target = test_args.target or options.target
+    options.arch = test_args.arch or options.arch
+    if (options.target, options.arch) not in BMV2_TARGETS:
+        supported = ", ".join(f"--target {t} --arch {a}" for t, a in BMV2_TARGETS)
+        testutils.log.error(
+            f"Unsupported --target {options.target} --arch {options.arch}, use one of: {supported}"
+        )
+        return None
+    if test_args.target:
+        options.compiler_options.extend(["--target", test_args.target])
+    if test_args.arch:
+        options.compiler_options.extend(["--arch", test_args.arch])
+
     # We have to be careful here, passing compiler options is ambiguous in
     # argparse because the parser is not positional.
     # https://stackoverflow.com/a/21894384/3215972
@@ -360,7 +400,6 @@ def create_options(test_args: Any) -> Optional[Options]:
         options.switch_target_options.extend(switch_option.split())
     for init_cmd in test_args.init_cmds:
         options.init_commands.append(init_cmd)
-    options.use_psa = test_args.use_psa
     if test_args.pp:
         options.compiler_options.append(test_args.pp)
     if test_args.gdb:

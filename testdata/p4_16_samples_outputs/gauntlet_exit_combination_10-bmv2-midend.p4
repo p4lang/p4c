@@ -39,17 +39,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_10bmv2l34() {
+    @hidden action gauntlet_exit_combination_10bmv2l40() {
         key_0 = 64w100;
     }
-    @hidden table tbl_gauntlet_exit_combination_10bmv2l34 {
+    @hidden table tbl_gauntlet_exit_combination_10bmv2l40 {
         actions = {
-            gauntlet_exit_combination_10bmv2l34();
+            gauntlet_exit_combination_10bmv2l40();
         }
-        const default_action = gauntlet_exit_combination_10bmv2l34();
+        const default_action = gauntlet_exit_combination_10bmv2l40();
     }
     apply {
-        tbl_gauntlet_exit_combination_10bmv2l34.apply();
+        tbl_gauntlet_exit_combination_10bmv2l40.apply();
         simple_table_0.apply();
     }
 }

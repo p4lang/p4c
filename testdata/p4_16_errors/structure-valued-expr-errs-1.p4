@@ -1,18 +1,9 @@
 /*
-Copyright 2022 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2022 Intel Corporation
+ * SPDX-FileCopyrightText: 2022 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #include <core.p4>
 #include <v1model.p4>
@@ -47,6 +38,12 @@ struct s1_t {
 struct s2_t {
     bit<8> f1;
     bit<8> f2;
+}
+
+struct tuple_0 {
+    bit<48> f0;
+    bit<48> f1;
+    bit<16> f2;
 }
 
 header hstructs_t {
@@ -85,11 +82,20 @@ control verifyChecksum(
     apply { }
 }
 
+extern Checksum {
+  /// Constructor
+  Checksum(HashAlgorithm hash);
+
+  /// Add data to checksum
+  void update<T>(in T data);
+}
+
 control ingressImpl(
     inout headers_t hdr,
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
+    Checksum(HashAlgorithm.crc32) checksum_crc32;
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
@@ -119,6 +125,8 @@ control ingressImpl(
             // are given a value in the structure-valued expression.
             hdr.h2 = {f2=5};
             hdr.hstructs.s2 = {f2=5};
+
+            checksum_crc32.update((tuple_0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
         }
     }
 }

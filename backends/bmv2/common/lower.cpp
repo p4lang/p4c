@@ -1,22 +1,11 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "lower.h"
 
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
@@ -88,6 +77,7 @@ const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
         auto cast0 = new IR::Cast(expression->srcInfo, destType, and0);
         typeMap->setType(one, srcType);
         typeMap->setType(shift_value, shift_value->type);
+        typeMap->setCompileTimeConstant(shift_value);
         typeMap->setType(shl, srcType);
         typeMap->setType(mask, srcType);
         typeMap->setType(and0, srcType);
@@ -117,6 +107,7 @@ const IR::Node *LowerExpressions::postorder(IR::Slice *expression) {
     if (l != 0) {
         auto one = new IR::Constant(IR::Type_InfInt::get(), l);
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, one);
+        typeMap->cloneExpressionProperties(one, expression->e2);
         typeMap->setType(expr, e0type);
         typeMap->setType(one, one->type);
     } else {
@@ -149,7 +140,17 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
-    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
+    // The result has the signedness of the left operand. A P4 cast cannot change both
+    // the width and the signedness, so if the right operand's signedness differs from
+    // the result's, first convert it to a same-width value with the result's signedness.
+    const IR::Expression *right = expression->right;
+    bool resultSigned = resulttype->to<IR::Type_Bits>()->isSigned;
+    if (type->to<IR::Type_Bits>()->isSigned != resultSigned) {
+        auto rtype = IR::Type_Bits::get(sizeofb, resultSigned);
+        right = new IR::Cast(expression->right->srcInfo, rtype, right);
+        typeMap->setType(right, rtype);
+    }
+    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, right);
     auto sizefb0 = new IR::Constant(IR::Type_InfInt::get(), sizeofb);
     auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
     big_int m = Util::maskFromSlice(sizeofb - 1, 0);
@@ -163,6 +164,7 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
     typeMap->setType(and0, resulttype);
     typeMap->setType(mask, resulttype);
     typeMap->setType(sizefb0, sizefb0->type);
+    typeMap->setCompileTimeConstant(sizefb0);
     LOG3("Replaced " << expression << " with " << result);
     return result;
 }
@@ -175,7 +177,7 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
     if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     if (auto ef = mi->to<P4::ExternFunction>()) {
-        if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
+        if (ef->method->name == P4V1::V1Model::instance().digest_receiver.name) {
             // Special handling for digest; the semantics on bmv2 is to
             // execute the digest at the very end of the pipeline, and to
             // pass a reference to the fields, so fields can be modified

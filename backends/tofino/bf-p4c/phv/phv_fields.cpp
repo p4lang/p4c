@@ -1568,9 +1568,9 @@ struct ComputeFieldAlignments : public Inspector {
 
         // For non-set instructions accessing an AttachedOutput
         if ((instr->operands.size() == 3) && (instr->name != "set")) {
-            int op_id = 0;
+            bool first = true;
             for (auto op_f : instr->operands) {
-                if (!op_id) {
+                if (first) {
                     // Keep destination field that may need alignment setting
                     dst_f = phv.field(op_f);
                 } else {
@@ -1592,7 +1592,7 @@ struct ComputeFieldAlignments : public Inspector {
                         }
                     }
                 }
-                op_id++;
+                first = false;
             }
         }
         return false;

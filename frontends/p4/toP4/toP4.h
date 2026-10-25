@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef P4_TOP4_TOP4_H_
-#define P4_TOP4_TOP4_H_
+#ifndef FRONTENDS_P4_TOP4_TOP4_H_
+#define FRONTENDS_P4_TOP4_TOP4_H_
 
 #include <filesystem>
 #include <iostream>
@@ -37,7 +28,8 @@ class ToP4 : public Inspector, ResolutionContext {
  protected:
     /// precedence of current IR::Operation
     int expressionPrecedence = DBPrint::Prec_Low;
-    bool isDeclaration = true;    /// current type is a declaration
+    bool isDeclaration = true;  /// current type is a declaration
+    std::shared_ptr<Util::SourceCodeBuilder> ownedBuilder;
     bool showIR;                  /// if true dump IR as comments
     bool withinArgument = false;  /// if true we are within a method call argument
     bool noIncludes = false;      /// If true do not generate #include statements.
@@ -104,8 +96,13 @@ class ToP4 : public Inspector, ResolutionContext {
         setName("ToP4");
     }
 
-    ToP4(std::ostream *outStream, bool showIR) : ToP4(*new Util::SourceCodeBuilder(), showIR) {
-        this->outStream = outStream;
+    ToP4(std::ostream *outStream, bool showIR)
+        : ownedBuilder(std::make_shared<Util::SourceCodeBuilder>()),
+          showIR(showIR),
+          builder(*ownedBuilder),
+          outStream(outStream) {
+        visitDagOnce = false;
+        setName("ToP4");
     }
 
     ToP4(Util::SourceCodeBuilder &builder, bool showIR, std::filesystem::path mainFile)
@@ -117,7 +114,7 @@ class ToP4 : public Inspector, ResolutionContext {
         this->mainFile = mainFile;
     }
 
-    ToP4() : ToP4(*new Util::SourceCodeBuilder(), false) {}
+    ToP4() : ToP4(nullptr, false) {}
 
     using Inspector::preorder;
 
@@ -147,7 +144,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Type_Parser *t) override;
     bool preorder(const IR::Type_Control *t) override;
     bool preorder(const IR::Type_Name *t) override;
-    bool preorder(const IR::Type_Stack *t) override;
+    bool preorder(const IR::Type_Array *t) override;
     bool preorder(const IR::Type_Specialized *t) override;
     bool preorder(const IR::Type_Enum *t) override;
     bool preorder(const IR::Type_SerEnum *t) override;
@@ -195,7 +192,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Invalid *e) override;
     bool preorder(const IR::InvalidHeader *e) override;
     bool preorder(const IR::InvalidHeaderUnion *e) override;
-    bool preorder(const IR::HeaderStackExpression *e) override;
+    bool preorder(const IR::ArrayExpression *e) override;
     bool preorder(const IR::MethodCallExpression *e) override;
     bool preorder(const IR::DefaultExpression *e) override;
     bool preorder(const IR::This *e) override;
@@ -220,6 +217,7 @@ class ToP4 : public Inspector, ResolutionContext {
 
     // statements
     bool preorder(const IR::AssignmentStatement *s) override;
+    bool preorder(const IR::OpAssignmentStatement *s) override;
     bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::EmptyStatement *s) override;
@@ -260,8 +258,10 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::P4Table *c) override;
     bool preorder(const IR::P4ValueSet *c) override;
 
+#ifdef SUPPORT_P4_14
     // in case it is accidentally called on a V1Program
     bool preorder(const IR::V1Program *) override { return false; }
+#endif
 };
 
 std::string toP4(const IR::INode *node);
@@ -269,4 +269,4 @@ void dumpP4(const IR::INode *node);
 
 }  // namespace P4
 
-#endif /* P4_TOP4_TOP4_H_ */
+#endif /* FRONTENDS_P4_TOP4_TOP4_H_ */

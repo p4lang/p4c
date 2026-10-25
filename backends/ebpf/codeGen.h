@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_EBPF_CODEGEN_H_
 #define BACKENDS_EBPF_CODEGEN_H_
@@ -82,8 +73,8 @@ class CodeGenInspector : public Inspector {
     }
     bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
 
-    bool notSupported(const IR::Expression *expression) {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
+    bool notSupported(const IR::Node *n) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", n);
         return false;
     }
 
@@ -117,6 +108,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Type_Enum *type) override;
     void emitAssignStatement(const IR::Type *ltype, const IR::Expression *lexpr, cstring lpath,
                              const IR::Expression *rexpr);
+    bool preorder(const IR::BaseAssignmentStatement *s) override { return notSupported(s); }
     bool preorder(const IR::AssignmentStatement *s) override;
     bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallStatement *s) override;
@@ -126,10 +118,14 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement *s) override;
 
     void widthCheck(const IR::Node *node) const;
+    bool scalarType(const IR::Node *node) const;
     void emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order);
-    void emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar);
-    void emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
-                                             const IR::Expression *rexpr);
+    void emitTCBinaryOperation(const IR::Operation_Binary *);
+    void emitTCAssignmentEndianessConversion(const IR::Type *ltype, const IR::Expression *lexpr,
+                                             const IR::Expression *rexpr, cstring lpath);
+    void getBitAlignment(const IR::Expression *expression);
+    bool storeBitAlignment(const IR::Type *ltype, const IR::Expression *lexpr, cstring lpath);
+    void emitTCLarge(const IR::Operation_Binary *, unsigned int);  // catchall
 };
 
 class EBPFInitializerUtils {

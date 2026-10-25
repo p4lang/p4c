@@ -4,17 +4,17 @@ struct S {
 }
 
 control c(out bit<1> b) {
-    @hidden action issue1863l10() {
+    @hidden action issue1863l16() {
         b = 1w1;
     }
-    @hidden table tbl_issue1863l10 {
+    @hidden table tbl_issue1863l16 {
         actions = {
-            issue1863l10();
+            issue1863l16();
         }
-        const default_action = issue1863l10();
+        const default_action = issue1863l16();
     }
     apply {
-        tbl_issue1863l10.apply();
+        tbl_issue1863l16.apply();
     }
 }
 

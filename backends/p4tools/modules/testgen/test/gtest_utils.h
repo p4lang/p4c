@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 
@@ -65,7 +71,7 @@ class P4TestgenTest : public testing::Test {
         if (!ctxOpt.has_value()) {
             return nullptr;
         }
-        return std::make_unique<AutoCompileContext>(ctxOpt.value());
+        return std::make_unique<AutoCompileContext>(std::move(ctxOpt.value()));
     }
 };
 

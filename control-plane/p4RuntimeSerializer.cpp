@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 #include "p4RuntimeSerializer.h"
 
 #pragma GCC diagnostic push
@@ -52,7 +41,7 @@ limitations under the License.
 #include "frontends/p4/externInstance.h"
 // TODO(antonin): this include should go away when we cleanup getMatchFields
 // and tableNeedsPriority implementations.
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -81,7 +70,7 @@ using Helpers::setPreamble;
 /// this rather than e.g. controlPlaneName() when we want to prevent any
 /// fallback.
 static std::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item) {
-    auto *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
+    const IR::Annotation *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
     if (!anno) return std::nullopt;
     const auto &expr = anno->getExpr();
     if (expr.size() != 1) {
@@ -259,7 +248,7 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
                                                      TypeMap *typeMap) {
     // not using getDefaultAction() here as I actually need the property IR node
     // to check if the default action is constant.
-    const auto *defaultActionProperty =
+    const IR::Property *defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defaultActionProperty == nullptr) {
         ::P4::error(ErrorType::ERR_EXPECTED, "Expected table %1% to have a default action", table);
@@ -271,19 +260,19 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
         return std::nullopt;
     }
 
-    const auto *expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
+    auto expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
     cstring actionName;
     const IR::Vector<IR::Argument> *arguments = nullptr;
     const IR::P4Action *action = nullptr;
     if (expr->is<IR::PathExpression>()) {
-        const auto *decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+        auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
         action = decl->to<IR::P4Action>();
         BUG_CHECK(action, "Expected an action: %1%", expr);
         actionName = action->controlPlaneName();
         arguments = new IR::Vector<IR::Argument>;
     } else if (expr->is<IR::MethodCallExpression>()) {
         const auto *callExpr = expr->to<IR::MethodCallExpression>();
-        auto *instance = MethodInstance::resolve(callExpr, refMap, typeMap);
+        auto instance = MethodInstance::resolve(callExpr, refMap, typeMap);
         BUG_CHECK(instance->is<P4::ActionCall>(), "Expected an action: %1%", expr);
         actionName = instance->to<P4::ActionCall>()->action->controlPlaneName();
         action = instance->to<P4::ActionCall>()->action;
@@ -350,11 +339,11 @@ static std::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) 
         return MatchField::MatchTypes::LPM;
     } else if (matchTypeName == P4CoreLibrary::instance().ternaryMatch.name) {
         return MatchField::MatchTypes::TERNARY;
-    } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().rangeMatchType.name) {
         return MatchField::MatchTypes::RANGE;
-    } else if (matchTypeName == P4V1::V1Model::instance.optionalMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().optionalMatchType.name) {
         return MatchField::MatchTypes::OPTIONAL;
-    } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().selectorMatchType.name) {
         // Nothing to do here, we cannot even perform some sanity-checking.
         return std::nullopt;
     } else {
@@ -387,7 +376,7 @@ static std::vector<MatchField> getMatchFields(const IR::P4Table *table, Referenc
                   "Table '%1%': Match field '%2%' has no "
                   "@name annotation",
                   table->controlPlaneName(), keyElement->expression);
-        auto *matchFieldType = typeMap->getType(keyElement->expression->getNode(), true);
+        const IR::Type *matchFieldType = typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr, "Couldn't determine type for key element %1%",
                   keyElement);
         // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo if
@@ -423,7 +412,7 @@ class P4RuntimeAnalyzer {
 
     P4RuntimeAnalyzer(const P4RuntimeSymbolTable &symbols, TypeMap *typeMap, ReferenceMap *refMap,
                       P4RuntimeArchHandlerIface *archHandler)
-        : p4Info(new P4Info),
+        : p4Info(std::make_shared<P4Info>()),
           symbols(symbols),
           typeMap(typeMap),
           refMap(refMap),
@@ -434,7 +423,7 @@ class P4RuntimeAnalyzer {
     /// @return the P4Info message generated by this analyzer. This captures
     /// P4Runtime representations of all the P4 constructs added to the control
     /// plane API with the add*() methods.
-    const P4Info *getP4Info() const {
+    std::shared_ptr<const P4Info> getP4Info() const {
         BUG_CHECK(p4Info != nullptr, "Didn't produce a P4Info object?");
         return p4Info;
     }
@@ -552,7 +541,7 @@ class P4RuntimeAnalyzer {
 
         // Allocate ids for all action parameters.
         std::vector<const IR::Parameter *> actionParams;
-        for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
+        for (auto actionParam : actionDeclaration->parameters->getEnumerator()) {
             actionParams.push_back(actionParam);
         }
         FieldIdAllocator<decltype(actionParams)::value_type> idAllocator(actionParams.begin(),
@@ -687,15 +676,15 @@ class P4RuntimeAnalyzer {
         table->mutable_initial_default_action()->set_action_id(id);
         int parameterIndex = 0;
         int parameterId = 1;
-        for (const auto *argument : *defaultAction->arguments) {
+        for (const IR::Argument *argument : *defaultAction->arguments) {
             auto value = stringRepr(*typeMap, argument->expression);
             if (!value.has_value()) {
                 continue;
             }
             auto *protoParam = table->mutable_initial_default_action()->mutable_arguments()->Add();
-            const auto *parameter =
+            const IR::Parameter *parameter =
                 defaultAction->action->parameters->parameters.at(parameterIndex++);
-            if (const auto *idAnnotation = parameter->getAnnotation("id"_cs)) {
+            if (const IR::Annotation *idAnnotation = parameter->getAnnotation("id"_cs)) {
                 protoParam->set_param_id(
                     idAnnotation->getExpr(0)->checkedTo<IR::Constant>()->asInt());
             } else {
@@ -753,12 +742,12 @@ class P4RuntimeAnalyzer {
             table->set_has_initial_entries(true);
         }
 
-        archHandler->addTableProperties(symbols, p4Info, table, tableBlock);
+        archHandler->addTableProperties(symbols, p4Info.get(), table, tableBlock);
     }
 
     void addExtern(const IR::ExternBlock *externBlock) {
         CHECK_NULL(externBlock);
-        archHandler->addExternInstance(symbols, p4Info, externBlock);
+        archHandler->addExternInstance(symbols, p4Info.get(), externBlock);
     }
 
     void analyzeControl(const IR::ControlBlock *controlBlock) {
@@ -776,7 +765,7 @@ class P4RuntimeAnalyzer {
                 action->body, [&](const IR::MethodCallExpression *call) {
                     auto instance = MethodInstance::resolve(call, refMap, typeMap);
                     if (instance->is<P4::ExternFunction>()) {
-                        archHandler->addExternFunction(symbols, p4Info,
+                        archHandler->addExternFunction(symbols, p4Info.get(),
                                                        instance->to<P4::ExternFunction>());
                     }
                 });
@@ -787,7 +776,7 @@ class P4RuntimeAnalyzer {
             control->body, [&](const IR::MethodCallExpression *call) {
                 auto instance = MethodInstance::resolve(call, refMap, typeMap);
                 if (instance->is<P4::ExternFunction>()) {
-                    archHandler->addExternFunction(symbols, p4Info,
+                    archHandler->addExternFunction(symbols, p4Info.get(),
                                                    instance->to<P4::ExternFunction>());
                 }
             });
@@ -920,12 +909,12 @@ class P4RuntimeAnalyzer {
 
     /// To be called after all objects have been added to P4Info. Calls the
     /// architecture-specific postAdd method for post-processing.
-    void postAdd() const { archHandler->postAdd(symbols, p4Info); }
+    void postAdd() const { archHandler->postAdd(symbols, p4Info.get()); }
 
     /// Sets the pkg_info field of the P4Info message, using the annotations on
     /// the P4 program package.
     void addPkgInfo(const IR::ToplevelBlock *evaluatedProgram, cstring arch) const {
-        auto *main = evaluatedProgram->getMain();
+        auto main = evaluatedProgram->getMain();
         if (main == nullptr) {
             ::P4::warning(ErrorType::WARN_MISSING,
                           "Program does not contain a main module, "
@@ -941,8 +930,9 @@ class P4RuntimeAnalyzer {
         std::set<cstring> keysVisited;
 
         // @pkginfo annotation
-        if (const auto *annotation = decl->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
-            for (auto *kv : annotation->getKV()) {
+        if (const IR::Annotation *annotation =
+                decl->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
+            for (const IR::NamedExpression *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setStringField = [kv, pkginfo, &keysVisited](cstring fName) {
                     auto *v = kv->expression->to<IR::StringLiteral>();
@@ -983,9 +973,9 @@ class P4RuntimeAnalyzer {
         }
 
         // Parse `@platform_property` annotation into the PkgInfo.
-        if (const auto *annotation = decl->getAnnotation("platform_property"_cs)) {
+        if (const IR::Annotation *annotation = decl->getAnnotation("platform_property"_cs)) {
             auto *platform_properties = pkginfo->mutable_platform_properties();
-            for (auto *kv : annotation->getKV()) {
+            for (const IR::NamedExpression *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setInt32Field = [kv, &platform_properties](cstring fName) {
                     auto *v = kv->expression->to<IR::Constant>();
@@ -1025,7 +1015,7 @@ class P4RuntimeAnalyzer {
 
  private:
     /// P4Runtime's representation of a program's control plane API.
-    P4Info *p4Info;
+    std::shared_ptr<P4Info> p4Info;
     /// The symbols used in the API and their ids.
     const P4RuntimeSymbolTable &symbols;
     /// The actions we've serialized so far. Used for deduplication.
@@ -1057,10 +1047,10 @@ class P4RuntimeEntriesConverter {
     friend class P4RuntimeAnalyzer;
 
     explicit P4RuntimeEntriesConverter(const P4RuntimeSymbolTable &symbols)
-        : entries(new p4v1::WriteRequest), symbols(symbols) {}
+        : entries(std::make_shared<p4v1::WriteRequest>()), symbols(symbols) {}
 
     /// @return the P4Runtime WriteRequest message generated by this analyzer.
-    const p4v1::WriteRequest *getEntries() const {
+    std::shared_ptr<const p4v1::WriteRequest> getEntries() const {
         BUG_CHECK(entries != nullptr, "Didn't produce a P4Runtime WriteRequest object?");
         return entries;
     }
@@ -1129,8 +1119,8 @@ class P4RuntimeEntriesConverter {
             auto matchType = getKeyMatchType(e, refMap);
             // TODO(antonin): remove dependency on v1model.
             if (matchType == P4CoreLibrary::instance().ternaryMatch.name ||
-                matchType == P4V1::V1Model::instance.rangeMatchType.name ||
-                matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+                matchType == P4V1::V1Model::instance().rangeMatchType.name ||
+                matchType == P4V1::V1Model::instance().optionalMatchType.name) {
                 return true;
             }
         }
@@ -1180,9 +1170,9 @@ class P4RuntimeEntriesConverter {
                 addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance().ternaryMatch.name) {
                 addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+            } else if (matchType == P4V1::V1Model::instance().rangeMatchType.name) {
                 addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+            } else if (matchType == P4V1::V1Model::instance().optionalMatchType.name) {
                 addOptional(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
@@ -1394,7 +1384,7 @@ class P4RuntimeEntriesConverter {
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object
-    p4v1::WriteRequest *entries;
+    std::shared_ptr<p4v1::WriteRequest> entries;
     /// The symbols used in the API and their ids.
     const P4RuntimeSymbolTable &symbols;
 };
@@ -1410,8 +1400,8 @@ class P4RuntimeEntriesConverter {
 
     // Perform a first pass to collect all of the control plane visible symbols in
     // the program.
-    const auto *symbols = P4RuntimeSymbolTable::generateSymbols(program, evaluatedProgram, refMap,
-                                                                typeMap, archHandler);
+    std::unique_ptr<const P4RuntimeSymbolTable> symbols(P4RuntimeSymbolTable::generateSymbols(
+        program, evaluatedProgram, refMap, typeMap, archHandler));
 
     archHandler->postCollect(*symbols);
 
@@ -1455,13 +1445,13 @@ class P4RuntimeEntriesConverter {
                                              archHandler);
         else if (block->is<IR::ExternBlock>()) {
             // add entries for arch specific extern types
-            archHandler->addExternEntries(entriesConverter.getEntries(), *symbols,
+            archHandler->addExternEntries(entriesConverter.getEntries().get(), *symbols,
                                           block->to<IR::ExternBlock>());
         }
     });
 
-    auto *p4Info = analyzer.getP4Info();
-    auto *p4Entries = entriesConverter.getEntries();
+    auto p4Info = analyzer.getP4Info();
+    auto p4Entries = entriesConverter.getEntries();
     return P4RuntimeAPI{p4Info, p4Entries, archHandler->getJsonPrintOptions()};
 }
 
@@ -1474,33 +1464,38 @@ P4RuntimeAPI P4RuntimeSerializer::generateP4Runtime(const IR::P4Program *program
     if (archHandlerBuilderIt == archHandlerBuilders.end()) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED, "Arch '%1%' not supported by P4Runtime serializer",
                     arch);
-        return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
+        return P4RuntimeAPI{std::make_shared<p4configv1::P4Info>(),
+                            std::make_shared<p4v1::WriteRequest>()};
     }
 
     // Generate a new version of the program that satisfies the prerequisites of
     // the P4Runtime analysis code.
     P4::ReferenceMap refMap;
+#ifdef SUPPORT_P4_14
     refMap.setIsV1(true);
+#endif
     P4::TypeMap typeMap;
     auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {
         new ControlPlaneAPI::ParseP4RuntimeAnnotations(),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true), evaluator};
-    auto *p4RuntimeProgram = program->apply(p4RuntimeFixups);
-    auto *evaluatedProgram = evaluator->getToplevelBlock();
+    auto p4RuntimeProgram = program->apply(p4RuntimeFixups);
+    auto evaluatedProgram = evaluator->getToplevelBlock();
 
     if (!p4RuntimeProgram || !evaluatedProgram) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED,
                     "%1%: unsupported P4 program (cannot apply necessary program transformations)",
                     "Cannot generate P4Info message");
-        return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
+        return P4RuntimeAPI{std::make_shared<p4configv1::P4Info>(),
+                            std::make_shared<p4v1::WriteRequest>()};
     }
 
-    auto archHandler = (*archHandlerBuilderIt->second)(&refMap, &typeMap, evaluatedProgram);
+    std::unique_ptr<P4RuntimeArchHandlerIface> archHandler(
+        (*archHandlerBuilderIt->second)(&refMap, &typeMap, evaluatedProgram));
 
     return P4RuntimeAnalyzer::analyze(p4RuntimeProgram, evaluatedProgram, &refMap, &typeMap,
-                                      archHandler, arch);
+                                      archHandler.get(), arch);
 }
 
 void P4RuntimeAPI::serializeP4InfoTo(std::ostream *destination, P4RuntimeFormat format) const {
@@ -1614,12 +1609,11 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeP4InfoTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime API file: %1%", file);
-                continue;
             }
-            p4Runtime.serializeP4InfoTo(out, format);
         }
     }
 
@@ -1636,13 +1630,12 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeEntriesTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
-                            options.p4RuntimeEntriesFile);
-                continue;
+                            file);
             }
-            p4Runtime.serializeEntriesTo(out, format);
         }
     }
 }
@@ -1671,7 +1664,7 @@ cstring P4RuntimeSerializer::resolveArch(const CompilerOptions &options) {
 
 void P4RuntimeSerializer::registerArch(
     const cstring archName, const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface *builder) {
-    archHandlerBuilders[archName] = builder;
+    archHandlerBuilders[archName].reset(builder);
 }
 
 P4RuntimeAPI generateP4Runtime(const IR::P4Program *program, cstring arch) {

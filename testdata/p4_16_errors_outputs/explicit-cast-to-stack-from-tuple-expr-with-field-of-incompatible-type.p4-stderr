@@ -1,0 +1,37 @@
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Werror=type-error] error: '(H[2]){ 0, ... }'
+    stack = (H[2]) { 0, ... };
+            ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(3): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'header H'
+  header H {}
+         ^
+  ---- Originating from:
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7): Source expression '{ 0, ... }' produces a result of type 'tuple<int, ANYTYPE>' which cannot be assigned to a left-value with type 'header H[2]'
+      stack = (H[2]) { 0, ... };
+                     ^^^^^^^^^^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7)
+      stack = (H[2]) { 0, ... };
+                     ^^^^^^^^^^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(5)
+    H[2] stack;
+    ^^^^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Werror=type-error] error: 'stack = { 0, ... }'
+    stack = (H[2]) { 0, ... };
+          ^
+  ---- Actual error:
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(3): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'header H'
+  header H {}
+         ^
+  ---- Originating from:
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7): Source expression '{ 0, ... }' produces a result of type 'tuple<int, ANYTYPE>' which cannot be assigned to a left-value with type 'header H[2]'
+      stack = (H[2]) { 0, ... };
+                     ^^^^^^^^^^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(7)
+      stack = (H[2]) { 0, ... };
+                     ^^^^^^^^^^
+explicit-cast-to-stack-from-tuple-expr-with-field-of-incompatible-type.p4(5)
+    H[2] stack;
+    ^^^^

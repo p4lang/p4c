@@ -1,16 +1,16 @@
 extern void log(string s);
 control c() {
-    @hidden action string5() {
+    @hidden action string11() {
         log("This is a message");
     }
-    @hidden table tbl_string5 {
+    @hidden table tbl_string11 {
         actions = {
-            string5();
+            string11();
         }
-        const default_action = string5();
+        const default_action = string11();
     }
     apply {
-        tbl_string5.apply();
+        tbl_string11.apply();
     }
 }
 

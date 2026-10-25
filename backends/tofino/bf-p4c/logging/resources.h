@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_
-#define _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_
 
 /* clang-format off */
 #include <set>
@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "ir/ir.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "backends/tofino/bf-p4c/logging/resources_schema.h"
@@ -252,4 +252,4 @@ class ResourcesLogging : public Inspector {
 
 }  // namespace BFN
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_ */

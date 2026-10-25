@@ -1,7 +1,7 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-typedef bit<48> eth_addr_t;
+@command_line("--loopsUnroll") typedef bit<48> eth_addr_t;
 header ethernet_h {
     eth_addr_t dstAddr;
     eth_addr_t srcAddr;

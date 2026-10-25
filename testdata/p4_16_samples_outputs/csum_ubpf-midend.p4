@@ -56,7 +56,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.old_addr") bit<32> old_addr_0;
     @name("pipe.from") bit<16> from_0;
-    @hidden action csum_ubpf80() {
+    @hidden action csum_ubpf71() {
         old_addr_0 = headers.ipv4.dstAddr;
         headers.ipv4.dstAddr = 32w0x1020304;
         headers.ipv4.checksum = csum_replace4(headers.ipv4.checksum, old_addr_0, 32w0x1020304);
@@ -64,31 +64,31 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         headers.udp.dstPort = 16w0x400;
         headers.udp.checksum = csum_replace2(headers.udp.checksum, from_0, 16w0x400);
     }
-    @hidden table tbl_csum_ubpf80 {
+    @hidden table tbl_csum_ubpf71 {
         actions = {
-            csum_ubpf80();
+            csum_ubpf71();
         }
-        const default_action = csum_ubpf80();
+        const default_action = csum_ubpf71();
     }
     apply {
-        tbl_csum_ubpf80.apply();
+        tbl_csum_ubpf71.apply();
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action csum_ubpf96() {
+    @hidden action csum_ubpf87() {
         packet.emit<Ethernet>(headers.ethernet);
         packet.emit<IPv4>(headers.ipv4);
         packet.emit<udp_t>(headers.udp);
     }
-    @hidden table tbl_csum_ubpf96 {
+    @hidden table tbl_csum_ubpf87 {
         actions = {
-            csum_ubpf96();
+            csum_ubpf87();
         }
-        const default_action = csum_ubpf96();
+        const default_action = csum_ubpf87();
     }
     apply {
-        tbl_csum_ubpf96.apply();
+        tbl_csum_ubpf87.apply();
     }
 }
 

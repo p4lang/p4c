@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 mau_schema.py: Generates a JSON Schema model for structured MAU allocation result information.
 """
@@ -21,12 +25,12 @@ Version Notes:
 """
 
 major_version = 1
-medium_version = 0
 minor_version = 0
+patch_version = 0
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(medium_version), str(minor_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################
@@ -233,7 +237,6 @@ class StageMatchMemoryDetails(StageMemoryDetailsWithEntryWidthAndIdeal):
 
 
 class MatchTables(jsl.Document):
-
     class StageDetails(jsl.Document):
         title = "StageDetails"
         description = "Information about packing and resource usage on a per-stage basis."

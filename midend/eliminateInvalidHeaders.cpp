@@ -1,18 +1,7 @@
-/*
-Copyright 2020 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2020 VMware, Inc.
+// SPDX-FileCopyrightText: 2020 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "eliminateInvalidHeaders.h"
 
@@ -54,8 +43,9 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Action *action) {
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expression) {
     if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
         !isInContext<IR::ParserState>()) {
-        // We need some place to insert the setInvalid call.
-        ::P4::error("%1%: Cannot eliminate invalid header", expression);
+        // We have no place to insert the setInvalid call.
+        // This could happen, for example, when {#} is used as the argument to a header
+        // param of a table's default action.
         return expression;
     }
     cstring name = nameGen.newName("ih");
@@ -74,8 +64,9 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *expression) {
     if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
         !isInContext<IR::ParserState>()) {
-        // We need some place to insert the setInvalid call.
-        ::P4::error("%1%: Cannot eliminate invalid header union", expression);
+        // We have no place to insert the setInvalid call.
+        // This could happen, for example, when {#} is used as the argument to a header union
+        // param of a table's default action.
         return expression;
     }
     cstring name = nameGen.newName("ih");

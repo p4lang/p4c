@@ -1,0 +1,6 @@
+extern-abstract-method-parameter-type-illformed.p4(6): [--Werror=type-error] error: a: a parameter with type t cannot have a direction
+  abstract t f(in t a);
+                    ^
+extern-abstract-method-parameter-type-illformed.p4(3)
+extern t {}
+       ^

@@ -8,18 +8,18 @@ header Header {
 
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
-@noWarn("uninitialized_use") parser p1(packet_in p, out Header h) {
+@noWarn("uninitialized-use") parser p1(packet_in p, out Header h) {
     Header[2] stack;
     bool b;
     bool c;
     bool d;
-    @noWarn("invalid_header") @noWarn("ordering") state start {
+    @noWarn("invalid-header") @noWarn("ordering") state start {
         h.data1 = 32w0;
         func(h);
         g(h.data2, g(h.data2, h.data2));
         transition next;
     }
-    @noWarn("invalid_header") state next {
+    @noWarn("invalid-header") state next {
         h.data2 = h.data3 + 32w1;
         stack[0] = stack[1];
         b = stack[1].isValid();
@@ -61,7 +61,7 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         b = b + 32w1;
         d = d + 32w1;
         bit<32> e;

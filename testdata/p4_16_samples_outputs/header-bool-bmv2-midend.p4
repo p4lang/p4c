@@ -30,10 +30,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
     state getH1 {
         b.extract<Hdr1>(h.u_h1);
+        h.u_h2.setInvalid();
         transition accept;
     }
     state getH2 {
         b.extract<Hdr2>(h.u_h2);
+        h.u_h1.setInvalid();
         transition accept;
     }
 }
@@ -49,17 +51,17 @@ control update(inout Headers h, inout Meta m) {
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action headerboolbmv2l67() {
+    @hidden action headerboolbmv2l57() {
         h.u_h1.x = true;
     }
-    @hidden table tbl_headerboolbmv2l67 {
+    @hidden table tbl_headerboolbmv2l57 {
         actions = {
-            headerboolbmv2l67();
+            headerboolbmv2l57();
         }
-        const default_action = headerboolbmv2l67();
+        const default_action = headerboolbmv2l57();
     }
     apply {
-        tbl_headerboolbmv2l67.apply();
+        tbl_headerboolbmv2l57.apply();
     }
 }
 
@@ -72,18 +74,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action headerboolbmv2l81() {
+    @hidden action headerboolbmv2l71() {
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_headerboolbmv2l81 {
+    @hidden table tbl_headerboolbmv2l71 {
         actions = {
-            headerboolbmv2l81();
+            headerboolbmv2l71();
         }
-        const default_action = headerboolbmv2l81();
+        const default_action = headerboolbmv2l71();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_headerboolbmv2l81.apply();
+            tbl_headerboolbmv2l71.apply();
         }
     }
 }

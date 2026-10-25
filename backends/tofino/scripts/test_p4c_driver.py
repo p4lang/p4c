@@ -1,5 +1,9 @@
 #! /usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script to test different compiler options and ensure that the compiler generates the correct
 # directory structure and manifest.
 
@@ -98,7 +102,7 @@ class Test:
 
         if self._verbose:
             print('running {}'.format(' '.join(args)))
-        (outlog, errlog) = p.communicate()  # now wait
+        outlog, errlog = p.communicate()  # now wait
         if self._verbose:
             print("Output log:", outlog.decode())
             print("Error log:", errlog.decode())

@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
+
 # Copyright 2018 VMware, Inc.
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" Virtual environment which models a simple bridge with n attached
-    interfaces. The bridge runs in a completely isolated namespace.
-    Allows the loading and testing of eBPF programs. """
+# SPDX-License-Identifier: Apache-2.0
+"""Virtual environment which models a simple bridge with n attached
+interfaces. The bridge runs in a completely isolated namespace.
+Allows the loading and testing of eBPF programs."""
 
 import logging
 import subprocess
@@ -96,7 +88,7 @@ class Bridge:
     def ns_proc_close(self, proc: subprocess.Popen, **extra_args: Any) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
-        testutils.log.info("Executing command: %s", proc)
+        testutils.log.info("Executing command: %s", proc.args)
         result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error(
@@ -109,7 +101,7 @@ class Bridge:
         avoid ICMPv6 spam."""
         # We do not care about failures here
         self.ns_exec(f"ip link set dev {br_name} up")
-        self.ns_exec(f"ip link set dev {br_name} mtu 9000")
+        self.ns_exec(f"ip link set dev {br_name} mtu 1500")
         # Prevent the broadcasting of ipv6 link discovery messages
         self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
@@ -130,7 +122,7 @@ class Bridge:
         result = self.ns_exec(cmd)
         if result != testutils.SUCCESS:
             return result
-        cmd = f"ip link set dev {port_name} mtu 9000"
+        cmd = f"ip link set dev {port_name} mtu 1500"
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces: int) -> int:

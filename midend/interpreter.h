@@ -1,17 +1,9 @@
 /*
-Copyright 2016 VMware, Inc.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2016 VMware, Inc.
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_INTERPRETER_H_
 #define MIDEND_INTERPRETER_H_
@@ -326,9 +318,7 @@ class SymbolicInteger final : public ScalarValue {
     SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits *type)
         : ScalarValue(state, type), constant(nullptr) {}
     explicit SymbolicInteger(const IR::Constant *constant)
-        : ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant) {
-        CHECK_NULL(constant);
-    }
+        : ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant) {}
     SymbolicInteger(const SymbolicInteger &other) = default;
     void dbprint(std::ostream &out) const override {
         ScalarValue::dbprint(out);
@@ -355,9 +345,7 @@ class SymbolicString final : public ScalarValue {
     SymbolicString(ScalarValue::ValueState state, const IR::Type_String *type)
         : ScalarValue(state, type), string(nullptr) {}
     explicit SymbolicString(const IR::StringLiteral *string)
-        : ScalarValue(ScalarValue::ValueState::Constant, string->type), string(string) {
-        CHECK_NULL(string);
-    }
+        : ScalarValue(ScalarValue::ValueState::Constant, string->type), string(string) {}
     SymbolicString(const SymbolicString &other) = default;
     void dbprint(std::ostream &out) const override {
         ScalarValue::dbprint(out);
@@ -483,9 +471,9 @@ class SymbolicHeaderUnion : public SymbolicStruct {
 };
 
 class SymbolicArray final : public SymbolicValue {
-    std::vector<SymbolicStruct *> values;
+    std::vector<SymbolicValue *> values;
     friend class AnyElement;
-    explicit SymbolicArray(const IR::Type_Stack *type)
+    explicit SymbolicArray(const IR::Type_Array *type)
         : SymbolicValue(type),
           size(type->getSize()),
           elemType(type->elementType->to<IR::Type_Header>()) {}
@@ -493,7 +481,7 @@ class SymbolicArray final : public SymbolicValue {
  public:
     const size_t size;
     const IR::Type_Header *elemType;
-    SymbolicArray(const IR::Type_Stack *stack, bool uninitialized,
+    SymbolicArray(const IR::Type_Array *stack, bool uninitialized,
                   const SymbolicValueFactory *factory);
     SymbolicValue *get(const IR::Node *node, size_t index) const {
         if (index >= values.size())
@@ -516,6 +504,7 @@ class SymbolicArray final : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+    SymbolicValue *collapse() const;
 
     DECLARE_TYPEINFO(SymbolicArray, SymbolicValue);
 };
@@ -526,7 +515,6 @@ class AnyElement final : public SymbolicHeader {
 
  public:
     explicit AnyElement(SymbolicArray *parent) : SymbolicHeader(parent->elemType), parent(parent) {
-        CHECK_NULL(parent);
         valid = new SymbolicBool();
     }
     SymbolicValue *clone() const override {
@@ -539,7 +527,11 @@ class AnyElement final : public SymbolicHeader {
     void setValid(bool) override { parent->setAllUnknown(); }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
-    SymbolicValue *collapse() const;
+    SymbolicValue *get(const IR::Node *node, cstring) const override {
+        parent->setAllUnknown();
+        return new SymbolicStaticError(node, "Unknown array index");
+    }
+    SymbolicValue *collapse() const { return parent->collapse(); }
     bool hasUninitializedParts() const override { BUG("Should not be called"); }
 
     DECLARE_TYPEINFO(AnyElement, SymbolicHeader);

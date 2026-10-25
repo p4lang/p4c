@@ -40,17 +40,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = do_meter();
     }
-    @hidden action issue18294bmv2l74() {
+    @hidden action issue18294bmv2l65() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_issue18294bmv2l74 {
+    @hidden table tbl_issue18294bmv2l65 {
         actions = {
-            issue18294bmv2l74();
+            issue18294bmv2l65();
         }
-        const default_action = issue18294bmv2l74();
+        const default_action = issue18294bmv2l65();
     }
     apply {
-        tbl_issue18294bmv2l74.apply();
+        tbl_issue18294bmv2l65.apply();
         mac_da_0.apply();
     }
 }

@@ -1,18 +1,9 @@
 /*
-Copyright 2022 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2022 VMware, Inc.
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_STATICASSERT_H_
 #define FRONTENDS_P4_STATICASSERT_H_
@@ -26,6 +17,8 @@ namespace P4 {
 
 using namespace literals;
 
+const cstring staticAssertMethodName = "static_assert"_cs;
+
 /**
  * Evaluates static_assert invocations.
  * A successful assertion is constant-folded to 'true'.
@@ -33,12 +26,10 @@ using namespace literals;
 class DoStaticAssert : public Transform, public ResolutionContext {
     TypeMap *typeMap;
     bool removeStatement = false;
-
-    // Cannot go static here as cstring is not constexpr
-    const cstring staticAssertMethodName = "static_assert"_cs;
+    bool isFinal = true;
 
  public:
-    explicit DoStaticAssert(TypeMap *typeMap) : typeMap(typeMap) {
+    explicit DoStaticAssert(TypeMap *typeMap, bool isFinal) : typeMap(typeMap), isFinal(isFinal) {
         CHECK_NULL(typeMap);
         setName("DoStaticAssert");
     }
@@ -77,6 +68,8 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                         return method;
                     }
                     return new IR::BoolLiteral(method->srcInfo, true);
+                } else if (!isFinal) {
+                    return method;
                 } else {
                     ::P4::error(ErrorType::ERR_UNEXPECTED,
                                 "Could not evaluate static_assert to a constant: %1%", arg);
@@ -98,9 +91,9 @@ class DoStaticAssert : public Transform, public ResolutionContext {
 
 class StaticAssert : public PassManager {
  public:
-    explicit StaticAssert(TypeMap *typeMap) {
+    explicit StaticAssert(TypeMap *typeMap, bool isFinal = true) {
         passes.push_back(new ReadOnlyTypeInference(typeMap));
-        passes.push_back(new DoStaticAssert(typeMap));
+        passes.push_back(new DoStaticAssert(typeMap, isFinal));
         setName("StaticAssert");
     }
 };

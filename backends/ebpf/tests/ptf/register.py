@@ -1,18 +1,9 @@
 #!/usr/bin/env python
-# Copyright 2022-present Orange
-# Copyright 2022-present Open Networking Foundation
+
+# SPDX-FileCopyrightText: 2022 Open Networking Foundation
+# SPDX-FileCopyrightText: 2022 Orange
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 from common import *
 
@@ -77,6 +68,41 @@ class RegisterApplyPSATest(P4EbpfTest):
         # After next action run in register should be stored a new value - 15
         testutils.send_packet(self, PORT0, pkt)
         self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0xf"])
+
+
+class RegisterArrayMetadataPSATest(P4EbpfTest):
+    """
+    Test reading a four-element register array into user metadata and writing
+    the incremented values back to the same register elements.
+    """
+
+    p4_file_path = "p4testdata/register-array-metadata.p4"
+
+    def runTest(self):
+        register_name = "RegisterIngress_register_array"
+
+        for index in range(4):
+            self.register_set(
+                name=register_name,
+                index=[index],
+                value=["0x0"],
+            )
+
+        for index in range(4):
+            self.register_verify(
+                name=register_name,
+                index=[index],
+                expected_value=["0x0"],
+            )
+
+        testutils.send_packet(self, PORT0, testutils.simple_eth_packet())
+
+        for index in range(4):
+            self.register_verify(
+                name=register_name,
+                index=[index],
+                expected_value=["0x1"],
+            )
 
 
 class RegisterDefaultPSATest(P4EbpfTest):

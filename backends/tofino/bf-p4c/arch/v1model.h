@@ -21,8 +21,8 @@
  * \ingroup ArchTranslation
  * \brief Set of passes that translate v1model architecture.
  */
-#ifndef BF_P4C_ARCH_V1MODEL_H_
-#define BF_P4C_ARCH_V1MODEL_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_V1MODEL_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_V1MODEL_H_
 
 #include <boost/algorithm/string.hpp>
 
@@ -32,7 +32,7 @@
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
@@ -77,4 +77,4 @@ class SimpleSwitchTranslation : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_V1MODEL_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_V1MODEL_H_ */

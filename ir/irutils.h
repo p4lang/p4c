@@ -1,15 +1,22 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef IR_IRUTILS_H_
 #define IR_IRUTILS_H_
 
 #include <initializer_list>
 #include <vector>
 
-#include "lib/big_int_util.h"
 #include "lib/source_file.h"
+
+namespace P4 {
 
 class Transform;
 
-namespace P4::IR {
+namespace IR {
 
 // Forward-declare some IR classes that are used in function declarations.
 class BoolLiteral;
@@ -23,6 +30,7 @@ class StatOrDecl;
 class StructExpression;
 class Type;
 class Type_Bits;
+class Type_Extern;
 template <typename T>
 class IndexedVector;
 
@@ -37,6 +45,11 @@ class IndexedVector;
 
 /// @returns a representation of bit<> that is just wide enough to fit the given value.
 const Type_Bits *getBitTypeToFit(int value);
+
+/// @returns the extern that @p type describes, or nullptr if @p type does not describe an extern.
+/// After type checking, an instance of a generic extern has the type Type_SpecializedCanonical.
+/// For this type, the result is the extern with the type arguments of the instance.
+const Type_Extern *getExternType(const Type *type);
 
 /* =========================================================================================
  *  Expressions
@@ -61,7 +74,7 @@ const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &s
 /// Type_StructLike     StructExpression (fields filled with getDefaultValue)
 /// Type_Fragment       recurses into getDefaultValue
 /// Type_BaseList       ListExpression (fields filled with getDefaultValue)
-/// Type_Stack          HeaderStackExpression (fields filled with getDefaultValue)
+/// Type_Array          ArrayExpression (fields filled with getDefaultValue)
 /// Definition: https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values
 const IR::Expression *getDefaultValue(const Type *type, const Util::SourceInfo &srcInfo = {},
                                       bool valueRequired = false);
@@ -128,6 +141,8 @@ const IR::Node *inlineBlock(const Transform &, std::initializer_list<const IR::S
 const IR::Node *inlineBlock(const Transform &, const IR::IndexedVector<IR::StatOrDecl> &);
 const IR::Node *inlineBlock(const Transform &, IR::IndexedVector<IR::StatOrDecl> &&);
 
-}  // namespace P4::IR
+}  // namespace IR
+
+}  // namespace P4
 
 #endif /* IR_IRUTILS_H_ */

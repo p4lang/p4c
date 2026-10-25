@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
-#define BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
 
 /* clang-format off */
 #include "backends/tofino/bf-p4c/mau/action_data_bus.h"
@@ -215,4 +215,4 @@ struct ActionDataBus : public ::ActionDataBus {
 
 }  // end namespace Tofino
 
-#endif /* BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_*/
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_*/

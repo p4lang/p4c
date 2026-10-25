@@ -1,0 +1,9 @@
+lvalue-indexaccess-on-non-value.p4(10): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+lvalue-indexaccess-on-non-value.p4(9): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(in Headers h)() {
+       ^
+lvalue-indexaccess-on-non-value.p4(11): [--Werror=type-error] error: Expression h.h2[1] cannot be the target of an assignment
+    h.h2[1] = 0;
+    ^^^^^^^

@@ -17,7 +17,7 @@ class Attach : public Inspector {
     enum class TraversalType { Preorder, Postorder };
 
     explicit Attach(std::unordered_map<const Util::Comment *, bool> &processedComments)
-        : processedComments(processedComments){};
+        : processedComments(processedComments) {};
 
     void attachCommentsToNode(const IR::Node *, TraversalType);
 

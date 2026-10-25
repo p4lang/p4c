@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "test/gtest/helpers.h"
 
@@ -142,9 +131,11 @@ P4CTestEnvironment::P4CTestEnvironment() {
     // Locate the headers based on the relative path of the file.
     std::filesystem::path srcFilePath{__FILE__};
     auto srcFileDir = std::filesystem::absolute(srcFilePath.parent_path());
-    auto corePath = srcFileDir / "../../p4include/core.p4";
-    auto v1modelPath = srcFileDir / "../../p4include/v1model.p4";
-    auto psaPath = srcFileDir / "../../p4include/bmv2/psa.p4";
+    auto includeDir = srcFileDir / "../../p4include";
+    P4::p4includePath = includeDir;
+    auto corePath = includeDir / "core.p4";
+    auto v1modelPath = includeDir / "v1model.p4";
+    auto psaPath = includeDir / "bmv2/psa.p4";
     _coreP4 = readHeader(corePath.c_str());
     _v1Model = readHeader(v1modelPath.c_str(), true, "V1MODEL_VERSION", 20200408);
     _psaP4 = readHeader(psaPath.c_str(), true);
@@ -167,7 +158,11 @@ namespace P4::Test {
     if (policy == nullptr) {
         policy = new P4::FrontEndPolicy();
     }
+#ifdef SUPPORT_P4_14
     auto *program = P4::parseP4String(source, langVersion);
+#else
+    auto *program = P4::parseP4String(source);
+#endif
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
         return std::nullopt;
@@ -178,7 +173,7 @@ namespace P4::Test {
         return std::nullopt;
     }
 
-    P4::P4COptionPragmaParser optionsPragmaParser;
+    P4::P4COptionPragmaParser optionsPragmaParser(true);
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
     if (::P4::errorCount() > 0) {
         std::cerr << "Encountered " << ::P4::errorCount()

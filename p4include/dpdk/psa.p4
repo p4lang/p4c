@@ -1,17 +1,9 @@
-/* Copyright 2021-2022 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+/*
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2021-2022 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef __PSA_P4__
 #define __PSA_P4__
@@ -46,7 +38,7 @@ limitations under the License.
  *
  * Note that the width of typedef <name>Uint_t will always be the same
  * as the width of type <name>_t. */
-typedef bit<32>  PortIdUint_t;
+typedef bit<32> PortIdUint_t;
 typedef bit<32> MulticastGroupUint_t;
 typedef bit<16> CloneSessionIdUint_t;
 typedef bit<8>  ClassOfServiceUint_t;
@@ -612,7 +604,7 @@ extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
   // dpdk does not support this overload currently if used with
   // BYTES counter type
-  void count(); 
+  void count();
   // Dpdk support this overload and requires packet length
   void count(in bit<32> pkt_len);
 }
@@ -642,6 +634,7 @@ extern Meter<S> {
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
   PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
+
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.

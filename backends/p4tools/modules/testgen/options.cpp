@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/options.h"
 
 #include <algorithm>
@@ -44,7 +48,7 @@ TestgenOptions::TestgenOptions()
                 if (maxTests < 0) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
                 return false;
             }
@@ -90,7 +94,7 @@ TestgenOptions::TestgenOptions()
                         "least the size of the minimum packet size.",
                         minPktSize, maxPktSize);
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error(
                     "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
                     "and [max] are integers.",
@@ -134,7 +138,7 @@ TestgenOptions::TestgenOptions()
                             loPortRange, hiPortRange);
                     }
                     permittedPortRanges.emplace_back(loPortRange, hiPortRange);
-                } catch (std::invalid_argument &) {
+                } catch (const std::logic_error &) {
                     error(
                         "Invalid permitted port range %1%. Expected format is [lo]:[hi], where "
                         "[lo] "
@@ -280,7 +284,7 @@ TestgenOptions::TestgenOptions()
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
             static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS"_cs, "TABLE_ENTRIES"_cs,
-                                                               "ACTIONS"_cs};
+                                                               "ACTIONS"_cs, "PARSER_STATES"_cs};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -297,6 +301,10 @@ TestgenOptions::TestgenOptions()
                     coverageOptions.coverActions = true;
                     return true;
                 }
+                if (selectionString == "PARSER_STATES") {
+                    coverageOptions.coverParserStates = true;
+                    return true;
+                }
             }
             error(
                 "Coverage tracking for label %1% not supported. Supported coverage tracking "
@@ -307,7 +315,8 @@ TestgenOptions::TestgenOptions()
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
         "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES (table rules encoded "
-        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables). "
+        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables), "
+        "PARSER_STATES (parser states which a particular path chose to visit)."
         "Defaults to no coverage.");
 
     registerOption(
@@ -327,7 +336,7 @@ TestgenOptions::TestgenOptions()
                 if (minCoverage < 0 || minCoverage > 1) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error(
                     "Invalid input value %1% for --assert-min-coverage. "
                     "Expected float in range [0, 1].",

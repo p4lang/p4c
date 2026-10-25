@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #define UBPF_MODEL_VERSION 20200304
 #include <ubpf_model.p4>
 #include <core.p4>

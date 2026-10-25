@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 // If you want to use 'raise' below to trace a node creation uncomment the next line
 // #include <signal.h>
@@ -50,12 +39,12 @@ void IR::Node::traceCreation() const {
 int IR::Node::currentId = 0;
 
 void IR::Node::toJSON(JSONGenerator &json) const {
-    json << json.indent << "\"Node_ID\" : " << id << "," << std::endl
-         << json.indent << "\"Node_Type\" : " << node_type_name();
+    json.emit("Node_ID", id);
+    json.emit("Node_Type", node_type_name());
 }
 
 IR::Node::Node(JSONLoader &json) : id(-1) {
-    json.load("Node_ID", id);
+    json.load("Node_ID", id) || json.error("missing field Node_Id");
     if (id < 0)
         id = currentId++;
     else if (id >= currentId)
@@ -85,9 +74,9 @@ cstring IR::dbp(const IR::INode *node) {
         } else if (node->is<IR::PathExpression>() || node->is<IR::Path>() ||
                    node->is<IR::TypeNameExpression>() || node->is<IR::Constant>() ||
                    node->is<IR::Type_Name>() || node->is<IR::Type_Base>() ||
-                   node->is<IR::Type_Specialized>()) {
+                   node->is<IR::ITypeVar>() || node->is<IR::Type_Specialized>()) {
             node->getNode()->Node::dbprint(str);
-            str << " " << node->toString();
+            str << " " << node->getNode();
         } else {
             node->getNode()->Node::dbprint(str);
         }
@@ -100,8 +89,7 @@ cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineN
     if (!si.isValid()) {
         return nullptr;
     }
-    if (is<IR::AssignmentStatement>()) {
-        auto assign = to<IR::AssignmentStatement>();
+    if (auto assign = to<IR::BaseAssignmentStatement>()) {
         si = (assign->left->srcInfo + si) + assign->right->srcInfo;
     }
     return si.toSourcePositionData(lineNumber, columnNumber);
@@ -133,7 +121,7 @@ Util::JsonObject *IR::Node::sourceInfoJsonObj() const {
         json->emplace("filename", fName);
         json->emplace("line", lineNumber);
         json->emplace("column", columnNumber);
-        json->emplace("source_fragment", si.toBriefSourceFragment().escapeJson());
+        json->emplace("source_fragment", si.toBriefSourceFragment());
         return json;
     }
 }
@@ -146,18 +134,40 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
         // Same reasoning as above.
         return;
     }
+    json.emit_tag("Source_Info");
+    auto state = json.begin_object();
+    json.emit("filename", fName);
+    json.emit("line", lineNumber);
+    json.emit("column", columnNumber);
+    json.emit("source_fragment", si.toBriefSourceFragment());
+    json.end_object(state);
+}
 
-    json << "," << std::endl << json.indent++ << "\"Source_Info\" : {" << std::endl;
-
-    json << json.indent << "\"filename\" : " << fName << "," << std::endl;
-    json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
-    json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
-    json << json.indent << "\"source_fragment\" : " << si.toBriefSourceFragment().escapeJson()
-         << std::endl;
-
-    json << --json.indent << "}";
+void IR::Node::sourceInfoFromJSON(JSONLoader &json) {
+    if (auto si = JSONLoader(json, "Source_Info")) {
+        si.load("filename", srcInfo.filename);
+        si.load("line", srcInfo.line);
+        si.load("column", srcInfo.column);
+        si.load("source_fragment", srcInfo.srcBrief);
+    }
 }
 
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )
+
+bool IR::INode::hasAnnotation(cstring name) const {
+    if (auto *a = to<IAnnotated>()) return a->hasAnnotation(name);
+    return false;
+}
+
+const IR::Annotation *IR::INode::getAnnotation(cstring name) const {
+    if (auto *a = to<IAnnotated>()) return a->getAnnotation(name);
+    return nullptr;
+}
+
+const IR::Vector<IR::Annotation> &IR::INode::getAnnotations() const {
+    if (auto *a = to<IAnnotated>()) return a->getAnnotations();
+    static IR::Vector<IR::Annotation> empty;
+    return empty;
+}
 
 }  // namespace P4

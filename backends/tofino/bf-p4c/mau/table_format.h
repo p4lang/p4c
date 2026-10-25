@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TABLE_FORMAT_H_
-#define BF_P4C_MAU_TABLE_FORMAT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_FORMAT_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_FORMAT_H_
 
 #include <map>
 #include <ostream>
@@ -390,4 +390,4 @@ struct TableFormat {
 };
 
 std::ostream &operator<<(std::ostream &out, const TableFormat::Use::match_group_use &m);
-#endif /* BF_P4C_MAU_TABLE_FORMAT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_FORMAT_H_ */

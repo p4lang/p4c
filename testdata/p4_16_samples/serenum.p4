@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 
 enum bit<16> EthTypes {

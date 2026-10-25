@@ -124,17 +124,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnadpdkparserstateerr191() {
+    @hidden action pnadpdkparserstateerr182() {
         user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
     }
-    @hidden table tbl_pnadpdkparserstateerr191 {
+    @hidden table tbl_pnadpdkparserstateerr182 {
         actions = {
-            pnadpdkparserstateerr191();
+            pnadpdkparserstateerr182();
         }
-        const default_action = pnadpdkparserstateerr191();
+        const default_action = pnadpdkparserstateerr182();
     }
     apply {
-        tbl_pnadpdkparserstateerr191.apply();
+        tbl_pnadpdkparserstateerr182.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -143,18 +143,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkparserstateerr206() {
+    @hidden action pnadpdkparserstateerr197() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkparserstateerr206 {
+    @hidden table tbl_pnadpdkparserstateerr197 {
         actions = {
-            pnadpdkparserstateerr206();
+            pnadpdkparserstateerr197();
         }
-        const default_action = pnadpdkparserstateerr206();
+        const default_action = pnadpdkparserstateerr197();
     }
     apply {
-        tbl_pnadpdkparserstateerr206.apply();
+        tbl_pnadpdkparserstateerr197.apply();
     }
 }
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Should match 1st const entry
 packet 0 0a0102030000 ffffffffffff 0000
 expect 1 0a0102030000 000000000001 0000

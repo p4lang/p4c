@@ -1,35 +1,30 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_JSON_LOADER_H_
 #define IR_JSON_LOADER_H_
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <variant>
 
+#include "absl/container/flat_hash_set.h"
 #include "ir.h"
 #include "json_parser.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
@@ -53,56 +48,125 @@ class JSONLoader {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
- public:
-    std::unordered_map<int, IR::Node *> &node_refs;
-    JsonData *json = nullptr;
+    using NodeReferences = std::unordered_map<int, IR::Node *>;
+    std::shared_ptr<NodeReferences> node_refs;
+    std::unique_ptr<JsonData> json_root;
+    const JsonData *json = nullptr;
+    JsonData::LocationInfo *locinfo = nullptr;
+    std::unique_ptr<absl::flat_hash_set<P4::cstring, Util::Hash>> decoded;
+    bool (*errfn)(const JSONLoader &, std::string_view msg) = nullptr;
 
-    explicit JSONLoader(std::istream &in)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())) {
-        in >> json;
+    JSONLoader(const JsonData *json, std::shared_ptr<NodeReferences> refs,
+               JsonData::LocationInfo *locinfo)
+        : node_refs(std::move(refs)), json(json), locinfo(locinfo) {}
+
+ public:
+    explicit JSONLoader(std::istream &in, JsonData::LocationInfo *li = nullptr)
+        : node_refs(std::make_shared<NodeReferences>()), locinfo(li) {
+        in >> json_root;
+        json = json_root.get();
     }
 
-    explicit JSONLoader(JsonData *json)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())), json(json) {}
+    JSONLoader(const JSONLoader &unpacker, std::string_view field)
+        : node_refs(unpacker.node_refs), json(nullptr), locinfo(unpacker.locinfo) {
+        if (!unpacker) return;
+        if (auto *obj = unpacker.json->to<JsonObject>()) {
+            if (auto it = obj->find(field); it != obj->end()) {
+                if (unpacker.decoded) unpacker.decoded->emplace(field);
+                json = it->second.get();
+            }
+        }
+    }
 
-    JSONLoader(JsonData *json, std::unordered_map<int, IR::Node *> &refs)
-        : node_refs(refs), json(json) {}
+    explicit operator bool() const { return json != nullptr; }
+    template <typename T>
+    [[nodiscard]] bool is() const {
+        return json && json->is<T>();
+    }
+    template <typename T>
+    [[nodiscard]] const T &as() const {
+        if (!is<T>()) error("type mismatch in json");
+        return json->as<T>();
+    }
+    template <typename T>
+    [[nodiscard]] const T *to() const {
+        return json ? json->to<T>() : nullptr;
+    }
 
-    JSONLoader(const JSONLoader &unpacker, const std::string &field)
-        : node_refs(unpacker.node_refs), json(nullptr) {
-        if (auto *obj = unpacker.json->to<JsonObject>()) json = get(obj, field);
+    std::string locdesc(const JsonData &d) const {
+        if (!locinfo) return "";
+        return locinfo->desc(d);
+    }
+    std::string locdesc() const {
+        if (!json) return "";
+        return locdesc(*json);
+    }
+    std::string locdesc(std::string_view field) const {
+        if (!locinfo || !json) return "";
+        if (auto *obj = json->to<JsonObject>())
+            if (auto it = obj->find(field); it != obj->end()) return locinfo->desc(*it->second);
+        return locdesc();
+    }
+
+    bool error(std::string_view msg) const {
+        if ((!errfn || errfn(*this, msg)) && JsonData::strict) throw JsonData::error(msg, json);
+        return false;
+    }
+
+    void track_decode() {
+        BUG_CHECK(json && json->is<JsonObject>(), "JSONLoader::track_decode on non-JsonObject");
+        if (!decoded) decoded = std::make_unique<absl::flat_hash_set<P4::cstring, Util::Hash>>();
+    }
+
+    template <typename FN>
+    void undecoded(FN fn) {
+        BUG_CHECK(decoded, "Called JSONLoader::undecoded without track_decode");
+        for (auto &el : *json->to<JsonObject>())
+            if (!decoded->count(el.first)) fn(*this, el.first, *el.second);
     }
 
  private:
-    const IR::Node *get_node() {
-        if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
-        int id = json->as<JsonObject>().get_id();
+    const IR::Node *get_node(NodeFactoryFn factory = nullptr) {
+        if (!json || !json->is<JsonObject>()) {
+            error("node is not a JsonObject");
+            return nullptr;
+        }
+        track_decode();
+        int id = -1;  // load() leaves id untouched if Node_ID is absent.
+        auto success = load("Node_ID", id) || error("missing field Node_ID");
+        if (!success) return nullptr;
         if (id >= 0) {
-            if (node_refs.find(id) == node_refs.end()) {
-                if (auto fn = get(IR::unpacker_table, json->as<JsonObject>().get_type())) {
-                    node_refs[id] = fn(*this);
+            if (node_refs->find(id) == node_refs->end()) {
+                cstring type;
+                if (!factory) {
+                    auto success = load("Node_Type", type) || error("missing field Node_Type");
+                    if (!success) return nullptr;
+                    factory = get(IR::unpacker_table, type);
+                }
+                if (factory) {
+                    auto *node = factory(*this)->to<IR::Node>();
+                    CHECK_NULL(node);
+                    node_refs->emplace(id, node);
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used
-                    JsonObject *obj = new JsonObject(json->as<JsonObject>().get_sourceJson());
-                    if (obj->hasSrcInfo() == true) {
-                        node_refs[id]->srcInfo =
-                            Util::SourceInfo(obj->get_filename(), obj->get_line(),
-                                             obj->get_column(), obj->get_sourceFragment());
-                    }
+                    node->sourceInfoFromJSON(*this);
                 } else {
+                    error("no Node factory for " + type);
                     return nullptr;
-                }  // invalid json exception?
+                }
             }
-            return node_refs[id];
+            return node_refs->at(id);
         }
-        return nullptr;  // invalid json exception?
+        error("invalid Node_ID " + std::to_string(id));
+        return nullptr;
     }
 
     template <typename T>
     void unpack_json(safe_vector<T> &v) {
         T temp;
-        for (auto e : json->as<JsonVector>()) {
+        v.clear();
+        for (auto &e : as<JsonVector>()) {
             load(e, temp);
             v.push_back(temp);
         }
@@ -111,7 +175,8 @@ class JSONLoader {
     template <typename T>
     void unpack_json(std::set<T> &v) {
         T temp;
-        for (auto e : json->as<JsonVector>()) {
+        v.clear();
+        for (auto &e : as<JsonVector>()) {
             load(e, temp);
             v.insert(temp);
         }
@@ -120,7 +185,8 @@ class JSONLoader {
     template <typename T>
     void unpack_json(ordered_set<T> &v) {
         T temp;
-        for (auto e : json->as<JsonVector>()) {
+        v.clear();
+        for (auto &e : as<JsonVector>()) {
             load(e, temp);
             v.insert(temp);
         }
@@ -128,57 +194,74 @@ class JSONLoader {
 
     template <typename T>
     void unpack_json(IR::Vector<T> &v) {
-        v = *IR::Vector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->as<IR::Vector<T>>();
     }
     template <typename T>
     void unpack_json(const IR::Vector<T> *&v) {
-        v = IR::Vector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->checkedTo<IR::Vector<T>>();
     }
     template <typename T>
     void unpack_json(IR::IndexedVector<T> &v) {
-        v = *IR::IndexedVector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))->as<IR::IndexedVector<T>>();
     }
     template <typename T>
     void unpack_json(const IR::IndexedVector<T> *&v) {
-        v = IR::IndexedVector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))
+                ->checkedTo<IR::IndexedVector<T>>();
     }
     template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
               class ALLOC>
     void unpack_json(IR::NameMap<T, MAP, COMP, ALLOC> &m) {
-        m = *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this);
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->as<IR::NameMap<T, MAP, COMP, ALLOC>>();
     }
     template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
               class ALLOC>
     void unpack_json(const IR::NameMap<T, MAP, COMP, ALLOC> *&m) {
-        m = IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this);
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->checkedTo<IR::NameMap<T, MAP, COMP, ALLOC>>();
     }
 
     template <typename K, typename V>
     void unpack_json(std::map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : json->as<JsonObject>()) {
-            JsonString *k = new JsonString(e.first);
-            load(k, temp.first);
-            load(e.second, temp.second);
-            v.insert(temp);
+        v.clear();
+        if (is<JsonVector>()) {
+            for (auto &e : as<JsonVector>()) {
+                load(e, temp);
+                v.insert(temp);
+            }
+        } else {
+            for (auto &e : as<JsonObject>()) {
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
+                v.insert(temp);
+            }
         }
     }
     template <typename K, typename V>
     void unpack_json(ordered_map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : json->as<JsonObject>()) {
-            JsonString *k = new JsonString(e.first);
-            load(k, temp.first);
-            load(e.second, temp.second);
-            v.insert(temp);
+        v.clear();
+        if (is<JsonVector>()) {
+            for (auto &e : as<JsonVector>()) {
+                load(e, temp);
+                v.insert(temp);
+            }
+        } else {
+            for (auto &e : as<JsonObject>()) {
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
+                v.insert(temp);
+            }
         }
     }
     template <typename V>
     void unpack_json(string_map<V> &v) {
         std::pair<cstring, V> temp;
-        for (auto e : json->as<JsonObject>()) {
-            JsonString *k = new JsonString(e.first);
-            load(k, temp.first);
+        v.clear();
+        for (auto &e : as<JsonObject>()) {
+            temp.first = e.first;
             load(e.second, temp.second);
             v.insert(temp);
         }
@@ -187,18 +270,26 @@ class JSONLoader {
     template <typename K, typename V>
     void unpack_json(std::multimap<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e : json->as<JsonObject>()) {
-            JsonString *k = new JsonString(e.first);
-            load(k, temp.first);
-            load(e.second, temp.second);
-            v.insert(temp);
+        v.clear();
+        if (is<JsonVector>()) {
+            for (auto &e : as<JsonVector>()) {
+                load(e, temp);
+                v.insert(temp);
+            }
+        } else {
+            for (auto &e : as<JsonObject>()) {
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
+                v.insert(temp);
+            }
         }
     }
 
     template <typename T>
     void unpack_json(std::vector<T> &v) {
         T temp;
-        for (auto e : json->as<JsonVector>()) {
+        v.clear();
+        for (auto &e : as<JsonVector>()) {
             load(e, temp);
             v.push_back(temp);
         }
@@ -206,131 +297,126 @@ class JSONLoader {
 
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
-        const JsonObject *obj = json->checkedTo<JsonObject>();
-        load(::P4::get(obj, "first"), v.first);
-        load(::P4::get(obj, "second"), v.second);
+        load("first", v.first) || error("missing field first");
+        load("second", v.second) || error("missing field second");
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
-        const JsonObject *obj = json->checkedTo<JsonObject>();
         bool isValid = false;
-        load(::P4::get(obj, "valid"), isValid);
+        load("valid", isValid) || error("missing field valid");
         if (!isValid) {
             v = std::nullopt;
             return;
         }
         T value;
-        load(::P4::get(obj, "value"), value), v = std::move(value);
+        auto success = load("value", value) || error("missing field value");
+        if (!success) {
+            v = std::nullopt;
+            return;
+        }
+        v = std::move(value);
     }
 
     template <int N, class Variant>
-    std::enable_if_t<N == std::variant_size_v<Variant>> unpack_variant(const JsonObject *,
-                                                                       int /*target*/,
+    std::enable_if_t<N == std::variant_size_v<Variant>> unpack_variant(int /*target*/,
                                                                        Variant & /*variant*/) {
         BUG("Error traversing variant during load");
     }
 
     template <int N, class Variant>
-    std::enable_if_t<(N < std::variant_size_v<Variant>)> unpack_variant(const JsonObject *obj,
-                                                                        int target,
+    std::enable_if_t<(N < std::variant_size_v<Variant>)> unpack_variant(int target,
                                                                         Variant &variant) {
         if (N == target) {
             variant.template emplace<N>();
-            load(P4::get(obj, "value"), std::get<N>(variant));
+            load("value", std::get<N>(variant)) || error("missing field value");
         } else
-            unpack_variant<N + 1>(obj, target, variant);
+            unpack_variant<N + 1>(target, variant);
     }
 
     template <class... Types>
     void unpack_json(std::variant<Types...> &v) {
-        const JsonObject *obj = json->checkedTo<JsonObject>();
         int index = -1;
-        load(P4::get(obj, "variant_index"), index);
-        unpack_variant<0>(obj, index, v);
+        load("variant_index", index) || error("missing field variant_index");
+        unpack_variant<0>(index, v);
     }
 
-    void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }
+    void unpack_json(bool &v) { v = as<JsonBoolean>(); }
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>> unpack_json(T &v) {
-        v = json->as<JsonNumber>();
+        // Use the full-precision value to avoid truncation through int.
+        v = static_cast<T>(as<JsonNumber>().val);
     }
-    void unpack_json(big_int &v) { v = json->as<JsonNumber>().val; }
+    void unpack_json(big_int &v) { v = as<JsonNumber>().val; }
+    void unpack_json(std::string &v) {
+        if (is<JsonString>()) v = as<JsonString>();
+    }
     void unpack_json(cstring &v) {
-        std::string tmp = json->as<JsonString>();
-        std::string::size_type p = 0;
-        while ((p = tmp.find('\\', p)) != std::string::npos) {
-            tmp.erase(p, 1);
-            switch (tmp[p]) {
-                case 'n':
-                    tmp[p] = '\n';
-                    break;
-                case 'r':
-                    tmp[p] = '\r';
-                    break;
-                case 't':
-                    tmp[p] = '\t';
-                    break;
-            }
-            p++;
-        }
-        if (!json->is<JsonNull>()) v = tmp;
+        if (is<JsonString>())
+            v = cstring(as<JsonString>());
+        else if (is<JsonNull>())
+            v = cstring();
     }
     void unpack_json(IR::ID &v) {
-        if (!json->is<JsonNull>()) v.name = json->as<JsonString>();
+        if (!json->is<JsonNull>()) v.name = as<JsonString>();
     }
 
     void unpack_json(LTBitMatrix &m) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> m;
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> m;
+        else
+            error("bit matrix value not a string");
     }
 
     void unpack_json(bitvec &v) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> v;
+        else
+            error("bitvec value not a string");
     }
 
     template <typename T>
     std::enable_if_t<std::is_enum_v<T>> unpack_json(T &v) {
-        if (auto *s = json->to<JsonString>()) *s >> v;
+        if (auto *s = json->to<JsonString>())
+            *s >> v;
+        else
+            error("enum tag not a string");
     }
 
     void unpack_json(match_t &v) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
-    }
-
-    void unpack_json(UnparsedConstant *&v) {
-        cstring text("");
-        unsigned skip = 0;
-        unsigned base = 0;
-        bool hasWidth = false;
-
-        load("text", text);
-        load("skip", skip);
-        load("base", base);
-        load("hasWidth", hasWidth);
-
-        v = new UnparsedConstant({text, skip, base, hasWidth});
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> v;
+        else
+            error("match name not a string");
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T *&v) {
         v = T::fromJSON(*this);
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = *(T::fromJSON(*this));
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::INode, T>::value &&
                      !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = T::fromJSON(*this);
+    }
+
+    template <typename T>
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::INode, T>::value &&
+                     !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
+    unpack_json(T *&v) {
+        v = new T(T::fromJSON(*this));
     }
 
     template <typename T>
@@ -346,33 +432,40 @@ class JSONLoader {
     void unpack_json(T (&v)[N]) {
         if (auto *j = json->to<JsonVector>()) {
             for (size_t i = 0; i < N && i < j->size(); ++i) {
-                json = (*j)[i];
-                unpack_json(v[i]);
+                load(j->at(i), v[i]);
             }
         }
     }
 
  public:
     template <typename T>
-    void load(JsonData *json, T &v) {
-        JSONLoader(json, node_refs).unpack_json(v);
+    void load(const JsonData &json, T &v) {
+        JSONLoader(&json, node_refs, locinfo).unpack_json(v);
     }
 
     template <typename T>
-    void load(const std::string field, T *&v) {
-        JSONLoader loader(*this, field);
-        if (loader.json == nullptr) {
-            v = nullptr;
-        } else {
+    void load(const std::unique_ptr<JsonData> &json, T &v) {
+        JSONLoader(json.get(), node_refs, locinfo).unpack_json(v);
+    }
+
+    template <typename T>
+    bool load(std::string_view field, T *&v) {
+        if (auto loader = JSONLoader(*this, field)) {
             loader.unpack_json(v);
+            return true;
+        } else {
+            v = nullptr;
+            return false;
         }
     }
 
     template <typename T>
-    void load(const std::string field, T &v) {
-        JSONLoader loader(*this, field);
-        if (loader.json == nullptr) return;
-        loader.unpack_json(v);
+    bool load(std::string_view field, T &v) {
+        if (auto loader = JSONLoader(*this, field)) {
+            loader.unpack_json(v);
+            return true;
+        }
+        return false;
     }
 
     template <typename T>
@@ -384,30 +477,30 @@ class JSONLoader {
 
 template <class T>
 IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
-    json.load("vec", vec);
+    json.load("vec", vec) || json.error("missing field vec");
 }
 template <class T>
-IR::Vector<T> *IR::Vector<T>::fromJSON(JSONLoader &json) {
+IR::Node *IR::Vector<T>::fromJSON(JSONLoader &json) {
     return new Vector<T>(json);
 }
 template <class T>
 IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
-    json.load("declarations", declarations);
+    json.load("declarations", declarations) || json.error("missing field declarations");
 }
 template <class T>
-IR::IndexedVector<T> *IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
+IR::Node *IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
     return new IndexedVector<T>(json);
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
-    json.load("symbols", symbols);
+    json.load("symbols", symbols) || json.error("missing field symbols");
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
+IR::Node *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
 

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 error {
     IPv4IncorrectVersion,
     IPv4OptionsNotSupported,

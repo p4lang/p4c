@@ -16,20 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
-#define BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
 
 #include <map>
 #include <ostream>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/mau/build_power_graph.h"
 #include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
 #include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
 #include "backends/tofino/bf-p4c/mau/mau_power.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/pass_manager.h"
 
 namespace MauPower {
@@ -74,4 +74,4 @@ class FinalizeMauPredDepsPower : public PassManager {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_ */

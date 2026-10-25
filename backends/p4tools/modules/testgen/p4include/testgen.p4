@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef _TOOLS_TESTGEN_P4_
 #define _TOOLS_TESTGEN_P4_
 

@@ -83,7 +83,7 @@ control c(inout bit<32> x) {
         result_0 = u1_3.h1.a ^ u1_3.h2.a ^ hs1_3[0].a ^ hs1_3[1].a ^ us1_3[0].h1.a ^ us1_3[0].h2.a ^ us1_3[1].h1.a ^ us1_3[1].h2.a;
         x = result_0;
     }
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         u_0.h1.setInvalid();
         u_0.h2.setInvalid();
         hs_0[0].setInvalid();

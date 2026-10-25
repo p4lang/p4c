@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 #include "crash.h"
 
 #include <config.h>
@@ -245,6 +234,33 @@ static void dumpregs(mcontext_t *mctxt) {
                  << " r13=" << hex(mctxt->REGNAME(r13), 16, '0')
                  << " r14=" << hex(mctxt->REGNAME(r14), 16, '0'));
     LOG1(" r15=" << hex(mctxt->REGNAME(r15), 16, '0'));
+#elif defined(__aarch64__)
+    LOG1("  x0=" << hex(mctxt->regs[0], 16, '0') << "  x1=" << hex(mctxt->regs[1], 16, '0')
+                 << "  x2=" << hex(mctxt->regs[2], 16, '0')
+                 << "  x3=" << hex(mctxt->regs[3], 16, '0'));
+    LOG1("  x4=" << hex(mctxt->regs[4], 16, '0') << "  x5=" << hex(mctxt->regs[5], 16, '0')
+                 << "  x6=" << hex(mctxt->regs[6], 16, '0')
+                 << "  x7=" << hex(mctxt->regs[7], 16, '0'));
+    LOG1("  x8=" << hex(mctxt->regs[8], 16, '0') << "  x9=" << hex(mctxt->regs[9], 16, '0')
+                 << " x10=" << hex(mctxt->regs[10], 16, '0')
+                 << " x11=" << hex(mctxt->regs[11], 16, '0'));
+    LOG1(" x12=" << hex(mctxt->regs[12], 16, '0') << " x13=" << hex(mctxt->regs[13], 16, '0')
+                 << " x14=" << hex(mctxt->regs[14], 16, '0')
+                 << " x15=" << hex(mctxt->regs[15], 16, '0'));
+    LOG1(" x16=" << hex(mctxt->regs[16], 16, '0') << " x17=" << hex(mctxt->regs[17], 16, '0')
+                 << " x18=" << hex(mctxt->regs[18], 16, '0')
+                 << " x19=" << hex(mctxt->regs[19], 16, '0'));
+    LOG1(" x20=" << hex(mctxt->regs[20], 16, '0') << " x21=" << hex(mctxt->regs[21], 16, '0')
+                 << " x22=" << hex(mctxt->regs[22], 16, '0')
+                 << " x23=" << hex(mctxt->regs[23], 16, '0'));
+    LOG1(" x24=" << hex(mctxt->regs[24], 16, '0') << " x25=" << hex(mctxt->regs[25], 16, '0')
+                 << " x26=" << hex(mctxt->regs[26], 16, '0')
+                 << " x27=" << hex(mctxt->regs[27], 16, '0'));
+    LOG1(" x28=" << hex(mctxt->regs[28], 16, '0') << " x29=" << hex(mctxt->regs[29], 16, '0')
+                 << " x30=" << hex(mctxt->regs[30], 16, '0'));
+    LOG1("    sp=" << hex(mctxt->sp, 16, '0'));
+    LOG1("    pc=" << hex(mctxt->pc, 16, '0'));
+    LOG1("pstate=" << hex(mctxt->pstate, 16, '0'));
 #else
 #warning "unknown machine type"
 #endif
@@ -293,7 +309,9 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         if (++threads_dumped < int(thread_ids.size())) {
             lock.unlock();
             pthread_exit(0);
-        } else { lock.unlock(); })
+        } else {
+            lock.unlock();  // NOLINT clang-format is collapsing this code into a single line.
+        })
     if (sig != SIGABRT) BUG("Exiting with SIG%s", signames[sig]);
     _exit(sig + 0x80);
 }

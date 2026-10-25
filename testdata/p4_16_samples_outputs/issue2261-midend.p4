@@ -28,21 +28,21 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t tmp_struct_0_eth_hdr;
-    @hidden action issue2261l22() {
+    @hidden action issue2261l28() {
         tmp_struct_0_eth_hdr.setValid();
         tmp_struct_0_eth_hdr.dst_addr = 48w0;
         tmp_struct_0_eth_hdr.src_addr = 48w0;
         tmp_struct_0_eth_hdr.eth_type = 16w0;
         h.eth_hdr.eth_type = 16w0;
     }
-    @hidden table tbl_issue2261l22 {
+    @hidden table tbl_issue2261l28 {
         actions = {
-            issue2261l22();
+            issue2261l28();
         }
-        const default_action = issue2261l22();
+        const default_action = issue2261l28();
     }
     apply {
-        tbl_issue2261l22.apply();
+        tbl_issue2261l28.apply();
     }
 }
 

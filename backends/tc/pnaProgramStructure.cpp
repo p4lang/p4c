@@ -1,18 +1,7 @@
-/*
-Copyright (C) 2023 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+// Copyright (C) 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "pnaProgramStructure.h"
 
@@ -33,7 +22,7 @@ void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {
 bool InspectPnaProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
-        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
+        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Array>()) {
             result = true;
         }
     }
@@ -115,9 +104,9 @@ void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
-        } else if (ft->is<IR::Type_Stack>()) {
-            LOG5("Field is Type_Stack " << ft->toString());
-            auto stack = ft->to<IR::Type_Stack>();
+        } else if (ft->is<IR::Type_Array>()) {
+            LOG5("Field is Type_Array " << ft->toString());
+            auto stack = ft->to<IR::Type_Array>();
             // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);

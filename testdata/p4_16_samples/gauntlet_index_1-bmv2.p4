@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #include <v1model.p4>
 bit<3> bound(in bit<3> val, in bit<3> bound_val) {

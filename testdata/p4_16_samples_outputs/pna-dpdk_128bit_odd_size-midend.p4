@@ -71,18 +71,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdk_128bit_odd_size112() {
+    @hidden action pnadpdk_128bit_odd_size103() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<custom_t>(hdr.custom);
     }
-    @hidden table tbl_pnadpdk_128bit_odd_size112 {
+    @hidden table tbl_pnadpdk_128bit_odd_size103 {
         actions = {
-            pnadpdk_128bit_odd_size112();
+            pnadpdk_128bit_odd_size103();
         }
-        const default_action = pnadpdk_128bit_odd_size112();
+        const default_action = pnadpdk_128bit_odd_size103();
     }
     apply {
-        tbl_pnadpdk_128bit_odd_size112.apply();
+        tbl_pnadpdk_128bit_odd_size103.apply();
     }
 }
 

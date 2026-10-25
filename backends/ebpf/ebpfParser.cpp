@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfParser.h"
 
@@ -185,17 +174,17 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
     BUG_CHECK(expression->select->components.size() == 1, "%1%: tuple not eliminated in select",
               expression->select);
     selectValue = state->parser->program->refMap->newName("select");
-    auto type = state->parser->program->typeMap->getType(expression->select, true);
-    if (auto list = type->to<IR::Type_List>()) {
+    selectType = state->parser->program->typeMap->getType(expression->select, true);
+    if (auto list = selectType->to<IR::Type_List>()) {
         BUG_CHECK(list->components.size() == 1, "%1% list type with more than 1 element", list);
-        type = list->components.at(0);
+        selectType = list->components.at(0);
     }
-    auto etype = EBPFTypeFactory::instance->create(type);
+    auto etype = EBPFTypeFactory::instance->create(selectType);
     builder->emitIndent();
     etype->declare(builder, selectValue, false);
     builder->endOfStatement(true);
 
-    emitAssignStatement(type, nullptr, selectValue, expression->select->components.at(0));
+    emitAssignStatement(selectType, nullptr, selectValue, expression->select->components.at(0));
     builder->newline();
 
     // Init value_sets

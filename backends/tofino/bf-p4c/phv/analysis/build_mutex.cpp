@@ -41,7 +41,7 @@ void BuildMutex::mark(const PHV::Field *f) {
 }
 
 bool BuildMutex::preorder(const IR::MAU::Action *act) {
-    act->action.visit_children(*this);
+    act->action.visit_children(*this, "action");
     return false;
 }
 

@@ -1,3 +1,6 @@
+issue3808-1.p4(8): [--Wwarn=unused] warning: control 'eq0' is unused
+control eq0(f<_> tt)
+        ^^^
 issue3808-1.p4(15): [--Werror=type-error] error: t: Could not infer a type for parameter a (inferred type is don't care '_')
     tt.g(t);
          ^

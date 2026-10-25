@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_EMPTY_TABLESEQ_H_
-#define BF_P4C_COMMON_EMPTY_TABLESEQ_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_EMPTY_TABLESEQ_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_EMPTY_TABLESEQ_H_
 
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
@@ -33,4 +33,4 @@ class AddEmptyTableSeqs : public MauModifier {
     AddEmptyTableSeqs() {}
 };
 
-#endif /* BF_P4C_COMMON_EMPTY_TABLESEQ_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_EMPTY_TABLESEQ_H_ */

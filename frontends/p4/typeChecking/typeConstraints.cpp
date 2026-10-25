@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typeConstraints.h"
 
@@ -126,30 +115,30 @@ std::string TypeConstraint::localError(Explain *explainer) const {
     if (errFormat.isNullOrEmpty()) return "";
 
     std::string message, explanation;
-    boost::format fmt = boost::format(errFormat.c_str());
     switch (errArguments.size()) {
         case 0:
-            message = boost::str(fmt);
+            message = ::P4::createFormattedMessage(errFormat.c_str());
             break;
         case 1:
             absl::StrAppend(&explanation, explain(0, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0)).toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0)).toString();
             break;
         case 2:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1))
+                          .toString();
             break;
         case 3:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer));
-            message =
-                ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
-                    .toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1),
+                                         errArguments.at(2))
+                          .toString();
             break;
         case 4:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer), explain(3, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1),
                                          errArguments.at(2), errArguments.at(3))
                           .toString();
             break;

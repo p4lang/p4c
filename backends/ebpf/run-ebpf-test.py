@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
-# Copyright 2013-present Barefoot Networks, Inc.
-# Copyright 2018 VMware, Inc.
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" Contains different eBPF models and specifies their individual behavior
-    Currently five phases are defined:
-   1. Invokes the specified compiler on a provided p4 file.
-   2. Parses an stf file and generates an pcap output.
-   3. Loads the generated template or compiles it to a runnable binary.
-   4. Feeds the generated pcap test packets into the P4 "filter"
-   5. Evaluates the output with the expected result from the .stf file
+# SPDX-License-Identifier: Apache-2.0
+"""Contains different eBPF models and specifies their individual behavior
+ Currently five phases are defined:
+1. Invokes the specified compiler on a provided p4 file.
+2. Parses an stf file and generates an pcap output.
+3. Loads the generated template or compiles it to a runnable binary.
+4. Feeds the generated pcap test packets into the P4 "filter"
+5. Evaluates the output with the expected result from the .stf file
 """
 
 import argparse
@@ -123,9 +114,9 @@ class Options:
         self.replace = False  # Replace previous outputs.
         self.target = "test"  # The name of the target compiler.
         # Actual location of the test framework.
-        self.testdir = str(FILE_DIR)
+        self.testdir = FILE_DIR
         # The location of the eBPF runtime, some targets may overwrite this.
-        self.runtimedir = str(FILE_DIR.joinpath("runtime"))
+        self.runtimedir = FILE_DIR.joinpath("runtime")
         self.extern = ""  # Path to C file with extern definition.
 
 

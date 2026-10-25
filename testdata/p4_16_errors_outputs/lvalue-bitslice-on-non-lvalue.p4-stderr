@@ -1,0 +1,12 @@
+lvalue-bitslice-on-non-lvalue.p4(6): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(hdr h)() {
+        ^^^^^^^
+lvalue-bitslice-on-non-lvalue.p4(8): [--Werror=type-error] error: Field c is not a member of header hdr
+    h.a[7:0] = ((bit<32>) h.c)[7:0];
+                            ^
+lvalue-bitslice-on-non-lvalue.p4(3)
+header hdr {
+       ^^^
+lvalue-bitslice-on-non-lvalue.p4(8): [--Werror=type-error] error: Expression h.a[7:0] cannot be the target of an assignment
+    h.a[7:0] = ((bit<32>) h.c)[7:0];
+    ^^^^^^^^

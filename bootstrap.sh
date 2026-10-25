@@ -1,17 +1,9 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 set -e  # exit on error
 
@@ -117,3 +109,4 @@ make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-psa-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/bmv2/p4c-bm2-ss-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/dpdk/p4c-dpdk-gdb.gdb"
 make_relative_link "${mydir}/.gdbinit" "backends/p4test/p4test-gdb.gdb"
+make_relative_link "${mydir}/.gdbinit" "backends/tofino/bf-p4c/p4c-basefoot-gdb.gdb"

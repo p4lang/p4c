@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 
 #include <cstddef>
@@ -131,7 +135,11 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
         const auto *arg = callArguments->at(idx);
         const auto *param = methodParams.at(idx);
         const auto *argExpr = arg->expression;
-        if (param->direction == IR::Direction::Out || SymbolicEnv::isSymbolicValue(argExpr)) {
+        // Avoid resolving externs because they do not actually exist in the symbolic environment.
+        // Do not resolve out parameters because we do not care about their content.
+        // Skip symbolic values since they have already been resolved.
+        if (IR::getExternType(argExpr->type) != nullptr || param->direction == IR::Direction::Out ||
+            SymbolicEnv::isSymbolicValue(argExpr)) {
             continue;
         }
         // If the parameter is not an out parameter (meaning we do not care about its content) and
@@ -195,9 +203,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 return false;
             }
 
-            // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (method->expr->type->is<IR::Type_Extern>() ||
-                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
+            // Handle extern calls.
+            if (IR::getExternType(method->expr->type) != nullptr) {
                 evalExternMethodCall({*call, *method->expr->checkedTo<IR::PathExpression>(),
                                       method->member, *call->arguments});
                 return false;
@@ -222,7 +229,7 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
-            if (method->expr->type->is<IR::Type_Stack>()) {
+            if (method->expr->type->is<IR::Type_Array>()) {
                 if (method->member == "push_front") {
                     return stepStackPushPopFront(method->expr, call->arguments);
                 }
@@ -510,10 +517,10 @@ bool ExprStepper::preorder(const IR::AbstractSlice *slice) {
 }
 
 void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condition) {
-    auto &noMatchState = condition ? state.clone() : state;
+    auto &noMatchState = (condition != nullptr) ? state.clone() : state;
     noMatchState.add(*new TraceEvents::GenericDescription("NoMatch"_cs, traceLog));
     noMatchState.replaceTopBody(Continuation::Exception::NoMatch);
-    if (condition) {
+    if (condition != nullptr) {
         result->emplace_back(condition, state, noMatchState);
     } else {
         result->emplace_back(state);

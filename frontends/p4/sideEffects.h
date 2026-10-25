@@ -1,18 +1,9 @@
 /*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2016 VMware, Inc.
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_SIDEEFFECTS_H_
 #define FRONTENDS_P4_SIDEEFFECTS_H_
@@ -59,9 +50,8 @@ class HasTableApply : public Inspector, public ResolutionContext {
  * method call expression is counted.  With type information, invocations
  * of ```isValid()``` are ignored.
  */
-class SideEffects : public Inspector {
+class SideEffects : public Inspector, public ResolutionContext {
  private:
-    DeclarationLookup *refMap;
     TypeMap *typeMap;
 
  public:
@@ -72,20 +62,7 @@ class SideEffects : public Inspector {
     unsigned sideEffectCount = 0;
 
     void postorder(const IR::MethodCallExpression *mce) override {
-        if (refMap == nullptr || typeMap == nullptr) {
-            // conservative
-            sideEffectCount++;
-            nodeWithSideEffect = mce;
-            return;
-        }
-        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-        if (!mi->is<BuiltInMethod>()) {
-            sideEffectCount++;
-            nodeWithSideEffect = mce;
-            return;
-        }
-        auto bim = mi->to<BuiltInMethod>();
-        if (bim->name.name != IR::Type_Header::isValid) {
+        if (mayHaveSideEffect(mce, this, typeMap)) {
             sideEffectCount++;
             nodeWithSideEffect = mce;
         }
@@ -98,26 +75,25 @@ class SideEffects : public Inspector {
 
     /// The @refMap and @typeMap arguments can be null, in which case the check
     /// will be more conservative.
-    SideEffects(DeclarationLookup *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        setName("SideEffects");
-    }
+    explicit SideEffects(TypeMap *typeMap) : typeMap(typeMap) { setName("SideEffects"); }
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      DeclarationLookup *refMap, TypeMap *typeMap,
-                      const Visitor::Context *ctxt = nullptr) {
-        SideEffects se(refMap, typeMap);
+                      TypeMap *typeMap = nullptr, const Visitor::Context *ctxt = nullptr) {
+        SideEffects se(typeMap);
         se.setCalledBy(calledBy);
+        if (calledBy && !ctxt) ctxt = calledBy->getChildContext();
         expression->apply(se, ctxt);
         return se.nodeWithSideEffect != nullptr;
     }
     /// @return true if the method call expression may have side-effects.
-    static bool hasSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
-                              TypeMap *typeMap) {
+    static bool mayHaveSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+                                  TypeMap *typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
         //  * function, extern function, or extern method with noSideEffects annotation
-        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+        auto mi = MethodInstance::resolve(mce, refMap, typeMap, !typeMap);
+        if (!mi) return true;
         if (const auto *ec = mi->to<P4::ExternCall>())
             return !ec->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
         if (const auto *ef = mi->to<P4::FunctionCall>())
@@ -171,9 +147,10 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     /// this pass.
     std::set<const IR::Expression *> temporaries;
 
-    cstring createTemporary(const IR::Type *type);
-    const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
-                                        const IR::Expression *expression);
+    IR::ID createTemporary(Util::SourceInfo srcInfo, const IR::Type *type);
+    const IR::Expression *addAssignment(Util::SourceInfo srcInfo, IR::ID varName,
+                                        const IR::Expression *expression,
+                                        Util::SourceInfo resultSrcInfo = {});
     bool mayAlias(const IR::Expression *left, const IR::Expression *right,
                   const Visitor::Context *ctxt) const;
     bool containsHeaderType(const IR::Type *type);
@@ -218,7 +195,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::ParserState *state) override;
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
     const IR::Node *postorder(IR::ReturnStatement *statement) override;
     const IR::Node *preorder(IR::SwitchStatement *statement) override;
@@ -233,7 +210,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
 class TableInsertions {
  public:
     std::vector<const IR::Declaration_Variable *> declarations;
-    std::vector<const IR::AssignmentStatement *> statements;
+    std::vector<const IR::BaseAssignmentStatement *> statements;
 };
 
 /**
@@ -308,7 +285,7 @@ class KeySideEffect : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::SwitchStatement *statement) override {
         return doStatement(statement, statement->expression, getContext());
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         return doStatement(statement, statement->right, getContext());
     }
     const IR::Node *postorder(IR::KeyElement *element) override;
@@ -386,6 +363,7 @@ class SideEffectOrdering : public PassRepeated {
         if (!skipSideEffectOrdering) {
             passes.push_back(new TypeChecking(nullptr, typeMap));
             passes.push_back(new DoSimplifyExpressions(typeMap, &added));
+            passes.push_back(new ClearTypeMap(typeMap));
             passes.push_back(typeChecking);
             passes.push_back(new TablesInActions(typeMap));
             passes.push_back(new TablesInKeys(typeMap, &invokedInKey));

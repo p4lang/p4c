@@ -1,25 +1,14 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "parser.h"
 
 #include "JsonObjects.h"
 #include "backend.h"
+#include "backends/bmv2/common/v1model.h"
 #include "extern.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/algorithm.h"
 
@@ -28,7 +17,7 @@ namespace P4::BMV2 {
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
-    if (auto ts = type->to<IR::Type_Stack>()) {
+    if (auto ts = type->to<IR::Type_Array>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
             return "assign_union_stack"_cs;
@@ -151,8 +140,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
 
                 if (auto mem = arg->expression->to<IR::Member>()) {
                     auto baseType = ctxt->typeMap->getType(mem->expr, true);
-                    if (baseType->is<IR::Type_Stack>()) {
-                        if (mem->member == IR::Type_Stack::next) {
+                    if (baseType->is<IR::Type_Array>()) {
+                        if (mem->member == IR::Type_Array::next) {
                             // stack.next
                             type = "stack"_cs;
                             j = ctxt->conv->convert(mem->expr);
@@ -163,9 +152,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                         auto parent = mem->expr->to<IR::Member>();
                         if (parent != nullptr) {
                             auto parentType = ctxt->typeMap->getType(parent->expr, true);
-                            if (parentType->is<IR::Type_Stack>()) {
+                            if (parentType->is<IR::Type_Array>()) {
                                 // stack.next.unionfield
-                                if (parent->member == IR::Type_Stack::next) {
+                                if (parent->member == IR::Type_Array::next) {
                                     type = "union_stack"_cs;
                                     j = ctxt->conv->convert(parent->expr);
                                     Util::JsonArray *a;
@@ -273,7 +262,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 paramsArray->append(expr);
                 paramValue->emplace("op", extFuncName);
                 paramValue->emplace_non_null("source_info"_cs, mce->sourceInfoJsonObj());
-            } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
+            } else if (extFuncName == P4V1::V1Model::instance().log_msg.name) {
                 BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
                           "%1%: Expected 1 or 2 arguments", mce);
                 result->emplace("op", "primitive");
@@ -308,9 +297,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 primitive = "add_header"_cs;
             } else if (bi->name == IR::Type_Header::setInvalid) {
                 primitive = "remove_header"_cs;
-            } else if (bi->name == IR::Type_Stack::push_front ||
-                       bi->name == IR::Type_Stack::pop_front) {
-                if (bi->name == IR::Type_Stack::push_front)
+            } else if (bi->name == IR::Type_Array::push_front ||
+                       bi->name == IR::Type_Array::pop_front) {
+                if (bi->name == IR::Type_Array::push_front)
                     primitive = "push"_cs;
                 else
                     primitive = "pop"_cs;

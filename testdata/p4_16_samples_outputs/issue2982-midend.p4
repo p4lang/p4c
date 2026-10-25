@@ -14,17 +14,17 @@ struct headers {
 }
 
 control computeChecksum(inout headers hdr) {
-    @hidden action issue2982l20() {
+    @hidden action issue2982l26() {
         update_checksum_with_payload<flags, bit<16>>((flags){cwr = hdr.tcp._flags_cwr0}, hdr.tcp._checksum1);
     }
-    @hidden table tbl_issue2982l20 {
+    @hidden table tbl_issue2982l26 {
         actions = {
-            issue2982l20();
+            issue2982l26();
         }
-        const default_action = issue2982l20();
+        const default_action = issue2982l26();
     }
     apply {
-        tbl_issue2982l20.apply();
+        tbl_issue2982l26.apply();
     }
 }
 

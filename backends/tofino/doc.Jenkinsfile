@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * Libraries contain reusabile snippets that can be reused across multiple projects.
  */

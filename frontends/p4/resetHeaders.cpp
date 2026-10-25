@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "resetHeaders.h"
 
@@ -35,8 +24,8 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         LOG3("Reset header " << expr);
         resets->push_back(stat);
-    } else if (type->is<IR::Type_Stack>()) {
-        auto tstack = type->to<IR::Type_Stack>();
+    } else if (type->is<IR::Type_Array>()) {
+        auto tstack = type->to<IR::Type_Array>();
         if (!tstack->sizeKnown()) {
             ::P4::error(ErrorType::ERR_UNSUPPORTED,
                         "%1%: stack size is not a compile-time constant", tstack);

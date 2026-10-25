@@ -1,0 +1,7 @@
+decl-serenum-with-duplicate-fields.p4(3): [--Werror=duplicate] error: a: Duplicates declaration a
+enum bit<4> e { a = 1, a = 1 }
+                       ^^^^^
+decl-serenum-with-duplicate-fields.p4(3)
+enum bit<4> e { a = 1, a = 1 }
+                ^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

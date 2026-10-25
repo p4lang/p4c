@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-header h_stack {
+@command_line("--loopsUnroll") header h_stack {
     bit<8> i1;
     bit<8> i2;
 }

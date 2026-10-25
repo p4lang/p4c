@@ -18,8 +18,8 @@
 
 /// Helpers for Boost graphs.
 
-#ifndef BF_P4C_LIB_BOOST_GRAPH_H_
-#define BF_P4C_LIB_BOOST_GRAPH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_BOOST_GRAPH_H_
+#define BACKENDS_TOFINO_BF_P4C_LIB_BOOST_GRAPH_H_
 
 #include <map>
 #include <optional>
@@ -145,4 +145,4 @@ class Reachability {
     EdgeSet backwardsReachableVertices;
 };
 
-#endif /* BF_P4C_LIB_BOOST_GRAPH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LIB_BOOST_GRAPH_H_ */

@@ -107,18 +107,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdktablekeyconsolidationlearner6l171() {
+    @hidden action pnadpdktablekeyconsolidationlearner6l162() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdktablekeyconsolidationlearner6l171 {
+    @hidden table tbl_pnadpdktablekeyconsolidationlearner6l162 {
         actions = {
-            pnadpdktablekeyconsolidationlearner6l171();
+            pnadpdktablekeyconsolidationlearner6l162();
         }
-        const default_action = pnadpdktablekeyconsolidationlearner6l171();
+        const default_action = pnadpdktablekeyconsolidationlearner6l162();
     }
     apply {
-        tbl_pnadpdktablekeyconsolidationlearner6l171.apply();
+        tbl_pnadpdktablekeyconsolidationlearner6l162.apply();
     }
 }
 

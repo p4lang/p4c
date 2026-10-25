@@ -1,0 +1,13 @@
+constructor-with-duplicate-parameter-names.p4(4): [--Werror=duplicate] error: c: Duplicates declaration c
+package P(C c, C c)
+                 ^
+constructor-with-duplicate-parameter-names.p4(4)
+package P(C c, C c)
+            ^
+constructor-with-duplicate-parameter-names.p4(4): [--Werror=duplicate] error: Duplicate declaration of c; previous at 
+package P(C c, C c)
+                 ^
+constructor-with-duplicate-parameter-names.p4(4)
+package P(C c, C c)
+            ^
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

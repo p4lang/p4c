@@ -8,7 +8,7 @@ header H {
 control c(packet_out p) {
     @name("c.tmp") H tmp;
     @name("c.tmp_0") H tmp_0;
-    @hidden action issue2795l10() {
+    @hidden action issue2795l16() {
         tmp.setValid();
         tmp.a = 32w0;
         tmp.b = 32w1;
@@ -18,14 +18,14 @@ control c(packet_out p) {
         tmp_0.b = 32w1;
         p.emit<H>(tmp_0);
     }
-    @hidden table tbl_issue2795l10 {
+    @hidden table tbl_issue2795l16 {
         actions = {
-            issue2795l10();
+            issue2795l16();
         }
-        const default_action = issue2795l10();
+        const default_action = issue2795l16();
     }
     apply {
-        tbl_issue2795l10.apply();
+        tbl_issue2795l16.apply();
     }
 }
 

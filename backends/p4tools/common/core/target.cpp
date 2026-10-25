@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "backends/p4tools/common/core/target.h"
 
@@ -43,9 +46,9 @@ bool Target::init(std::string_view deviceName, std::string_view archName) {
     return false;
 }
 
-std::optional<ICompileContext *> Target::initializeTarget(std::string_view toolName,
-                                                          std::string_view target,
-                                                          std::string_view arch) {
+std::optional<std::unique_ptr<ICompileContext>> Target::initializeTarget(std::string_view toolName,
+                                                                         std::string_view target,
+                                                                         std::string_view arch) {
     // Establish a dummy compilation context so that we can use ::error to report errors while
     // processing target and arch.
     class DummyCompileContext : public BaseCompileContext {
@@ -64,11 +67,11 @@ std::optional<ICompileContext *> Target::initializeTarget(std::string_view toolN
     BUG_CHECK(instance != instances.end(), "Architecture %1% on device %2% not supported for %3%",
               curTarget->archName, curTarget->deviceName, toolName);
 
-    return instance->second->makeContext();
+    return std::unique_ptr<ICompileContext>(instance->second->makeContext());
 }
 
-std::optional<ICompileContext *> Target::initializeTarget(std::string_view toolName,
-                                                          const std::vector<const char *> &args) {
+std::optional<std::unique_ptr<ICompileContext>> Target::initializeTarget(
+    std::string_view toolName, const std::vector<const char *> &args) {
     // Establish a dummy compilation context so that we can use ::error to report errors while
     // processing target and arch.
     class DummyCompileContext : public BaseCompileContext {

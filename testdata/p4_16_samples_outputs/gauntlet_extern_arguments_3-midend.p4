@@ -20,17 +20,17 @@ parser p(packet_in pkt, out Headers hdr) {
 
 control ingress(inout Headers h) {
     @name("ingress.tmp") bool tmp_0;
-    @hidden action gauntlet_extern_arguments_3l29() {
+    @hidden action gauntlet_extern_arguments_3l35() {
         h.eth_hdr.src_addr = simple_extern(tmp_0, false);
     }
-    @hidden table tbl_gauntlet_extern_arguments_3l29 {
+    @hidden table tbl_gauntlet_extern_arguments_3l35 {
         actions = {
-            gauntlet_extern_arguments_3l29();
+            gauntlet_extern_arguments_3l35();
         }
-        const default_action = gauntlet_extern_arguments_3l29();
+        const default_action = gauntlet_extern_arguments_3l35();
     }
     apply {
-        tbl_gauntlet_extern_arguments_3l29.apply();
+        tbl_gauntlet_extern_arguments_3l35.apply();
     }
 }
 

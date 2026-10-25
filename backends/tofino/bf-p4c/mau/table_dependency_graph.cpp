@@ -30,7 +30,6 @@
 #include <boost/optional/optional_io.hpp>
 
 #include "backends/tofino/bf-p4c/common/run_id.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/ir/table_tree.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
 #include "backends/tofino/bf-p4c/lib/error_type.h"
@@ -39,6 +38,7 @@
 #include "backends/tofino/bf-p4c/mau/table_placement.h"
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/log.h"

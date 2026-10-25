@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 macro(p4c_obtain_bdwgc)
   option(
     P4C_USE_PREINSTALLED_BDWGC
@@ -10,6 +14,12 @@ macro(p4c_obtain_bdwgc)
   if(P4C_USE_PREINSTALLED_BDWGC)
     option(ENABLE_MULTITHREAD "Use multithreading" OFF)
     find_package(LibGc 7.2.0 REQUIRED)
+    # Some distros ship libgc/libcord without libgctba; only add it if present.
+    find_library(LIBGC_GCTBA_LIBRARY NAMES gctba)
+    if(NOT LIBGC_GCTBA_LIBRARY)
+      message(STATUS "libgctba not found; using libgc/libcord only")
+      set(LIBGC_LIBRARIES gc cord)
+    endif()
     check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
   else()
     # Print out download state while setting up BDWGC.

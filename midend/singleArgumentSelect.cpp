@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2018 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "singleArgumentSelect.h"
 
 namespace P4 {

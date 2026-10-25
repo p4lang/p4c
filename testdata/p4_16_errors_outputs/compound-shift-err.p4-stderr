@@ -1,0 +1,6 @@
+compound-shift-err.p4(25): [--Werror=type-error] error: <<=: cannot be applied with 'hdrs.head.b1' with type 'bool'
+        hdrs.head.f1 <<= hdrs.head.b1;
+                         ^^^^^^^^^^^^
+compound-shift-err.p4(26): [--Werror=type-error] error: >>=: cannot be applied with 'hdrs.head.b1' with type 'bool'
+        hdrs.head.f1 >>= hdrs.head.b1;
+                         ^^^^^^^^^^^^

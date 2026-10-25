@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 bit<32> min(in bit<32> a, in bit<32> b) {
     return a > b ? b : a;
 }

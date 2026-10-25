@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/lib/namespace_context.h"
 
 #include <set>
@@ -99,7 +103,7 @@ const std::set<cstring> &NamespaceContext::getUsedNames() const {
             usedNames = outer->getUsedNames();
 
             // Add names in curNamespace.
-            for (const auto *decl : *curNamespace->getDeclarations()) {
+            for (const auto *decl : curNamespace->getDeclarations()) {
                 usedNames->insert(decl->getName());
             }
         }

@@ -12,17 +12,17 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.retval_0") ethernet_t retval_0;
-    @hidden action act() {
+    @hidden action issue25431l23() {
         retval_0.setValid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue25431l23 {
         actions = {
-            act();
+            issue25431l23();
         }
-        const default_action = act();
+        const default_action = issue25431l23();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue25431l23.apply();
     }
 }
 

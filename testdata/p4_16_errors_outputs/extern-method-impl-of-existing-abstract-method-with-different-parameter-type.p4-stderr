@@ -1,0 +1,23 @@
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(14): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(8): [--Wwarn=unused] warning: parser 'MyParser0' is unused
+parser MyParser0() {
+       ^^^^^^^^^
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(9): [--Wwarn=unused] warning: 'ee' is unused
+  e() ee = {
+      ^^
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(9): [--Werror=type-error] error: 'ee'
+  e() ee = {
+      ^^
+  ---- Actual error:
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(6): Cannot unify type 'bit<1>' with type 'match_kind'
+    abstract t f(in match_kind a);
+                    ^^^^^^^^^^
+  ---- Originating from:
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(10): Method 'f' does not have the expected type 'f'
+      t f(in t a) {
+        ^
+extern-method-impl-of-existing-abstract-method-with-different-parameter-type.p4(6)
+    abstract t f(in match_kind a);
+               ^

@@ -1,3 +1,6 @@
+type-in-expr.p4(6): [--Wwarn=unused] warning: control 'p' is unused
+control p<H>(in H hdrs, out bool flag)
+        ^
 type-in-expr.p4(5): [--Werror=type-error] error: H: Type cannot be used here, expecting an expression.
 @foo[bar=4<H]
            ^

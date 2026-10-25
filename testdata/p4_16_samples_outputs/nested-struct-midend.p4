@@ -13,17 +13,17 @@ struct H2 {
 }
 
 control c(out bit<1> x) {
-    @hidden action nestedstruct29() {
+    @hidden action nestedstruct35() {
         x = 1w0;
     }
-    @hidden table tbl_nestedstruct29 {
+    @hidden table tbl_nestedstruct35 {
         actions = {
-            nestedstruct29();
+            nestedstruct35();
         }
-        const default_action = nestedstruct29();
+        const default_action = nestedstruct35();
     }
     apply {
-        tbl_nestedstruct29.apply();
+        tbl_nestedstruct35.apply();
     }
 }
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 
 #include <cstddef>
@@ -63,8 +67,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
 
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *assignType = state.resolveType(left->type);
-    if (assign->right->is<IR::StructExpression>() ||
-        assign->right->to<IR::HeaderStackExpression>()) {
+    if (assign->right->is<IR::StructExpression>() || assign->right->to<IR::ArrayExpression>()) {
         state.assignStructLike(left, assign->right);
     } else if (assignType->is<IR::Type_Base>()) {
         state.set(left, assign->right);
@@ -342,6 +345,9 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
     logStep(parserState);
 
     auto &nextState = state.clone();
+    if (TestgenOptions::get().coverageOptions.coverParserStates) {
+        nextState.markVisited(parserState);
+    }
     nextState.add(*new TraceEvents::ParserState(parserState));
 
     if (parserState->name == IR::ParserState::accept) {

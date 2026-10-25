@@ -1,0 +1,12 @@
+explicit-cast-to-incompatible-type-from-default-expr.p4(8): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+explicit-cast-to-incompatible-type-from-default-expr.p4(9): [--Wwarn=unused] warning: 'v' is unused
+  action a1(in s v) {}
+                 ^
+explicit-cast-to-incompatible-type-from-default-expr.p4(10): [--Wwarn=unused] warning: table 't' is unused
+  table t {
+        ^
+explicit-cast-to-incompatible-type-from-default-expr.p4(14): [--Werror=type-error] error: match_kind: cast not supported
+    default_action = a1((match_kind) (...));
+                         ^^^^^^^^^^

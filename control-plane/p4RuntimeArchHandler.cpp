@@ -1,18 +1,7 @@
-/*
-Copyright 2018-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+// Copyright 2018-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <optional>
 #include <sstream>  // for std::ostringstream
@@ -20,7 +9,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize
 // implementation.
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
@@ -92,7 +81,7 @@ int64_t getTableSize(const IR::P4Table *table) {
     // TODO(antonin): we should not be referring to v1model in this
     // architecture-independent code; each architecture may have a different
     // default table size.
-    const int64_t defaultTableSize = P4V1::V1Model::instance.tableAttributes.defaultTableSize;
+    const int64_t defaultTableSize = P4V1::V1Model::instance().tableAttributes.defaultTableSize;
 
     auto sizeProperty = table->properties->getProperty("size");
     if (sizeProperty == nullptr) {

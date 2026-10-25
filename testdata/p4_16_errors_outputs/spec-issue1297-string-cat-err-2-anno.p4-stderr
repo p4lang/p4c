@@ -1,3 +1,6 @@
-spec-issue1297-string-cat-err-2-anno.p4(2): [--Werror=type-error] error: 4: @name annotation's value must be a string
+spec-issue1297-string-cat-err-2-anno.p4(2): [--Werror=invalid] error: @name: should contain a string
 @name(4)
-      ^
+^
+spec-issue1297-string-cat-err-2-anno.p4(3): [--Wwarn=unused] warning: '' is unused
+void fn() {
+     ^^

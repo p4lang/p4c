@@ -1,18 +1,7 @@
-/*
-Copyright 2020 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2020 Intel Corp.
+// SPDX-FileCopyrightText: 2020 Intel Corp.
+//
+// SPDX-License-Identifier: Apache-2.0
 #include "backend.h"
 
 #include <unordered_map>
@@ -116,8 +105,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file
             if (!options.ctxtFile.empty()) {
-                if (std::ostream *out = openFile(options.ctxtFile, false)) {
-                    genContextJson->serializeContextJson(out);
+                if (auto out = openFile(options.ctxtFile, false)) {
+                    genContextJson->serializeContextJson(out.get());
                     out->flush();
                 } else
                     ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);

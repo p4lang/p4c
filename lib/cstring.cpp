@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "cstring.h"
 
@@ -241,10 +230,9 @@ cstring cstring::substr(size_t start, size_t length) const {
 
 cstring cstring::replace(char c, char with) const {
     if (isNullOrEmpty()) return *this;
-    char *dup = strdup(c_str());
-    for (char *p = dup; *p; ++p)
-        if (*p == c) *p = with;
-    return cstring(dup);
+    auto result = string();
+    std::replace(result.begin(), result.end(), c, with);
+    return cstring(result);
 }
 
 cstring cstring::replace(std::string_view search, std::string_view replace) const {
@@ -296,7 +284,7 @@ cstring cstring::escapeJson() const {
                 o << "\\t";
                 break;
             default: {
-                if ('\x00' <= c && c <= '\x1f') {
+                if ('\x00' <= static_cast<signed char>(c) && c <= '\x1f') {
                     o << "\\u" << std::hex << std::setw(4) << std::setfill('0')
                       << static_cast<int>(c);
                 } else {

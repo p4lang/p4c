@@ -53,34 +53,34 @@ parser ing_parse(packet_in buffer, out ing_in_headers parsed_hdr) {
 }
 
 control ingress(in ing_in_headers ihdr, in InControl inCtrl, out ing_out_headers ohdr, out ing_to_egr toEgress, out OutControl outCtrl) {
-    @hidden action issue8032l95() {
+    @hidden action issue8032l101() {
         ohdr.ethernet = ihdr.ethernet;
         toEgress.x = inCtrl.inputPort;
         outCtrl.outputPort = inCtrl.inputPort;
     }
-    @hidden table tbl_issue8032l95 {
+    @hidden table tbl_issue8032l101 {
         actions = {
-            issue8032l95();
+            issue8032l101();
         }
-        const default_action = issue8032l95();
+        const default_action = issue8032l101();
     }
     apply {
-        tbl_issue8032l95.apply();
+        tbl_issue8032l101.apply();
     }
 }
 
 control ing_deparse(in ing_out_headers ohdr, packet_out b) {
-    @hidden action issue8032l104() {
+    @hidden action issue8032l110() {
         b.emit<ethernet_t>(ohdr.ethernet);
     }
-    @hidden table tbl_issue8032l104 {
+    @hidden table tbl_issue8032l110 {
         actions = {
-            issue8032l104();
+            issue8032l110();
         }
-        const default_action = issue8032l104();
+        const default_action = issue8032l110();
     }
     apply {
-        tbl_issue8032l104.apply();
+        tbl_issue8032l110.apply();
     }
 }
 
@@ -92,33 +92,33 @@ parser egr_parse(packet_in buffer, out egr_in_headers parsed_hdr) {
 }
 
 control egress(in egr_in_headers ihdr, in InControl inCtrl, in ing_to_egr fromIngress, out egr_out_headers ohdr, out OutControl outCtrl) {
-    @hidden action issue8032l123() {
+    @hidden action issue8032l129() {
         ohdr.ethernet = ihdr.ethernet;
         outCtrl.outputPort = fromIngress.x;
     }
-    @hidden table tbl_issue8032l123 {
+    @hidden table tbl_issue8032l129 {
         actions = {
-            issue8032l123();
+            issue8032l129();
         }
-        const default_action = issue8032l123();
+        const default_action = issue8032l129();
     }
     apply {
-        tbl_issue8032l123.apply();
+        tbl_issue8032l129.apply();
     }
 }
 
 control egr_deparse(in egr_out_headers ohdr, packet_out b) {
-    @hidden action issue8032l131() {
+    @hidden action issue8032l137() {
         b.emit<ethernet_t>(ohdr.ethernet);
     }
-    @hidden table tbl_issue8032l131 {
+    @hidden table tbl_issue8032l137 {
         actions = {
-            issue8032l131();
+            issue8032l137();
         }
-        const default_action = issue8032l131();
+        const default_action = issue8032l137();
     }
     apply {
-        tbl_issue8032l131.apply();
+        tbl_issue8032l137.apply();
     }
 }
 

@@ -1,0 +1,20 @@
+call-on-function-with-different-type-parameter-arity.p4(3): [--Wwarn=unused] warning: 'c' is unused
+extern void f<T, c>(in tuple<T> x);
+                 ^
+call-on-function-with-different-type-parameter-arity.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+call-on-function-with-different-type-parameter-arity.p4(6): [--Werror=type-error] error: 'f({ 32w2 })'
+    f<bit<32>>({ 32w2 });
+    ^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-on-function-with-different-type-parameter-arity.p4(3): f: 2 type parameters expected, but 1 type arguments supplied
+  extern void f<T, c>(in tuple<T> x);
+              ^
+  ---- Originating from:
+call-on-function-with-different-type-parameter-arity.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  extern void f<T, c>(in tuple<T> x);
+              ^
+call-on-function-with-different-type-parameter-arity.p4(6)
+      f<bit<32>>({ 32w2 });
+      ^^^^^^^^^^^^^^^^^^^^

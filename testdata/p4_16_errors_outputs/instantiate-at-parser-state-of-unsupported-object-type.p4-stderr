@@ -1,0 +1,12 @@
+instantiate-at-parser-state-of-unsupported-object-type.p4(5): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+instantiate-at-parser-state-of-unsupported-object-type.p4(4): [--Wwarn=unused] warning: parser 'q' is unused
+parser q()() {
+       ^
+instantiate-at-parser-state-of-unsupported-object-type.p4(6): [--Werror=type-error] error: Cannot extract field apply from p which has type Type(package p)
+    p.apply();
+      ^^^^^
+instantiate-at-parser-state-of-unsupported-object-type.p4(6)
+    p.apply();
+    ^

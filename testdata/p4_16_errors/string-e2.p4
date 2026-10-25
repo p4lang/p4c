@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2019 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 extern void f<T>(in T data);
 
 control c() {

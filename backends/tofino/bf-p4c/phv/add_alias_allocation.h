@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_
-#define BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_
 
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
@@ -50,4 +50,4 @@ class AddAliasAllocation : public Inspector {
 
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_ADD_ALIAS_ALLOCATION_H_ */

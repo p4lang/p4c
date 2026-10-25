@@ -49,18 +49,18 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = act_miss();
     }
-    @hidden action v1modelconstentriesbmv2l77() {
+    @hidden action v1modelconstentriesbmv2l68() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_v1modelconstentriesbmv2l77 {
+    @hidden table tbl_v1modelconstentriesbmv2l68 {
         actions = {
-            v1modelconstentriesbmv2l77();
+            v1modelconstentriesbmv2l68();
         }
-        const default_action = v1modelconstentriesbmv2l77();
+        const default_action = v1modelconstentriesbmv2l68();
     }
     apply {
         lpm1_0.apply();
-        tbl_v1modelconstentriesbmv2l77.apply();
+        tbl_v1modelconstentriesbmv2l68.apply();
     }
 }
 

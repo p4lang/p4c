@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This file defines how a test should be written for a particular target. This is used by testutils
 
 # Write the script to check eBPF Kernel STF tests to the designated test file.

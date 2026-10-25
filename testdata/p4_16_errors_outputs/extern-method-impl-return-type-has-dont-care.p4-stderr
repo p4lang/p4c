@@ -1,0 +1,12 @@
+extern-method-impl-return-type-has-dont-care.p4(11): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+extern-method-impl-return-type-has-dont-care.p4(7): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser()() {
+       ^^^^^^^^
+extern-method-impl-return-type-has-dont-care.p4(8): [--Wwarn=unused] warning: 'ee' is unused
+  e() ee = {
+      ^^
+extern-method-impl-return-type-has-dont-care.p4(8): [--Werror=type-error] error: BlockStatement: instance initializers for extern without abstract methods
+  e() ee = {
+           ^

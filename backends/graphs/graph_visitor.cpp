@@ -23,14 +23,13 @@ namespace P4::graphs {
 
 void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
     auto path = graphsDir / (name + ".dot");
-    auto out = openFile(path, false);
-    if (out == nullptr) {
+    if (auto out = openFile(path, false)) {
+        // Custom label writers not supported with subgraphs, so we populate
+        // *_attribute_t properties instead using our GraphAttributeSetter class.
+        boost::write_graphviz(*out, g);
+    } else {
         ::P4::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
-        return;
     }
-    // Custom label writers not supported with subgraphs, so we populate
-    // *_attribute_t properties instead using our GraphAttributeSetter class.
-    boost::write_graphviz(*out, g);
 }
 
 const char *Graph_visitor::getType(const VertexType &v_type) {
@@ -102,7 +101,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
 
             const auto &vinfo = subg[*vit];
 
-            node->emplace("name", vinfo.name.escapeJson());
+            node->emplace("name", vinfo.name);
             node->emplace("type", getType(vinfo.type));
             node->emplace("type_enum", (unsigned)vinfo.type);
         }
@@ -119,7 +118,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
             edge->emplace("from", from);
             edge->emplace("to", to);
 
-            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit).escapeJson());
+            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit));
         }
     }
 }

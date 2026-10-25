@@ -1,0 +1,7 @@
+decl-parsertype-with-duplicate-parameter-names.p4(3): [--Werror=duplicate] error: fox: Duplicates declaration fox
+parser P(out error fox, inout error fox)
+                                    ^^^
+decl-parsertype-with-duplicate-parameter-names.p4(3)
+parser P(out error fox, inout error fox)
+                   ^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

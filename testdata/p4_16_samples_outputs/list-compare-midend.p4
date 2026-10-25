@@ -11,18 +11,18 @@ struct tuple_0 {
 }
 
 control test(out bool zout) {
-    @hidden action listcompare22() {
+    @hidden action listcompare28() {
         zout = true;
         zout = true;
     }
-    @hidden table tbl_listcompare22 {
+    @hidden table tbl_listcompare28 {
         actions = {
-            listcompare22();
+            listcompare28();
         }
-        const default_action = listcompare22();
+        const default_action = listcompare28();
     }
     apply {
-        tbl_listcompare22.apply();
+        tbl_listcompare28.apply();
     }
 }
 

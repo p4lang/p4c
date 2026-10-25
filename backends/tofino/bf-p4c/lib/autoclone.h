@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BF_P4C_LIB_AUTOCLONE_H_
-#define _BF_P4C_LIB_AUTOCLONE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_AUTOCLONE_H_
+#define BACKENDS_TOFINO_BF_P4C_LIB_AUTOCLONE_H_
 
 #include <memory>
 
@@ -41,4 +41,4 @@ class autoclone_ptr : public std::unique_ptr<T, D> {
     }
 };
 
-#endif /* _BF_P4C_LIB_AUTOCLONE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LIB_AUTOCLONE_H_ */

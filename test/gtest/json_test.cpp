@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "lib/json.h"
 
@@ -50,6 +39,19 @@ TEST(Util, Json) {
     auto smallestLongLong = static_cast<long long>(1LL << 63);
     value = new JsonValue(smallestLongLong);
     EXPECT_EQ(getNumStringRepr(smallestLongLong), value->toString());
+    value = new JsonValue(0.0f);
+    EXPECT_EQ("0", value->toString());
+    value = new JsonValue(3.14f);
+    EXPECT_EQ("3.14", value->toString());
+    value = new JsonValue(2.718);
+    EXPECT_EQ("2.718", value->toString());
+    value = new JsonValue(-0.00123);
+    EXPECT_EQ("-0.00123", value->toString());
+    value = new JsonValue(1.23456e-10);
+    EXPECT_EQ("1.23456e-10", value->toString());
+    value = new JsonValue(static_cast<float>(1.0 / 3.0));
+    std::string floatStr = value->toString().string();
+    EXPECT_EQ(floatStr.find("0.333"), 0);
 
     auto arr = new JsonArray();
     arr->append(5);
@@ -70,6 +72,30 @@ TEST(Util, Json) {
     obj->emplace("y", arr);
     EXPECT_EQ("{\n  \"x\" : \"x\",\n  \"y\" : [\n    5,\n    \"5\",\n    [true]\n  ]\n}",
               obj->toString());
+}
+
+TEST(Util, JsonStringEscaping) {
+    // Quotes must be escaped inside JSON strings.
+    EXPECT_EQ("\"hello \\\"world\\\"\"", JsonValue("hello \"world\"").toString());
+
+    // Backslashes must be escaped inside JSON strings.
+    EXPECT_EQ("\"backslash \\\\ test\"", JsonValue("backslash \\ test").toString());
+
+    // Newlines must be represented as the JSON escape sequence \\n.
+    EXPECT_EQ("\"line1\\nline2\"", JsonValue("line1\nline2").toString());
+
+    // Tabs must be represented as the JSON escape sequence \\t.
+    EXPECT_EQ("\"column1\\tcolumn2\"", JsonValue("column1\tcolumn2").toString());
+
+    // Other control characters must use the JSON Unicode escape form.
+    std::string controlCharacter(1, '\x01');
+    EXPECT_EQ("\"\\u0001\"", JsonValue(controlCharacter).toString());
+
+    // Escaping must also work when the string is serialized as a
+    // JsonValue contained inside a JsonObject.
+    auto obj = new JsonObject();
+    obj->emplace("message", "hello \"world\"\n");
+    EXPECT_EQ("{\n  \"message\" : \"hello \\\"world\\\"\\n\"\n}", obj->toString());
 }
 
 }  // namespace P4::Util

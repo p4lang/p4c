@@ -29,17 +29,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         val_0 = tmp;
         h.eth_hdr.eth_type = val_0.eth_type;
     }
-    @hidden action act() {
+    @hidden action gauntlet_list_as_in_argumentbmv2l37() {
         tmp.setValid();
         tmp.dst_addr = 48w1;
         tmp.src_addr = 48w1;
         tmp.eth_type = 16w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_list_as_in_argumentbmv2l37 {
         actions = {
-            act();
+            gauntlet_list_as_in_argumentbmv2l37();
         }
-        const default_action = act();
+        const default_action = gauntlet_list_as_in_argumentbmv2l37();
     }
     @hidden table tbl_do_action {
         actions = {
@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_action();
     }
     apply {
-        tbl_act.apply();
+        tbl_gauntlet_list_as_in_argumentbmv2l37.apply();
         tbl_do_action.apply();
     }
 }

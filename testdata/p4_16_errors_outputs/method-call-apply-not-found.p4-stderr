@@ -1,0 +1,14 @@
+method-call-apply-not-found.p4(6): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(inout bit<8> a)() {
+        ^^^^^^^
+method-call-apply-not-found.p4(9): [--Werror=type-error] error: 'x.apply()'
+    x.apply();
+    ^^^^^^^^^
+  ---- Actual error:
+method-call-apply-not-found.p4(3): val: No argument supplied for parameter
+  control c(inout bit<8> val)(int a) {
+                         ^^^
+  ---- Originating from:
+method-call-apply-not-found.p4(9): Function type 'c' does not match invocation type '<Method call>'
+      x.apply();
+      ^^^^^^^^^

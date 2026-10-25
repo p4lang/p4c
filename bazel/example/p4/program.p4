@@ -2,11 +2,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
-// The following also works:
-#include "external/com_github_p4lang_p4c/p4include/core.p4"
-#include "external/com_github_p4lang_p4c/p4include/v1model.p4"
-
-// Include paths are relative to the WORKSPACE.bazel file.
+// Quoted include paths are relative to the WORKSPACE.bazel file.
 #include "p4/empty.p4"
 
 typedef bit<48> EthernetAddress;

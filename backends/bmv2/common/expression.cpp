@@ -1,17 +1,7 @@
-/*Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "expression.h"
 
@@ -285,7 +275,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             return;
         }
         // convert normal parameters
-        if (auto st = type->to<IR::Type_Stack>()) {
+        if (auto st = type->to<IR::Type_Array>()) {
             auto et = typeMap->getTypeType(st->elementType, true);
             if (et->is<IR::Type_HeaderUnion>())
                 result->emplace("type", "header_union_stack");
@@ -354,10 +344,10 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
     if (expression->expr->is<IR::Member>()) {
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
-        if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::next)
+        if (memtype->is<IR::Type_Array>() && mem->member == IR::Type_Array::next)
             ::P4::error(ErrorType::ERR_UNINITIALIZED, "%1% uninitialized: next field read", mem);
         // array.last.field => type: "stack_field", value: [ array, field ]
-        if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
+        if (memtype->is<IR::Type_Array>() && mem->member == IR::Type_Array::last) {
             auto l = get(mem->expr);
             if (!l) return;
             result->emplace("type", "stack_field");
@@ -391,8 +381,8 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
                 a->append(fieldName);
                 result->emplace("value"_cs, a);
             }
-        } else if (parentType->is<IR::Type_Stack>() &&
-                   expression->member == IR::Type_Stack::lastIndex) {
+        } else if (parentType->is<IR::Type_Array>() &&
+                   expression->member == IR::Type_Array::lastIndex) {
             auto l = get(expression->expr);
             if (!l) return;
             result->emplace("type", "expression");
@@ -402,7 +392,7 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
             e->emplace("left", Util::JsonValue::null);
             e->emplace("right", l);
         } else {
-            const char *fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
+            const char *fieldRef = parentType->is<IR::Type_Array>() ? "stack_field" : "field";
             Util::JsonArray *e = nullptr;
             bool st = isArrayIndexRuntime(expression);
             if (!st) {
@@ -698,7 +688,7 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
             auto f = mkArrayField(r, "value"_cs);
             f->append(scalarsName);
             f->append(var->name);
-        } else if (auto st = type->to<IR::Type_Stack>()) {
+        } else if (auto st = type->to<IR::Type_Array>()) {
             auto et = typeMap->getTypeType(st->elementType, true);
             if (et->is<IR::Type_HeaderUnion>())
                 result->emplace("type", "header_union_stack");

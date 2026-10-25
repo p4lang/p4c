@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_VISITOR_H_
 #define IR_VISITOR_H_
@@ -49,11 +40,11 @@ struct Visitor_Context {
     // in the Visitor::apply_visitor functions as we do the recursive
     // descent traversal.  pre/postorder function can access this
     // context via getContext/findContext
-    const Visitor_Context *parent;
-    const IR::Node *node, *original;
-    mutable const char *child_name;
-    mutable int child_index;
-    int depth;
+    const Visitor_Context *parent = nullptr;
+    const IR::Node *node = nullptr, *original = nullptr;
+    mutable const char *child_name = nullptr;
+    mutable int child_index = 0;
+    int depth = 0;
     template <class T>
     inline const T *findContext(const Visitor_Context *&c) const {
         c = this;
@@ -145,26 +136,26 @@ class Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void visit(IR::Node &n, const char *name = 0) {
-        if (name && ctxt) ctxt->child_name = name;
-        n.visit_children(*this);
+        if (ctxt) ctxt->child_name = name;
+        n.visit_children(*this, name);
     }
     void visit(const IR::Node &n, const char *name = 0) {
-        if (name && ctxt) ctxt->child_name = name;
-        n.visit_children(*this);
+        if (ctxt) ctxt->child_name = name;
+        n.visit_children(*this, name);
     }
     void visit(IR::Node &n, const char *name, int cidx) {
         if (ctxt) {
             ctxt->child_name = name;
             ctxt->child_index = cidx;
         }
-        n.visit_children(*this);
+        n.visit_children(*this, name);
     }
     void visit(const IR::Node &n, const char *name, int cidx) {
         if (ctxt) {
             ctxt->child_name = name;
             ctxt->child_index = cidx;
         }
-        n.visit_children(*this);
+        n.visit_children(*this, name);
     }
     template <class T>
     void parallel_visit(IR::Vector<T> &v, const char *name = 0) {
@@ -386,6 +377,7 @@ class Modifier : public virtual Visitor {
     std::shared_ptr<ChangeTracker> visited;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
+    std::function<void(const IR::Node *from, const IR::Node *to)> onNodeTransformedHook;
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -405,6 +397,10 @@ class Modifier : public virtual Visitor {
     bool visit_in_progress(const IR::Node *) const;
     void visitOnce() const override;
     void visitAgain() const override;
+    void setOnNodeTransformedHook(
+        const std::function<void(const IR::Node *from, const IR::Node *to)> &hook) {
+        onNodeTransformedHook = hook;
+    }
 
  protected:
     bool forceClone = false;  // force clone whole tree even if unchanged
@@ -439,6 +435,7 @@ class Transform : public virtual Visitor {
     bool prune_flag = false;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
+    std::function<void(const IR::Node *from, const IR::Node *to)> onNodeTransformedHook;
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -460,6 +457,10 @@ class Transform : public virtual Visitor {
     void visitAgain() const override;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
+    void setOnNodeTransformedHook(
+        const std::function<void(const IR::Node *from, const IR::Node *to)> &hook) {
+        onNodeTransformedHook = hook;
+    }
 
  protected:
     const IR::Node *transform_child(const IR::Node *child) {

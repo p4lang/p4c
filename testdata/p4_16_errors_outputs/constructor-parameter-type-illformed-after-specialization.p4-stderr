@@ -1,0 +1,33 @@
+constructor-parameter-type-illformed-after-specialization.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+constructor-parameter-type-illformed-after-specialization.p4(7): [--Wwarn=unused] warning: 'e' is unused
+  E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                                                             ^
+constructor-parameter-type-illformed-after-specialization.p4(7): [--Werror=type-error] error: 'e'
+  E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                                                             ^
+  ---- Actual error:
+constructor-parameter-type-illformed-after-specialization.p4(7): Cannot cast implicitly type 'bit<32>' to type 'list<int>'
+    E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+      ^^^^^^^^^
+  ---- Originating from:
+constructor-parameter-type-illformed-after-specialization.p4(7): Type of argument '{}' (list<tuple<bit<32>, bit<16>>>) does not match type of parameter 'data' (list<tuple<list<int>, bit<16>>>)
+    E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+constructor-parameter-type-illformed-after-specialization.p4(7)
+    E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+constructor-parameter-type-illformed-after-specialization.p4(4)
+    E(list<tuple<T, S>> data);
+                        ^^^^
+constructor-parameter-type-illformed-after-specialization.p4(4)
+    E(list<tuple<T, S>> data);
+      ^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+constructor-parameter-type-illformed-after-specialization.p4(7): Constructor invocation <Method call> does not match constructor declaration E
+    E<list<int>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { }) e;
+                                                               ^
+constructor-parameter-type-illformed-after-specialization.p4(4)
+    E(list<tuple<T, S>> data);
+    ^

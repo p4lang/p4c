@@ -1,0 +1,9 @@
+expr-call-on-type-unsupported-method.p4(5): [--Werror=type-error] error: Cannot extract field C from P which has type Type(package P)
+P(P.C()) main;
+    ^
+expr-call-on-type-unsupported-method.p4(5)
+P(P.C()) main;
+  ^
+expr-call-on-type-unsupported-method.p4(5): [--Werror=type-error] error: P.C(): cannot evaluate to a compile-time constant
+P(P.C()) main;
+  ^^^^^

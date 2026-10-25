@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend.h"
 
@@ -72,11 +61,10 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
                                      std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
 
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
-    refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager midEnd = {};
+    ParserConfig config;
     if (options.loadIRFromJson == false) {
         midEnd.addPasses(
             {new P4::ConvertEnums(&typeMap, new EnumOn32Bits()),
@@ -84,7 +72,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::RemoveMiss(&typeMap),
              new P4::EliminateInvalidHeaders(&typeMap),
              new P4::EliminateNewtype(&typeMap),
-             new P4::SimplifyControlFlow(&typeMap),
+             new P4::SimplifyControlFlow(&typeMap, true),
              new P4::SimplifyKey(
                  &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
              new P4::RemoveExits(&typeMap),
@@ -104,11 +92,11 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::RemoveSelectBooleans(&typeMap),
              new P4::SingleArgumentSelect(&typeMap),
              new P4::ConstantFolding(&typeMap),
-             new P4::SimplifyControlFlow(&typeMap),
+             new P4::SimplifyControlFlow(&typeMap, true),
              new P4::TableHit(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),
-             new EBPF::Lower(&refMap, &typeMap),
-             new P4::ParsersUnroll(true, &refMap, &typeMap),
+             new EBPF::Lower(&refMap, &typeMap, 5),
+             new P4::ParsersUnroll(config, &refMap, &typeMap),
              evaluator,
              new P4::MidEndLast()});
 

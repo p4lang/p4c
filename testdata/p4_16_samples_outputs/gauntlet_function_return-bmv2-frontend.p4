@@ -17,9 +17,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.c") bit<32> c_0;
     @name("ingress.retval") bit<8> retval;
+    @name("ingress.inlinedRetval") bit<8> inlinedRetval_0;
     @name("ingress.action_thing") action action_thing() {
         retval = 8w1;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         c_0 = (bit<32>)tmp;
         sm.enq_timestamp = c_0;
     }

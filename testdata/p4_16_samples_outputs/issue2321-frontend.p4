@@ -34,8 +34,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.z") bit<16> z_0;
     @name("ingressImpl.x_0") bit<16> x_3;
     @name("ingressImpl.retval") bit<16> retval;
+    @name("ingressImpl.inlinedRetval") bit<16> inlinedRetval_1;
     @name("ingressImpl.x_2") bit<16> x_4;
     @name("ingressImpl.retval") bit<16> retval_1;
+    @name("ingressImpl.inlinedRetval_0") bit<16> inlinedRetval_2;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingressImpl.my_drop") action my_drop() {
@@ -52,12 +54,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         x_3 = x_3 | 16w7;
         retval = x_3 >> 1;
         hdr.ethernet.etherType = x_3;
-        y_0 = retval;
+        inlinedRetval_1 = retval;
+        y_0 = inlinedRetval_1;
         x_4 = hdr.ethernet.etherType;
         x_4 = x_4 | 16w7;
         retval_1 = x_4 >> 1;
         hdr.ethernet.etherType = x_4;
-        z_0 = retval_1;
+        inlinedRetval_2 = retval_1;
+        z_0 = inlinedRetval_2;
         hdr.ethernet.srcAddr[15:0] = y_0 + z_0;
     }
     @name("ingressImpl.t1") table t1_0 {

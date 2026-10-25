@@ -1,26 +1,15 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend.h"
 
 #include "backends/bmv2/common/check_unsupported.h"
+#include "backends/bmv2/common/v1model.h"
 #include "backends/bmv2/psa_switch/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
@@ -56,6 +45,7 @@ limitations under the License.
 #include "midend/removeSelectBooleans.h"
 #include "midend/removeUnusedParameters.h"
 #include "midend/replaceSelectRange.h"
+#include "midend/simplifyExternMethod.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
@@ -94,12 +84,14 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     : PortableMidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context *, const IR::Expression *)> policy =
-        [=](const Context *, const IR::Expression *e) -> bool {
+    auto *strengthReductionPolicy = new P4::StrengthReductionPolicy();
+    strengthReductionPolicy->enablePlusSliceToShiftTransform = true;
+    P4::LocalCopyPropPolicyCallbackFn policy = [=](const Context *, const IR::Expression *e,
+                                                   const DeclarationLookup *refMap) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
         // FIXME: Add utility method to resolve declaration given a context
-        auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
+        auto mi = P4::MethodInstance::resolve(mce, refMap, &typeMap);
         auto em = mi->to<P4::ExternMethod>();
         if (em == nullptr) return true;
         if (em->originalExternType->name.name == "Register" || em->method->name.name == "read")
@@ -111,6 +103,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+            new P4::TypeChecking(&refMap, &typeMap),
+            new P4::SimplifyExternMethodCalls(&typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),
             new CheckUnsupported(),
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
@@ -123,12 +118,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::SimplifyKey(&typeMap,
                                 new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
             new P4::ConstantFolding(&typeMap),
-            new P4::StrengthReduction(&typeMap),
+            new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
             new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
             new P4::ExpandLookahead(&typeMap),
             new P4::ExpandEmit(&typeMap),
             new P4::SimplifyParsers(),
-            new P4::StrengthReduction(&typeMap),
+            new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&typeMap),
@@ -145,7 +140,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
             new PassRepeated({
                 new P4::ConstantFolding(&typeMap),
-                new P4::StrengthReduction(&typeMap),
+                new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
             }),
             new P4::MoveDeclarations(),
             new P4::ValidateTableProperties({
@@ -155,7 +150,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
                 "psa_idle_timeout"_cs,
                 "size"_cs,
             }),
-            new P4::SimplifyControlFlow(&typeMap),
+            new P4::SimplifyControlFlow(&typeMap, true),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&typeMap),
             new P4::EliminateSwitch(&typeMap),

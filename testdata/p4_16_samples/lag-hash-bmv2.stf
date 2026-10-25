@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium & Devansh Singh
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# lag_hash % member_count picks the member, so hashes 0,1,2 must egress on ports 1,2,3 (needs BMv2 #1456).
+mc_set_lag_membership 1 1 2 3
+mc_mgrp_create 1
+mc_node_create 0 | 1
+mc_node_associate 1 0
+
+# hash 0 selects port 1 (also the default-initialized value).
+packet 0 00000000
+expect 1 00000000
+
+# hash 1 selects the second member (port 2).
+packet 0 00010000
+expect 2 00010000
+
+# hash 2 selects the third member (port 3).
+packet 0 00020000
+expect 3 00020000
+
+# Same hash must deterministically select the same member.
+packet 0 00000000
+expect 1 00000000

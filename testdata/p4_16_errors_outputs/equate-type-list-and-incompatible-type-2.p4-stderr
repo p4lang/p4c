@@ -1,0 +1,31 @@
+equate-type-list-and-incompatible-type-2.p4(4): [--Wwarn=unused] warning: control 'cIngress0' is unused
+control cIngress0() {
+        ^^^^^^^^^
+equate-type-list-and-incompatible-type-2.p4(7): [--Werror=type-error] error: 'random(rand_val, 0)'
+    random(rand_val, 0);
+    ^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+equate-type-list-and-incompatible-type-2.p4(5): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'list<match_kind>'
+    list<match_kind> rand_val;
+    ^^^^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-list-and-incompatible-type-2.p4(7): Type of argument 'rand_val' (list<match_kind>) does not match type of parameter 'result' (T)
+      random(rand_val, 0);
+             ^^^^^^^^
+equate-type-list-and-incompatible-type-2.p4(5)
+    list<match_kind> rand_val;
+    ^^^^^^^^^^^^^^^^
+equate-type-list-and-incompatible-type-2.p4(3)
+  extern void random<T>(out T result, in T lo);
+                              ^^^^^^
+equate-type-list-and-incompatible-type-2.p4(3)
+  extern void random<T>(out T result, in T lo);
+                     ^
+  Where 'T' is bound to 'int'
+  ---- Originating from:
+equate-type-list-and-incompatible-type-2.p4(3): Function type 'random' does not match invocation type '<Method call>'
+  extern void random<T>(out T result, in T lo);
+              ^^^^^^
+equate-type-list-and-incompatible-type-2.p4(7)
+      random(rand_val, 0);
+      ^^^^^^^^^^^^^^^^^^^

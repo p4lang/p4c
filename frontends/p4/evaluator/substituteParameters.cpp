@@ -1,22 +1,29 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "substituteParameters.h"
 
 namespace P4 {
+
+bool SubstituteParameters::useParameterSourceInfo(const IR::Expression *replacement) const {
+    if (!replacement->srcInfo.isValid()) return true;
+    auto path = replacement->to<IR::PathExpression>();
+    if (!path) return false;
+    if (path->path->name.originalName == nullptr) return true;
+
+    const IR::IDeclaration *decl = nullptr;
+    if (refMap) {
+        decl = refMap->getDeclaration(path->path, false);
+    } else {
+        // The temporary may not have been added to the program yet.
+        // Look it up without reporting an error if it is missing.
+        auto declarations = resolve(path->path->name, ResolutionType::Any);
+        if (declarations.size() == 1) decl = declarations.front();
+    }
+    return decl && decl->getName().originalName == nullptr;
+}
 
 const IR::Node *SubstituteParameters::postorder(IR::This *t) {
     auto result = new IR::This(t->srcInfo);
@@ -29,15 +36,19 @@ const IR::Node *SubstituteParameters::postorder(IR::PathExpression *expr) {
         (refMap ? refMap->getDeclaration(expr->path, true) : getDeclaration(expr->path, true));
     auto param = decl->to<IR::Parameter>();
     if (param != nullptr && subst->contains(param)) {
-        auto value = subst->lookup(param)->expression;
+        const auto *value = subst->lookup(param)->expression;
         LOG1("Replaced " << dbp(expr) << " with " << dbp(value));
-        return value;
+        // Keep the argument's source location unless it is a compiler temporary.
+        // For temporaries, use the location of the parameter reference.
+        auto *cloned = value->clone();
+        if (useParameterSourceInfo(value)) cloned->srcInfo = expr->srcInfo;
+        return cloned;
     }
 
     // Path expressions always need to be cloned.
     IR::ID newid = expr->path->name;
     auto path = new IR::Path(newid, expr->path->absolute);
-    auto result = new IR::PathExpression(path);
+    auto result = new IR::PathExpression(expr->srcInfo, path);
     LOG1("Cloned " << dbp(expr) << " into " << dbp(result));
     return result;
 }

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "simplify.h"
 
@@ -23,7 +12,17 @@ namespace P4 {
 
 const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
-    if (statement->hasAnnotations()) return statement;
+    if (statement->hasAnnotations() &&
+        !(foldInlinedFrom && statement->hasOnlyAnnotation(IR::Annotation::inlinedFromAnnotation))) {
+        if (auto *pblk = getParent<IR::BlockStatement>()) {
+            for (auto *annot : statement->annotations) {
+                if (auto *p = pblk->getAnnotation(annot->name); !p || !p->equiv(*annot))
+                    return statement;
+            }
+        } else {
+            return statement;
+        }
+    }
     auto parent = getContext()->node;
     CHECK_NULL(parent);
     if (parent->is<IR::SwitchCase>() || parent->is<IR::P4Control>() || parent->is<IR::Function>() ||
@@ -65,7 +64,7 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::IfStatement *statement) {
         statement->ifTrue = e;
     }
 
-    if (SideEffects::check(statement->condition, this, this, typeMap, getChildContext()))
+    if (SideEffects::check(statement->condition, this, typeMap, getChildContext()))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
         (statement->ifFalse == nullptr || statement->ifFalse->is<IR::EmptyStatement>()))
@@ -94,7 +93,7 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::SwitchStatement *statement)
             LOG2("Removing switch statement " << statement << " keeping " << mce);
             return new IR::MethodCallStatement(statement->srcInfo, mce);
         }
-        if (SideEffects::check(statement->expression, this, this, typeMap, getChildContext()))
+        if (SideEffects::check(statement->expression, this, typeMap, getChildContext()))
             // This can happen if this pass is run before SideEffectOrdering.
             return statement;
         LOG2("Removing switch statement " << statement);

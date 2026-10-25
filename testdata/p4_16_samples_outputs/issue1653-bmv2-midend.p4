@@ -24,18 +24,18 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("ingress.bh") bitvec_hdr bh_0;
-    @hidden action issue1653bmv2l43() {
+    @hidden action issue1653bmv2l34() {
         bh_0.setInvalid();
         clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
-    @hidden table tbl_issue1653bmv2l43 {
+    @hidden table tbl_issue1653bmv2l34 {
         actions = {
-            issue1653bmv2l43();
+            issue1653bmv2l34();
         }
-        const default_action = issue1653bmv2l43();
+        const default_action = issue1653bmv2l34();
     }
     apply {
-        tbl_issue1653bmv2l43.apply();
+        tbl_issue1653bmv2l34.apply();
     }
 }
 

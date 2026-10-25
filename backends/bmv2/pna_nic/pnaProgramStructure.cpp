@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Marvell Technology, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Marvell Technology, Inc.
+// SPDX-FileCopyrightText: 2024 Marvell Technology, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "pnaProgramStructure.h"
 
@@ -61,6 +50,13 @@ void InspectPnaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
+void InspectPnaProgram::addHeaderStackInstance(const IR::StructField *field,
+                                               const IR::Type_Array *stack) {
+    auto stack_decl = new IR::Declaration_Variable(field->controlPlaneName(), stack);
+    typeMap->setType(stack_decl, stack);
+    pinfo->header_stacks.emplace(field->controlPlaneName(), stack_decl);
+}
+
 void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
@@ -105,25 +101,14 @@ void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
-        } else if (ft->is<IR::Type_Stack>()) {
-            LOG5("Field is Type_Stack " << ft->toString());
-            auto stack = ft->to<IR::Type_Stack>();
-            // auto stack_name = f->controlPlaneName();
-            auto stack_size = stack->getSize();
+        } else if (ft->is<IR::Type_Array>()) {
+            LOG5("Field is Type_Array " << ft->toString());
+            auto stack = ft->to<IR::Type_Array>();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
-            auto stack_type = stack->elementType->to<IR::Type_Header>();
-            std::vector<unsigned> ids;
-            for (unsigned i = 0; i < stack_size; i++) {
-                cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-                /* TODO */
-                // auto id = json->add_header(stack_type, hdrName);
-                addHeaderInstance(stack_type, hdrName);
-                // ids.push_back(id);
-            }
-            // addHeaderStackInstance();
+            addHeaderStackInstance(f, stack);
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);

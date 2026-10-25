@@ -1,0 +1,34 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+extern void __e(in bit<16> x);
+control C(in bit<16> x) {
+    action a3(bit<16> y) {
+        __e(y);
+    }
+
+    action a2(bit<6> y) {
+        a3(x << (9 + y));
+    }
+
+    action a() {
+        a2(9);
+    }
+
+    table t {
+        actions = { a; }
+        default_action = a;
+    }
+
+    apply {
+        t.apply();
+    }
+}
+
+control proto(in bit<16> x);
+package top(proto p);
+
+top(C()) main;

@@ -1,0 +1,12 @@
+elimActRun1.p4(25): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            48w1 : exact @name("key") ;
+            ^^^^
+elimActRun1.p4(33): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            48w1 : exact @name("key") ;
+            ^^^^
+elimActRun1.p4(25): [--Wwarn=mismatch] warning: 48w1: Constant key field
+            48w1 : exact @name("key") ;
+            ^^^^
+elimActRun1.p4(33): [--Wwarn=mismatch] warning: 48w1: Constant key field
+            48w1 : exact @name("key") ;
+            ^^^^

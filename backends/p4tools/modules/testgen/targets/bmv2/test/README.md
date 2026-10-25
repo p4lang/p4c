@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!-- 
 Documentation Inclusion:
 This README is integrated as a subsection of the "P4Testgen" page in the P4 compiler documentation.

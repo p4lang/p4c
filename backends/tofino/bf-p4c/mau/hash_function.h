@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_HASH_FUNCTION_H_
-#define BF_P4C_MAU_HASH_FUNCTION_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_HASH_FUNCTION_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_HASH_FUNCTION_H_
 
 struct bfn_hash_algorithm_;
 
@@ -140,4 +140,4 @@ inline std::ostream &operator<<(std::ostream &out, const IR::MAU::HashFunction &
 }  // end namespace IR
 }  // end namespace P4
 
-#endif /* BF_P4C_MAU_HASH_FUNCTION_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_HASH_FUNCTION_H_ */

@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Marvell Technology, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Marvell Technology, Inc.
+// SPDX-FileCopyrightText: 2024 Marvell Technology, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "portable.h"
 
@@ -33,7 +22,12 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
     LOG5("In createStructLike with struct " << st->toString());
     for (auto f : st->fields) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(f, true);
+        auto ftype = structure->typeMap->getType(f, false);
+        if (ftype == nullptr) {
+            auto typeName = f->type->to<IR::Type_Name>();
+            CHECK_NULL(typeName);
+            ftype = structure->refMap->getDeclaration(typeName->path, true)->to<IR::Type>();
+        }
         LOG5("Iterating field with field " << f << " and type " << ftype->toString());
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
@@ -60,7 +54,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
             field->append(error_width);
             field->append(false);
             max_length += error_width;
-        } else if (ftype->to<IR::Type_Stack>()) {
+        } else if (ftype->to<IR::Type_Array>()) {
             BUG("%1%: nested stack", st);
         } else {
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
@@ -94,13 +88,11 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
     for (auto kv : structure->header_union_types) {
         auto st = kv.second;
         auto fields = new Util::JsonArray();
-        for (auto f : st->fields) {
+        for (auto field_info : structure->header_union_fields.at(kv.first)) {
             auto field = new Util::JsonArray();
-            auto ftype = structure->typeMap->getType(f, true);
-            auto ht = ftype->to<IR::Type_Header>();
-            CHECK_NULL(ht);
-            field->append(f->name.name);
-            field->append(ht->name.name);
+            field->append(field_info.first);
+            field->append(field_info.second);
+            fields->append(field);
         }
         ctxt->json->add_union_type(st->name, fields);
     }
@@ -111,28 +103,44 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
 
 void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
                                           P4::PortableProgramStructure *structure) {
-    auto name = structure->scalars.begin()->first;
-    ctxt->json->add_header("scalars_t"_cs, name);
+    if (structure->scalars.empty() && structure->scalarMetadataFields.empty()) return;
+    // We may have items in scalarMetadataFields but not scalars
+    auto name = structure->scalars.empty() ? "scalars"_cs : structure->scalars.begin()->first;
+    ctxt->json->add_metadata("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
     unsigned max_length = 0;
-    for (auto kv : structure->scalars) {
-        LOG5("Adding a scalar field " << kv.second << " to generated json");
+    auto add_field = [&](cstring name, const P4::IR::Declaration *decl) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(kv.second, true);
+        auto ftype = structure->typeMap->getType(decl, true);
         if (auto type = ftype->to<IR::Type_Bits>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += type->size;
             field->append(type->size);
             field->append(type->isSigned);
         } else if (ftype->is<IR::Type_Boolean>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += 1;
             field->append(1);
             field->append(false);
+        } else if (ftype->is<IR::Type_Error>()) {
+            // Treat as bit<32>, the same as the program structure pass and the v1model back end.
+            field->append(name);
+            max_length += 32;
+            field->append(32);
+            field->append(false);
         } else {
-            BUG_CHECK(kv.second, "%1 is not of Type_Bits or Type_Boolean");
+            BUG("%1%: unexpected type %2% for scalar field", decl, ftype);
         }
         ctxt->json->add_header_field("scalars_t"_cs, field);
+    };
+    for (auto kv : structure->scalars) {
+        LOG5("Adding a scalar field " << kv.second << " to generated json");
+        add_field(kv.second->name.name, kv.second);
+    }
+    // also output the scalar metadata fields
+    for (auto kv : structure->scalarMetadataFields) {
+        LOG5("Adding a scalar metadata field " << kv.second << " to generated json");
+        add_field(kv.second, kv.first);
     }
     // must add padding
     unsigned padding = max_length % 8;
@@ -156,10 +164,29 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
     }
-    /* TODO */
-    // for (auto kv : header_stacks) {
-    //     json->add_header_stack(stack_type, stack_name, stack_size, ids);
-    // }
+    for (auto kv : structure->header_stacks) {
+        auto stack_decl = kv.second;
+        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        CHECK_NULL(stack);
+
+        auto element_type =
+            structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_Header>();
+        CHECK_NULL(element_type);
+
+        const auto stack_name = stack_decl->controlPlaneName();
+        const auto header_type = element_type->controlPlaneName();
+
+        std::vector<unsigned> ids;
+        ids.reserve(stack->getSize());
+
+        for (unsigned index = 0; index < stack->getSize(); ++index) {
+            cstring element_name = stack_name + "[" + Util::toString(index) + "]";
+
+            ids.push_back(ctxt->json->add_header(header_type, element_name));
+        }
+
+        ctxt->json->add_header_stack(header_type, stack_name, stack->getSize(), ids);
+    }
     for (auto kv : structure->header_unions) {
         auto header_name = kv.first;
         auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
@@ -167,14 +194,38 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         // headers in the union.  Each instance will be named with
         // a prefix including the union name, e.g., "u.h"
         Util::JsonArray *fields = new Util::JsonArray();
-        for (auto uf : kv.second->to<IR::Type_HeaderUnion>()->fields) {
-            auto uft = structure->typeMap->getType(uf, true);
-            auto h_name = header_name + "." + uf->controlPlaneName();
-            auto h_type = uft->to<IR::Type_StructLike>()->controlPlaneName();
-            unsigned id = ctxt->json->add_header(h_type, h_name);
+        for (auto field_info :
+             structure->header_union_fields.at(kv.second->to<IR::Type_HeaderUnion>()->getName())) {
+            auto h_name = header_name + "." + field_info.first;
+            unsigned id = ctxt->json->add_header(field_info.second, h_name);
             fields->append(id);
         }
         ctxt->json->add_union(header_type, fields, header_name);
+    }
+    for (auto kv : structure->header_union_stacks) {
+        auto stack_decl = kv.second;
+        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        CHECK_NULL(stack);
+        auto union_type =
+            structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_HeaderUnion>();
+        CHECK_NULL(union_type);
+        const auto stack_name = stack_decl->controlPlaneName();
+        const auto union_type_name = union_type->controlPlaneName();
+        std::vector<unsigned> union_ids;
+        union_ids.reserve(stack->getSize());
+
+        for (unsigned index = 0; index < stack->getSize(); ++index) {
+            cstring union_name = stack_name + "[" + Util::toString(index) + "]";
+            auto fields = new Util::JsonArray();
+            for (auto field_info : structure->header_union_fields.at(union_type->getName())) {
+                cstring header_name = union_name + "." + field_info.first;
+                fields->append(ctxt->json->add_header(field_info.second, header_name));
+            }
+            union_ids.push_back(ctxt->json->add_union(union_type_name, fields, union_name));
+        }
+
+        ctxt->json->add_header_union_stack(union_type_name, stack_name, stack->getSize(),
+                                           union_ids);
     }
 }
 
@@ -221,6 +272,10 @@ cstring PortableCodeGenerator::convertHashAlgorithm(cstring algo) {
     }
     if (algo == "IDENTITY") {
         return "identity"_cs;
+    }
+    // Target default chosen to be crc16
+    if (algo == "TARGET_DEFAULT") {
+        return "crc16"_cs;
     }
 
     return nullptr;
@@ -321,20 +376,21 @@ Util::IJson *ExternConverter_Random::convertExternObject(UNUSED ConversionContex
                                                          UNUSED const IR::MethodCallExpression *mc,
                                                          UNUSED const IR::StatOrDecl *s,
                                                          UNUSED const bool &emitExterns) {
-    if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+    if (mc->arguments->size() != 1) {
+        modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("modify_field_rng_uniform"_cs);
     auto params = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, em->method->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-    /* TODO */
-    // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
-    // auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
+    // Get low/high values from the declaration instance
+    auto di = em->object->to<IR::Declaration_Instance>();
+    auto lo = ctxt->conv->convert(di->arguments->at(0)->expression);
+    auto hi = ctxt->conv->convert(di->arguments->at(1)->expression);
     params->append(dest);
-    // params->append(lo);
-    // params->append(hi);
+    params->append(lo);
+    params->append(hi);
     return primitive;
 }
 
@@ -475,12 +531,12 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
             modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
             return;
         }
-        if (eb->getConstructorParameters()->size() < 2) {
-            modelError("%1%: expected 2 parameters", eb);
+        if (eb->getConstructorParameters()->size() < 1) {
+            modelError("%1%: expected 1 parameter", eb);
             return;
         }
         auto arg = tp->to<IR::Declaration_ID>();
-        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto param = eb->getConstructorParameters()->getParameter(0);
         auto mem = arg->toString();
         LOG5("In convertParam with param " << param->toString() << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
@@ -667,7 +723,16 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         modelError("%1%: expected a member", hash->getNode());
         return;
     }
-    auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    // ExternConverter::convertHashAlgorithm() expects v1model names
+    // Convert from PSA/PNA names to v1model names
+    PortableCodeGenerator pcg;
+    auto v1modelHashName = pcg.convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    if (v1modelHashName.isNullOrEmpty()) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: unsupported hash algorithm for action selector", hash);
+        return;
+    }
+    auto algo = ExternConverter::convertHashAlgorithm(v1modelHashName);
     selector->emplace("algo"_cs, algo);
     auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {

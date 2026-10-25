@@ -58,6 +58,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     @name("MainControlImpl.tmp") bool tmp;
     @name("MainControlImpl.istd_0") pna_main_input_metadata_t istd_1;
     @name("MainControlImpl.retval") bool retval;
+    @name("MainControlImpl.inlinedRetval") bool inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
@@ -74,7 +75,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     apply {
         istd_1 = istd;
         retval = istd_1.direction == PNA_Direction_t.HOST_TO_NET;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         if (tmp) {
             key_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
             key_1 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr);

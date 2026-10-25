@@ -1,0 +1,17 @@
+table-entry-keyset-and-table-key-non-coercible-types-4.p4(12): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(inout standard_metadata_t sm)() {
+        ^^^^^^^
+table-entry-keyset-and-table-key-non-coercible-types-4.p4(13): [--Wwarn=unused] warning: table 't2' is unused
+  table t2 {
+        ^^
+table-entry-keyset-and-table-key-non-coercible-types-4.p4(19): [--Werror=type-error] error: 'Entry'
+      (0) : NoAction;
+      ^^^^^^^^^^^^^^
+  ---- Actual error:
+table-entry-keyset-and-table-key-non-coercible-types-4.p4(10): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'bool'
+    bool ingress_port;
+    ^^^^
+  ---- Originating from:
+table-entry-keyset-and-table-key-non-coercible-types-4.p4(19): Table entry has type 'tuple<bool>' which is not the expected type 'tuple<int>'
+        (0) : NoAction;
+        ^^^

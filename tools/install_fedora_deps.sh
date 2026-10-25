@@ -15,6 +15,7 @@ if [ "$IN_DOCKER" == "TRUE" ]; then
 fi
 
 sudo dnf install -y -q \
+    awk \
     automake \
     bison \
     boost-devel \
@@ -22,11 +23,10 @@ sudo dnf install -y -q \
     boost-graph \
     boost-iostreams \
     boost-program-options \
-    boost-system \
     boost-test \
     boost-thread \
     ccache \
-    clang \
+    clang-15 \
     cmake \
     cpp \
     elfutils-libelf-devel \
@@ -38,6 +38,7 @@ sudo dnf install -y -q \
     grpc-plugins \
     iproute \
     iptables-legacy \
+    jsoncpp-devel \
     libevent-devel \
     libfl-devel \
     libpcap-devel \
@@ -50,17 +51,23 @@ sudo dnf install -y -q \
     pkg-config \
     procps-ng \
     python3 \
+    python3-devel \
     python3-pip \
+    python3-virtualenv \
     python3-thrift \
+    uv \
+    curl \
     readline-devel \
     tcpdump \
     thrift-devel \
     valgrind \
     zlib-devel \
-    ninja-build
+    glibc-devel.i686 \
+    ninja-build \
+    xxhash-devel
 
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up uv for Python dependency management.
+uv sync
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
@@ -77,14 +84,16 @@ make -j$((`nproc`+1))
 make -j$((`nproc`+1)) install
 popd
 
-# Install BMv2 from source
-pushd "${tmp_dir}"
-git clone --depth=1 https://github.com/p4lang/behavioral-model
-cd behavioral-model
-./autogen.sh
-./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
-make -j$((`nproc`+1))
-make -j$((`nproc`+1)) install-strip
-popd
+# Install BMv2 from source via the shared CMake-based helper.
+BMV2_INSTALL_ARGS=(
+  --work-dir "${tmp_dir}"
+)
+if [[ -n "${BMV2_REF:-}" ]]; then
+  BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+fi
+"${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
+
+git clone https://github.com/libbpf/libbpf/ -b v1.7.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+${P4C_DIR}/backends/tc/runtime/build-libbpf
 
 rm -rf "${tmp_dir}"

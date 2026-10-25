@@ -1,0 +1,9 @@
+method-call-setValid-on-unsupported-type.p4(4): [--Wwarn=unused] warning: control 'compute' is unused
+control compute(inout hdr h)() {
+        ^^^^^^^
+method-call-setValid-on-unsupported-type.p4(8): [--Werror=type-error] error: Field setValid is not a member of structure struct hdr
+      h.setValid();
+        ^^^^^^^^
+method-call-setValid-on-unsupported-type.p4(3)
+struct hdr {}
+       ^^^

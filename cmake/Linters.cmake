@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 file(
   GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
   backends/*.cpp
@@ -136,9 +140,10 @@ file(
   tools/*.py
 )
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
-list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime/contrib/libbpf")
+list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime/contrib")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/tofino/third_party")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
+list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/tc/runtime")
 
 add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 

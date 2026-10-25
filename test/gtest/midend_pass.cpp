@@ -1,24 +1,13 @@
-/*
-Copyright 2024 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Intel Corp.
+// SPDX-FileCopyrightText: 2024 Intel Corp.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend_pass.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
@@ -57,11 +46,14 @@ limitations under the License.
 namespace P4::Test {
 
 MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
+#ifdef SUPPORT_P4_14
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
+#endif
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
+    ParserConfig config;
     auto v1controls = new std::set<cstring>();
     defuse = new P4::ComputeDefUse;
 
@@ -99,7 +91,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::ConstantFolding(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::SimplifyControlFlow(&typeMap),
+         new P4::SimplifyControlFlow(&typeMap, true),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
          new P4::EliminateSwitch(&typeMap),
@@ -112,11 +104,12 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
                  // nothing further to do
                  return nullptr;
              // Special handling when compiling for v1model.p4
-             if (main->type->name == P4V1::V1Model::instance.sw.name) {
+             if (main->type->name == P4V1::V1Model::instance().sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;
-                 auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
-                 auto update = main->getParameterValue(P4V1::V1Model::instance.sw.compute.name);
-                 auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                 auto verify = main->getParameterValue(P4V1::V1Model::instance().sw.verify.name);
+                 auto update = main->getParameterValue(P4V1::V1Model::instance().sw.compute.name);
+                 auto deparser =
+                     main->getParameterValue(P4V1::V1Model::instance().sw.deparser.name);
                  if (verify == nullptr || update == nullptr || deparser == nullptr ||
                      !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
                      !deparser->is<IR::ControlBlock>()) {
@@ -130,7 +123,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          },
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
-         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+         options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::MidEndLast()});

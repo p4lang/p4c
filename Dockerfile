@@ -6,6 +6,9 @@ LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 # building locally or you know there are more cores available, you may want to
 # override this.
 ARG MAKEFLAGS=-j2
+# Allow CI to apply the same ccache policy inside and outside the image.
+ARG CCACHE_MAXSIZE=1G
+ARG CCACHE_COMPILERCHECK=content
 # Useful environment variable for scripts.
 ARG IN_DOCKER=TRUE
 # Select the type of image we're building. Use `build` for a normal build, which
@@ -37,6 +40,8 @@ ARG COMPILE_WITH_CLANG=OFF
 ARG ENABLE_SANITIZERS=OFF
 # Only execute the steps necessary to successfully run CMake.
 ARG CMAKE_ONLY=OFF
+# Support P4-14 in the compiler (legacy).
+ARG SUPPORT_P4_14=OFF
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
@@ -46,6 +51,7 @@ ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
 # - Disable leaks detector as p4c uses GC.
 ENV UBSAN_OPTIONS=print_stacktrace=1
 ENV ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
+ENV PATH="/root/.local/bin:$PATH"
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

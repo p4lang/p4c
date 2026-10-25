@@ -1,24 +1,17 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "options.h"
 
 #include "lib/null.h"
 
 namespace P4 {
+
+void Util::Options::shortUsage() {
+    *outStream << "Use '--help' to see all available options." << std::endl;
+}
 
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
@@ -28,7 +21,7 @@ void Util::Options::registerOption(const char *option, const char *argName,
     if (strlen(option) <= 1) throw std::logic_error(std::string("Option too short: ") + option);
     if (option[0] != '-')
         throw std::logic_error(std::string("Expected option to start with -: ") + option);
-    auto o = new Option();
+    auto o = std::make_shared<Option>();
     o->option = cstring(option);
     o->argName = argName;
     o->processor = processor;
@@ -58,17 +51,21 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
     char build_date[50];
     strftime(build_date, 50, "%c", localtime(&now));
     buildDate = cstring(build_date);
+    return process_options(argc, argv);
+}
+
+std::vector<const char *> *Util::Options::process_options(int argc, char *const argv[]) {
     for (int i = 1; i < argc; i++) {
         cstring opt = cstring(argv[i]);
         const char *arg = nullptr;
-        const Option *option = nullptr;
+        std::shared_ptr<const Option> option;
 
         if (opt.startsWith("--")) {
             option = get(options, opt);
             if (!option && (arg = opt.find('='))) option = get(options, opt.before(arg++));
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
-                usage();
+                shortUsage();
                 return nullptr;
             }
         } else if (opt.startsWith("-") && opt.size() > 1) {
@@ -83,7 +80,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
             }
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
-                usage();
+                shortUsage();
                 return nullptr;
             }
             if ((option->flags & OptionFlags::OptionalArgument) && (!arg || strlen(arg) == 0))
@@ -99,14 +96,14 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
                     ::P4::error(ErrorType::ERR_EXPECTED,
                                 "Option %1% is missing required argument %2%", opt,
                                 option->argName);
-                    usage();
+                    shortUsage();
                     return nullptr;
                 }
                 arg = argv[++i];
             }
             bool success = option->processor(arg);
             if (!success) {
-                usage();
+                shortUsage();
                 return nullptr;
             }
         }
@@ -114,7 +111,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
 
     auto result = validateOptions();
     if (!result) {
-        usage();
+        shortUsage();
         return nullptr;
     }
 

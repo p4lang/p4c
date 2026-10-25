@@ -38,29 +38,41 @@
 // COMMON TYPES
 // ----------------------------------------------------------------------------
 #define PORT_ID_WIDTH                  9
+@noWarn("unused")
 typedef bit<PORT_ID_WIDTH>             PortId_t;            // Port id -- ingress or egress port
 #define MULTICAST_GROUP_ID_WIDTH       16
+@noWarn("unused")
 typedef bit<MULTICAST_GROUP_ID_WIDTH>  MulticastGroupId_t;  // Multicast group id
 #define QUEUE_ID_WIDTH                 5
+@noWarn("unused")
 typedef bit<QUEUE_ID_WIDTH>            QueueId_t;           // Queue id
 #define MIRROR_TYPE_WIDTH              3
+@noWarn("unused")
 typedef bit<MIRROR_TYPE_WIDTH>         MirrorType_t;        // Mirror type
 #define MIRROR_ID_WIDTH                10
+@noWarn("unused")
 typedef bit<MIRROR_ID_WIDTH>           MirrorId_t;          // Mirror id
 #define RESUBMIT_TYPE_WIDTH            3
+@noWarn("unused")
 typedef bit<RESUBMIT_TYPE_WIDTH>       ResubmitType_t;      // Resubmit type
 #define DIGEST_TYPE_WIDTH              3
+@noWarn("unused")
 typedef bit<DIGEST_TYPE_WIDTH>         DigestType_t;        // Digest type
 #define REPLICATION_ID_WIDTH           16
+@noWarn("unused")
 typedef bit<REPLICATION_ID_WIDTH>      ReplicationId_t;     // Replication id
 #define L1_EXCLUSION_ID_WIDTH          16
+@noWarn("unused")
 typedef bit<L1_EXCLUSION_ID_WIDTH>     L1ExclusionId_t;     // L1 Exclusion id
 #define L2_EXCLUSION_ID_WIDTH          9
+@noWarn("unused")
 typedef bit<L2_EXCLUSION_ID_WIDTH>     L2ExclusionId_t;     // L2 Exclusion id
 
+@noWarn("unused")
 typedef error ParserError_t;
 
 
+@noWarn("unused")
 const bit<32> PORT_METADATA_SIZE = 32w64;
 
 

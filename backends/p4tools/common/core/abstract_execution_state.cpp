@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/core/abstract_execution_state.h"
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
@@ -82,7 +86,7 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
             auto fieldName = structField->name;
             const auto *fieldType = resolveType(structField->type);
             auto ref = new IR::Member(fieldType, parent, fieldName);
-            if (fieldType->is<IR::Type_StructLike>() || fieldType->to<IR::Type_Stack>()) {
+            if (fieldType->is<IR::Type_StructLike>() || fieldType->to<IR::Type_Array>()) {
                 components.push_back(
                     new IR::NamedExpression(fieldName, convertToComplexExpression(ref)));
             } else {
@@ -97,19 +101,19 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
             // We do not know the underlying type name of the struct, so keep it anonymous.
             return new IR::StructExpression(ts, nullptr, components);
         }
-    } else if (auto ts = parent->type->to<IR::Type_Stack>()) {
+    } else if (auto ts = parent->type->to<IR::Type_Array>()) {
         IR::Vector<IR::Expression> components;
         const auto *elementType = resolveType(ts->elementType);
         for (size_t idx = 0; idx < ts->getSize(); idx++) {
             auto ref = new IR::ArrayIndex(elementType, parent,
                                           new IR::Constant(static_cast<uint64_t>(idx)));
-            if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Stack>()) {
+            if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Array>()) {
                 components.push_back(convertToComplexExpression(ref));
             } else {
                 components.push_back(get(ref));
             }
         }
-        return new IR::HeaderStackExpression(parent->type, components, parent->type);
+        return new IR::ArrayExpression(parent->type, components, parent->type);
     }
     P4C_UNIMPLEMENTED("Unsupported struct-like type %1% for member %2%",
                       parent->type->node_type_name(), parent);
@@ -123,12 +127,12 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
             auto subList = flattenComplexExpression(listElem->expression, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
-        if (auto headerExpr = structExpr->to<IR::HeaderExpression>()) {
+        if (const auto *headerExpr = structExpr->to<IR::HeaderExpression>()) {
             flatValids.emplace_back(headerExpr->validity);
         }
-    } else if (const auto *headerStackExpr = inputExpression->to<IR::HeaderStackExpression>()) {
-        for (const auto *headerStackElem : headerStackExpr->components) {
-            auto subList = flattenComplexExpression(headerStackElem, flatValids);
+    } else if (const auto *arrayExpr = inputExpression->to<IR::ArrayExpression>()) {
+        for (const auto *arrayElem : arrayExpr->components) {
+            auto subList = flattenComplexExpression(arrayElem, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
     } else {
@@ -153,14 +157,11 @@ std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
         if (validVector != nullptr && structType->is<IR::Type_Header>()) {
             validVector->push_back(ToolsVariables::getHeaderValidity(parent));
         }
-    } else if (const auto *typeStack = resolvedType->to<IR::Type_Stack>()) {
+    } else if (const auto *typeStack = resolvedType->to<IR::Type_Array>()) {
         const auto *stackElementsType = resolveType(typeStack->elementType);
         for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
             const auto *newArr =
                 HSIndexToMember::produceStackIndex(stackElementsType, parent, arrayIndex);
-            BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
-                      "Trying to get the flat fields for a non Type_StructLike element : %1%",
-                      stackElementsType);
             auto subFields = getFlatFields(newArr, validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
         }
@@ -212,12 +213,12 @@ void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
             const auto *flatStructField = flatStructFields[idx];
             set(flatTargetRef, flatStructField);
         }
-    } else if (auto stackExpression = right->to<IR::HeaderStackExpression>()) {
-        auto stackType = stackExpression->headerStackType->checkedTo<IR::Type_Stack>();
-        auto stackSize = stackExpression->components.size();
-        for (size_t idx = 0; idx < stackSize; idx++) {
-            const auto *ref = HSIndexToMember::produceStackIndex(stackType->elementType, left, idx);
-            const auto *rightElem = stackExpression->components.at(idx);
+    } else if (auto arrayExpression = right->to<IR::ArrayExpression>()) {
+        auto arrayType = arrayExpression->arrayType->checkedTo<IR::Type_Array>();
+        auto arraySize = arrayExpression->components.size();
+        for (size_t idx = 0; idx < arraySize; idx++) {
+            const auto *ref = HSIndexToMember::produceStackIndex(arrayType->elementType, left, idx);
+            const auto *rightElem = arrayExpression->components.at(idx);
             assignStructLike(ref, rightElem);
         }
     } else if (right->is<IR::PathExpression>() || right->is<IR::Member>() ||
@@ -264,7 +265,7 @@ void AbstractExecutionState::declareVariable(const Target &target,
     const auto *leftExpr = new IR::PathExpression(declType, new IR::Path(declVar.name.name));
     if (declType->is<IR::Type_StructLike>()) {
         initializeStructLike(target, leftExpr, false);
-    } else if (const auto *stackType = declType->to<IR::Type_Stack>()) {
+    } else if (const auto *stackType = declType->to<IR::Type_Array>()) {
         const auto *stackSizeExpr = stackType->size;
         auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
         const auto *stackElemType = stackType->elementType;

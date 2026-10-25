@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_
-#define BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_
 
 #include <map>
 #include <optional>
@@ -27,7 +27,6 @@
 #include <boost/graph/transitive_closure.hpp>
 
 #include "backends/tofino/bf-p4c/common/asm_output.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
 #include "backends/tofino/bf-p4c/logging/pass_manager.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
@@ -35,6 +34,7 @@
 #include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
 #include "backends/tofino/bf-p4c/mau/table_mutex.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "lib/json.h"
 
 using namespace P4;
 
@@ -1102,4 +1102,4 @@ class TableDependencyGraphSummary : public Logging::PassManager {
 
 std::ostream &operator<<(std::ostream &, DependencyGraph::dependencies_t);
 
-#endif /* BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_DEPENDENCY_GRAPH_H_ */

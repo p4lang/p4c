@@ -1,15 +1,15 @@
 control c(out bit<4> result) {
-    @hidden action issue3219l13() {
+    @hidden action issue3219l19() {
         result = 4w1;
     }
-    @hidden table tbl_issue3219l13 {
+    @hidden table tbl_issue3219l19 {
         actions = {
-            issue3219l13();
+            issue3219l19();
         }
-        const default_action = issue3219l13();
+        const default_action = issue3219l19();
     }
     apply {
-        tbl_issue3219l13.apply();
+        tbl_issue3219l19.apply();
     }
 }
 

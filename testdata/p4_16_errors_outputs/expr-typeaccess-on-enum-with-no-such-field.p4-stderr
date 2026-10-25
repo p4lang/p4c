@@ -1,0 +1,20 @@
+expr-typeaccess-on-enum-with-no-such-field.p4(4): [--Wwarn=unused] warning: 'a' is unused
+const bool a = X.a;
+           ^
+expr-typeaccess-on-enum-with-no-such-field.p4(4): [--Werror=type-error] error: X.a: Invalid enum tag
+const bool a = X.a;
+               ^^^
+expr-typeaccess-on-enum-with-no-such-field.p4(4): [--Werror=type-error] error: 'a'
+const bool a = X.a;
+           ^
+  ---- Actual error:
+expr-typeaccess-on-enum-with-no-such-field.p4(4): Cannot cast implicitly type 'Type(X)' to type 'bool'
+  const bool a = X.a;
+        ^^^^
+  ---- Originating from:
+expr-typeaccess-on-enum-with-no-such-field.p4(4): Source expression 'X.a' produces a result of type 'Type(X)' which cannot be assigned to a left-value with type 'bool'
+  const bool a = X.a;
+                 ^^^
+expr-typeaccess-on-enum-with-no-such-field.p4(4)
+  const bool a = X.a;
+        ^^^^

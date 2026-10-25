@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/smith/util/wordlist.h"
 
 #include <array>
@@ -690,7 +694,8 @@ const std::array<const char *, WORDLIST_LENGTH> Wordlist::WORDS = {
     "tractor",  "allah",    "unwrap",   "fares",    "resist",   "hoped",    "safer",    "wagner",
     "touched",  "cologne",  "wishing",  "ranger",   "smallest", "newman",   "marsh",    "ricky",
     "scared",   "theta",    "monsters", "asylum",   "lightbox", "robbie",   "stake",    "cocktail",
-    "outlets",  "arbor",    "poison"};
+    "outlets",  "arbor",    "poison",
+};
 
 const char *P4Tools::P4Smith::Wordlist::getFromWordlist() {
     if (counter < WORDLIST_LENGTH) {

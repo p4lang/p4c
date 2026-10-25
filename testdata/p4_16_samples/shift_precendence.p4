@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control i(out bit<4> a, out bit<16> x) {
     bit<4> tmp_0;
     apply {

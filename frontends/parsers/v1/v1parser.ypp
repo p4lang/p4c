@@ -1,17 +1,7 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 */
 
 // Use Bison's C++ mode.
@@ -48,7 +38,7 @@ using namespace P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
-    IR::NameMap<IR::Attribute, ordered_map>* attribs;
+    IR::NameMap<IR::Declaration, ordered_map>* attribs;
 };
 
 struct HeaderType {
@@ -128,9 +118,10 @@ typedef const IR::Type ConstType;
 
 using namespace P4;
 
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
-                 : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                                        \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                                     \
+        : YYRHSLOC(Rhs, 0) ?  Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd())  \
+                 : Util::SourceInfo(driver.sources, driver.sources->getCurrentPosition()))
 
 #undef yylex
 #define yylex lexer.yylex
@@ -885,7 +876,7 @@ blackbox_type_declaration: BLACKBOX_TYPE name "{" blackbox_body "}"
 
 blackbox_body: /* epsilon */ {
             $$.methods = new IR::Vector<IR::Method>;
-            $$.attribs = new IR::NameMap<IR::Attribute, ordered_map>; }
+            $$.attribs = new IR::NameMap<IR::Declaration, ordered_map>; }
     | blackbox_body ATTRIBUTE name "{" blackbox_attribute "}"
           { ($$=$1).attribs->addUnique($3, $5); }
     | blackbox_body METHOD name "(" opt_argument_list ")" ";"

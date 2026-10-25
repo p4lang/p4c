@@ -38,52 +38,52 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<3> tmp_1;
-    @hidden action gauntlet_index_1bmv2l4() {
+    @hidden action gauntlet_index_1bmv2l10() {
         tmp_1 = 3w1;
     }
-    @hidden action gauntlet_index_1bmv2l4_0() {
+    @hidden action gauntlet_index_1bmv2l10_0() {
         tmp_1 = h.i.a;
     }
-    @hidden action gauntlet_index_1bmv2l45() {
+    @hidden action gauntlet_index_1bmv2l51() {
         h.h[3w0].a = 32w1;
     }
-    @hidden action gauntlet_index_1bmv2l45_0() {
+    @hidden action gauntlet_index_1bmv2l51_0() {
         h.h[3w1].a = 32w1;
     }
-    @hidden table tbl_gauntlet_index_1bmv2l4 {
+    @hidden table tbl_gauntlet_index_1bmv2l10 {
         actions = {
-            gauntlet_index_1bmv2l4();
+            gauntlet_index_1bmv2l10();
         }
-        const default_action = gauntlet_index_1bmv2l4();
+        const default_action = gauntlet_index_1bmv2l10();
     }
-    @hidden table tbl_gauntlet_index_1bmv2l4_0 {
+    @hidden table tbl_gauntlet_index_1bmv2l10_0 {
         actions = {
-            gauntlet_index_1bmv2l4_0();
+            gauntlet_index_1bmv2l10_0();
         }
-        const default_action = gauntlet_index_1bmv2l4_0();
+        const default_action = gauntlet_index_1bmv2l10_0();
     }
-    @hidden table tbl_gauntlet_index_1bmv2l45 {
+    @hidden table tbl_gauntlet_index_1bmv2l51 {
         actions = {
-            gauntlet_index_1bmv2l45();
+            gauntlet_index_1bmv2l51();
         }
-        const default_action = gauntlet_index_1bmv2l45();
+        const default_action = gauntlet_index_1bmv2l51();
     }
-    @hidden table tbl_gauntlet_index_1bmv2l45_0 {
+    @hidden table tbl_gauntlet_index_1bmv2l51_0 {
         actions = {
-            gauntlet_index_1bmv2l45_0();
+            gauntlet_index_1bmv2l51_0();
         }
-        const default_action = gauntlet_index_1bmv2l45_0();
+        const default_action = gauntlet_index_1bmv2l51_0();
     }
     apply {
         if (h.i.a > 3w1) {
-            tbl_gauntlet_index_1bmv2l4.apply();
+            tbl_gauntlet_index_1bmv2l10.apply();
         } else {
-            tbl_gauntlet_index_1bmv2l4_0.apply();
+            tbl_gauntlet_index_1bmv2l10_0.apply();
         }
         if (tmp_1 == 3w0) {
-            tbl_gauntlet_index_1bmv2l45.apply();
+            tbl_gauntlet_index_1bmv2l51.apply();
         } else if (tmp_1 == 3w1) {
-            tbl_gauntlet_index_1bmv2l45_0.apply();
+            tbl_gauntlet_index_1bmv2l51_0.apply();
         }
     }
 }

@@ -1,0 +1,15 @@
+equate-type-stack-and-stack-with-incompatible-type.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-stack-and-stack-with-incompatible-type.p4(10): [--Werror=type-error] error: 's = { { b = 32w0, t = 32w1 }, { b = 32w2, t = 32w3 }, InvalidHeader }'
+    s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<32>>) {#} };
+      ^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<32>' to type 'bit<0>'
+  ---- Originating from:
+equate-type-stack-and-stack-with-incompatible-type.p4(10): Source expression '{ { b = 32w0, t = 32w1 }, { b = 32w2, t = 32w3 }, InvalidHeader }' produces a result of type 'header H<...>[3]' which cannot be assigned to a left-value with type 'header H<...>[3]'
+      s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<32>>) {#} };
+           ^^^^^^^^^^^^^
+equate-type-stack-and-stack-with-incompatible-type.p4(9)
+      H<bit<0>>[3] s;
+      ^^^^^^^^^^^^

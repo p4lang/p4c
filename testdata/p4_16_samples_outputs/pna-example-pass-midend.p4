@@ -62,37 +62,37 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass107() {
+    @hidden action pnaexamplepass98() {
         hdr.udp.src_port = hdr.udp.src_port + 16w1;
         recirculate();
     }
-    @hidden table tbl_pnaexamplepass107 {
+    @hidden table tbl_pnaexamplepass98 {
         actions = {
-            pnaexamplepass107();
+            pnaexamplepass98();
         }
-        const default_action = pnaexamplepass107();
+        const default_action = pnaexamplepass98();
     }
     apply {
         if ((bit<8>)(bit<3>)istd.pass <= 8w0x4) {
-            tbl_pnaexamplepass107.apply();
+            tbl_pnaexamplepass98.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass120() {
+    @hidden action pnaexamplepass111() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
         pkt.emit<udp_t>(hdr.udp);
     }
-    @hidden table tbl_pnaexamplepass120 {
+    @hidden table tbl_pnaexamplepass111 {
         actions = {
-            pnaexamplepass120();
+            pnaexamplepass111();
         }
-        const default_action = pnaexamplepass120();
+        const default_action = pnaexamplepass111();
     }
     apply {
-        tbl_pnaexamplepass120.apply();
+        tbl_pnaexamplepass111.apply();
     }
 }
 

@@ -1,0 +1,9 @@
+issue1167-bmv2.p4(49): [--Wwarn=unused] warning: 'egress_color' is unused
+    MeterColor_t egress_color = MeterColor_t.GREEN;
+                 ^^^^^^^^^^^^
+issue1167-bmv2.p4(57): [--Werror=invalid] error: cIngress.guh: table with direct meter cIngress.my_meter must have at least one action with a read method call
+    table guh {
+          ^^^
+issue1167-bmv2.p4(48)
+    direct_meter<MeterColor_t>(MeterType.bytes) my_meter;
+                                                ^^^^^^^^

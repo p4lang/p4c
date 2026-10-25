@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfTable.h"
 
@@ -243,7 +232,7 @@ void EBPFTable::emitActionArguments(CodeBuilder *builder, const IR::P4Action *ac
     builder->append("struct ");
     builder->blockStart();
 
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
         type->declare(builder, p->externalName(), false);
@@ -629,7 +618,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat(".u = {.%s = {", name.c_str());
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
         builder->append(",");
@@ -701,7 +690,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
         builder->emitIndent();
         builder->appendFormat(".u = {.%s = {", name.c_str());
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto arg = mi->substitution.lookup(p);
             arg->apply(cg);
             builder->append(",");

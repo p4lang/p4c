@@ -40,27 +40,21 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_9bmv2l45() {
+    @hidden action gauntlet_exit_combination_9bmv2l51() {
         hasReturned = true;
     }
-    @hidden action gauntlet_exit_combination_9bmv2l35() {
+    @hidden action gauntlet_exit_combination_9bmv2l41() {
         hasReturned = false;
         key_0 = 48w1;
     }
-    @hidden action gauntlet_exit_combination_9bmv2l51() {
+    @hidden action gauntlet_exit_combination_9bmv2l57() {
         h.eth_hdr.eth_type = 16w2;
     }
-    @hidden table tbl_gauntlet_exit_combination_9bmv2l35 {
+    @hidden table tbl_gauntlet_exit_combination_9bmv2l41 {
         actions = {
-            gauntlet_exit_combination_9bmv2l35();
+            gauntlet_exit_combination_9bmv2l41();
         }
-        const default_action = gauntlet_exit_combination_9bmv2l35();
-    }
-    @hidden table tbl_gauntlet_exit_combination_9bmv2l45 {
-        actions = {
-            gauntlet_exit_combination_9bmv2l45();
-        }
-        const default_action = gauntlet_exit_combination_9bmv2l45();
+        const default_action = gauntlet_exit_combination_9bmv2l41();
     }
     @hidden table tbl_gauntlet_exit_combination_9bmv2l51 {
         actions = {
@@ -68,11 +62,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_exit_combination_9bmv2l51();
     }
+    @hidden table tbl_gauntlet_exit_combination_9bmv2l57 {
+        actions = {
+            gauntlet_exit_combination_9bmv2l57();
+        }
+        const default_action = gauntlet_exit_combination_9bmv2l57();
+    }
     apply {
-        tbl_gauntlet_exit_combination_9bmv2l35.apply();
+        tbl_gauntlet_exit_combination_9bmv2l41.apply();
         switch (simple_table_0.apply().action_run) {
             simple_action: {
-                tbl_gauntlet_exit_combination_9bmv2l45.apply();
+                tbl_gauntlet_exit_combination_9bmv2l51.apply();
             }
             default: {
             }
@@ -80,7 +80,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (hasReturned) {
             ;
         } else {
-            tbl_gauntlet_exit_combination_9bmv2l51.apply();
+            tbl_gauntlet_exit_combination_9bmv2l57.apply();
         }
     }
 }

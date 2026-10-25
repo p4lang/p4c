@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "test-p4c-ubuntu-24.04-sanitizers"
+
+on:
+  schedule:
+    # Every day on midnight UTC
+    - cron: "0 0 * * *"
+  pull_request:
+    branches: [main]
+    # "labeled" so adding run-sanitizer to an open PR starts a run.
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-ubuntu24-clang-sanitizers-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # Build with clang and test p4c on Ubuntu 24.04.
+  test-ubuntu24-clang-sanitizers:
+    # Only run on pull requests with the "run-sanitizer" label.
+    if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-sanitizer') }}
+    runs-on: ubuntu-24.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      COMPILE_WITH_CLANG: ON
+      BUILD_AUTO_VAR_INIT_PATTERN: ON
+      ENABLE_SANITIZERS: ON
+      UBSAN_OPTIONS: print_stacktrace=1
+      ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
+        with:
+          ccache-key: "ubuntu-24.04-clang-unity-sanitizer"
+
+      - name: Run tests (Ubuntu 24.04)
+        # Need to use sudo for the eBPF kernel tests.
+        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
+        working-directory: ./build

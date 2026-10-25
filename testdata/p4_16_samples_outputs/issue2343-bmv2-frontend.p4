@@ -27,11 +27,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<16> tmp_0;
     @name("ingress.val_0") bit<48> val;
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     apply {
         val = 48w1;
         retval = 16w1;
         h.eth_hdr.dst_addr = val;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         tmp_0 = tmp[0:0] ++ 15w0;
         h.eth_hdr.eth_type = tmp_0;
     }

@@ -1,18 +1,7 @@
-/*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2016 VMware, Inc.
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 #include "predication.h"
 
 #include "frontends/p4/cloner.h"
@@ -50,6 +39,16 @@ const IR::Node *Predication::EmptyStatementRemover::postorder(IR::EmptyStatement
 
 const IR::Node *Predication::EmptyStatementRemover::postorder(IR::BlockStatement *statement) {
     if (statement->components.empty()) return nullptr;
+    return statement;
+}
+
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::ForStatement *statement) {
+    if (!statement->body) statement->body = new IR::EmptyStatement(statement->srcInfo);
+    return statement;
+}
+
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::ForInStatement *statement) {
+    if (!statement->body) statement->body = new IR::EmptyStatement(statement->srcInfo);
     return statement;
 }
 
@@ -145,13 +144,13 @@ const IR::Expression *Predication::clone(const IR::Expression *expression) {
     return expression->apply(cloner);
 }
 
-const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
+const IR::AssignmentStatement *Predication::clone(const IR::AssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
     CloneExpressions cloner;
     cloner.setCalledBy(this);
-    return statement->apply(cloner);
+    return statement->apply(cloner)->to<IR::AssignmentStatement>();
 }
 
 /// expressionReplacer is applied here and the assignment is stored in liveAssigns vector
@@ -172,8 +171,7 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
         modifyIndex = false;
     }
     // The expressionReplacer responsible for transforming this statement
-    ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(), traversalPath,
-                                conditions);
+    ExpressionReplacer replacer(clone(statement), traversalPath, conditions);
     replacer.setCalledBy(this);
     dependencies.clear();
     visit(statement->right);
@@ -227,14 +225,25 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
 
     // Push statement which now contains a Mux expression in the statement->right.
     // ExpressionReplacer is applied here which takes care of correct transforming.
-    liveAssignments[statementName] =
-        new IR::AssignmentStatement(statement->left, clone(statement->right)->apply(replacer));
+    liveAssignments[statementName] = new IR::AssignmentStatement(
+        statement->srcInfo, statement->left, clone(statement->right)->apply(replacer));
     liveAssigns.push_back(liveAssignments[statementName]);
     LOG2("Finished visiting statement");
     LOG3("Pushed into liveAssigns statement: " << *(liveAssigns.back()));
 
     // Later removed by the emptyStatementRemover
-    return new IR::EmptyStatement();
+    return new IR::EmptyStatement(statement->srcInfo);
+}
+
+const IR::Node *Predication::preorder(IR::OpAssignmentStatement *statement) {
+    if (!isInContext<IR::P4Action>() || ifNestingLevel == 0) {
+        return statement;
+    }
+    ::P4::error(
+        ErrorType::ERR_EXPRESSION,
+        "%1%: Op-Assignment inside if statement can't be transformed to condition expression",
+        statement);
+    return statement;
 }
 
 const IR::Node *Predication::preorder(IR::PathExpression *pathExpr) {
@@ -259,20 +268,23 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
         // Creates a new variable that has the value of the original index when the
         // condition is fulfilled, and in any other case it has a default value of '1w0'
         cstring indexName = generator.newName("index");
-        auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
-        auto index = new IR::PathExpression(IR::ID(indexName));
-        auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
-        ExpressionReplacer replacer(clone(indexAssignment)->to<IR::AssignmentStatement>(),
-                                    traversalPath, conditions);
+        auto srcInfo = arrInd->right->srcInfo;
+        auto name = IR::ID(srcInfo, indexName);
+        auto indexDecl =
+            new IR::Declaration_Variable(srcInfo, name, arrInd->right->type->getP4Type());
+        auto index = new IR::PathExpression(name);
+        auto indexAssignment = new IR::AssignmentStatement(srcInfo, index, clone(arrInd->right));
+        ExpressionReplacer replacer(clone(indexAssignment), traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
         indexAssignment->right =
-            new IR::Mux(conditions.back(), new IR::Constant(arrInd->right->type->getP4Type(), 0),
-                        new IR::Constant(arrInd->right->type->getP4Type(), 0));
+            new IR::Mux(srcInfo, conditions.back(),
+                        new IR::Constant(srcInfo, arrInd->right->type->getP4Type(), 0),
+                        new IR::Constant(srcInfo, arrInd->right->type->getP4Type(), 0));
         // Applies the replacer and adds the declaration and assignment to vectors
         indexDeclarations.push_back(indexDecl);
         liveAssignments[indexName] = new IR::AssignmentStatement(
-            indexAssignment->left, indexAssignment->right->apply(replacer));
+            srcInfo, indexAssignment->left, indexAssignment->right->apply(replacer));
         liveAssigns.push_back(liveAssignments[indexName]);
 
         arrInd->right = index;
@@ -289,15 +301,18 @@ const IR::Node *Predication::preorder(IR::IfStatement *statement) {
     LOG2(*statement);
     // rv block is the actual output of this preorder, it contains all of the newly
     // transformed statements, every new IF block has a new 'rv' block
-    auto rv = new IR::BlockStatement;
+    auto rv = new IR::BlockStatement(statement->srcInfo);
     // If the condition is of composite nature then an 'alias' needs to be made. It's declaration
     // can be pushed onto 'rv' immediately, while it's assignment of value needs to be pushed
     // onto 'liveAssigns', delaying it's placement on the 'rv' block and avoiding ordering issues.
     if (!statement->condition->is<IR::PathExpression>()) {
         cstring conditionName = generator.newName("cond");
-        rv->push_back(new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get()));
-        auto condition = new IR::PathExpression(IR::ID(conditionName));
-        liveAssigns.push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
+        auto srcInfo = statement->condition->srcInfo;
+        auto name = IR::ID(srcInfo, conditionName);
+        rv->push_back(new IR::Declaration_Variable(srcInfo, name, IR::Type::Boolean::get()));
+        auto condition = new IR::PathExpression(name);
+        liveAssigns.push_back(
+            new IR::AssignmentStatement(srcInfo, clone(condition), statement->condition));
         LOG1("Composite condition alias created: " << conditionName);
         LOG2(" " << statement->condition);
         statement->condition = condition;  // replace with variable cond

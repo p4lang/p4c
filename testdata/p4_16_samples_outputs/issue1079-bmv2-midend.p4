@@ -40,17 +40,17 @@ control EmptyIngress(inout headers_t headers, inout metadata_t meta, inout stand
 }
 
 control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1079bmv2l47() {
+    @hidden action issue1079bmv2l53() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_issue1079bmv2l47 {
+    @hidden table tbl_issue1079bmv2l53 {
         actions = {
-            issue1079bmv2l47();
+            issue1079bmv2l53();
         }
-        const default_action = issue1079bmv2l47();
+        const default_action = issue1079bmv2l53();
     }
     apply {
-        tbl_issue1079bmv2l47.apply();
+        tbl_issue1079bmv2l53.apply();
     }
 }
 

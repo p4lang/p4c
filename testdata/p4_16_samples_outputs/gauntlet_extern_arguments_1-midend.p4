@@ -19,17 +19,17 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    @hidden action gauntlet_extern_arguments_1l28() {
+    @hidden action gauntlet_extern_arguments_1l34() {
         h.eth_hdr.eth_type = do_extern(32w12);
     }
-    @hidden table tbl_gauntlet_extern_arguments_1l28 {
+    @hidden table tbl_gauntlet_extern_arguments_1l34 {
         actions = {
-            gauntlet_extern_arguments_1l28();
+            gauntlet_extern_arguments_1l34();
         }
-        const default_action = gauntlet_extern_arguments_1l28();
+        const default_action = gauntlet_extern_arguments_1l34();
     }
     apply {
-        tbl_gauntlet_extern_arguments_1l28.apply();
+        tbl_gauntlet_extern_arguments_1l34.apply();
     }
 }
 

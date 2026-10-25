@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_FIELD_USE_H_
-#define BF_P4C_MAU_FIELD_USE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_FIELD_USE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_FIELD_USE_H_
 
 #include <iostream>
 
@@ -65,4 +65,4 @@ class FieldUse : public MauInspector, TofinoWriteContext {
     }
 };
 
-#endif /* BF_P4C_MAU_FIELD_USE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_FIELD_USE_H_ */

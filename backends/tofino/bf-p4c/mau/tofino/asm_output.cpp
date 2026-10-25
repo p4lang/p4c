@@ -294,7 +294,7 @@ void Tofino::IXBar::Use::emit_ixbar_asm(const PhvInfo &phv, std::ostream &out, i
         emit_ixbar_gather_bytes(phv, use, sort, midbytes, tbl, type == IXBar::Use::TERNARY_MATCH,
                                 type == IXBar::Use::ATCAM_MATCH);
     }
-    for (int hash_group = 0; hash_group < IXBar::HASH_GROUPS; hash_group++) {
+    for (int hash_group = 0; hash_group < TofinoIXBarSpec::HASH_GROUPS; hash_group++) {
         unsigned hash_table_input = hash_table_inputs[hash_group];
         bitvec hash_seed = this->hash_seed[hash_group];
         int ident_bits_prev_alloc = 0;
@@ -309,7 +309,7 @@ void Tofino::IXBar::Use::emit_ixbar_asm(const PhvInfo &phv, std::ostream &out, i
                 emit_ixbar_hash(phv, out, indent, match_data, ghost, this, hash_group,
                                 ident_bits_prev_alloc);
                 if (is_parity_enabled())
-                    out << indent << IXBar::HASH_PARITY_BIT << ": parity" << std::endl;
+                    out << indent << TofinoIXBarSpec::HASH_PARITY_BIT << ": parity" << std::endl;
                 --indent;
             }
             out << indent++ << "hash group " << hash_group << ":" << std::endl;
@@ -356,8 +356,8 @@ bool Tofino::ActionDataBus::Use::emit_adb_asm(std::ostream &out, const IR::MAU::
             int immed_hi = immed_lo + (8 << rs.location.type) - 1;
             le_bitrange immed_range = {immed_lo, immed_hi};
             for (int i = 0; i < 2; i++) {
-                le_bitrange immed_impact = {i * IXBar::HASH_DIST_BITS,
-                                            (i + 1) * IXBar::HASH_DIST_BITS - 1};
+                le_bitrange immed_impact = {i * TofinoIXBarSpec::HASH_DIST_BITS,
+                                            (i + 1) * TofinoIXBarSpec::HASH_DIST_BITS - 1};
                 if (!immed_impact.overlaps(immed_range)) continue;
                 slot_hash_dist_units.setbit(i);
             }
@@ -374,8 +374,8 @@ bool Tofino::ActionDataBus::Use::emit_adb_asm(std::ostream &out, const IR::MAU::
 
             // Byte slots need a particular byte range of hash dist
             if (rs.location.type == ActionData::BYTE) {
-                int slot_range_shift = (immed_range.lo / IXBar::HASH_DIST_BITS);
-                slot_range_shift *= IXBar::HASH_DIST_BITS;
+                int slot_range_shift = (immed_range.lo / TofinoIXBarSpec::HASH_DIST_BITS);
+                slot_range_shift *= TofinoIXBarSpec::HASH_DIST_BITS;
                 le_bitrange slot_range = immed_range.shiftedByBits(-1 * slot_range_shift);
                 out << ", " << slot_range.lo << ".." << slot_range.hi;
             }

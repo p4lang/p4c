@@ -59,17 +59,17 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
         psa_direct_meter = meter0_0;
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkdirectmeter57() {
+    @hidden action psaexampledpdkdirectmeter63() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkdirectmeter57 {
+    @hidden table tbl_psaexampledpdkdirectmeter63 {
         actions = {
-            psaexampledpdkdirectmeter57();
+            psaexampledpdkdirectmeter63();
         }
-        const default_action = psaexampledpdkdirectmeter57();
+        const default_action = psaexampledpdkdirectmeter63();
     }
     apply {
-        tbl_psaexampledpdkdirectmeter57.apply();
+        tbl_psaexampledpdkdirectmeter63.apply();
         tbl_0.apply();
     }
 }

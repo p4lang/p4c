@@ -142,110 +142,110 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
                         const 12w2 : switch_0_case_0();
         }
     }
-    @hidden action issue3374l126() {
+    @hidden action issue3374l117() {
         key_1 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action issue3374l126_0() {
+    @hidden action issue3374l117_0() {
         key_1 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action issue3374l126_1() {
+    @hidden action issue3374l117_1() {
         key_1 = hsVar;
     }
-    @hidden action issue3374l126_2() {
+    @hidden action issue3374l117_2() {
         hsiVar = meta.depth;
     }
-    @hidden action issue3374l104() {
+    @hidden action issue3374l95() {
         key_0 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action issue3374l104_0() {
+    @hidden action issue3374l95_0() {
         key_0 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action issue3374l104_1() {
+    @hidden action issue3374l95_1() {
         key_0 = hsVar;
     }
-    @hidden action issue3374l104_2() {
+    @hidden action issue3374l95_2() {
         hsiVar = meta.depth;
     }
-    @hidden action issue3374l130() {
+    @hidden action issue3374l121() {
         hsiVar = meta.depth;
     }
-    @hidden table tbl_issue3374l126 {
+    @hidden table tbl_issue3374l117 {
         actions = {
-            issue3374l126_2();
+            issue3374l117_2();
         }
-        const default_action = issue3374l126_2();
+        const default_action = issue3374l117_2();
     }
-    @hidden table tbl_issue3374l126_0 {
+    @hidden table tbl_issue3374l117_0 {
         actions = {
-            issue3374l126();
+            issue3374l117();
         }
-        const default_action = issue3374l126();
+        const default_action = issue3374l117();
     }
-    @hidden table tbl_issue3374l126_1 {
+    @hidden table tbl_issue3374l117_1 {
         actions = {
-            issue3374l126_0();
+            issue3374l117_0();
         }
-        const default_action = issue3374l126_0();
+        const default_action = issue3374l117_0();
     }
-    @hidden table tbl_issue3374l126_2 {
+    @hidden table tbl_issue3374l117_2 {
         actions = {
-            issue3374l126_1();
+            issue3374l117_1();
         }
-        const default_action = issue3374l126_1();
+        const default_action = issue3374l117_1();
     }
-    @hidden table tbl_issue3374l104 {
+    @hidden table tbl_issue3374l95 {
         actions = {
-            issue3374l104_2();
+            issue3374l95_2();
         }
-        const default_action = issue3374l104_2();
+        const default_action = issue3374l95_2();
     }
-    @hidden table tbl_issue3374l104_0 {
+    @hidden table tbl_issue3374l95_0 {
         actions = {
-            issue3374l104();
+            issue3374l95();
         }
-        const default_action = issue3374l104();
+        const default_action = issue3374l95();
     }
-    @hidden table tbl_issue3374l104_1 {
+    @hidden table tbl_issue3374l95_1 {
         actions = {
-            issue3374l104_0();
+            issue3374l95_0();
         }
-        const default_action = issue3374l104_0();
+        const default_action = issue3374l95_0();
     }
-    @hidden table tbl_issue3374l104_2 {
+    @hidden table tbl_issue3374l95_2 {
         actions = {
-            issue3374l104_1();
+            issue3374l95_1();
         }
-        const default_action = issue3374l104_1();
+        const default_action = issue3374l95_1();
     }
-    @hidden table tbl_issue3374l130 {
+    @hidden table tbl_issue3374l121 {
         actions = {
-            issue3374l130();
+            issue3374l121();
         }
-        const default_action = issue3374l130();
+        const default_action = issue3374l121();
     }
     apply {
-        tbl_issue3374l126.apply();
+        tbl_issue3374l117.apply();
         if (hsiVar == 2w0) {
-            tbl_issue3374l126_0.apply();
+            tbl_issue3374l117_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_issue3374l126_1.apply();
+            tbl_issue3374l117_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_issue3374l126_2.apply();
+            tbl_issue3374l117_2.apply();
         }
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
-                tbl_issue3374l104.apply();
+                tbl_issue3374l95.apply();
                 if (hsiVar == 2w0) {
-                    tbl_issue3374l104_0.apply();
+                    tbl_issue3374l95_0.apply();
                 } else if (hsiVar == 2w1) {
-                    tbl_issue3374l104_1.apply();
+                    tbl_issue3374l95_1.apply();
                 } else if (hsiVar >= 2w1) {
-                    tbl_issue3374l104_2.apply();
+                    tbl_issue3374l95_2.apply();
                 }
                 stub_0.apply();
             }
             switch_0_case_0: {
-                tbl_issue3374l130.apply();
+                tbl_issue3374l121.apply();
                 if (hsiVar == 2w0 && hdrs.vlan_tag[2w0].ether_type == hdrs.ethernet.etherType) {
                     stub1_0.apply();
                 } else if (hsiVar == 2w1 && hdrs.vlan_tag[2w1].ether_type == hdrs.ethernet.etherType) {

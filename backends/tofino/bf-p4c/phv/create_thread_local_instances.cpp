@@ -18,9 +18,9 @@
 
 #include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/ir/thread_visitor.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 
 namespace {
 

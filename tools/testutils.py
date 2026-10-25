@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" Defines helper functions for a general testing framework. Used by multiple
-    Python testing scripts in the backends folder."""
+# SPDX-License-Identifier: Apache-2.0
+"""Defines helper functions for a general testing framework. Used by multiple
+Python testing scripts in the backends folder."""
 
 import logging
 import os
@@ -25,9 +17,7 @@ import socket
 import subprocess
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Union
-
-import scapy.packet
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Union
 
 # Set up logging.
 log = logging.getLogger(__name__)
@@ -93,18 +83,18 @@ def hex_to_byte(hex_str: str) -> str:
     return "".join(byte_vals)
 
 
-def compare_pkt(expected: str, received: scapy.packet.Packet) -> int:
+def compare_pkt(expected: str, received: bytes) -> int:
     """Compare two given byte sequences and check if they are the same.
     Report errors if this is not the case."""
 
     # If the expected packet string ends with a '$' it means that the packets are only equal,
     # if they are the exact same length.
     strict_length_check = False
-    if expected[-1] == '$':
+    if expected[-1] == "$":
         strict_length_check = True
         expected = expected[:-1]
 
-    received = received.build().hex().upper()
+    received = received.hex().upper()
     expected = "".join(expected.split()).upper()
     if strict_length_check and len(received) > len(expected):
         log.error(
@@ -239,31 +229,33 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
         else:
             out = result.stdout
         returncode = result.returncode
+    except FileNotFoundError as exception:
+        if errpipe:
+            out = errpipe.out
+        returncode = FAILURE
+        log.error(
+            'Error %s with exception "%s" when executing "%s".',
+            returncode,
+            exception,
+            " ".join(args),
+        )
     except subprocess.CalledProcessError as exception:
         if errpipe:
             out = errpipe.out
         returncode = exception.returncode
-        cmd = exception.cmd
-        # Rejoin the list for better readability.
-        if isinstance(cmd, list):
-            cmd = " ".join(cmd)
-        log.error('Error %s when executing "%s".', returncode, cmd)
+        log.error('Error %s when executing "%s".', returncode, " ".join(args))
     except subprocess.TimeoutExpired as exception:
         if errpipe:
             out = errpipe.out
         else:
             out = str(exception.stderr)
         returncode = FAILURE
-        cmd = exception.cmd
-        # Rejoin the list for better readability.
-        if isinstance(cmd, list):
-            cmd = " ".join(cmd)
-        log.error("Timed out when executing %s.", cmd)
+        log.error("Timed out when executing %s.", " ".join(args))
     finally:
         if "capture_output" not in extra_args:
-            if outpipe:
+            if "outpipe" in locals() and outpipe:
                 outpipe.close()
-            if errpipe:
+            if "errpipe" in locals() and errpipe:
                 errpipe.close()
     return ProcessResult(out, returncode)
 
@@ -279,36 +271,54 @@ def check_root() -> bool:
     return os.getuid() == 0
 
 
-def check_if_file(input_path_str: str) -> Optional[Path]:
-    """Checks if a path is a file and converts the input
-    to an absolute path"""
-    if not input_path_str:
+def _check_input_path_present(input_path: Union[Path, str, None]) -> bool:
+    """Shared guard used by the check_if_* helpers below: logs an error
+    if the given input path is falsy (None or empty string)."""
+    if not input_path:
         log.error("input_path is None")
+        return False
+    return True
+
+
+def _check_path_type(
+    input_path_str: str, is_expected_type: Callable[[Path], bool], type_name: str
+) -> Optional[Path]:
+    """Shared helper for check_if_file and check_if_dir:
+    verifies the input is present, exists, and matches the expected type."""
+    if not _check_input_path_present(input_path_str):
         return None
     input_path = Path(input_path_str)
     if not input_path.exists():
         log.error("%s does not exist", input_path)
         return None
-    if not input_path.is_file():
-        log.error("%s is not a file", input_path)
+    if not is_expected_type(input_path):
+        log.error("%s is not a %s", input_path, type_name)
         return None
     return Path(input_path.absolute())
+
+
+def check_if_file(input_path_str: str) -> Optional[Path]:
+    """Checks if a path is a file and converts the input
+    to an absolute path"""
+    return _check_path_type(input_path_str, Path.is_file, "file")
+
+
+def check_if_binary(input_path: Union[Path, str]) -> Optional[Path]:
+    """Checks if a path is an executable binary and converts the input
+    to an absolute path"""
+    if not _check_input_path_present(input_path):
+        return None
+    binary_path = shutil.which(str(input_path))
+    if not binary_path:
+        log.error("%s is not an executable binary", input_path)
+        return None
+    return Path(binary_path).absolute()
 
 
 def check_if_dir(input_path_str: str) -> Optional[Path]:
     """Checks if a path is an actual directory and converts the input
     to an absolute path"""
-    if not input_path_str:
-        log.error("input_path is None")
-        return None
-    input_path = Path(input_path_str)
-    if not input_path.exists():
-        log.error("%s does not exist", input_path)
-        return None
-    if not input_path.is_dir():
-        log.error("%s is not a directory", input_path)
-        return None
-    return Path(input_path.absolute())
+    return _check_path_type(input_path_str, Path.is_dir, "directory")
 
 
 def check_and_create_dir(directory: Path) -> None:
@@ -322,7 +332,7 @@ def del_dir(directory: Path) -> None:
     """Delete a directory and all its children.
     TODO: Convert to Path input."""
     try:
-        shutil.rmtree(directory, ignore_errors=True)
+        shutil.rmtree(directory)
     except OSError as exception:
         log.error(
             "Could not delete directory, reason:\n%s - %s.",

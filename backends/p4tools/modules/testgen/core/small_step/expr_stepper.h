@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 
@@ -6,6 +12,7 @@
 #include <vector>
 
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
 
@@ -48,20 +55,12 @@ class ExprStepper : public AbstractStepper {
         std::optional<MethodImpl> find(const IR::PathExpression &externObjectRef,
                                        const IR::ID &methodName,
                                        const IR::Vector<IR::Argument> &args) const {
-            // We have to check the extern type here. We may receive a specialized canonical type,
-            // which we need to unpack.
-            const IR::Type_Extern *externType = nullptr;
-            if (const auto *type = externObjectRef.type->to<IR::Type_Extern>()) {
-                externType = type;
-            } else if (const auto *specType =
-                           externObjectRef.type->to<IR::Type_SpecializedCanonical>()) {
-                CHECK_NULL(specType->substituted);
-                externType = specType->substituted->checkedTo<IR::Type_Extern>();
-            } else if (externObjectRef.path->name == IR::ID("*method")) {
-            } else {
-                BUG("Not a valid extern: %1% with member %2%. Type is %3%.", externObjectRef,
-                    methodName, externObjectRef.type->node_type_name());
-            }
+            // Extern functions and internal methods use a placeholder receiver, such as "*method".
+            // This placeholder also has an extern type.
+            const auto *externType = IR::getExternType(externObjectRef.type);
+            BUG_CHECK(externType != nullptr,
+                      "Not a valid extern: %1% with member %2%. Type is %3%.", externObjectRef,
+                      methodName, externObjectRef.type->node_type_name());
 
             cstring qualifiedMethodName = externType->name + "." + methodName;
             auto submapIt = impls.find(qualifiedMethodName);

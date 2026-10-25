@@ -1,0 +1,7 @@
+decl-matchkind-with-duplicate-fields.p4(5): [--Werror=duplicate] error: ternary: Duplicates declaration ternary
+  ternary
+  ^^^^^^^
+decl-matchkind-with-duplicate-fields.p4(4)
+  ternary,
+  ^^^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

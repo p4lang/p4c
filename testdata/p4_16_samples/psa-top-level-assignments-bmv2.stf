@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 expect 3 cafed00dbead 1234567890ab ffff $
 packet 0 cafed00dbead 1234567890ab ffff
 

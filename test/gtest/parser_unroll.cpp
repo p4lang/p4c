@@ -10,6 +10,7 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "ir/ir.h"
+#include "midend/interpreter.h"
 #include "test/gtest/env.h"
 #include "test/gtest/helpers.h"
 #include "test/gtest/midend_pass.h"
@@ -80,8 +81,6 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> loadExample(
     CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto &options = P4TestContext::get().options();
-    const char *argv = "./gtestp4c";
-    options.process(1, (char *const *)&argv);
     options.langVersion = langVersion;
     const IR::P4Program *program = load_model(file, options);
     if (!program) return std::make_pair(nullptr, nullptr);
@@ -111,6 +110,7 @@ TEST_F(P4CParserUnroll, test3) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 4);
 }
 
+#ifdef SUPPORT_P4_14
 TEST_F(P4CParserUnroll, switch_20160512) {
     auto parsers = loadExample("../p4_14_samples/switch_20160512/switch.p4",
                                CompilerOptions::FrontendVersion::P4_14);
@@ -118,6 +118,7 @@ TEST_F(P4CParserUnroll, switch_20160512) {
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 22 - 4 - 2);
 }
+#endif
 
 TEST_F(P4CParserUnroll, header_stack_access_remover) {
     auto parsers = loadExample("parser-unroll-test4.p4");
@@ -152,6 +153,28 @@ TEST_F(P4CParserUnroll, stringTypes) {
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
+}
+
+TEST_F(P4CParserUnroll, ErrorOperandPropagation) {
+    // An error on either side must propagate; it must not be replaced by the other side's value.
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    P4::ValueMap valueMap;
+    auto *type = IR::Type_Bits::get(8);
+    auto *decl = new IR::Declaration_Variable(IR::ID("e"), type);
+    auto *errPath = new IR::PathExpression(new IR::Path("e"));
+    refMap.setDeclaration(errPath->path, decl);
+    typeMap.setType(errPath, type);
+    SymbolicValue *err = new SymbolicStaticError(errPath, "Reading field from invalid header");
+    valueMap.set(decl, err);
+    auto *one = new IR::Constant(IR::Type_Bits::get(8), 1);
+
+    ExpressionEvaluator ev(&refMap, &typeMap, &valueMap);
+    EXPECT_EQ(err, ev.evaluate(new IR::Add(type, one, errPath), false));
+    EXPECT_EQ(err, ev.evaluate(new IR::Add(type, errPath, one), false));
+    EXPECT_EQ(err,
+              ev.evaluate(new IR::Equ(IR::Type_Boolean::get(), IR::BoolLiteral::get(true), errPath),
+                          false));
 }
 
 }  // namespace P4::Test

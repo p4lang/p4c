@@ -1,26 +1,16 @@
-# Copyright 2022-present Orange
-# Copyright 2022-present Open Networking Foundation
+# SPDX-FileCopyrightText: 2022 Open Networking Foundation
+# SPDX-FileCopyrightText: 2022 Orange
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" This file implements a PTF test case abstraction for eBPF.
-    Before each test case, the following steps are performed:
-    1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
-    2. Load compiled eBPF programs to eBPF subsystem (nikss-ctl load).
-    3. Attach eBPF programs to interfaces used by PTF framework.
+# SPDX-License-Identifier: Apache-2.0
+"""This file implements a PTF test case abstraction for eBPF.
+Before each test case, the following steps are performed:
+1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
+2. Load compiled eBPF programs to eBPF subsystem (nikss-ctl load).
+3. Attach eBPF programs to interfaces used by PTF framework.
 
-    After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
+After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
 
-    This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
+This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
 """
 
 import json

@@ -48,29 +48,29 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_variable_shadowingbmv2l31() {
+    @hidden action gauntlet_variable_shadowingbmv2l37() {
         m.test = 8w1;
         key_0 = h.h.a + h.h.a;
     }
-    @hidden action gauntlet_variable_shadowingbmv2l62() {
+    @hidden action gauntlet_variable_shadowingbmv2l68() {
         h.h.c = 8w1;
     }
-    @hidden table tbl_gauntlet_variable_shadowingbmv2l31 {
+    @hidden table tbl_gauntlet_variable_shadowingbmv2l37 {
         actions = {
-            gauntlet_variable_shadowingbmv2l31();
+            gauntlet_variable_shadowingbmv2l37();
         }
-        const default_action = gauntlet_variable_shadowingbmv2l31();
+        const default_action = gauntlet_variable_shadowingbmv2l37();
     }
-    @hidden table tbl_gauntlet_variable_shadowingbmv2l62 {
+    @hidden table tbl_gauntlet_variable_shadowingbmv2l68 {
         actions = {
-            gauntlet_variable_shadowingbmv2l62();
+            gauntlet_variable_shadowingbmv2l68();
         }
-        const default_action = gauntlet_variable_shadowingbmv2l62();
+        const default_action = gauntlet_variable_shadowingbmv2l68();
     }
     apply {
-        tbl_gauntlet_variable_shadowingbmv2l31.apply();
+        tbl_gauntlet_variable_shadowingbmv2l37.apply();
         c_t.apply();
-        tbl_gauntlet_variable_shadowingbmv2l62.apply();
+        tbl_gauntlet_variable_shadowingbmv2l68.apply();
     }
 }
 

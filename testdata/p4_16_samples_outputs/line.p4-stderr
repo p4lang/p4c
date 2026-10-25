@@ -1,7 +1,13 @@
-file.p4(4): [--Wwarn=unused] warning: Control x is not used; removing
+file.p4(4): [--Wwarn=unused] warning: control 'x' is unused
 control x()
         ^
-file1.p4(6): [--Wwarn=unused] warning: Control y is not used; removing
+file1.p4(6): [--Wwarn=unused] warning: control 'y' is unused
+control y() { apply {} }
+        ^
+file.p4(4): [--Winfo=removed] info: removing control 'x'
+control x()
+        ^
+file1.p4(6): [--Winfo=removed] info: removing control 'y'
 control y() { apply {} }
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

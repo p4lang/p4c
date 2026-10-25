@@ -59,30 +59,30 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action issue870_ebpf72() {
+    @hidden action issue870_ebpf63() {
         pass = false;
     }
-    @hidden action issue870_ebpf68() {
+    @hidden action issue870_ebpf59() {
         pass = true;
     }
-    @hidden table tbl_issue870_ebpf68 {
+    @hidden table tbl_issue870_ebpf59 {
         actions = {
-            issue870_ebpf68();
+            issue870_ebpf59();
         }
-        const default_action = issue870_ebpf68();
+        const default_action = issue870_ebpf59();
     }
-    @hidden table tbl_issue870_ebpf72 {
+    @hidden table tbl_issue870_ebpf63 {
         actions = {
-            issue870_ebpf72();
+            issue870_ebpf63();
         }
-        const default_action = issue870_ebpf72();
+        const default_action = issue870_ebpf63();
     }
     apply {
-        tbl_issue870_ebpf68.apply();
+        tbl_issue870_ebpf59.apply();
         if (headers.ipv4.isValid()) {
             Check_src_ip_0.apply();
         } else {
-            tbl_issue870_ebpf72.apply();
+            tbl_issue870_ebpf63.apply();
         }
     }
 }

@@ -1,18 +1,7 @@
-/*
-Copyright 2018 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2018 VMware, Inc.
+// SPDX-FileCopyrightText: 2018 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "structInitializers.h"
 
@@ -109,7 +98,7 @@ const IR::Node *CreateStructInitializers::postorder(IR::MethodCallExpression *ex
     auto result = expression;
     auto convertedArgs = new IR::Vector<IR::Argument>();
     bool modified = false;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::None) {
             auto paramType = typeMap->getType(p, true);

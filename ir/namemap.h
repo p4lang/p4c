@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_NAMEMAP_H_
 #define IR_NAMEMAP_H_
@@ -146,16 +137,16 @@ class NameMap : public Node {
     }
     cstring node_type_name() const override { return "NameMap<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "NameMap<" + T::static_type_name() + ">"; }
-    void visit_children(Visitor &v) override;
-    void visit_children(Visitor &v) const override;
+    void visit_children(Visitor &v, const char *) override;
+    void visit_children(Visitor &v, const char *) const override;
     void toJSON(JSONGenerator &json) const override;
-    static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
+    static Node *fromJSON(JSONLoader &json);
 
-    Util::Enumerator<const T *> *valueEnumerator() const {
+    Util::EnumeratorPtr<const T *> valueEnumerator() const {
         return Util::enumerate(Values(symbols));
     }
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::EnumeratorPtr<const S *> only() const {
         return valueEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }

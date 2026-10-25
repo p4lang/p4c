@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Google LLC
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # ================================================
 # Xfails are _temporary_ failures: the tests should work but we haven't fixed p4testgen yet.
@@ -38,6 +42,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
   "with type .* is not a Constant"
   # Most of these come from varbits
+  issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
 )
 
 p4tools_add_xfail_reason(
@@ -77,6 +82,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
   issue4739.p4
   loop-3-clause-tricky2.p4
 )
@@ -141,7 +147,14 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
-  "with type Type_Specialized is not a Type_Declaration"
+  # P4Testgen reaches this error only if it skips the generic extern argument.
+  "Unknown or unimplemented extern method: observe"
+  generic-extern-instance-argument.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-protobuf-ir"
+  "P4Testgen back end only supports a 'V1Switch' main"
   # Pipeline as a parameter of a switch, not a valid v1model program
   issue1304.p4
 )

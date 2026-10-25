@@ -1,19 +1,11 @@
-/* Copyright 2021 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-#ifndef DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
-#define DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+/*
+ * Copyright 2021 Intel Corporation
+ * SPDX-FileCopyrightText: 2021 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#ifndef BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+#define BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
 #include <optional>
@@ -311,7 +303,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto typeSpec =
             TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
-                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeArg);
 
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }
@@ -392,4 +384,4 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 /** @} */ /* end group control_plane */
 }  // namespace P4
 
-#endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */
+#endif /* BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

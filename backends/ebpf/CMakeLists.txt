@@ -1,16 +1,13 @@
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 # Copyright 2013-present Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
+
+if(APPLE)
+  # TODO Maybe we can provide some basic support here?
+ message(STATUS "Skipping eBPF back end on MacOS")
+ return()
+endif()
 
 # CMakefile for the EBPF P4-16 back-end.
 message(STATUS "Start configuring the eBPF back end")
@@ -21,9 +18,9 @@ if(NOT APPLE)
   set(FETCHCONTENT_QUIET OFF)
   fetchcontent_declare(
     bpfrepo
-    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.4.1.tar.gz
-    URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/libbpf
+    URL https://github.com/libbpf/bpftool/releases/download/v7.5.0/bpftool-libbpf-v7.5.0-sources.tar.gz
+    # URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/bpftool
     USES_TERMINAL_DOWNLOAD TRUE
     GIT_PROGRESS TRUE
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
@@ -31,7 +28,7 @@ if(NOT APPLE)
   fetchcontent_makeavailable(bpfrepo)
   set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
   # Check if we have already built the libbpf library.
-  find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+  find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
   if (NOT LIBBPF)
     message("Building libbpf...")
     execute_process(
@@ -39,9 +36,8 @@ if(NOT APPLE)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
   endif()
-  message("Done with setting up libbpf for P4C.")
+  message(STATUS "Done with setting up libbpf for P4C.")
 endif()
-
 
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
@@ -182,20 +178,12 @@ set (EBPF_ERRORS_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_ebpf_errors/*.p4"
   )
 
-# determine the kernel version
-execute_process(COMMAND uname -r
-  OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  RESULT_VARIABLE rc)
-message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
-# Check if the kernel version is new enough to support ebpf features
-set (MIN_KERNEL 4.15.0)
-string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
-if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
-  MESSAGE(WARNING "Kernel version ${KERNEL_VER} too small, expected ${MIN_KERNEL}. Ignoring ebpf kernel tests...")
-  set (SUPPORTS_KERNEL False)
-else()
-  set (SUPPORTS_KERNEL True)
+include(CheckLinuxKernel)
+check_minimum_kernel_version("4.15.0" SUPPORTS_KERNEL)
+check_minimum_linux_libc_version("4.15.0" SUPPORTS_LIBC)
+if (NOT SUPPORTS_LIBC)
+  message(WARNING "Disabling eBPF kernel tests.")
+  set (SUPPORTS_KERNEL FALSE)
 endif()
 
 # Check if we have the right llvm version
@@ -212,25 +200,25 @@ if (NOT LLVM_RET)
   if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})
     message(WARNING "LLVM version ${LLVM_PACKAGE_VERSION} too small, expected ${MIN_LLVM}.
     Ignoring ebpf tests...")
-    set (SUPPORTS_KERNEL False)
+    set (SUPPORTS_KERNEL FALSE)
   endif()
 else()
   message(WARNING
     "Did not find an LLVM version that can compile the eBPF kernel tests...\n"
     "'llvm-config' reason: ${LLVM_PACKAGE_VERSION}\n"
     "'llvm-config' return value: ${LLVM_RET}" )
-  set (SUPPORTS_KERNEL False)
+  set (SUPPORTS_KERNEL FALSE)
 endif()
 
 # check for the libbpf library
-find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
 if (LIBBPF)
   message(STATUS "Found libbpf library at ${LIBBPF}")
 else()
   message(WARNING "Missing the libbpf dependency, disabling kernel tests."
   " You can install libbpf by running './build_libbpf' in the "
   "${CMAKE_CURRENT_SOURCE_DIR} folder.")
-  set (SUPPORTS_KERNEL False)
+  set (SUPPORTS_KERNEL FALSE)
 endif()
 
 # Only add the kernel tests if the two requirements are met

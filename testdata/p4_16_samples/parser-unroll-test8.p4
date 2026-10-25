@@ -1,6 +1,7 @@
 #include <core.p4>
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
+@command_line("--loopsUnroll")
 
 header h_index1 {
     bit<8> index;

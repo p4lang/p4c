@@ -16,37 +16,34 @@
 # This is the CMake version supplied by Ubuntu 20.04.
 cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    MESSAGE(STATUS "Enabling ccache")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
-
 project (P4C)
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
-set (CMAKE_CXX_STANDARD 17)
+include(CMakeDependentOption)
+
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++20 rather than -std=gnu++20
+set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(ccache)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
 set (P4C_ARTIFACTS_OUTPUT_DIRECTORY share/p4c)
 set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
+OPTION (ENABLE_CONTROL_PLANE "Build the control-plane library. This also pulls in Protobuf" ON)
 OPTION (ENABLE_GTESTS "Enable building and running GTest unit tests" ON)
-OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON)
-OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
-OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
-OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
-OPTION (ENABLE_TOFINO "Build the TOFINO backend (required for the full test suite)" OFF)
-OPTION (ENABLE_P4TC "Build the P4TC backend" ON)
+CMAKE_DEPENDENT_OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_TOFINO "Build the TOFINO backend (required for the full test suite)" OFF ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_P4TC "Build the P4TC backend" ON ENABLE_CONTROL_PLANE OFF)
 OPTION (ENABLE_P4FMT "Build the P4FMT backend" ON)
-OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
+CMAKE_DEPENDENT_OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
-OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
@@ -68,8 +65,16 @@ OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
 
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+OPTION (FORMATTING_ONLY "Only configure formatting/linting targets, skip all build dependencies" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
+# Support compilation for the legacy P4-14 language.
+# The Tofino backend requires P4-14 support, in which case the option is forced ON.
+CMAKE_DEPENDENT_OPTION (SUPPORT_P4_14 "Support the deprecated P4_14 version of the language" OFF
+                        "NOT ENABLE_TOFINO" ON)
+
+# Enable DumpPipe pass output
+OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -82,7 +87,8 @@ endif()
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
   # Allow the version to be set from outside
-  set (P4C_VERSION $ENV{P4C_VERSION})
+  set (P4C_SEM_VERSION_STRING $ENV{P4C_VERSION})
+  set (P4C_VERSION ${P4C_SEM_VERSION_STRING})
 else()
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
   # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
@@ -91,12 +97,6 @@ else()
     OUTPUT_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE rc
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-  string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
-    __p4c_version ${P4C_SEM_VERSION_STRING})
-  set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
-  set (P4C_VERSION_MINOR ${CMAKE_MATCH_2})
-  set (P4C_VERSION_PATCH ${CMAKE_MATCH_3})
-  set (P4C_VERSION_RC ${CMAKE_MATCH_4})
   execute_process (COMMAND git rev-parse --short HEAD
     OUTPUT_VARIABLE P4C_GIT_SHA
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -104,6 +104,12 @@ else()
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
+string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
+  __p4c_version ${P4C_SEM_VERSION_STRING})
+set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
+set (P4C_VERSION_MINOR ${CMAKE_MATCH_2})
+set (P4C_VERSION_PATCH ${CMAKE_MATCH_3})
+set (P4C_VERSION_RC ${CMAKE_MATCH_4})
 
 # P4 General Utilities
 include(P4CUtils)
@@ -115,7 +121,6 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckFunctionExists)
 include(FindPythonModule)
-include(CPack)
 # TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
@@ -167,7 +172,7 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
   endif()
-  add_definitions(-DP4C_STATIC_BUILD)
+  add_definitions("-DP4C_STATIC_BUILD")
 endif()
 
 # Ensure we enable sanitizers before fetching dependencies so the correct flags
@@ -189,10 +194,24 @@ if (BUILD_AUTO_VAR_INIT_PATTERN)
   add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
 endif ()
 
+# Enable DumpPipe pass output
+if (ENABLE_DUMP_PIPE)
+  add_definitions("-DENABLE_DUMP_PIPE=1")
+endif ()
+if (SUPPORT_P4_14)
+  add_definitions("-DSUPPORT_P4_14=1")
+endif ()
+
+# When FORMATTING_ONLY is set, skip all build dependencies and jump
+# straight to the linter/formatter targets.  This allows running
+# clang-format, cpplint, black, and isort without installing flex,
+# bison, Boost, Protobuf, or any other compile-time dependency.
+if (NOT FORMATTING_ONLY)
+
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
-find_package (BISON 3.0 REQUIRED)
+find_package (BISON 3.3 REQUIRED)
 # If we enable GTest, install GoogleTest with the appropriate options.
 if (ENABLE_GTESTS)
   include(GoogleTest)
@@ -204,8 +223,6 @@ if (ENABLE_GTESTS)
 endif ()
 include(Abseil)
 p4c_obtain_abseil()
-include(Protobuf)
-p4c_obtain_protobuf()
 
 # We require -pthread to make std::call_once work, even if we're not using threads...
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -227,7 +244,7 @@ if (ENABLE_GC)
   p4c_obtain_bdwgc()
 endif ()
 if (ENABLE_MULTITHREAD)
-  add_definitions(-DMULTITHREAD)
+  add_definitions("-DMULTITHREAD")
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
@@ -395,7 +412,10 @@ set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # Component libraries: must be defined before being used in the back end executables.
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+set (P4C_LIBRARIES midend frontend ir p4ctoolkit ir-generated)
+if (ENABLE_CONTROL_PLANE)
+  list (APPEND P4C_LIBRARIES controlplane)
+endif()
 
 # The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
@@ -406,10 +426,13 @@ add_subdirectory (ir)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
+# extra libraries that need to be linked with the generated IR.
+set(EXTENSION_IR_LIBS)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
+if (ENABLE_CONTROL_PLANE)
 ########################################## P4Runtime Begin #########################################
 # TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
 # extensions which may depend on P4Runtime variables are instantiated before the control-plane we
@@ -421,7 +444,7 @@ set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
   p4runtime
   GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5
+  GIT_TAG        26b75559f2fedcd11876d7ff21eec4180011dc36  # v1.6.0
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)
@@ -432,11 +455,17 @@ message(STATUS "Done with setting up P4Runtime for P4C.")
 set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
                                                           "Path to the P4Runtime directory."
 )
+endif()
 ########################################## P4Runtime End ##########################################
 
 add_subdirectory (frontends)
 add_subdirectory (midend)
-add_subdirectory (control-plane)
+if (ENABLE_CONTROL_PLANE)
+    OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
+    include(Protobuf)
+    p4c_obtain_protobuf()
+    add_subdirectory (control-plane)
+endif()
 
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")
@@ -536,7 +565,7 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS} ${EXTENSION_IR_LIBS})
 
 
 ######################################## IR Generation End ########################################
@@ -567,14 +596,24 @@ add_custom_target(update_includes ALL
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
+endif (NOT FORMATTING_ONLY)
+
 ########################################## Linters Begin ##########################################
 include(Linters)
 ########################################### Linters End ###########################################
 
+if (NOT FORMATTING_ONLY)
 
 # tags, etags
-set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
-add_custom_target(tags
+set (CTAGS_DIRS_ALL backends extensions frontends ir lib tools midend)
+set (CTAGS_DIRS "")
+foreach(_dir IN LISTS CTAGS_DIRS_ALL)
+  if(EXISTS "${P4C_SOURCE_DIR}/${_dir}")
+    list(APPEND CTAGS_DIRS ${_dir})
+  endif()
+endforeach()
+
+add_custom_target(ctags
   COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp -I abstract=class -I interface=class ${CTAGS_DIRS}
   COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
@@ -635,7 +674,7 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# Packaging:
+######################################## Packaging BEGIN ########################################
 SET(CPACK_SOURCE_GENERATOR "TXZ")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME
    "p4c-${P4C_SEM_VERSION_STRING}")
@@ -643,3 +682,36 @@ SET(CPACK_SOURCE_IGNORE_FILES
    "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+set (CPACK_RESOURCE_FILE_LICENSE "${P4C_SOURCE_DIR}/LICENSES/Apache-2.0.txt")
+
+set (CPACK_GENERATOR "TBZ2")
+set (CPACK_PACKAGE_NAME "p4c")
+set (CPACK_PACKAGE_VERSION_MAJOR ${P4C_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${P4C_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${P4C_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${P4C_SEM_VERSION_STRING}")
+set (CPACK_PACKAGE_CONTACT "P4 Language Organization <info@p4.org>")
+set (CPACK_PACKAGE_VENDOR "P4 Language Organization")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "P4C compilers for P4_14 and P4_16")
+set (CPACK_PACKAGE_DESCRIPTION "p4c is a reference compiler for the P4 programming language.
+ It supports both P4-14 and P4-16; you can find more information about P4
+ and the specifications for both versions of the language at http://p4.org.
+
+ p4c is modular; it provides a standard frontend and midend which can be
+ combined with a target-specific backend to create a complete P4 compiler.
+ The goal is to make adding new backends easy.")
+set (CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/p4lang/p4c")
+set (CPACK_PROJECT_CONFIG_FILE "${P4C_SOURCE_DIR}/cmake/CPackOptions.cmake")
+# Match the package name used by the debian/ packaging.
+set (CPACK_DEBIAN_PACKAGE_NAME "p4lang-p4c")
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/p4lang/p4c")
+# The p4c driver is a Python script, which SHLIBDEPS cannot detect.
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "python3")
+set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set (CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+set (CPACK_STRIP_FILES TRUE)
+
+include (CPack)
+######################################## Packaging End ########################################
+endif (NOT FORMATTING_ONLY)

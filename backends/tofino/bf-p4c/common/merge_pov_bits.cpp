@@ -225,7 +225,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
     explicit IdentifyPovMergeTargets(const PhvInfo &phv, const CollectParserInfo &parser_info,
                                      const HeaderValidityAnalysis &hva,
                                      ordered_map<const PHV::Field *, const PHV::Field *> &merge_pov)
-        : phv(phv), parser_info(parser_info), hva(hva), merge_pov(merge_pov){};
+        : phv(phv), parser_info(parser_info), hva(hva), merge_pov(merge_pov) {};
 };
 
 /**
@@ -355,7 +355,7 @@ class UpdatePovBits : public Transform {
  public:
     explicit UpdatePovBits(const PhvInfo &phv, const HeaderValidityAnalysis &hva,
                            const ordered_map<const PHV::Field *, const PHV::Field *> &merge_pov)
-        : phv(phv), hva(hva), merge_pov(merge_pov){};
+        : phv(phv), hva(hva), merge_pov(merge_pov) {};
 };
 
 /**

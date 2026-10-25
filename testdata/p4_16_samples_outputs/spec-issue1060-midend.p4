@@ -4,18 +4,18 @@ header H {
 }
 
 control c(inout H h) {
-    @hidden action specissue1060l9() {
+    @hidden action specissue1060l15() {
         h.setValid = h.isValid + 32w32;
     }
-    @hidden table tbl_specissue1060l9 {
+    @hidden table tbl_specissue1060l15 {
         actions = {
-            specissue1060l9();
+            specissue1060l15();
         }
-        const default_action = specissue1060l9();
+        const default_action = specissue1060l15();
     }
     apply {
         if (h.isValid()) {
-            tbl_specissue1060l9.apply();
+            tbl_specissue1060l15.apply();
         }
     }
 }

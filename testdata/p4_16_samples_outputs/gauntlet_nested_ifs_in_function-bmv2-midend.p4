@@ -29,17 +29,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_nested_ifs_in_functionbmv2l47() {
+    @hidden action gauntlet_nested_ifs_in_functionbmv2l53() {
         h.h.a = 8w1;
     }
-    @hidden table tbl_gauntlet_nested_ifs_in_functionbmv2l47 {
+    @hidden table tbl_gauntlet_nested_ifs_in_functionbmv2l53 {
         actions = {
-            gauntlet_nested_ifs_in_functionbmv2l47();
+            gauntlet_nested_ifs_in_functionbmv2l53();
         }
-        const default_action = gauntlet_nested_ifs_in_functionbmv2l47();
+        const default_action = gauntlet_nested_ifs_in_functionbmv2l53();
     }
     apply {
-        tbl_gauntlet_nested_ifs_in_functionbmv2l47.apply();
+        tbl_gauntlet_nested_ifs_in_functionbmv2l53.apply();
     }
 }
 

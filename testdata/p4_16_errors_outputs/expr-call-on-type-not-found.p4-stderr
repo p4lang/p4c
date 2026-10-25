@@ -1,0 +1,3 @@
+expr-call-on-type-not-found.p4(6): [--Werror=not-found] error: T: declaration not found
+const GH<bit<32>> g = .T.GH();
+                       ^

@@ -1,0 +1,3 @@
+expr-indexaccess-on-unsupported-type.p4(6): [--Werror=not-found] error: error: declaration not found
+    error h;
+    ^^^^^

@@ -3,17 +3,17 @@ header hdr {
 }
 
 control A(inout hdr _hdr) {
-    @hidden action issue1466l7() {
+    @hidden action issue1466l13() {
         _hdr.g = 1w1;
     }
-    @hidden table tbl_issue1466l7 {
+    @hidden table tbl_issue1466l13 {
         actions = {
-            issue1466l7();
+            issue1466l13();
         }
-        const default_action = issue1466l7();
+        const default_action = issue1466l13();
     }
     apply {
-        tbl_issue1466l7.apply();
+        tbl_issue1466l13.apply();
     }
 }
 

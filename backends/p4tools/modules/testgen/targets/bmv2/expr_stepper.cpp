@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 
 #include <cstddef>
@@ -1021,8 +1025,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
                  }
              }
              bool argsAreTainted = false;
-             for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+             for (auto arg : externInfo.externArguments) {
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
@@ -1631,7 +1634,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const ExternInfo &externInfo) 
     }
     // Lastly, check whether we are calling an internal extern method.
     return ExprStepper::evalExternMethodCall(externInfo);
-}  // NOLINT
+}
 
 bool Bmv2V1ModelExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.

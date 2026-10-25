@@ -90,30 +90,30 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         default_action = my_drop_2();
     }
-    @hidden action usepriorityasname132() {
+    @hidden action usepriorityasname124() {
         prio_0 = hdr.ipv4.priority;
     }
-    @hidden action usepriorityasname84() {
+    @hidden action usepriorityasname76() {
         hdr.ipv4.priority = prio_0;
     }
-    @hidden table tbl_usepriorityasname132 {
+    @hidden table tbl_usepriorityasname124 {
         actions = {
-            usepriorityasname132();
+            usepriorityasname124();
         }
-        const default_action = usepriorityasname132();
+        const default_action = usepriorityasname124();
     }
-    @hidden table tbl_usepriorityasname84 {
+    @hidden table tbl_usepriorityasname76 {
         actions = {
-            usepriorityasname84();
+            usepriorityasname76();
         }
-        const default_action = usepriorityasname84();
+        const default_action = usepriorityasname76();
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            tbl_usepriorityasname132.apply();
+            tbl_usepriorityasname124.apply();
             ipv4_da_lpm_0.apply();
             mac_da_0.apply();
-            tbl_usepriorityasname84.apply();
+            tbl_usepriorityasname76.apply();
         }
     }
 }

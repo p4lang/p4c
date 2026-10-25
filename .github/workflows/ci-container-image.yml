@@ -23,10 +23,35 @@ jobs:
   build:
     if: ${{ github.repository == 'p4lang/p4c' }}
     runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
+
+      - name: Set up ccache
+        id: ccache
+        uses: ./.github/actions/restore-ccache
+        with:
+          key: container-image
+
+      - name: Build Docker test image
+        run: |
+          docker build --network host -t p4c-test --build-arg IMAGE_TYPE=test \
+            --build-arg CCACHE_MAXSIZE --build-arg CCACHE_COMPILERCHECK .
+      - name: Run p4c tests (Docker image)
+        run: |
+          sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
+            uv run ctest --output-on-failure --schedule-random
+      - name: Export ccache
+        run: ./tools/export_ccache.sh p4c-test
+      - name: Save compiler cache
+        uses: ./.github/actions/save-ccache
+        with:
+          prefix: ${{ steps.ccache.outputs.prefix }}
+      - name: Free disk space
+        run: docker rmi p4c-test || true
       - name: Determine Docker image tag
         id: get-tag
         shell: bash
@@ -38,20 +63,56 @@ jobs:
               TAG=${GITHUB_REF////_}
           fi
           echo "Tag is $TAG"
-          echo "::set-output name=tag::$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
+
       - name: Login to DockerHub
         if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push Docker image to registry
-        uses: docker/build-push-action@v6
+
+      - name: Build production Docker image
+        uses: docker/build-push-action@v7
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          load: true
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # A cache write must not fail the build.
+          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=min,ignore-error=true' || '' }}
+
+      - name: Smoke test production image
+        run: |
+          IMAGE=p4lang/p4c:${{ steps.get-tag.outputs.tag }}
+          docker run --rm $IMAGE p4test --version
+          cat > /tmp/smoke.p4 <<'EOF'
+          #include <core.p4>
+          #include <v1model.p4>
+
+          struct metadata {}
+          struct headers {}
+
+          parser MyParser(packet_in packet, out headers hdr, inout metadata meta,
+                          inout standard_metadata_t standard_metadata) {
+              state start { transition accept; }
+          }
+          control MyVerifyChecksum(inout headers hdr, inout metadata meta) { apply {} }
+          control MyIngress(inout headers hdr, inout metadata meta,
+                            inout standard_metadata_t standard_metadata) { apply {} }
+          control MyEgress(inout headers hdr, inout metadata meta,
+                           inout standard_metadata_t standard_metadata) { apply {} }
+          control MyComputeChecksum(inout headers hdr, inout metadata meta) { apply {} }
+          control MyDeparser(packet_out packet, in headers hdr) { apply {} }
+
+          V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(),
+                   MyComputeChecksum(), MyDeparser()) main;
+          EOF
+          docker run --rm -v /tmp/smoke.p4:/tmp/smoke.p4:ro $IMAGE p4test /tmp/smoke.p4
+      - name: Push Docker image to registry
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        run: |
+          docker push p4lang/p4c:${{ steps.get-tag.outputs.tag }}

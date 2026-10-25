@@ -1,0 +1,6 @@
+expr-binary-shift-by-negative.p4(3): [--Wwarn=unused] warning: 'a' is unused
+action a(inout bit<32> x) {
+       ^
+expr-binary-shift-by-negative.p4(4): [--Werror=invalid] error: x >> 3 >> -2: Shifts with negative amounts are not permitted
+  x = (x >> 3) >> (-2);
+      ^^^^^^^^^^^^^^^^

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 This file holds the various JSON attribute names, keys, etc., that are used by
 tools.  Rather than duplicating definitions, let's put them in a common file.

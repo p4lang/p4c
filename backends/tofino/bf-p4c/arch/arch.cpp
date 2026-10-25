@@ -26,7 +26,7 @@
 #include "backends/tofino/bf-p4c/arch/v1model.h"
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -212,25 +212,23 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock *block, unsigned
 }
 
 void ParseTna::parsePortMapAnnotation(const IR::PackageBlock *block, DefaultPortMap &map) {
-    if (auto annot = block->node->to<IR::IAnnotated>()) {
-        if (auto anno = annot->getAnnotation("default_portmap"_cs)) {
-            int index = 0;
-            for (auto expr : anno->getExpr()) {
-                std::vector<int> ports;
-                if (auto cst = expr->to<IR::Constant>()) {
-                    ports.push_back(cst->asInt());
-                } else if (auto list = expr->to<IR::ListExpression>()) {
-                    for (auto expr : list->components) {
-                        ports.push_back(expr->to<IR::Constant>()->asInt());
-                    }
-                } else if (auto list = expr->to<IR::StructExpression>()) {
-                    for (auto expr : list->components) {
-                        ports.push_back(expr->expression->to<IR::Constant>()->asInt());
-                    }
+    if (auto anno = block->node->getAnnotation("default_portmap"_cs)) {
+        int index = 0;
+        for (auto expr : anno->getExpr()) {
+            std::vector<int> ports;
+            if (auto cst = expr->to<IR::Constant>()) {
+                ports.push_back(cst->asInt());
+            } else if (auto list = expr->to<IR::ListExpression>()) {
+                for (auto expr : list->components) {
+                    ports.push_back(expr->to<IR::Constant>()->asInt());
                 }
-                map[index] = ports;
-                index++;
+            } else if (auto list = expr->to<IR::StructExpression>()) {
+                for (auto expr : list->components) {
+                    ports.push_back(expr->expression->to<IR::Constant>()->asInt());
+                }
             }
+            map[index] = ports;
+            index++;
         }
     }
 }

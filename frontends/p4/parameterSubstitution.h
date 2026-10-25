@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
 #define FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
@@ -50,7 +41,7 @@ class ParameterSubstitution : public IHasDbPrint {
     }
 
     const IR::Parameter *findParameter(const IR::Argument *argument) const {
-        for (auto p : *getParametersInOrder())
+        for (auto p : getParametersInOrder())
             if (lookup(p) == argument) return p;
         return nullptr;
     }
@@ -63,22 +54,23 @@ class ParameterSubstitution : public IHasDbPrint {
     void populate(const IR::ParameterList *params, const IR::Vector<IR::Argument> *args);
 
     /// Returns parameters in the order they were added
-    Util::Enumerator<const IR::Parameter *> *getParametersInArgumentOrder() const {
+    Util::EnumeratorPtr<const IR::Parameter *> getParametersInArgumentOrder() const {
         return Util::enumerate(parameters);
     }
 
     /// Returns parameters in the order of the parameter list.
     /// Only works if parameters were inserted using populate.
-    Util::Enumerator<const IR::Parameter *> *getParametersInOrder() const {
-        if (paramList == nullptr) return new Util::EmptyEnumerator<const IR::Parameter *>;
+    Util::EnumeratorPtr<const IR::Parameter *> getParametersInOrder() const {
+        if (paramList == nullptr)
+            return std::make_shared<Util::EmptyEnumerator<const IR::Parameter *>>();
         return paramList->getEnumerator();
     }
 
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         bool brief = (DBPrint::dbgetflags(out) & DBPrint::Brief);
         if (paramList != nullptr) {
             if (!brief) out << "paramList:" << Log::endl;
-            for (auto s : *paramList->getEnumerator()) {
+            for (auto s : paramList->getEnumerator()) {
                 out << dbp(s) << "=>" << dbp(lookup(s));
                 if (!brief) out << " " << lookup(s);
                 out << Log::endl;

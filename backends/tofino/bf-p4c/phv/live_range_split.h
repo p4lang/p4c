@@ -75,7 +75,7 @@ class ContainerOccupancy {
           maxStage(maxStage),
           vec((maxStage - minStage + 1) * 2),
           containerWidth(containerWidth) {
-        BUG_CHECK(minStage >= -1, "ContainerOccupancy minStage (%1%) must be >= -1");
+        BUG_CHECK(minStage >= -1, "ContainerOccupancy minStage (%1%) must be >= -1", minStage);
         BUG_CHECK(maxStage >= minStage, "Invalid ContainerOccupancy stage range (%1% > %2%)",
                   minStage, maxStage);
     }

@@ -26,10 +26,10 @@
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "backends/tofino/bf-p4c/parde/add_parde_metadata.h"
 #include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 
@@ -97,10 +97,10 @@ bool ParserPragmas::preorder(const IR::Annotation *annot) {
             return false;
         }
 
-        warning(
-            "Parser state %1% will be unrolled up to %2% "
-            "times due to @pragma max_loop_depth.",
-            ps->name, max_loop->asInt());
+        info(ErrorType::INFO_PROGRESS,
+             "Parser state '%1%': loop unrolling is limited to "
+             "%2% iterations (@max_loop_depth).",
+             ps->name, max_loop->asUnsigned());
 
         max_loop_depth[ps] = max_loop->asUnsigned();
     } else if (pragma_name == "dont_unroll") {
@@ -125,7 +125,7 @@ struct ParserLoopsInfo::GetMaxLoopDepth : public Inspector {
         if (!dest) return true;
         auto *expr = dest->expr->to<IR::Member>();
         if (!expr) return true;
-        auto *type_stack = expr->type->to<IR::Type_Stack>();
+        auto *type_stack = expr->type->to<IR::Type_Array>();
         if (!type_stack) return true;
 
         auto stack_size = type_stack->size->to<IR::Constant>()->asInt();
@@ -141,7 +141,7 @@ struct ParserLoopsInfo::GetMaxLoopDepth : public Inspector {
     /// Identify stack depth after SimplifyReferences
     bool preorder(const IR::HeaderStackItemRef *ref) override {
         auto stack_size =
-            ref->base()->type->to<IR::Type_Stack>()->size->to<IR::Constant>()->asInt();
+            ref->base()->type->to<IR::Type_Array>()->size->to<IR::Constant>()->asInt();
 
         if (max_loop_depth == -1)
             max_loop_depth = stack_size;

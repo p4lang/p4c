@@ -1,21 +1,12 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-#ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
-#define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#ifndef FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#define FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
@@ -90,8 +81,9 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     /// Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
 
-    const IR::IDeclaration *getDeclaration(const IR::Path *path, bool notNull = false) const;
-    const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const;
+    const IR::IDeclaration *getDeclaration(const IR::Path *path,
+                                           bool notNull = false) const override;
+    const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const override;
 
     /// Returns the set of decls that exist in the given namespace.
     auto getDeclarations(const IR::INamespace *ns) const {
@@ -177,7 +169,9 @@ class CheckShadowing : public PassManager {
 
  public:
     CheckShadowing() {
+#ifdef SUPPORT_P4_14
         refMap.setIsV1(P4CContext::get().options().isv1());
+#endif
 
         addPasses({new ResolveReferences(&refMap, /* checkShadow */ true)});
         setName("CheckShadowing");
@@ -186,4 +180,4 @@ class CheckShadowing : public PassManager {
 
 }  // namespace P4
 
-#endif /* COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */
+#endif /* FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */

@@ -18,6 +18,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") bit<16> retval_1;
     @name("ingress.not_initialized") H not_initialized_1;
     @name("ingress.new_val") bit<32> new_val_1;
+    @name("ingress.inlinedRetval_0") bit<16> inlinedRetval_2;
     @name("ingress.do_thing_action") action do_thing_action() {
         not_initialized_0.setInvalid();
     }
@@ -30,7 +31,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             new_val_1 = 32w232;
         }
         retval_1 = (bit<16>)new_val_1;
-        h.h.a = retval_1;
+        inlinedRetval_2 = retval_1;
+        h.h.a = inlinedRetval_2;
         do_thing_action();
     }
 }

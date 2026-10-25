@@ -1,0 +1,4 @@
+constructor-parameter-type-illformed.p4(4): [--Werror=type-error] error: Field 'f0' of 'struct tuple_0' cannot have type 'string'
+  E(tuple<string> x = 0);
+          ^^^^^^
+[--Werror=type-error] error: Error while analyzing struct tuple_0

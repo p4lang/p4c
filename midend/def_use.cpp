@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Intel Corp.
+// SPDX-FileCopyrightText: 2024 Intel Corp.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "def_use.h"
 
@@ -415,7 +404,7 @@ bool ComputeDefUse::preorder(const IR::KeyElement *ke) {
     return false;
 }
 
-bool ComputeDefUse::preorder(const IR::AssignmentStatement *as) {
+bool ComputeDefUse::preorder(const IR::BaseAssignmentStatement *as) {
     // visit RHS of assignment before LHS
     visit(as->right, "right", 1);
     visit(as->left, "left", 0);
@@ -491,7 +480,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             else
                 e = get_primary(m, ctxt->parent);
             if (!di.live[fi]) return e;
-        } else if (m->expr->type->to<IR::Type_Stack>()) {
+        } else if (m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "lastIndex") {
                 // this depends on how much has been written to the header stack, but not
                 // on any data that has been written.  So what should the defs be?  For now,
@@ -514,7 +503,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             BUG_CHECK(e == sl, "slice %s is not primary in ComputeDefUse::do_read", sl);
         }
         e = sl;
-        if (!di.live.getrange(range.lo, range.size())) return e;
+        if (di.live.getslice(range.lo, range.size()).empty()) return e;
     } else if (auto *ai = ctxt->node->to<IR::ArrayIndex>()) {
         if (auto idx = ai->right->to<IR::Constant>()) {
             int i = idx->asInt();
@@ -534,6 +523,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
         defuse.uses[l->node].insert(loc);
         defuse.defs[loc->node].insert(l);
     }
+    LOG8("  " << defuse.defs[loc->node]);
     return e;
 }
 
@@ -573,7 +563,7 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
             di.live[fi] = 0;
             if (!di.live) di.defs.clear();
             return e;
-        } else if (auto *ts = m->expr->type->to<IR::Type_Stack>()) {
+        } else if (auto *ts = m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "next" || m->member.name == "last") {
                 di.defs.insert(getLoc(m));
                 di.live.setrange(0, ts->getSize());
@@ -717,7 +707,7 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
 }
 
 std::ostream &operator<<(std::ostream &out, const hvec_set<const ComputeDefUse::loc_t *> &s) {
-    out << ": {";
+    out << "{";
     const char *sep = " ";
     for (auto *l : s) {
         out << sep << *l;
@@ -739,7 +729,7 @@ std::ostream &operator<<(
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);
         out << ':' << line << ':' << (col + 1) << ')';
     }
-    out << p.second;
+    out << ": " << p.second;
     return out;
 }
 

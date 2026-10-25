@@ -60,28 +60,28 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         tmp_0 = s_0;
     }
     @name("ingress.port_pkt_ip_bytes_in") Register<bit<64>, bit<32>>(32w512) port_pkt_ip_bytes_in_0;
-    @hidden action psaexampleregister2bmv2l130() {
+    @hidden action psaexampleregister2bmv2l121() {
         tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
     }
-    @hidden action psaexampleregister2bmv2l132() {
+    @hidden action psaexampleregister2bmv2l123() {
         port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp_0);
     }
-    @hidden action psaexampleregister2bmv2l123() {
+    @hidden action psaexampleregister2bmv2l114() {
         ostd.egress_port = 32w0;
         hdr.ipv4.setValid();
         hdr.ipv4.totalLen = 16w14;
     }
-    @hidden table tbl_psaexampleregister2bmv2l123 {
+    @hidden table tbl_psaexampleregister2bmv2l114 {
         actions = {
-            psaexampleregister2bmv2l123();
+            psaexampleregister2bmv2l114();
         }
-        const default_action = psaexampleregister2bmv2l123();
+        const default_action = psaexampleregister2bmv2l114();
     }
-    @hidden table tbl_psaexampleregister2bmv2l130 {
+    @hidden table tbl_psaexampleregister2bmv2l121 {
         actions = {
-            psaexampleregister2bmv2l130();
+            psaexampleregister2bmv2l121();
         }
-        const default_action = psaexampleregister2bmv2l130();
+        const default_action = psaexampleregister2bmv2l121();
     }
     @hidden table tbl_update_pkt_ip_byte_count {
         actions = {
@@ -89,18 +89,18 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         const default_action = update_pkt_ip_byte_count_0();
     }
-    @hidden table tbl_psaexampleregister2bmv2l132 {
+    @hidden table tbl_psaexampleregister2bmv2l123 {
         actions = {
-            psaexampleregister2bmv2l132();
+            psaexampleregister2bmv2l123();
         }
-        const default_action = psaexampleregister2bmv2l132();
+        const default_action = psaexampleregister2bmv2l123();
     }
     apply {
-        tbl_psaexampleregister2bmv2l123.apply();
+        tbl_psaexampleregister2bmv2l114.apply();
         if (hdr.ipv4.isValid()) @atomic {
-            tbl_psaexampleregister2bmv2l130.apply();
+            tbl_psaexampleregister2bmv2l121.apply();
             tbl_update_pkt_ip_byte_count.apply();
-            tbl_psaexampleregister2bmv2l132.apply();
+            tbl_psaexampleregister2bmv2l123.apply();
         }
     }
 }
@@ -117,34 +117,34 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleregister2bmv2l164() {
+    @hidden action psaexampleregister2bmv2l155() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampleregister2bmv2l164 {
+    @hidden table tbl_psaexampleregister2bmv2l155 {
         actions = {
-            psaexampleregister2bmv2l164();
+            psaexampleregister2bmv2l155();
         }
-        const default_action = psaexampleregister2bmv2l164();
+        const default_action = psaexampleregister2bmv2l155();
     }
     apply {
-        tbl_psaexampleregister2bmv2l164.apply();
+        tbl_psaexampleregister2bmv2l155.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleregister2bmv2l164_0() {
+    @hidden action psaexampleregister2bmv2l155_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampleregister2bmv2l164_0 {
+    @hidden table tbl_psaexampleregister2bmv2l155_0 {
         actions = {
-            psaexampleregister2bmv2l164_0();
+            psaexampleregister2bmv2l155_0();
         }
-        const default_action = psaexampleregister2bmv2l164_0();
+        const default_action = psaexampleregister2bmv2l155_0();
     }
     apply {
-        tbl_psaexampleregister2bmv2l164_0.apply();
+        tbl_psaexampleregister2bmv2l155_0.apply();
     }
 }
 

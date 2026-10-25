@@ -20,7 +20,7 @@
 
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "helpers.h"
 
 namespace Parde::Lowered {

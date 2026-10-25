@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 #include <cstddef>
 #include <sstream>
 
-#include "backends/p4tools/common/control_plane/symbolic_variables.h"
+#include "backends/p4tools/common/lib/symbolic_variables.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -107,7 +111,7 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
     // occurrence of a table where the suffix matches.
     // Ideally, we would use originalName, but originalName currently is not preserved correctly.
     const IR::IDeclaration *tableDeclaration = nullptr;
-    for (const auto *decl : *ctrlContext.getDeclarations()) {
+    for (const auto *decl : ctrlContext.getDeclarations()) {
         auto declName = decl->controlPlaneName();
         if (declName.endsWith(tableReference)) {
             tableDeclaration = decl;

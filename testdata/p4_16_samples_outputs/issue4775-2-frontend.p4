@@ -10,13 +10,17 @@ header hdr_t {
 
 control c(inout hdr_t hdr) {
     @name("c.retval") bit<8> retval;
+    @name("c.inlinedRetval") bit<8> inlinedRetval_1;
     @name("c.retval_0") bit<8> retval_0;
+    @name("c.inlinedRetval_0") bit<8> inlinedRetval_2;
     apply {
         if (hdr.isValid()) {
             retval = 8w1;
-            hdr.value_6 = retval;
+            inlinedRetval_1 = retval;
+            hdr.value_6 = inlinedRetval_1;
             retval_0 = 8w2;
-            hdr.value_7 = retval_0;
+            inlinedRetval_2 = retval_0;
+            hdr.value_7 = inlinedRetval_2;
         }
     }
 }

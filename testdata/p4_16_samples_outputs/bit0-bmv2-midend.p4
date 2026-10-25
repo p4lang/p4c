@@ -26,19 +26,19 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    @hidden action bit0bmv2l35() {
+    @hidden action bit0bmv2l41() {
         h.h.a = 0;
         h.h.b = 1w0;
         h.h.c = 0;
     }
-    @hidden table tbl_bit0bmv2l35 {
+    @hidden table tbl_bit0bmv2l41 {
         actions = {
-            bit0bmv2l35();
+            bit0bmv2l41();
         }
-        const default_action = bit0bmv2l35();
+        const default_action = bit0bmv2l41();
     }
     apply {
-        tbl_bit0bmv2l35.apply();
+        tbl_bit0bmv2l41.apply();
     }
 }
 

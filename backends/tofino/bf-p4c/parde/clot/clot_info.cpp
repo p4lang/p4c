@@ -26,12 +26,12 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/logging.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "clot_candidate.h"
 #include "field_slice_extract_info.h"
 #include "lib/bitvec.h"
@@ -167,7 +167,7 @@ std::map<int, const PHV::Field *> ClotInfo::get_csum_fields(const Clot *clot) co
                 BUG_CHECK(
                     checksum_field == other_field,
                     "CLOT %d has more than one checksum field at overwrite offset %d: %s and %s",
-                    checksum_field->name, other_field->name);
+                    clot->tag, offset, checksum_field->name, other_field->name);
             }
 
             checksum_fields[offset] = checksum_field;

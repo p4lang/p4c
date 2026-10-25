@@ -105,96 +105,96 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
                         const 12w2 : switch_0_case_0();
         }
     }
-    @hidden action pnaexamplevarIndex2l125() {
+    @hidden action pnaexamplevarIndex2l116() {
         key_1 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action pnaexamplevarIndex2l125_0() {
+    @hidden action pnaexamplevarIndex2l116_0() {
         key_1 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action pnaexamplevarIndex2l125_1() {
+    @hidden action pnaexamplevarIndex2l116_1() {
         key_1 = hsVar;
     }
-    @hidden action pnaexamplevarIndex2l125_2() {
+    @hidden action pnaexamplevarIndex2l116_2() {
         hsiVar = meta.depth;
     }
-    @hidden action pnaexamplevarIndex2l102() {
+    @hidden action pnaexamplevarIndex2l93() {
         key_0 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action pnaexamplevarIndex2l102_0() {
+    @hidden action pnaexamplevarIndex2l93_0() {
         key_0 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action pnaexamplevarIndex2l102_1() {
+    @hidden action pnaexamplevarIndex2l93_1() {
         key_0 = hsVar;
     }
-    @hidden action pnaexamplevarIndex2l102_2() {
+    @hidden action pnaexamplevarIndex2l93_2() {
         hsiVar = meta.depth;
     }
-    @hidden table tbl_pnaexamplevarIndex2l125 {
+    @hidden table tbl_pnaexamplevarIndex2l116 {
         actions = {
-            pnaexamplevarIndex2l125_2();
+            pnaexamplevarIndex2l116_2();
         }
-        const default_action = pnaexamplevarIndex2l125_2();
+        const default_action = pnaexamplevarIndex2l116_2();
     }
-    @hidden table tbl_pnaexamplevarIndex2l125_0 {
+    @hidden table tbl_pnaexamplevarIndex2l116_0 {
         actions = {
-            pnaexamplevarIndex2l125();
+            pnaexamplevarIndex2l116();
         }
-        const default_action = pnaexamplevarIndex2l125();
+        const default_action = pnaexamplevarIndex2l116();
     }
-    @hidden table tbl_pnaexamplevarIndex2l125_1 {
+    @hidden table tbl_pnaexamplevarIndex2l116_1 {
         actions = {
-            pnaexamplevarIndex2l125_0();
+            pnaexamplevarIndex2l116_0();
         }
-        const default_action = pnaexamplevarIndex2l125_0();
+        const default_action = pnaexamplevarIndex2l116_0();
     }
-    @hidden table tbl_pnaexamplevarIndex2l125_2 {
+    @hidden table tbl_pnaexamplevarIndex2l116_2 {
         actions = {
-            pnaexamplevarIndex2l125_1();
+            pnaexamplevarIndex2l116_1();
         }
-        const default_action = pnaexamplevarIndex2l125_1();
+        const default_action = pnaexamplevarIndex2l116_1();
     }
-    @hidden table tbl_pnaexamplevarIndex2l102 {
+    @hidden table tbl_pnaexamplevarIndex2l93 {
         actions = {
-            pnaexamplevarIndex2l102_2();
+            pnaexamplevarIndex2l93_2();
         }
-        const default_action = pnaexamplevarIndex2l102_2();
+        const default_action = pnaexamplevarIndex2l93_2();
     }
-    @hidden table tbl_pnaexamplevarIndex2l102_0 {
+    @hidden table tbl_pnaexamplevarIndex2l93_0 {
         actions = {
-            pnaexamplevarIndex2l102();
+            pnaexamplevarIndex2l93();
         }
-        const default_action = pnaexamplevarIndex2l102();
+        const default_action = pnaexamplevarIndex2l93();
     }
-    @hidden table tbl_pnaexamplevarIndex2l102_1 {
+    @hidden table tbl_pnaexamplevarIndex2l93_1 {
         actions = {
-            pnaexamplevarIndex2l102_0();
+            pnaexamplevarIndex2l93_0();
         }
-        const default_action = pnaexamplevarIndex2l102_0();
+        const default_action = pnaexamplevarIndex2l93_0();
     }
-    @hidden table tbl_pnaexamplevarIndex2l102_2 {
+    @hidden table tbl_pnaexamplevarIndex2l93_2 {
         actions = {
-            pnaexamplevarIndex2l102_1();
+            pnaexamplevarIndex2l93_1();
         }
-        const default_action = pnaexamplevarIndex2l102_1();
+        const default_action = pnaexamplevarIndex2l93_1();
     }
     apply {
-        tbl_pnaexamplevarIndex2l125.apply();
+        tbl_pnaexamplevarIndex2l116.apply();
         if (hsiVar == 2w0) {
-            tbl_pnaexamplevarIndex2l125_0.apply();
+            tbl_pnaexamplevarIndex2l116_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_pnaexamplevarIndex2l125_1.apply();
+            tbl_pnaexamplevarIndex2l116_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_pnaexamplevarIndex2l125_2.apply();
+            tbl_pnaexamplevarIndex2l116_2.apply();
         }
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
-                tbl_pnaexamplevarIndex2l102.apply();
+                tbl_pnaexamplevarIndex2l93.apply();
                 if (hsiVar == 2w0) {
-                    tbl_pnaexamplevarIndex2l102_0.apply();
+                    tbl_pnaexamplevarIndex2l93_0.apply();
                 } else if (hsiVar == 2w1) {
-                    tbl_pnaexamplevarIndex2l102_1.apply();
+                    tbl_pnaexamplevarIndex2l93_1.apply();
                 } else if (hsiVar >= 2w1) {
-                    tbl_pnaexamplevarIndex2l102_2.apply();
+                    tbl_pnaexamplevarIndex2l93_2.apply();
                 }
                 stub_0.apply();
             }
@@ -208,19 +208,19 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplevarIndex2l139() {
+    @hidden action pnaexamplevarIndex2l130() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<vlan_tag_h>(hdr.vlan_tag[0]);
         pkt.emit<vlan_tag_h>(hdr.vlan_tag[1]);
     }
-    @hidden table tbl_pnaexamplevarIndex2l139 {
+    @hidden table tbl_pnaexamplevarIndex2l130 {
         actions = {
-            pnaexamplevarIndex2l139();
+            pnaexamplevarIndex2l130();
         }
-        const default_action = pnaexamplevarIndex2l139();
+        const default_action = pnaexamplevarIndex2l130();
     }
     apply {
-        tbl_pnaexamplevarIndex2l139.apply();
+        tbl_pnaexamplevarIndex2l130.apply();
     }
 }
 

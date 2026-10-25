@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!-- 
 Documentation Inclusion:
 This README is integrated as a subsection of the "Getting Started" page in the P4 compiler documentation.

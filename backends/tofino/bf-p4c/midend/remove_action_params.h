@@ -23,8 +23,8 @@
  *
  * This moves action parameters out of the actions.
  */
-#ifndef BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
-#define BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
 
 #include "frontends/p4/removeParameters.h"
 
@@ -35,8 +35,9 @@ namespace BFN {
  */
 class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
  public:
-    explicit DoRemoveActionParametersTofino(P4::ActionInvocation *inv)
-        : P4::DoRemoveActionParameters(inv) {}
+    DoRemoveActionParametersTofino(P4::ActionInvocation *inv, P4::TypeMap *typeMap,
+                                   MinimalNameGenerator *nameGen)
+        : P4::DoRemoveActionParameters(inv, typeMap, nameGen) {}
 
     /**
      * Check if there is a mark_to_drop action and don't replace parameters.
@@ -48,8 +49,8 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
         for (auto abc : action->body->components) {
             /* iterate thought all statements, and find the uses of smeta */
             /* if the only use is in mark_to_drop -- that's not a use! */
-            if (abc->is<IR::AssignmentStatement>()) {
-                auto as = abc->to<IR::AssignmentStatement>();
+            if (abc->is<IR::BaseAssignmentStatement>()) {
+                auto as = abc->to<IR::BaseAssignmentStatement>();
                 // TODO: Handle assignment statements with expressions
                 if (p->name == as->left->toString())
                     paramUses++;
@@ -186,12 +187,14 @@ class RemoveActionParameters : public PassManager {
         passes.emplace_back(new P4::MoveDeclarations());
         if (!tc) tc = new P4::TypeChecking(refMap, typeMap);
         passes.emplace_back(tc);
+        auto nameGen = new MinimalNameGenerator();
         passes.emplace_back(new P4::FindActionParameters(typeMap, ai));
-        passes.emplace_back(new DoRemoveActionParametersTofino(ai));
+        passes.emplace_back(nameGen);
+        passes.emplace_back(new DoRemoveActionParametersTofino(ai, typeMap, nameGen));
         passes.emplace_back(new P4::ClearTypeMap(typeMap));
     }
 };
 
 }  // end namespace BFN
 
-#endif /* BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */

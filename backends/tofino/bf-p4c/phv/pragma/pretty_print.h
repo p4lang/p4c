@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_
-#define BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_
 
 #include <string>
 // Pretty-print Pragma classes for debugging and logging purpose
@@ -33,4 +33,4 @@ class PrettyPrint {
 
 }  // namespace Pragma
 
-#endif /* BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_ */

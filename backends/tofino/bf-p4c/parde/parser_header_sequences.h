@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_
-#define BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_
 
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
@@ -72,4 +72,4 @@ class ParserHeaderSequences : public BFN::ControlFlowVisitor, public PardeInspec
     ParserHeaderSequences *clone() const override { return new ParserHeaderSequences(*this); }
 };
 
-#endif /* BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_HEADER_SEQUENCES_H_ */

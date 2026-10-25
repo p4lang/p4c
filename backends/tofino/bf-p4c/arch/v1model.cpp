@@ -27,9 +27,9 @@
 #include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
 #include "backends/tofino/bf-p4c/arch/fromv1.0/parser_counter.h"
 #include "backends/tofino/bf-p4c/arch/program_structure.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/annotations.h"
 #include "lib/bitops.h"
@@ -170,7 +170,6 @@ class LoadTargetArchitecture : public Inspector {
 
         structure->addMetadata(EGRESS, MetadataField{"standard_metadata"_cs, "egress_rid"_cs, 16},
                                MetadataField{"eg_intr_md"_cs, "egress_rid"_cs, 16});
-#ifdef HAVE_JBAY
         structure->addMetadata(INGRESS,
                                MetadataField{"ig_intr_md_for_mb"_cs, "mirror_io_select"_cs, 1},
                                MetadataField{"ig_intr_md_for_dprsr"_cs, "mirror_io_select"_cs, 1});
@@ -225,7 +224,6 @@ class LoadTargetArchitecture : public Inspector {
         structure->addMetadata(
             EGRESS, MetadataField{"eg_intr_md_for_mb"_cs, "mirror_coalesce_length"_cs, 8},
             MetadataField{"eg_intr_md_for_dprsr"_cs, "mirror_coalesce_length"_cs, 8});
-#endif
     }
 
     void analyzeTofinoModel() {
@@ -313,14 +311,10 @@ class LoadTargetArchitecture : public Inspector {
         if (Device::currentDevice() == Device::TOFINO) {
             filenames.push_back("tofino1_specs.p4");
             filenames.push_back("tofino1_base.p4");
-        }
-#if HAVE_JBAY
-        else if (Device::currentDevice() == Device::JBAY) {
+        } else if (Device::currentDevice() == Device::JBAY) {
             filenames.push_back("tofino2_specs.p4");
             filenames.push_back("tofino2_base.p4");
-        }
-#endif  // HAVE_JBAY
-        else
+        } else
             BUG("Unsupported device id %s", Device::currentDevice());
         filenames.push_back("tofino/stratum.p4");
         filenames.push_back("tofino/p4_14_prim.p4");
@@ -1020,9 +1014,7 @@ class ConstructSymbolTable : public Inspector {
         auto *typeName = typeArg->to<IR::Type_Name>();
         ERROR_CHECK(typeName != nullptr, "Expected type T in digest to be a typeName %1%", typeArg);
         auto fieldList = refMap->getDeclaration(typeName->path);
-        const IR::Annotation *declAnno = nullptr;
-        if (const auto *annotated = fieldList->to<IR::IAnnotated>())
-            declAnno = annotated->getAnnotation(IR::Annotation::nameAnnotation);
+        auto *declAnno = fieldList->getAnnotation(IR::Annotation::nameAnnotation);
 
         ERROR_CHECK(typeName != nullptr, "Wrong argument type for %1%", typeArg);
         /*
@@ -1878,7 +1870,7 @@ class ConstructSymbolTable : public Inspector {
                 if (it == toTranslateInParser.end()) return;
                 if (auto type = expr->type->to<IR::Type_Name>()) {
                     if (type->path->name == "ingress_parser_control_signals") {
-                        if (auto stmt = findContext<IR::AssignmentStatement>()) {
+                        if (auto stmt = findContext<IR::BaseAssignmentStatement>()) {
                             if (node->member == "parser_counter") {
                                 ParserCounterConverter cvt(structure);
                                 structure->_map.emplace(stmt, stmt->apply(cvt));
@@ -2016,7 +2008,7 @@ class ConstructSymbolTable : public Inspector {
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")
-                BUG("Selector mode provided for the selector is not supported", node);
+                BUG("%1%: selector mode provided for the selector is not supported", node);
         } else {
             LOG1("WARNING: No mode specified for the selector %s. Assuming fair" << node);
         }
@@ -2444,8 +2436,9 @@ bool skipMethodCallStatement(const Visitor::Context *ctxt, const IR::Expression 
 }
 
 /** \ingroup SimpleSwitchTranslation */
-bool skipCond(const Visitor::Context *ctxt, const IR::Expression *expr) {
-    return skipMethodCallStatement(ctxt, expr) && BFN::skipRegisterActionOutput(ctxt, expr);
+bool skipCond(const Visitor::Context *ctxt, const IR::Expression *expr,
+              const DeclarationLookup *refMap) {
+    return skipMethodCallStatement(ctxt, expr) && BFN::skipRegisterActionOutput(ctxt, expr, refMap);
 }
 
 }  // namespace V1

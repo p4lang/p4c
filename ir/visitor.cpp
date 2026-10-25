@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "visitor.h"
 
@@ -23,7 +12,6 @@ limitations under the License.
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
-#include "ir/ir-generated.h"
 #include "lib/hash.h"
 
 #if HAVE_CXXABI_H
@@ -335,13 +323,11 @@ bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
     while (visitor != nullptr) {
         auto crt = visitor->ctxt;
         while (crt != nullptr) {
-            if (const auto *annotated = crt->node->to<IR::IAnnotated>()) {
-                for (const auto *a : annotated->getAnnotations()) {
-                    if (a->name != IR::Annotation::noWarnAnnotation) continue;
+            for (auto *a : crt->node->getAnnotations()) {
+                if (a->name != IR::Annotation::noWarnAnnotation) continue;
 
-                    auto arg = a->getSingleString();
-                    if (arg == errorString) return false;
-                }
+                auto arg = a->getSingleString();
+                if (arg == errorString) return false;
             }
             crt = crt->parent;
         }
@@ -439,14 +425,12 @@ struct PushContext {
     bool saved_logging_disable;
     PushContext(const Visitor::Context *&stck, const IR::Node *node) : stack(stck) {
         saved_logging_disable = Log::Detail::enableLoggingInContext;
-        if (const auto *annotated = node->to<IR::IAnnotated>()) {
-            if (annotated->getAnnotation(IR::Annotation::debugLoggingAnnotation))
-                Log::Detail::enableLoggingInContext = true;
-        }
+        if (node->hasAnnotation(IR::Annotation::debugLoggingAnnotation))
+            Log::Detail::enableLoggingInContext = true;
         current.parent = stack;
         current.node = current.original = node;
         current.child_index = 0;
-        current.child_name = "";
+        current.child_name = nullptr;
         current.depth = stack ? stack->depth + 1 : 1;
         assert(current.depth < 10000);  // stack overflow?
         stack = &current;
@@ -471,7 +455,7 @@ class ForwardChildren : public Visitor {
 }  // namespace
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt && name) ctxt->child_name = name;
+    if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -489,13 +473,17 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
                 local.current.node = copy;
                 if (!dontForwardChildrenBeforePreorder) {
                     ForwardChildren forward_children(*visited);
-                    copy->visit_children(forward_children);
+                    copy->visit_children(forward_children, name);
                 }
                 if (copy->apply_visitor_preorder(*this)) {
-                    copy->visit_children(*this);
+                    copy->visit_children(*this, name);
                     copy->apply_visitor_postorder(*this);
                 }
-                if (visited->finish(n, copy)) (n = copy)->validate();
+                if (visited->finish(n, copy)) {
+                    copy->validate();
+                    if (onNodeTransformedHook) onNodeTransformedHook(n, copy);
+                    n = copy;
+                }
                 break;
             }
         }
@@ -508,7 +496,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt && name) ctxt->child_name = name;
+    if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -520,7 +508,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
                 break;
             default:  // New or Revisit
                 if (n->apply_visitor_preorder(*this)) {
-                    n->visit_children(*this);
+                    n->visit_children(*this, name);
                     n->apply_visitor_postorder(*this);
                 }
                 visited->finish(n);
@@ -536,7 +524,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
 }
 
 const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
-    if (ctxt && name) ctxt->child_name = name;
+    if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
         switch (visited->try_start(n, visitDagOnce)) {
@@ -554,7 +542,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 local.current.node = copy;
                 if (!dontForwardChildrenBeforePreorder) {
                     ForwardChildren forward_children(*visited);
-                    copy->visit_children(forward_children);
+                    copy->visit_children(forward_children, name);
                 }
                 bool save_prune_flag = prune_flag;
                 prune_flag = false;
@@ -581,15 +569,19 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                     }
                 }
                 if (!prune_flag) {
-                    copy->visit_children(*this);
+                    copy->visit_children(*this, name);
                     final_result = copy->apply_visitor_postorder(*this);
                 }
                 prune_flag = save_prune_flag;
                 if (final_result == copy && final_result != preorder_result &&
                     *final_result == *preorder_result)
                     final_result = preorder_result;
-                if (visited->finish(n, final_result) && (n = final_result))
-                    final_result->validate();
+                if (visited->finish(n, final_result)) {
+                    if (final_result) final_result->validate();
+                    if (n != final_result && onNodeTransformedHook)
+                        onNodeTransformedHook(n, final_result);
+                    n = final_result;
+                }
                 if (extra_clone) visited->finish(preorder_result, final_result);
                 break;
             }

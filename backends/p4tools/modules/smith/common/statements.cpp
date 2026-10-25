@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/smith/common/statements.h"
 
 #include <cstddef>
@@ -166,10 +170,6 @@ void StatementGenerator::removeLval(const IR::Expression *left, const IR::Type *
 }
 
 IR::Statement *StatementGenerator::genAssignmentStatement() {
-    IR::AssignmentStatement *assignstat = nullptr;
-    IR::Expression *left = nullptr;
-    IR::Expression *right = nullptr;
-
     std::vector<int64_t> percent = {
         Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_BIT,
         Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_STRUCTLIKE};
@@ -183,11 +183,11 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
                 // TODO(fruffy): Find a more meaningful assignment statement
                 return nullptr;
             }
-            left = target().expressionGenerator().pickLvalOrSlice(bitType);
+            auto *left = target().expressionGenerator().pickLvalOrSlice(bitType);
             if (P4Scope::constraints.single_stage_actions) {
                 removeLval(left, bitType);
             }
-            right = target().expressionGenerator().genExpression(bitType);
+            auto *right = target().expressionGenerator().genExpression(bitType);
             return new IR::AssignmentStatement(left, right);
         }
         case 1:
@@ -195,7 +195,7 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
             break;
     }
 
-    return assignstat;
+    return nullptr;
 }
 
 IR::Statement *StatementGenerator::genMethodCallExpression(const IR::PathExpression *methodName,
@@ -448,8 +448,7 @@ IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
     big_int upperBound = IR::getMaxBvVal(bitFieldWidth);
 
     // Create the IR nodes for the for-in-loop component expressions.
-    auto declVar =
-        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
+    auto declVar = new IR::Declaration_Variable(IR::ID(loopVar), varType);
     auto collectionExpr =
         new IR::Range(new IR::Constant(varType, lowerBound), new IR::Constant(varType, upperBound));
     auto *bodyStmt = genBlockStatement(is_in_func);

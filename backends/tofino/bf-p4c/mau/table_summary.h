@@ -16,18 +16,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TABLE_SUMMARY_H_
-#define BF_P4C_MAU_TABLE_SUMMARY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SUMMARY_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SUMMARY_H_
 
 #include <iostream>
 #include <map>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace Logging {
 class FileLog;
@@ -445,4 +445,4 @@ class TableSummary : public MauInspector {
     }
 };
 
-#endif /* BF_P4C_MAU_TABLE_SUMMARY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SUMMARY_H_ */

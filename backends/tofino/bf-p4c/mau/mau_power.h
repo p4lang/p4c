@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_MAU_POWER_H_
-#define BF_P4C_MAU_MAU_POWER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_MAU_POWER_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_MAU_POWER_H_
 
 #include <fstream>
 #include <map>
@@ -25,10 +25,10 @@
 #include <string>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/unique_id.h"
 #include "backends/tofino/bf-p4c/lib/dyn_vector.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 
 namespace MauPower {
@@ -502,4 +502,4 @@ struct PowerMemoryAccess {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_MAU_POWER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_MAU_POWER_H_ */

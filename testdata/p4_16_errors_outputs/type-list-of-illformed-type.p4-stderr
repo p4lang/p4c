@@ -1,0 +1,6 @@
+type-list-of-illformed-type.p4(4): [--Werror=type-error] error: Field 't' of 'header_union S' cannot have type 'bit<32>'
+  T t;
+    ^
+type-list-of-illformed-type.p4(7): [--Werror=type-error] error: Error while analyzing header_union S<...>
+  E(list<S<bit<32>>> data);
+         ^^^^^^^^^^

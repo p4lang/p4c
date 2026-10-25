@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_MULTIPLE_APPLY_H_
-#define BF_P4C_COMMON_MULTIPLE_APPLY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_MULTIPLE_APPLY_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_MULTIPLE_APPLY_H_
 
 #include <set>
 
@@ -204,4 +204,4 @@ class MultipleApply : public PassManager {
                   bool dedup_only = false, bool run_default_next = true);
 };
 
-#endif /* BF_P4C_COMMON_MULTIPLE_APPLY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_MULTIPLE_APPLY_H_ */

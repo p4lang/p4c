@@ -7,18 +7,18 @@ header hdr {
 }
 
 control ingress(inout hdr h) {
-    @hidden action issue648l11() {
+    @hidden action issue648l17() {
         h.a[7:0] = h.c;
         h.a[15:8] = h.c + h.c;
     }
-    @hidden table tbl_issue648l11 {
+    @hidden table tbl_issue648l17 {
         actions = {
-            issue648l11();
+            issue648l17();
         }
-        const default_action = issue648l11();
+        const default_action = issue648l17();
     }
     apply {
-        tbl_issue648l11.apply();
+        tbl_issue648l17.apply();
     }
 }
 

@@ -8,17 +8,17 @@ struct M {
 control Ingress(inout M sm);
 package V1Switch(Ingress ig);
 control FabricIngress(inout M sm) {
-    @hidden action newtype2l16() {
+    @hidden action newtype2l22() {
         sm.es = (bit<9>)sm.e;
     }
-    @hidden table tbl_newtype2l16 {
+    @hidden table tbl_newtype2l22 {
         actions = {
-            newtype2l16();
+            newtype2l22();
         }
-        const default_action = newtype2l16();
+        const default_action = newtype2l22();
     }
     apply {
-        tbl_newtype2l16.apply();
+        tbl_newtype2l22.apply();
     }
 }
 

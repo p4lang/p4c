@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_PARSERS_PARSERDRIVER_H_
 #define FRONTENDS_PARSERS_PARSERDRIVER_H_
@@ -188,7 +179,14 @@ class P4ParserDriver final : public AbstractParserDriver {
     friend class P4::P4Parser;
 
     /// Notify that the parser parsed a P4 `error` declaration.
-    void onReadErrorDeclaration(IR::Type_Error *error);
+    //  @return true if this is the first error declaration, false if it has
+    //          been combined into a previous one (and should be elided)
+    bool onReadErrorDeclaration(IR::Type_Error *error);
+
+    /// Notify that the parser parsed a P4 `match_kind` declaration.
+    //  @return true if this is the first match_kind declaration, false if it has
+    //          been combined into a previous one (and should be elided)
+    bool onReadMatchKindDeclaration(IR::Declaration_MatchKind *matchKind);
 
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
@@ -197,9 +195,9 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// Semantic information about the program being parsed.
     Util::ProgramStructure *structure = nullptr;
 
-    /// The top-level nodes that make up the P4 program (or program fragment)
+    /// The top-level object that makes up the P4 program (or program fragment)
     /// we're parsing.
-    IR::Vector<IR::Node> *nodes = nullptr;
+    IR::Node *result = nullptr;
 
     /// A scratch buffer to hold the current string literal. (They're lexed
     /// incrementally, so we need to hold some state between tokens.)
@@ -224,10 +222,16 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// lazily created the first time we see an `error` declaration. (This node
     /// is present in @declarations as well.)
     IR::Type_Error *allErrors = nullptr;
+
+    /// All P4 `match_kind` declarations are merged together in the node, which
+    /// is lazily created the first time we see a `match_kind` declaration. (This
+    /// node is present in @declarations as well.)
+    IR::Declaration_MatchKind *allMatchKinds = nullptr;
 };
 
 }  // namespace P4
 
+#ifdef SUPPORT_P4_14
 namespace P4::V1 {
 
 class V1Lexer;
@@ -249,6 +253,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      *                    set the initial source location.
      * @returns a V1Program object if parsing was successful, or null otherwise.
      */
+
     static const IR::V1Program *parse(std::istream &in, std::string_view sourceFile,
                                       unsigned sourceLine = 1);
     static const IR::V1Program *parse(FILE *in, std::string_view sourceFile,
@@ -296,5 +301,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
 };
 
 }  // namespace P4::V1
+#endif
 
 #endif /* FRONTENDS_PARSERS_PARSERDRIVER_H_ */

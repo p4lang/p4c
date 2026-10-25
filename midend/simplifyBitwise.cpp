@@ -12,13 +12,15 @@ void SimplifyBitwise::assignSlices(const IR::Expression *expr, big_int mask) {
         int zero_pos = Util::scan0(mask, one_pos);
         auto left_slice = IR::Slice::make(changing_as->left, one_pos, zero_pos - 1);
         auto right_slice = IR::Slice::make(expr, one_pos, zero_pos - 1);
-        auto new_as = new IR::AssignmentStatement(changing_as->srcInfo, left_slice, right_slice);
+        auto new_as = changing_as->clone();
+        new_as->left = left_slice;
+        new_as->right = right_slice;
         slice_statements->push_back(new_as);
         one_pos = Util::scan1(mask, zero_pos);
     }
 }
 
-const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
+const IR::Node *SimplifyBitwise::preorder(IR::BaseAssignmentStatement *as) {
     Pattern::Match<IR::Expression> a, b;
     Pattern::Match<IR::Constant> maskA, maskB;
 

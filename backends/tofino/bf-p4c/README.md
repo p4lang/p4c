@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Overview of bf-p4c
 
 ## Setup

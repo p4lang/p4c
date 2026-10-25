@@ -1,0 +1,12 @@
+instantiate-at-parser-block-of-unsupported-object-type.p4(8): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+instantiate-at-parser-block-of-unsupported-object-type.p4(6): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser()() {
+       ^^^^^^^^
+instantiate-at-parser-block-of-unsupported-object-type.p4(7): [--Wwarn=unused] warning: 'ee' is unused
+  e() ee = {};
+      ^^
+instantiate-at-parser-block-of-unsupported-object-type.p4(7): [--Werror=type-error] error: BlockStatement: initializers only allowed for extern instances
+  e() ee = {};
+           ^^

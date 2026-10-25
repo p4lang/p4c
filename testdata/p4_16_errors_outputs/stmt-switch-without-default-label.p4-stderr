@@ -1,0 +1,12 @@
+stmt-switch-without-default-label.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c(in e v)() {
+        ^
+stmt-switch-without-default-label.p4(6): [--Werror=type-error] error: 'v' with type 'e' cannot be compared to 'false' with type 'bool'
+    switch (v) {
+            ^
+stmt-switch-without-default-label.p4(3)
+enum bit<4> e { a = 1 };
+            ^
+stmt-switch-without-default-label.p4(8)
+      false:
+      ^^^^^

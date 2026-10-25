@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "ir/ir.h"
 
 namespace P4 {

@@ -23,8 +23,8 @@
 #include <set>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/lib/cmp.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
@@ -85,7 +85,8 @@ class Clot final : public LiftCompare<Clot> {
 
     /// JSON serialization/deserialization.
     void toJSON(JSONGenerator &json) const;
-    static Clot *fromJSON(JSONLoader &json);
+    explicit Clot(JSONLoader &json);
+    static Clot *fromJSON(JSONLoader &json) { return new Clot(json); }
 
     /// Identifies the hardware CLOT associated with this object.
     unsigned tag;
@@ -185,7 +186,5 @@ class Clot final : public LiftCompare<Clot> {
 
 std::ostream &operator<<(std::ostream &out, const Clot &clot);
 std::ostream &operator<<(std::ostream &out, const Clot *clot);
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const Clot &clot);
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const Clot *clot);
 
 #endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_CLOT_H_ */

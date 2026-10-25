@@ -35,7 +35,7 @@
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
 #include "backends/tofino/bf-p4c/common/pragma/pragma.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "type_checker.h"

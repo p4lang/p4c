@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 
 #include <algorithm>
@@ -10,9 +14,9 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
-#include "backends/p4tools/common/control_plane/symbolic_variables.h"
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/symbolic_variables.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -73,6 +77,10 @@ const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *tabl
 
 const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
+}
+
+const IR::StateVariable &TableStepper::getActiveTableVar() {
+    return ToolsVariables::getStateVariable(IR::Type::String::get(), "*active_table_var"_cs);
 }
 
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
@@ -191,6 +199,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         // Some path selection strategies depend on looking ahead and collecting potential
         // nodes. If that is the case, apply the CoverableNodesScanner visitor.
@@ -288,6 +297,7 @@ void TableStepper::setTableDefaultEntries(
         }
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
@@ -306,6 +316,24 @@ void TableStepper::evalTableControlEntries(
     TableMatchMap matches;
     const auto *hitCondition = computeHit(&matches);
 
+    // It is possible we hit the same table twice for some targets. Our current framework does not
+    // support multiple entries that are executed at different times when stepping through the same
+    // table. To work around this, we check if there is already a table config for this table. If
+    // there is, we only follow the paths that are consistent with the already configured action.
+    // A concrete test can only install one control-plane configuration per table.
+    // If this table was already configured earlier on this path, keep using the
+    // same action for subsequent apply() calls of that table.
+    const auto *existingTableConfigObject =
+        stepper->state.getTestObject("tableconfigs"_cs, properties.tableName, false);
+    cstring configuredActionName;
+    if (existingTableConfigObject != nullptr) {
+        const auto *existingTableConfig = existingTableConfigObject->checkedTo<TableConfig>();
+        const auto *existingRules = existingTableConfig->getRules();
+        if (!existingRules->empty()) {
+            configuredActionName = existingRules->front().getActionCall()->getActionName();
+        }
+    }
+
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
         // Create an execution state per action.
@@ -317,6 +345,10 @@ void TableStepper::evalTableControlEntries(
 
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
+        // Make sure actions stay consistent across repeated apply() calls of the same table.
+        if (!configuredActionName.isNullOrEmpty() && actionName != configuredActionName) {
+            continue;
+        }
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -337,10 +369,14 @@ void TableStepper::evalTableControlEntries(
         synthesizedAction->arguments = arguments;
 
         // Finally, add all the new rules to the execution stepper->state.
-        auto tableRule =
-            TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
-        auto *tableConfig = new TableConfig(table, {tableRule});
-        nextState.addTestObject("tableconfigs"_cs, properties.tableName, tableConfig);
+        // Only create the table entry once. Later apply() calls on the same path
+        // reuse the installed table configuration.
+        if (existingTableConfigObject == nullptr) {
+            auto tableRule =
+                TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
+            auto *tableConfig = new TableConfig(table, {tableRule});
+            nextState.addTestObject("tableconfigs"_cs, properties.tableName, tableConfig);
+        }
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -356,6 +392,7 @@ void TableStepper::evalTableControlEntries(
 
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
@@ -412,6 +449,10 @@ void TableStepper::evalTaintedTable() {
     // We do not know whether this table was hit or not.
     auto hitVar = getTableHitVar(table);
     nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
+    // Set current active table
+    auto activeTableVar = getActiveTableVar();
+    nextState.set(activeTableVar,
+                  stepper->programInfo.createTargetUninitialized(activeTableVar->type, true));
 
     // Reset the property to its previous stepper->state.
     replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
@@ -511,6 +552,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     }
     nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
     nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+    nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
     nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredNodes);

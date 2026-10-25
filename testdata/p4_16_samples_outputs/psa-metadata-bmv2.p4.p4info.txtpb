@@ -1,0 +1,63 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 46145193
+    name: "ingress.match_meta"
+    alias: "match_meta"
+  }
+  match_fields {
+    id: 1
+    name: "user_meta.field"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28429210
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28429210
+    name: "ingress.set_output"
+    alias: "set_output"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

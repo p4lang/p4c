@@ -1,18 +1,7 @@
-/*
-Copyright 2017 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2017 VMware, Inc.
+// SPDX-FileCopyrightText: 2017 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "tableHit.h"
 
@@ -20,7 +9,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoTableHit::process(IR::BaseAssignmentStatement *statement, DoTableHit::op_t op) {
     LOG3("Visiting " << getOriginal());
     auto right = statement->right;
     bool negated = false;
@@ -32,12 +21,38 @@ const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
 
     if (!TableApplySolver::isHit(right, this, typeMap)) return statement;
 
-    auto tstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(true));
-    auto fstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(false));
+    auto srcInfo = statement->srcInfo;
+    const IR::Statement *tstat, *fstat;
+    switch (op) {
+        case None:
+            tstat =
+                new IR::AssignmentStatement(srcInfo, statement->left->clone(),
+                                            new IR::BoolLiteral(statement->right->srcInfo, true));
+            fstat = new IR::AssignmentStatement(
+                srcInfo, statement->left, new IR::BoolLiteral(statement->right->srcInfo, false));
+            break;
+        case And:
+            tstat = new IR::EmptyStatement(srcInfo);
+            fstat = new IR::AssignmentStatement(
+                srcInfo, statement->left, new IR::BoolLiteral(statement->right->srcInfo, false));
+            break;
+        case Or:
+            tstat = new IR::AssignmentStatement(
+                srcInfo, statement->left, new IR::BoolLiteral(statement->right->srcInfo, true));
+            fstat = new IR::EmptyStatement(srcInfo);
+            break;
+        case Xor:
+            tstat = new IR::BXorAssign(srcInfo, statement->left,
+                                       new IR::BoolLiteral(statement->right->srcInfo, true));
+            fstat = new IR::EmptyStatement(srcInfo);
+            break;
+        default:
+            BUG("invalid op_t in DoTableHit");
+    }
     if (negated)
-        return new IR::IfStatement(right, fstat, tstat);
+        return new IR::IfStatement(srcInfo, right, fstat, tstat);
     else
-        return new IR::IfStatement(right, tstat, fstat);
+        return new IR::IfStatement(srcInfo, right, tstat, fstat);
 }
 
 }  // namespace P4

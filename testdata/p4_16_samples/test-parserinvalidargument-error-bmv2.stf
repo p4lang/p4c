@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Parser should get no error, and extract 0-length custom header
 packet 2 ffffffffffff a5a5a5a5a5a5 0000 deadbeef
 expect 1 ffffffffff00 a5a5a5a5a5a5 0000 deadbeef $

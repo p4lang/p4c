@@ -23,8 +23,8 @@
  * TODO High-level description of %PHV allocation
  */
 
-#ifndef BF_P4C_PHV_PHV_ANALYSIS_H_
-#define BF_P4C_PHV_PHV_ANALYSIS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PHV_ANALYSIS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PHV_ANALYSIS_H_
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
@@ -58,6 +58,9 @@
 #include "backends/tofino/bf-p4c/phv/utils/tables_to_ids.h"
 #include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 #include "backends/tofino/bf-p4c/phv/v2/table_replay_friendly_constraints.h"
+
+void applyGlobalPragmas(const PhvSpec &phvspec,
+                        const std::vector<const IR::Annotation *> &global_pragmas);
 
 /** This is the main PHV allocation pass manager.
  */
@@ -156,4 +159,4 @@ class PHV_AnalysisPass : public Logging::PassManager {
     void end_apply() override;
 };
 
-#endif /* BF_P4C_PHV_PHV_ANALYSIS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PHV_ANALYSIS_H_ */

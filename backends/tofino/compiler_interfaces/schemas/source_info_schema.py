@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 source_schema.py: Generates JSON schema for source info
 """
@@ -19,12 +23,12 @@ Initial version
 
 # versioning follows SchemaVer convention
 major_version = 1
-revision_version = 0
-addition_version = 0
+minor_version = 0
+patch_version = 0
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(revision_version), str(addition_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################

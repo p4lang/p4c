@@ -1,5 +1,11 @@
-#ifndef TESTGEN_TARGETS_EBPF_CONSTANTS_H_
-#define TESTGEN_TARGETS_EBPF_CONSTANTS_H_
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONSTANTS_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONSTANTS_H_
 
 #include "ir/ir.h"
 
@@ -15,4 +21,4 @@ class EBPFConstants {
 
 }  // namespace P4::P4Tools::P4Testgen::EBPF
 
-#endif /* TESTGEN_TARGETS_EBPF_CONSTANTS_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONSTANTS_H_ */

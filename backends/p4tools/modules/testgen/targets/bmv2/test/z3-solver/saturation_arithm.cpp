@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -7,6 +12,7 @@
 
 #include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
@@ -239,6 +245,36 @@ class Z3SolverSubSat05 : public Z3SolverSatTests {
 };
 
 TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
+
+class Z3SolverSubSat06 : public Z3SolverSatTests {
+ public:
+    Z3SolverSubSat06()
+        : Z3SolverSatTests("hdr.h.ai == 0 && hdr.h.bi == hdr.h.ai |-| (-8)",
+                           "hdr.h.bi = (int<4>)0 |-| (-8)") {}
+};
+
+TEST_F(Z3SolverSubSat06, SubSat06) { test(expression, variableValue); }
+
+TEST(SubSatExhaustive, AllSignedFourBitOperands) {
+    constexpr int kOperandWidth = 4;
+    const auto *bitType = IR::Type_Bits::get(kOperandWidth, true);
+    const big_int minValue = IR::getMinBvVal(bitType);
+    const big_int maxValue = IR::getMaxBvVal(bitType);
+    Z3Solver solver;
+
+    for (big_int left = minValue; left <= maxValue; ++left) {
+        for (big_int right = minValue; right <= maxValue; ++right) {
+            const auto *operation = new IR::SubSat(bitType, IR::Constant::get(bitType, left),
+                                                   IR::Constant::get(bitType, right));
+            const auto *result = SaturationElim::eliminate(operation);
+            const big_int difference = left - right;
+            const big_int expectedValue = std::max(minValue, std::min(maxValue, difference));
+            const auto *expected = IR::Constant::get(bitType, expectedValue);
+            ASSERT_EQ(solver.checkSat({new IR::Equ(result, expected)}), true)
+                << "left=" << left << ", right=" << right;
+        }
+    }
+}
 
 }  // namespace ArithmTest
 

@@ -1,18 +1,7 @@
-/*
-Copyright 2017 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2017 VMware, Inc.
+// SPDX-FileCopyrightText: 2017 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "complexComparison.h"
 
@@ -118,10 +107,10 @@ const IR::Expression *RemoveComplexComparisons::explode(Util::SourceInfo srcInfo
             result = new IR::LAnd(srcInfo, result, rec);
         }
         return result;
-    } else if (auto at = leftType->to<IR::Type_Stack>()) {
+    } else if (auto at = leftType->to<IR::Type_Array>()) {
         auto size = at->getSize();
         const IR::Expression *result = new IR::BoolLiteral(true);
-        BUG_CHECK(rightType->is<IR::Type_Stack>(), "%1%: comparing stack with %1%", left,
+        BUG_CHECK(rightType->is<IR::Type_Array>(), "%1%: comparing stack with %2%", left,
                   rightType);
         for (unsigned i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
@@ -153,7 +142,7 @@ const IR::Node *RemoveComplexComparisons::postorder(IR::Operation_Binary *expres
     if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>()) return expression;
     auto ltype = typeMap->getType(expression->left, true);
     auto rtype = typeMap->getType(expression->right, true);
-    if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Stack>() &&
+    if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Array>() &&
         !ltype->is<IR::Type_BaseList>())
         return expression;
     auto result = explode(expression->srcInfo, ltype, expression->left, rtype, expression->right);

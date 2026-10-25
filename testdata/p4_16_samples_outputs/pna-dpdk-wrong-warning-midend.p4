@@ -45,7 +45,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
     @name("ingress.a1b") h1_t[2] a1b_0;
     @name("ingress.au1") hu1_t[2] au1_0;
     @name("ingress.au1b") hu1_t[2] au1b_0;
-    @hidden action pnadpdkwrongwarning50() {
+    @hidden action pnadpdkwrongwarning56() {
         hu1_0_h1.setInvalid();
         hu1_0_h2.setInvalid();
         hu1b_0_h1.setInvalid();
@@ -63,29 +63,29 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         au1b_0[1].h1.setInvalid();
         au1b_0[1].h2.setInvalid();
     }
-    @hidden table tbl_pnadpdkwrongwarning50 {
+    @hidden table tbl_pnadpdkwrongwarning56 {
         actions = {
-            pnadpdkwrongwarning50();
+            pnadpdkwrongwarning56();
         }
-        const default_action = pnadpdkwrongwarning50();
+        const default_action = pnadpdkwrongwarning56();
     }
     apply {
-        tbl_pnadpdkwrongwarning50.apply();
+        tbl_pnadpdkwrongwarning56.apply();
     }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkwrongwarning90() {
+    @hidden action pnadpdkwrongwarning96() {
         packet.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_pnadpdkwrongwarning90 {
+    @hidden table tbl_pnadpdkwrongwarning96 {
         actions = {
-            pnadpdkwrongwarning90();
+            pnadpdkwrongwarning96();
         }
-        const default_action = pnadpdkwrongwarning90();
+        const default_action = pnadpdkwrongwarning96();
     }
     apply {
-        tbl_pnadpdkwrongwarning90.apply();
+        tbl_pnadpdkwrongwarning96.apply();
     }
 }
 

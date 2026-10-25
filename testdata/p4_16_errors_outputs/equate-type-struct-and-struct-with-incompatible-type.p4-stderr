@@ -1,0 +1,33 @@
+equate-type-struct-and-struct-with-incompatible-type.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-struct-and-struct-with-incompatible-type.p4(10): [--Wwarn=unused] warning: 'e' is unused
+  E((list<S<bit<32>>>) { { 10 } }) e;
+                                   ^
+equate-type-struct-and-struct-with-incompatible-type.p4(10): [--Werror=type-error] error: 'e'
+  E((list<S<bit<32>>>) { { 10 } }) e;
+                                   ^
+  ---- Actual error:
+equate-type-struct-and-struct-with-incompatible-type.p4(7): Cannot cast implicitly type 'bit<32>' to type 'varbit<32>'
+    E(list<S<varbit<32>>> data);
+             ^^^^^^^^^^
+  ---- Originating from:
+equate-type-struct-and-struct-with-incompatible-type.p4(10): Type of argument '{ { t = 32w10 } }' (list<struct S<...>>) does not match type of parameter 'data' (list<struct S<...>>)
+    E((list<S<bit<32>>>) { { 10 } }) e;
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+equate-type-struct-and-struct-with-incompatible-type.p4(10)
+    E((list<S<bit<32>>>) { { 10 } }) e;
+       ^^^^^^^^^^^^^^^^
+equate-type-struct-and-struct-with-incompatible-type.p4(7)
+    E(list<S<varbit<32>>> data);
+                          ^^^^
+equate-type-struct-and-struct-with-incompatible-type.p4(7)
+    E(list<S<varbit<32>>> data);
+      ^^^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-struct-and-struct-with-incompatible-type.p4(10): Constructor invocation <Method call> does not match constructor declaration E
+    E((list<S<bit<32>>>) { { 10 } }) e;
+                                     ^
+equate-type-struct-and-struct-with-incompatible-type.p4(7)
+    E(list<S<varbit<32>>> data);
+    ^

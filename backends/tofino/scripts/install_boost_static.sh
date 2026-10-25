@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 SUDO=sudo
 boost_lib_type=static
 
@@ -59,7 +63,7 @@ function install_boost() {
             $SUDO ./b2 install --build-type=minimal variant=release \
                   link=${boost_lib_type} runtime-link=${boost_lib_type} || \
             die "failed to install boost"
-        cd /tmp && rm -rf boost_${boost_ver}
+        cd /tmp && rm -rf "boost_${boost_ver}"
     fi
 }
 

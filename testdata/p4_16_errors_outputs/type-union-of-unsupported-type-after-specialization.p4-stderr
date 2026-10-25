@@ -1,0 +1,9 @@
+type-union-of-unsupported-type-after-specialization.p4(6): [--Wwarn=unused] warning: 'func' is unused
+bit<1> func(h<bit<1>> a) {}
+       ^^^^
+type-union-of-unsupported-type-after-specialization.p4(4): [--Werror=type-error] error: Field 'f' of 'header_union h' cannot have type 'bit<1>'
+  t f;
+    ^
+type-union-of-unsupported-type-after-specialization.p4(6): [--Werror=type-error] error: Error while analyzing header_union h<...>
+bit<1> func(h<bit<1>> a) {}
+            ^^^^^^^^^

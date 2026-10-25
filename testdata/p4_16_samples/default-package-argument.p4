@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
  struct intrinsic_metadata_t {
     bit<8> f0;
     bit<8> f1;

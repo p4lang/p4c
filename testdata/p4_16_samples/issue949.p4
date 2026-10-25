@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #define DCE_BUG 1
 
 

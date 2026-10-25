@@ -1053,9 +1053,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
     fmt_state fmt;
     out << indent << "format: {";
     int group = (ternary || gateway) ? -1 : 0;
-#ifdef HAVE_JBAY
     if (Device::currentDevice() == Device::JBAY && gateway) group = 0;
-#endif
 
     for (auto match_group : use.match_groups) {
         int type;
@@ -1394,7 +1392,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             is_empty = false;
             alias.clear();
         }
-        act->action.visit_children(*this);
+        act->action.visit_children(*this, "action");
         // Dumping the information on stateful calls.  For anything that has a meter type,
         // the meter type is dumped first, followed by the address location.  This is
         // required to generate override_full_.*_addr information
@@ -1783,7 +1781,7 @@ class MauAsmOutput::EmitAlwaysRunAction : public MauAsmOutput::EmitAction {
     bool preorder(const IR::MAU::Action *act) override {
         indent++;
         is_empty = true;
-        act->visit_children(*this);
+        act->visit_children(*this, "action");
         return false;
     }
 
@@ -2307,7 +2305,7 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent, const IR
         auto method = method_call->method->to<IR::PathExpression>();
         auto path = method->path;
         for (auto action : Values(tbl->actions)) {
-            if (action->name.name == path->name) {
+            if (path->name == action->name.name) {
                 context_json_entries << indent << "action_handle: 0x" << hex(action->handle)
                                      << std::endl;
                 break;
@@ -3560,7 +3558,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
             // Ideally, this check should never fail as an empty action is validated in
             // 'CheckStatefulAlu' earlier in backend.
             BUG_CHECK((act->action.size() > 0),
-                      " Stateful %1% must have instructions assigned for action '%1%'."
+                      " Stateful %1% must have instructions assigned for action '%2%'."
                       " Please verify the action is valid.",
                       salu, act);
             act->apply(EmitAction(self, out, tbl, indent));

@@ -1,0 +1,6 @@
+type-variable-not-found.p4(8): [--Werror=unsupported] error: Self-referencing types not supported: 'c' within 'control c'
+  E((list<c<bit<32>>>) {}) e;
+          ^
+type-variable-not-found.p4(7)
+control c()() {
+        ^

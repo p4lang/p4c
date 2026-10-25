@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "symbol_table.h"
 
@@ -262,14 +251,12 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
     BUG("Should be unreachable");
 }
 
-void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars) {
-    if (typeVars == nullptr) return;
-    for (auto tv : *typeVars) declareType(tv->name);
+void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var> &typeVars) {
+    for (auto tv : typeVars) declareType(tv->name);
 }
 
-void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter> *params) {
-    if (params == nullptr) return;
-    for (auto param : *params) declareObject(param->name, param->type->toString());
+void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter> &params) {
+    for (auto param : params) declareObject(param->name, param->type->toString());
 }
 
 void ProgramStructure::endParse() {

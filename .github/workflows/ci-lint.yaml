@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "p4c-lint"
 
 on:
@@ -8,39 +12,42 @@ on:
   merge_group:
     branches: [main]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: p4c-lint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   p4c-lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       IMAGE_TYPE: test
+      CMAKE_FLAGS: "-DFORMATTING_ONLY=ON"
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
-      ENABLE_GTESTS: ON
-      ENABLE_TOFINO: ON
-      ENABLE_TEST_TOOLS: ON
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: apply-linters-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 20.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "ubuntu-24.04-gcc-unity-lint"
+          use-ccache: "false"
 
       - name: Run cpplint on C/C++ files.
-        run: cmake --build build --target cpplint
+        run: uv run cmake --build build --target cpplint
 
       - name: Run clang-format on C/C++ files.
-        run: cmake --build build --target clang-format
+        run: |
+          uv run clang-format --version
+          uv run cmake --build build --target clang-format
 
       - name: Run black and isort on Python files.
         run: |
-          cmake --build build --target black
-          cmake --build build --target isort
+          uv run black --version
+          uv run cmake --build build --target black
+          uv run isort --version
+          uv run cmake --build build --target isort

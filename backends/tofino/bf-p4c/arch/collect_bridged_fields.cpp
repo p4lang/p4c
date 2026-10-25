@@ -36,12 +36,8 @@ using TnaParams = CollectBridgedFields::TnaParams;
 
 bool isMetadataType(const IR::Type *type) {
     if (type->is<IR::Type_Struct>()) return true;
-    if (auto *annotated = type->to<IR::IAnnotated>()) {
-        /// TODO: note that we are looking for the annotation in stratum.p4
-        auto *intrinsicMetadata = annotated->getAnnotation("__intrinsic_metadata"_cs);
-        if (intrinsicMetadata) return true;
-    }
-    return false;
+    /// TODO: note that we are looking for the annotation in stratum.p4
+    return type->hasAnnotation("__intrinsic_metadata"_cs);
 }
 
 bool isMetadataOrPrimitiveType(const IR::Type *type) {

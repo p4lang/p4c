@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 if(ENABLE_TESTING)
   # Include the test subdirectory.
   message("-- Adding p4smith nic test suite")

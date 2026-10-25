@@ -39,9 +39,10 @@ limitations under the License.
 namespace P4 {
 
 #define YYLTYPE Util::SourceInfo
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
-                 : Util::SourceInfo(sources, YYRHSLOC(Rhs, 0).getEnd()))
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                                     \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                                  \
+        : yylloc ? yyloc                                                                \
+                 : Util::SourceInfo(sources, sources->getCurrentPosition()))
 
 template<typename... Args>
 void yyerror(const char *fmt, Args&&... args);
@@ -79,6 +80,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
+%token ANDAND
 %token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE INTERFACE NAMESPACE
                 NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VARIANT VIRTUAL
 %token<str>     BLOCK COMMENTBLOCK IDENTIFIER INCLUDE INTEGER NO STRING ZERO
@@ -253,7 +255,8 @@ method
           { $$ = new IrMethod(@2, canon_name($2)); }
     | modifiers IDENTIFIER '('
           { if ($2 != $<irClass>0->name)
-                yyerror("constructor name %s doesn't match class name %s", $2, $<irClass>0->name);
+                yyerror("constructor name %s doesn't match class name %s", $2.c_str(),
+                        $<irClass>0->name.c_str());
             if ($1 & ~IrField::Inline)
                 yyerror("%s invalid on constructor", IrElement::modifier($1));
             ($<irMethod>$ = new IrMethod(@2, $2))->inImpl = !($1 & IrField::Inline);
@@ -274,7 +277,7 @@ method
           { ($$ = $<irMethod>5)->body = $10;
             if (!$10 || $10.startsWith("=")) {
                 if (!$$->inImpl)
-                    yyerror("inline method %v with no body", $3);
+                    yyerror("inline method %v with no body", $3.c_str());
                 $$->inImpl = false; }
             $$->isUser = true;
             $$->isConst = $8;
@@ -326,15 +329,15 @@ irField
     : modifiers type fieldName optInitializer ';'
           { $$ = new IrField(@3, $2, $3, $4, $1);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $3); }
+                yyerror("virtual invalid on field %s", $3.c_str()); }
     | modifiers CONST nonRefType fieldName optInitializer ';'
           { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $4); }
+                yyerror("virtual invalid on field %s", $4.c_str()); }
     | modifiers VARIANT '<' type_args '>' fieldName optInitializer ';'
           { $$ = new IrVariantField(@6, $4, $6, $7, $1);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $6); }
+                yyerror("virtual invalid on field %s", $6.c_str()); }
     ;
 
 modifier
@@ -372,6 +375,9 @@ type: nonRefType
     | type '&'                          { $$ = new ReferenceType($1); }
     | type CONST '&'                    { $$ = new ReferenceType($1, true); }
     | CONST nonRefType '&'              { $$ = new ReferenceType($2, true); }
+    | type ANDAND                       { $$ = new ReferenceType($1, false, true); }
+    | type CONST ANDAND                 { $$ = new ReferenceType($1, true, true); }
+    | CONST nonRefType ANDAND           { $$ = new ReferenceType($2, true, true); }
     | type '*'                          { $$ = new PointerType($1); }
     | type CONST '*'                    { $$ = new PointerType($1, true); }
     | CONST nonRefType '*'              { $$ = new PointerType($2, true); }

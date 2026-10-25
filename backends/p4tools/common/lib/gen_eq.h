@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_GEN_EQ_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_GEN_EQ_H_
 

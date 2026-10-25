@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type ethernet_t {
     fields {
         dstAddr   : 48;

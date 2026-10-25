@@ -1,0 +1,23 @@
+equate-type-specialized-and-non-specialized.p4(3): [--Wwarn=unused] warning: 'f' is unused
+T f<T>(tuple<> x) {
+  ^
+equate-type-specialized-and-non-specialized.p4(4): [--Werror=type-error] error: 'return x'
+  return x;
+  ^^^^^^
+  ---- Actual error:
+equate-type-specialized-and-non-specialized.p4(3): Cannot cast implicitly type 'tuple<>' to type 'T'
+  T f<T>(tuple<> x) {
+         ^^^^^^^
+equate-type-specialized-and-non-specialized.p4(3)
+  T f<T>(tuple<> x) {
+      ^
+  ---- Originating from:
+equate-type-specialized-and-non-specialized.p4(4): Source expression 'x' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'T'
+    return x;
+           ^
+equate-type-specialized-and-non-specialized.p4(3)
+  T f<T>(tuple<> x) {
+         ^^^^^^^
+equate-type-specialized-and-non-specialized.p4(3)
+  T f<T>(tuple<> x) {
+      ^

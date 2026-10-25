@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "test-tools"
 
 on:
@@ -23,22 +27,20 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
+      # This pins BMv2 to current upstream main.
+      BMV2_REF: 7f4e1daca12b7fe52897687764b7e74ded7dab55
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-tools-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 22.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "ubuntu-22.04-gcc-unity-core"
+          max-size: 2G
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest -R "testgen|smith" --output-on-failure --schedule-random
+        run: sudo -E env PATH="$PATH" uv run ctest -R "testgen|smith" --output-on-failure --schedule-random
         working-directory: ./build

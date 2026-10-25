@@ -1,26 +1,16 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "toP4.h"
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/parser_options.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/getV1ModelVersion.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
@@ -51,7 +41,7 @@ std::optional<cstring> ToP4::ifSystemFile(const IR::Node *node) {
         return std::nullopt;
     }
     auto sourceFile = node->srcInfo.getSourceFile();
-    if (isSystemFile(sourceFile)) {
+    if (isSystemFile(std::filesystem::path(sourceFile.c_str()))) {
         return sourceFile;
     }
     return std::nullopt;
@@ -144,15 +134,27 @@ void ToP4::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
 }
 
 bool ToP4::preorder(const IR::P4Program *program) {
-    std::set<cstring> includesEmitted;
+    std::set<std::filesystem::path> includesEmitted;
 
     bool first = true;
     dump(2);
     for (auto a : program->objects) {
         // Check where this declaration originates
         auto sourceFileOpt = ifSystemFile(a);
-        // Errors can come from multiple files
-        if (!a->is<IR::Type_Error>() && sourceFileOpt.has_value()) {
+        // Errors and match_kinds can come from multiple files.
+        // Do not print a system-defined declaration whose members are also all system-defined.
+        if (sourceFileOpt.has_value() &&
+            (a->is<IR::Type_Error>() || a->is<IR::Declaration_MatchKind>())) {
+            const bool hasUserDecls = a->checkedTo<IR::ISimpleNamespace>()
+                                          ->getDeclarations()
+                                          ->where([this](const IR::IDeclaration *e) {
+                                              return !ifSystemFile(e->getNode()).has_value();
+                                          })
+                                          ->any();
+            if (!hasUserDecls) continue;
+        }
+        if (!a->is<IR::Type_Error>() && !a->is<IR::Declaration_MatchKind>() &&
+            sourceFileOpt.has_value()) {
             /* FIXME -- when including a user header file (sourceFile !=
              * mainFile), do we want to emit an #include of it or not?  Probably
              * not when translating from P4-14, as that would create a P4-16
@@ -160,14 +162,14 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * allow converting headers independently (is that even possible?).
              * For now we ignore mainFile and don't emit #includes for any
              * non-system header */
-            auto sourceFile = sourceFileOpt.value();
+            std::filesystem::path sourceFile(sourceFileOpt.value().c_str());
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                if (sourceFile.startsWith(p4includePath)) {
-                    const char *p = sourceFile.c_str() + strlen(p4includePath);
-                    if (*p == '/') p++;
+                auto relativePath = std::filesystem::relative(sourceFile, p4includePath);
+                auto relativePathStr = relativePath.generic_string();
+                if (!relativePathStr.empty() && relativePathStr.rfind("..", 0) != 0) {
                     // TODO: This is v1model-specific code. This should be not part of the core
                     // pass.
-                    if (P4V1::V1Model::instance.file.name == p) {
+                    if (P4V1::V1Model::instance().file.name == relativePathStr) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
@@ -175,12 +177,12 @@ bool ToP4::preorder(const IR::P4Program *program) {
                         builder.newline();
                     }
                     builder.append("#include <");
-                    builder.append(p);
+                    builder.append(relativePathStr);
                     builder.append(">");
                     builder.newline();
                 } else {
                     builder.append("#include \"");
-                    builder.append(sourceFile);
+                    builder.append(sourceFile.string());
                     builder.append("\"");
                     builder.newline();
                 }
@@ -199,9 +201,12 @@ bool ToP4::preorder(const IR::P4Program *program) {
 
 bool ToP4::preorder(const IR::Type_Bits *t) {
     if (t->expression) {
-        builder.append("bit<(");
+        int prec = expressionPrecedence;
+        builder.append("bit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.append(t->toString());
     }
@@ -244,7 +249,7 @@ bool ToP4::preorder(const IR::Type_Name *t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Stack *t) {
+bool ToP4::preorder(const IR::Type_Array *t) {
     dump(2);
     visit(t->elementType);
     builder.append("[");
@@ -346,7 +351,7 @@ bool ToP4::preorder(const IR::Type_Enum *t) {
     builder.spc();
     builder.blockStart();
     bool first = true;
-    for (auto a : *t->getDeclarations()) {
+    for (auto a : t->getDeclarations()) {
         dump(2, a->getNode(), 1);
         if (!first) builder.append(",\n");
         first = false;
@@ -473,9 +478,12 @@ bool ToP4::preorder(const IR::Type_Boolean *) {
 
 bool ToP4::preorder(const IR::Type_Varbits *t) {
     if (t->expression) {
-        builder.append("varbit<(");
+        int prec = expressionPrecedence;
+        builder.append("varbit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.appendFormat("varbit<%d>", t->size);
     }
@@ -660,7 +668,7 @@ bool ToP4::preorder(const IR::Type_Error *d) {
                                 })
                                 ->toVector();
     if (!isDeclaration || !userErrors.empty()) {
-        builder.append("error");
+        builder.append("error ");
 
         if (!isDeclaration) {
             return false;
@@ -685,10 +693,19 @@ bool ToP4::preorder(const IR::Type_Error *d) {
 
 bool ToP4::preorder(const IR::Declaration_MatchKind *d) {
     dump(1);
+
+    const auto userMatchKinds = d->getDeclarations()
+                                    ->where([this](const IR::IDeclaration *e) {
+                                        // only print if not from a system file
+                                        return !ifSystemFile(e->getNode()).has_value();
+                                    })
+                                    ->toVector();
+    if (userMatchKinds.empty()) return false;
+
     builder.append("match_kind ");
     builder.blockStart();
     bool first = true;
-    for (auto a : *d->getDeclarations()) {
+    for (auto a : userMatchKinds) {
         if (!first) builder.append(",\n");
         dump(1, a->getNode(), 1);
         first = false;
@@ -916,11 +933,11 @@ bool ToP4::preorder(const IR::StructExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::HeaderStackExpression *e) {
+bool ToP4::preorder(const IR::ArrayExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
-    if (e->headerStackType != nullptr) {
+    if (e->arrayType != nullptr) {
         builder.append("(");
-        visit(e->headerStackType);
+        visit(e->arrayType);
         builder.append(")");
     }
     builder.append("{");
@@ -1086,6 +1103,17 @@ bool ToP4::preorder(const IR::AssignmentStatement *a) {
     dump(2);
     visit(a->left);
     builder.append(" = ");
+    visit(a->right);
+    builder.endOfStatement();
+    return false;
+}
+
+bool ToP4::preorder(const IR::OpAssignmentStatement *a) {
+    dump(2);
+    visit(a->left);
+    builder.append(" ");
+    builder.append(a->getStringOp());
+    builder.append("= ");
     visit(a->right);
     builder.endOfStatement();
     return false;
@@ -1394,7 +1422,7 @@ bool ToP4::preorder(const IR::P4Control *c) {
 bool ToP4::preorder(const IR::ParameterList *p) {
     builder.append("(");
     bool first = true;
-    for (auto param : *p->getEnumerator()) {
+    for (auto param : p->getEnumerator()) {
         if (!first) builder.append(", ");
         first = false;
         visit(param);

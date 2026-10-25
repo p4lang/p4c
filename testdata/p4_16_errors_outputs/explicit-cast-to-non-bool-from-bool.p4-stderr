@@ -1,0 +1,12 @@
+explicit-cast-to-non-bool-from-bool.p4(3): [--Wwarn=unused] warning: control 'SetAndFwd' is unused
+control SetAndFwd()() {
+        ^^^^^^^^^
+explicit-cast-to-non-bool-from-bool.p4(7): [--Werror=type-error] error: 'a = (int<1>)b'
+    a = (int<1>) b;
+      ^
+  ---- Actual error:
+  Cannot cast implicitly type 'int<1>' to type 'bit<1>'
+  ---- Originating from:
+explicit-cast-to-non-bool-from-bool.p4(7): Source expression '(int<1>)b' produces a result of type 'int<1>' which cannot be assigned to a left-value with type 'bit<1>'
+      a = (int<1>) b;
+          ^^^^^^^^^^

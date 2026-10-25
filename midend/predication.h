@@ -1,18 +1,9 @@
 /*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2016 VMware, Inc.
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef MIDEND_PREDICATION_H_
 #define MIDEND_PREDICATION_H_
@@ -45,6 +36,8 @@ class Predication final : public Transform {
     class EmptyStatementRemover final : public Transform {
      public:
         EmptyStatementRemover() {}
+        const IR::Node *postorder(IR::ForStatement *) override;
+        const IR::Node *postorder(IR::ForInStatement *) override;
         const IR::Node *postorder(IR::EmptyStatement *statement) override;
         const IR::Node *postorder(IR::BlockStatement *statement) override;
     };
@@ -57,7 +50,7 @@ class Predication final : public Transform {
     class ExpressionReplacer final : public Transform {
      private:
         // Original assignment that the replacer works on
-        const IR::AssignmentStatement *statement;
+        const IR::AssignmentStatement *const statement;
         // To keep track of the path used while traversing nested if-else statements:
         //      IF - true / ELSE - false
         const std::vector<bool> &traversalPath;
@@ -133,11 +126,12 @@ class Predication final : public Transform {
     }
 
     const IR::Expression *clone(const IR::Expression *expression);
-    const IR::Node *clone(const IR::AssignmentStatement *statement);
+    const IR::AssignmentStatement *clone(const IR::AssignmentStatement *statement);
     const IR::Node *preorder(IR::IfStatement *statement) override;
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::P4Action *action) override;
     const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::OpAssignmentStatement *statement) override;
     // Assignment dependecy checkers
     const IR::Node *preorder(IR::PathExpression *pathExpr) override;
     const IR::Node *preorder(IR::Member *member) override;

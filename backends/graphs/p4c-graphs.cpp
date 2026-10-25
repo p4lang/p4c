@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "backends/graphs/version.h"
 #include "controls.h"
@@ -48,9 +37,13 @@ class MidEnd : public PassManager {
     }
 };
 
+#ifdef SUPPORT_P4_14
 MidEnd::MidEnd(CompilerOptions &options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
+#else
+MidEnd::MidEnd(CompilerOptions & /*options*/) {
+#endif
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
@@ -151,7 +144,7 @@ int main(int argc, char *const argv[]) {
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "Not valid input file");
             return 1;
         }
@@ -162,7 +155,7 @@ int main(int argc, char *const argv[]) {
         if (program == nullptr || ::P4::errorCount() > 0) return 1;
 
         try {
-            P4::P4COptionPragmaParser optionsPragmaParser;
+            P4::P4COptionPragmaParser optionsPragmaParser(false);
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
             P4::FrontEnd fe;
@@ -180,8 +173,10 @@ int main(int argc, char *const argv[]) {
     const IR::ToplevelBlock *top = nullptr;
     try {
         top = midEnd.process(program);
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream).emit(program);
+        }
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

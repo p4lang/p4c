@@ -1,18 +1,7 @@
-/*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2016 VMware, Inc.
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "def_use.h"
 
@@ -100,7 +89,7 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
             result->createField(validFieldName, valid);
         }
         return result;
-    } else if (auto st = type->to<IR::Type_Stack>()) {
+    } else if (auto st = type->to<IR::Type_Array>()) {
         auto *result = construct<ArrayLocation>(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
             auto *sl = create(st->elementType, absl::StrCat(name, "[", i, "]"));
@@ -207,7 +196,7 @@ const LocationSet *LocationSet::getField(cstring field) const {
             }
         } else if (const auto *array = l->to<ArrayLocation>()) {
             for (const auto *f : *array) {
-                if (field == IR::Type_Stack::next || field == IR::Type_Stack::last) {
+                if (field == IR::Type_Array::next || field == IR::Type_Array::last) {
                     result->add(f);
                 } else {
                     f->to<StructLocation>()->addField(field, result);
@@ -296,10 +285,27 @@ void ProgramPoints::add(const ProgramPoints *from) {
     points.insert(from->points.begin(), from->points.end());
 }
 
+// Take the union of the current object with another.  A new ProgramPoints
+// will be allocated if necessary, but in the case where one of the two
+// ProgramPoints is a subset of the other, the latter will itself be returned.
 const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    auto *result = new ProgramPoints(points);
-    result->points.insert(with->points.begin(), with->points.end());
-    return result;
+    if (with == this) {
+        // Notice the case where the two are identical and exit early to avoid
+        // the iteration.
+        return this;
+    } else {
+        // Iterate over the (weakly) smaller of the two.
+        ProgramPoints *result = nullptr;
+        const ProgramPoints *larger = this, *smaller = with;
+        if (size() < with->size()) std::swap(larger, smaller);
+        for (auto pp : smaller->points) {
+            if (!larger->points.count(pp)) {
+                if (!result) result = new ProgramPoints(larger->points);
+                result->points.insert(pp);
+            }
+        }
+        return result ? result : larger;
+    }
 }
 
 bool ProgramPoints::operator==(const ProgramPoints &other) const {
@@ -521,7 +527,7 @@ bool ComputeWriteSet::preorder(const IR::StructExpression *expression) {
     return false;
 }
 
-bool ComputeWriteSet::preorder(const IR::HeaderStackExpression *expression) {
+bool ComputeWriteSet::preorder(const IR::ArrayExpression *expression) {
     expressionWrites(expression, LocationSet::empty);
     return false;
 }
@@ -574,12 +580,12 @@ bool ComputeWriteSet::preorder(const IR::Member *expression) {
     auto storage = getWrites(expression->expr);
 
     auto basetype = typeMap->getType(expression->expr, true);
-    if (basetype->is<IR::Type_Stack>()) {
-        if (expression->member.name == IR::Type_Stack::next ||
-            expression->member.name == IR::Type_Stack::last) {
+    if (basetype->is<IR::Type_Array>()) {
+        if (expression->member.name == IR::Type_Array::next ||
+            expression->member.name == IR::Type_Array::last) {
             expressionWrites(expression, storage);
             return false;
-        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+        } else if (expression->member.name == IR::Type_Array::lastIndex) {
             expressionWrites(expression, LocationSet::empty);
             return false;
         }
@@ -686,7 +692,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
             auto v = base->getField(StorageFactory::validFieldName);
             expressionWrites(expression, v);
             return false;
-        } else if (name == IR::Type_Stack::push_front || name == IR::Type_Stack::pop_front) {
+        } else if (name == IR::Type_Array::push_front || name == IR::Type_Array::pop_front) {
             expressionWrites(expression, base);
             return false;
         } else {
@@ -731,7 +737,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
 
     auto result = LocationSet::empty;
     // For all methods out/inout arguments are written
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         bool save = lhs;
         // pretend we are on the lhs
@@ -981,7 +987,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement *) {
     return setDefinitions(currentDefinitions);
 }
 
-bool ComputeWriteSet::preorder(const IR::AssignmentStatement *statement) {
+bool ComputeWriteSet::preorder(const IR::BaseAssignmentStatement *statement) {
     LOG3("CWS Visiting " << dbp(statement) << " " << statement);
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     lhs = true;

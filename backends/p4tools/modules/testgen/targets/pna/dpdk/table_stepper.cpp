@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/table_stepper.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

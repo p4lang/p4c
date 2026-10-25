@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef CONTROL_PLANE_ADDMISSINGIDS_H_
 #define CONTROL_PLANE_ADDMISSINGIDS_H_
 
@@ -25,7 +31,7 @@ class MissingIdAssigner : public Transform {
     /// The symbol table that contains all the ID information.
     /// This ID assigner first computes this table,
     /// then uses the results to assign missing IDs.
-    const ControlPlaneAPI::P4RuntimeSymbolTable *symbols = nullptr;
+    std::shared_ptr<const ControlPlaneAPI::P4RuntimeSymbolTable> symbols;
 
     /// The arch builder is necessary to compute the correct symbol table for a
     /// particular architecture.

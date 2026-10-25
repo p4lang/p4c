@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_
-#define BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_
 
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
@@ -114,4 +114,4 @@ class TableFieldPackOptimization : public MauInspector {
     std::list<PHV::FieldSlice> getPackCandidate(const PHV::FieldSlice &fs) const;
 };
 
-#endif /* BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_TABLE_PHV_CONSTRAINTS_H_ */

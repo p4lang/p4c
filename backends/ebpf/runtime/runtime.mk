@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Actual location of the makefile
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # If needed, bpf target files can be hardcoded here
@@ -73,7 +77,7 @@ $(BPFNAME).c: $(P4FILE)
 		echo "*** ERROR: Cannot find $(P4C)"; \
 		exit 1;\
 	fi;
-	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS)
+	$(P4C) --Werror --Wdisable=unused $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS)
 
 .PHONY: clean
 clean:

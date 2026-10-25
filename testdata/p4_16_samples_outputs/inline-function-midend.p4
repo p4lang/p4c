@@ -1,39 +1,15 @@
 control c(inout bit<32> x) {
-    @name("c.tmp") bit<32> tmp_2;
-    @hidden action inlinefunction2() {
-        tmp_2 = x;
+    @hidden action inlinefunction17() {
+        x = x + x;
     }
-    @hidden action inlinefunction2_0() {
-        tmp_2 = x;
-    }
-    @hidden action inlinefunction11() {
-        x = x + tmp_2;
-    }
-    @hidden table tbl_inlinefunction2 {
+    @hidden table tbl_inlinefunction17 {
         actions = {
-            inlinefunction2();
+            inlinefunction17();
         }
-        const default_action = inlinefunction2();
-    }
-    @hidden table tbl_inlinefunction2_0 {
-        actions = {
-            inlinefunction2_0();
-        }
-        const default_action = inlinefunction2_0();
-    }
-    @hidden table tbl_inlinefunction11 {
-        actions = {
-            inlinefunction11();
-        }
-        const default_action = inlinefunction11();
+        const default_action = inlinefunction17();
     }
     apply {
-        if (x > x) {
-            tbl_inlinefunction2.apply();
-        } else {
-            tbl_inlinefunction2_0.apply();
-        }
-        tbl_inlinefunction11.apply();
+        tbl_inlinefunction17.apply();
     }
 }
 

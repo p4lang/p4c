@@ -69,8 +69,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_var = 8w0 % function_with_side_effect(h.h.f);
         dummy_var = function_with_side_effect(h.h.g);
         dummy_var = 8w0 |-| function_with_side_effect(h.h.h);
-        dummy_var = 8w255 |+| function_with_side_effect(h.h.i);
-        dummy_var = 8w255 + function_with_side_effect(h.h.j);
+        dummy_var = function_with_side_effect(h.h.i) |+| 8w255;
+        dummy_var = function_with_side_effect(h.h.j) + 8w255;
         dummy_var = 8w255 | function_with_side_effect(h.h.k);
         dummy_var = -function_with_side_effect(h.h.l);
         dummy_var = (16w1 ++ function_with_side_effect(h.h.m))[15:8];

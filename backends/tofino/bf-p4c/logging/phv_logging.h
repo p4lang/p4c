@@ -16,14 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_LOGGING_PHV_LOGGING_H_
-#define BF_P4C_LOGGING_PHV_LOGGING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_
 
 #include <algorithm>
 #include <string>
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
 #include "backends/tofino/bf-p4c/logging/constrained_fields.h"
 #include "backends/tofino/bf-p4c/logging/group_constraint_extractor.h"
@@ -36,9 +35,10 @@
 #include "backends/tofino/bf-p4c/phv/make_clusters.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
-#include "backends/tofino/bf-p4c/phv/phv_spec.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv_spec.h"
 #include "ir/ir.h"
 
 using Logging::Phv_Schema_Logger;
@@ -348,4 +348,4 @@ class PhvLogging : public MauInspector {
                         const ordered_map<cstring, ordered_set<int>> &t, const TableSummary &ts);
 };
 
-#endif /* BF_P4C_LOGGING_PHV_LOGGING_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_ */

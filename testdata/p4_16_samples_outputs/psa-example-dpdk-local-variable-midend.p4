@@ -28,17 +28,17 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @hidden action psaexampledpdklocalvariable35() {
+    @hidden action psaexampledpdklocalvariable41() {
         hdr.ethernet.etherType = 16w0xff;
     }
-    @hidden table tbl_psaexampledpdklocalvariable35 {
+    @hidden table tbl_psaexampledpdklocalvariable41 {
         actions = {
-            psaexampledpdklocalvariable35();
+            psaexampledpdklocalvariable41();
         }
-        const default_action = psaexampledpdklocalvariable35();
+        const default_action = psaexampledpdklocalvariable41();
     }
     apply {
-        tbl_psaexampledpdklocalvariable35.apply();
+        tbl_psaexampledpdklocalvariable41.apply();
     }
 }
 

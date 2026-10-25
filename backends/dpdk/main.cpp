@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <cstdio>
 #include <fstream>  // IWYU pragma: keep
@@ -35,7 +24,6 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/exename.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
@@ -55,12 +43,11 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
 
     std::filesystem::path filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
-    std::ostream *out = openFile(filename, false);
-    if (!out) {
+    if (auto out = openFile(filename, false)) {
+        p4rt->serializeBFRuntimeSchema(out.get());
+    } else {
         ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
-        return;
     }
-    p4rt->serializeBFRuntimeSchema(out);
 }
 
 int main(int argc, char *const argv[]) {
@@ -86,7 +73,7 @@ int main(int argc, char *const argv[]) {
 
         if (program == nullptr || ::P4::errorCount() > 0) return 1;
         try {
-            P4::P4COptionPragmaParser optionsPragmaParser;
+            P4::P4COptionPragmaParser optionsPragmaParser(true);
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
             P4::FrontEnd frontend;
@@ -105,7 +92,7 @@ int main(int argc, char *const argv[]) {
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_INVALID, "Not valid input file");
             return 1;
         }
@@ -135,8 +122,10 @@ int main(int argc, char *const argv[]) {
         toplevel = midEnd.process(program);
         if (::P4::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
             return 1;
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream, true).emit(program);
+        }
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -149,8 +138,7 @@ int main(int argc, char *const argv[]) {
     if (::P4::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
-        std::ostream *out = openFile(options.outputFile, false);
-        if (out != nullptr) {
+        if (auto out = openFile(options.outputFile, false)) {
             backend->codegen(*out);
             out->flush();
         }

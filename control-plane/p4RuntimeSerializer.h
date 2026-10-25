@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef CONTROL_PLANE_P4RUNTIMESERIALIZER_H_
 #define CONTROL_PLANE_P4RUNTIMESERIALIZER_H_
@@ -24,6 +15,7 @@ limitations under the License.
 #pragma GCC diagnostic pop
 
 #include <iosfwd>
+#include <memory>
 #include <unordered_map>
 
 #include "lib/cstring.h"
@@ -64,22 +56,26 @@ struct P4RuntimeAPI {
 
     /// A P4Runtime P4Info message, which encodes the control-plane API of the
     /// program. Never null.
-    const ::p4::config::v1::P4Info *p4Info;
+    std::shared_ptr<const ::p4::config::v1::P4Info> p4Info;
     /// All static table entries as one P4Runtime WriteRequest object. Never
     /// null.
-    const ::p4::v1::WriteRequest *entries;
+    std::shared_ptr<const ::p4::v1::WriteRequest> entries;
 
     // Print options to use while outputting JSON.
     google::protobuf::util::JsonPrintOptions jsonPrintOptions;
 
-    P4RuntimeAPI(const ::p4::config::v1::P4Info *p4Info, const ::p4::v1::WriteRequest *entries)
-        : p4Info(p4Info), entries(entries) {
+    P4RuntimeAPI(std::shared_ptr<const ::p4::config::v1::P4Info> p4Info,
+                 std::shared_ptr<const ::p4::v1::WriteRequest> entries)
+        : p4Info(std::move(p4Info)), entries(std::move(entries)) {
         jsonPrintOptions.add_whitespace = true;
     }
 
-    P4RuntimeAPI(const ::p4::config::v1::P4Info *p4Info, const ::p4::v1::WriteRequest *entries,
+    P4RuntimeAPI(std::shared_ptr<const ::p4::config::v1::P4Info> p4Info,
+                 std::shared_ptr<const ::p4::v1::WriteRequest> entries,
                  google::protobuf::util::JsonPrintOptions jsonPrintOptions)
-        : p4Info(p4Info), entries(entries), jsonPrintOptions(jsonPrintOptions) {}
+        : p4Info(std::move(p4Info)),
+          entries(std::move(entries)),
+          jsonPrintOptions(jsonPrintOptions) {}
 };
 
 namespace ControlPlaneAPI {
@@ -137,7 +133,8 @@ class P4RuntimeSerializer {
  private:
     P4RuntimeSerializer();
 
-    std::unordered_map<cstring, const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface *>
+    std::unordered_map<cstring,
+                       std::shared_ptr<const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface>>
         archHandlerBuilders{};
 };
 

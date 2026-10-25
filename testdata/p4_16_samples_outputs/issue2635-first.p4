@@ -3,18 +3,18 @@ struct S<T, N> {
     bit<32> otherField;
 }
 
-struct S_0 {
+struct S_bit32_bit32 {
     bit<32> field;
     bit<32> otherField;
 }
 
-const S_0 s = (S_0){field = 32w0,otherField = 32w0};
+const S_bit32_bit32 s = (S_bit32_bit32){field = 32w0,otherField = 32w0};
 control _c<T>(out T t);
 package top<T>(_c<T> c);
-control c(out S_0 t) {
+control c(out S_bit32_bit32 t) {
     apply {
-        t = (S_0){field = 32w0,otherField = 32w0};
+        t = (S_bit32_bit32){field = 32w0,otherField = 32w0};
     }
 }
 
-top<S_0>(c()) main;
+top<S_bit32_bit32>(c()) main;

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "frontend.h"
 
@@ -40,16 +29,17 @@ limitations under the License.
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
-#include "getV1ModelVersion.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
+#include "metrics/metricsPassManager.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parseAnnotations.h"
 #include "parserControlFlow.h"
 #include "reassociation.h"
 #include "redundantParsers.h"
+#include "removeOpAssign.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -104,8 +94,8 @@ class PrettyPrint : public Inspector {
     }
     bool preorder(const IR::P4Program *program) override {
         if (!ppfile.empty()) {
-            std::ostream *ppStream = openFile(ppfile, true);
-            P4::ToP4 top4(ppStream, false, inputfile);
+            auto ppStream = openFile(ppfile, true);
+            P4::ToP4 top4(ppStream.get(), false, inputfile);
             (void)program->apply(top4);
         }
         return false;  // prune
@@ -144,6 +134,83 @@ class SetStrictStruct : public NoVisit {
     }
 };
 
+/**
+ * This pass validates switch statement semantics.
+ * Must be run after ConstantFolding.
+ */
+class ValidateSwitchStatements : public Inspector {
+ public:
+    explicit ValidateSwitchStatements() {}
+    bool preorder(const IR::SwitchStatement *stat) override {
+        const IR::Node *foundDefault = nullptr;
+        for (unsigned i = 0; i < stat->cases.size(); i++) {
+            const auto *c = stat->cases.at(i);
+            if (c->label->is<IR::DefaultExpression>()) {
+                if (foundDefault)
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: multiple 'default' labels %2%",
+                              c->label, foundDefault);
+                foundDefault = c->label;
+                continue;
+            }
+            for (unsigned j = i + 1; j < stat->cases.size(); j++) {
+                auto *other = stat->cases.at(j);
+                if (other->label->equiv(*c->label)) {
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: duplicate case label %2%",
+                              other->label, c->label);
+                }
+            }
+        }
+        return true;
+    }
+};
+
+/**
+ * Rejects duplicate method or constructor declarations within an extern.
+ * Overloaded methods may share a name only when a call can be disambiguated by
+ * the number of arguments or by argument names; two declarations with the same
+ * name, parameter count, and parameter names can never be told apart, so they
+ * are duplicates rather than overloads. The existing checks only fire when such
+ * a method is actually called, so a never-instantiated extern slips through.
+ * See also #5096 for the same rule on functions.
+ */
+class ValidateOverloadedMethods : public Inspector {
+    // Two same-named methods are indistinguishable when they have the same
+    // number of parameters and the same parameter names (argument types are
+    // not used to disambiguate overloads).
+    static bool sameSignature(const IR::Method *a, const IR::Method *b) {
+        auto aParams = a->getParameters()->parameters;
+        auto bParams = b->getParameters()->parameters;
+        if (aParams.size() != bParams.size()) return false;
+        for (const auto *ap : aParams) {
+            bool found = false;
+            for (const auto *bp : bParams) {
+                if (ap->name.name == bp->name.name) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+
+ public:
+    bool preorder(const IR::Type_Extern *ext) override {
+        for (size_t i = 0; i < ext->methods.size(); i++) {
+            const auto *m = ext->methods.at(i);
+            for (size_t j = i + 1; j < ext->methods.size(); j++) {
+                const auto *other = ext->methods.at(j);
+                if (m->name == other->name && sameSignature(m, other)) {
+                    P4::error(P4::ErrorType::ERR_DUPLICATE,
+                              "Duplicate declaration of %1%: previous declaration at %2%",
+                              other->name, m->srcInfo);
+                }
+            }
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
@@ -152,13 +219,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     TypeMap typeMap;
 
+    MetricsPassManager metricsPassManager(options, &typeMap, P4CContext::get().options().metrics);
+
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
 
     ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
 
     PassManager passes({
-        new P4V1::GetV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
@@ -167,9 +235,12 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new CheckShadowing(),
+        new WarnAboutUnusedDeclarations(*policy),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
+        new ValidateSwitchStatements(),
+        new ValidateOverloadedMethods(),
         // Validate @name/@deprecated/@noWarn. Should run after constant folding.
         new ValidateStringAnnotations(),
         // Desugars direct parser and control applications
@@ -196,38 +267,45 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SpecializeGenericFunctions(&typeMap),
         }),
         new CheckCoreMethods(&typeMap),
-        new StaticAssert(&typeMap),
+        new StaticAssert(&typeMap, policy->isStaticAssertFinal()),
+    });
+    metricsPassManager.addUnusedCode(passes, true);
+    passes.addPasses({
         new RemoveParserIfs(&typeMap),
         new StructInitializers(&typeMap),
         new TableKeyNames(&typeMap),
         new PassRepeated({
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new StrengthReduction(&typeMap, policy->enableSubConstToAddTransform()),
+            new StrengthReduction(&typeMap, policy->getStrengthReductionPolicy()),
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),
-        new SimplifyControlFlow(&typeMap),
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(*policy, true),
+        // Give each local declaration a unique internal name.
+        // Must run before SimplifyParsers, which may merge adjacent states that
+        // contain same-named state-local variables.
+        new UniqueNames(),
         new SimplifyParsers(),
         new ResetHeaders(&typeMap),
-        new UniqueNames(),       // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
-        new SimplifyControlFlow(&typeMap),
+        policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&typeMap),
         new UniqueParameters(&typeMap),
-        new SimplifyControlFlow(&typeMap),
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SpecializeAll(&typeMap, policy),
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
         new EvaluatorPass(&typeMap),
@@ -243,8 +321,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         });
     }
     if (policy->optimize(options)) {
+        passes.addPasses({new InlineActions(&typeMap, *policy)});
+        metricsPassManager.addInlined(passes);
         passes.addPasses({
-            new InlineActions(&typeMap, *policy),
             new LocalizeAllActions(*policy),
             new UniqueNames(),
             new UniqueParameters(&typeMap),
@@ -257,16 +336,20 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new SimplifyControlFlow(&typeMap),
+            new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&typeMap),
-            new UniqueNames(),       // needed again after inlining
-            new MoveDeclarations(),  // needed again after inlining
+            new UniqueNames(),           // needed again after inlining
+            new SimplifyParsers(false),  // remove newly unreachable states
+            new MoveDeclarations(),      // needed again after inlining
             new SimplifyDefUse(&typeMap),
-            new RemoveAllUnusedDeclarations(*policy),
-            new SimplifyControlFlow(&typeMap),
+            new RemoveAllUnusedDeclarations(*policy, true),
+            new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }
+    metricsPassManager.addUnusedCode(passes, false);
+    metricsPassManager.addMetricPasses(passes);
+
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.

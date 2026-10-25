@@ -4,6 +4,7 @@ error {
     TcpBadSackOptionLength
 }
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -175,9 +176,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.tcp_options_vec[9].s.setInvalid();
         hdr.tcp_options_vec[9].sack.setInvalid();
         hdr.tcp_options_padding.setInvalid();
-        transition Tcp_option_parser_start;
-    }
-    state Tcp_option_parser_start {
         verify(hdr.tcp.dataOffset >= 4w5, error.TcpDataOffsetTooSmall);
         Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
         transition Tcp_option_parser_next_option;

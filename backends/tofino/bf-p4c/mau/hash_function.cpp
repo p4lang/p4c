@@ -542,14 +542,14 @@ bool IR::MAU::HashFunction::convertPolynomialExtern(const IR::GlobalRef *ref) {
 }
 
 void IR::MAU::HashFunction::toJSON(JSONGenerator &json) const {
-    json << json.indent << "\"type\": " << static_cast<int>(type) << ",\n"
-         << json.indent << "\"size\": " << size << ",\n"
-         << json.indent << "\"msb\": " << msb << ",\n"
-         << json.indent << "\"reverse\": " << reverse << ",\n"
-         << json.indent << "\"poly\": " << poly << ",\n"
-         << json.indent << "\"init\": " << init << ",\n"
-         << json.indent << "\"xor\": " << final_xor << ",\n"
-         << json.indent << "\"extend\": " << extend;
+    json.emit("type", static_cast<int>(type));
+    json.emit("size", size);
+    json.emit("msb", msb);
+    json.emit("reverse", reverse);
+    json.emit("poly", poly);
+    json.emit("init", init);
+    json.emit("xor", final_xor);
+    json.emit("extend", extend);
 }
 
 void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
@@ -580,18 +580,18 @@ void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
 }
 
 IR::MAU::HashFunction *IR::MAU::HashFunction::fromJSON(JSONLoader &json) {
-    if (!json.json) return nullptr;
+    if (!json) return nullptr;
     auto *rv = new HashFunction;
     int type = 0;
-    json.load("type", type);
+    json.load("type", type) || json.error("missing field type");
     rv->type = static_cast<decltype(rv->type)>(type);
-    json.load("size", rv->size);
-    json.load("msb", rv->msb);
-    json.load("reverse", rv->reverse);
-    json.load("poly", rv->poly);
-    json.load("init", rv->init);
-    json.load("xor", rv->final_xor);
-    json.load("extend", rv->extend);
+    json.load("size", rv->size) || json.error("missing field size");
+    json.load("msb", rv->msb) || json.error("missing field msb");
+    json.load("reverse", rv->reverse) || json.error("missing field reverse");
+    json.load("poly", rv->poly) || json.error("missing field poly");
+    json.load("init", rv->init) || json.error("missing field init");
+    json.load("xor", rv->final_xor) || json.error("missing field final_xor");
+    json.load("extend", rv->extend) || json.error("missing field extend");
     return rv;
 }
 

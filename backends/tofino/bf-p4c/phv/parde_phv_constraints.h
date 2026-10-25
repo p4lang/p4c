@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
-#define BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
 
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
@@ -75,4 +75,4 @@ class TofinoParserConstantExtract : public Inspector {
     explicit TofinoParserConstantExtract(PhvInfo &p) : phv(p) {}
 };
 
-#endif /* BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_ */

@@ -1,24 +1,14 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ebpfType.h"
 
 namespace P4::EBPF {
 
 EBPFTypeFactory *EBPFTypeFactory::instance;
+bool EBPFTypeFactory::isTC;
 
 EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
     CHECK_NULL(type);
@@ -27,7 +17,11 @@ EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
     if (type->is<IR::Type_Boolean>()) {
         result = new EBPFBoolType();
     } else if (auto bt = type->to<IR::Type_Bits>()) {
-        result = new EBPFScalarType(bt);
+        if (EBPFTypeFactory::isTC) {
+            result = new EBPFScalarTypePNA(bt);
+        } else {
+            result = new EBPFScalarType(bt);
+        }
     } else if (auto st = type->to<IR::Type_StructLike>()) {
         result = new EBPFStructType(st);
     } else if (auto tt = type->to<IR::Type_Typedef>()) {
@@ -43,7 +37,7 @@ EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
         result = new EBPFEnumType(te);
     } else if (auto te = type->to<IR::Type_Error>()) {
         result = new EBPFErrorType(te);
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
+    } else if (auto ts = type->to<IR::Type_Array>()) {
         auto et = create(ts->elementType);
         if (et == nullptr) return nullptr;
         result = new EBPFStackType(ts, et);
@@ -128,7 +122,10 @@ void EBPFScalarType::emit(CodeBuilder *builder) {
 }
 
 void EBPFScalarType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
-    if (EBPFScalarType::generatesScalar(width)) {
+    if (type->variable()) {
+        builder->appendFormat("struct { u8 data[%d]; u16 curwidth; } %s", (width + 7) >> 3,
+                              id.c_str());
+    } else if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer) builder->append("*");
         builder->spc();
@@ -191,6 +188,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike *strct) : EBPFType(strc
         }
         fields.push_back(new EBPFField(type, f));
     }
+    packed = false;
 }
 
 void EBPFStructType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
@@ -227,6 +225,8 @@ void EBPFStructType::emitInitializer(CodeBuilder *builder) {
 void EBPFStructType::emit(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append(kind);
+    builder->spc();
+    if (packed) builder->append("__attribute__((__packed__))");
     builder->spc();
     builder->append(name);
     builder->spc();
@@ -382,6 +382,61 @@ void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     }
     builder->append(");");
     builder->newline();
+}
+
+unsigned EBPFScalarTypePNA::alignment() const {
+    if (width <= 8)
+        return 1;
+    else if (width <= 16)
+        return 2;
+    else if (width <= 24)
+        return 1;  // compiled as u8*
+    else if (width <= 32)
+        return 4;
+    else if (width <= 56)
+        return 1;  // compiled as u8*
+    else if (width <= 64)
+        return 8;
+    else
+        // compiled as u8*
+        return 1;
+}
+
+void EBPFScalarTypePNA::declare(CodeBuilder *builder, cstring id, bool asPointer) {
+    if (generatesScalar(width) && isPrimitiveByteAligned == true) {
+        emit(builder);
+        if (asPointer) builder->append("*");
+        builder->spc();
+        builder->append(id);
+    } else {
+        if (asPointer)
+            builder->appendFormat("u8* %s", id.c_str());
+        else
+            builder->appendFormat("u8 %s[%d]", id.c_str(), bytesRequired());
+    }
+}
+
+void EBPFScalarTypePNA::declareInit(CodeBuilder *builder, cstring id, bool asPointer) {
+    if (generatesScalar(width) && isPrimitiveByteAligned == true) {
+        emit(builder);
+        if (asPointer) builder->append("*");
+        builder->spc();
+        id = id + cstring(" = 0");
+        builder->append(id);
+    } else {
+        if (asPointer)
+            builder->appendFormat("u8* %s = NULL", id.c_str());
+        else
+            builder->appendFormat("u8 %s[%d] = {0}", id.c_str(), bytesRequired());
+    }
+}
+
+void EBPFScalarTypePNA::emitInitializer(CodeBuilder *builder) {
+    if (generatesScalar(width) && isPrimitiveByteAligned == true) {
+        builder->append("0");
+    } else {
+        builder->append("{ 0 }");
+    }
 }
 
 }  // namespace P4::EBPF

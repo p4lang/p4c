@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_
-#define BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_
 
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "backends/tofino/bf-p4c/phv/v2/allocator_base.h"
@@ -97,7 +97,7 @@ class GreedyAllocator : public AllocatorBase {
 
  public:
     GreedyAllocator(const PhvKit &kit, PhvInfo &phv, int pipe_id)
-        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id){};
+        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id) {};
 
     /// @returns false if allocation failed.
     /// allocate all @p clusters to phv_i. This function will directly print out errors
@@ -110,4 +110,4 @@ std::ostream &operator<<(std::ostream &, const GreedyAllocator::AllocResultWithS
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_ */

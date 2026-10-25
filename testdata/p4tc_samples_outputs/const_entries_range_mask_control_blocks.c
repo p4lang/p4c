@@ -46,6 +46,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct Meta_t *m;

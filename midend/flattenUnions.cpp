@@ -1,20 +1,11 @@
-/*
-Copyright 2022 Intel Corp.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2022 Intel Corp.
+// SPDX-FileCopyrightText: 2022 Intel Corp.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "flattenUnions.h"
+
+#include "frontends/p4/coreLibrary.h"
 
 namespace P4 {
 const IR::MethodCallStatement *HandleValidityHeaderUnion::processValidityForStr(
@@ -153,6 +144,15 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::SwitchStatement *a) {
     return a;
 }
 
+// True if DoFlattenHeaderUnion splits this union into separate headers
+bool HandleValidityHeaderUnion::isFlattened(const IR::Expression *u) const {
+    if (u->is<IR::ArrayIndex>()) return flattenStacks;
+    if (auto mem = u->to<IR::Member>()) return mem->expr->type->is<IR::Type_Struct>();
+    if (auto path = u->to<IR::PathExpression>())
+        return refMap->getDeclaration(path->path, true)->is<IR::Declaration_Variable>();
+    return false;
+}
+
 // Assumes nested structs are flattened before this pass
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
@@ -163,13 +163,23 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mc
                     return setInvalidforRest(mcs, m, huType, m->member.name, false);
             }
         }
+    } else if (auto em = mi->to<P4::ExternMethod>()) {
+        auto &corelib = P4CoreLibrary::instance();
+        if (em->actualExternType->name == corelib.packetIn.name &&
+            em->method->name == corelib.packetIn.extract.name) {  // pkt.extract(hdr.u.h1)
+            if (auto m = mcs->methodCall->arguments->at(0)->expression->to<IR::Member>()) {
+                auto huType = m->expr->type->to<IR::Type_HeaderUnion>();
+                if (huType && isFlattened(m->expr))
+                    return setInvalidforRest(mcs, m, huType, m->member.name, false);
+            }
+        }
     }
     return mcs;
 }
 
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Action *action) {
     if (toInsert.empty()) return action;
-    auto body = new IR::BlockStatement(action->body->srcInfo);
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     for (auto a : toInsert) body->push_back(a);
     for (auto s : action->body->components) body->push_back(s);
     action->body = body;
@@ -191,10 +201,59 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
     return control;
 }
 
+const IR::Node *DoExpandHeaderUnionStackPushPop::postorder(IR::MethodCallStatement *mcs) {
+    auto mem = mcs->methodCall->method->to<IR::Member>();
+    if (!mem) return mcs;
+    bool push = mem->member == IR::Type_Array::push_front;
+    if (!push && mem->member != IR::Type_Array::pop_front) return mcs;
+    auto stack = typeMap->getType(mem->expr, true)->to<IR::Type_Array>();
+    if (!stack) return mcs;
+    auto hu = stack->elementType->to<IR::Type_HeaderUnion>();
+    if (!hu) return mcs;  // regular header stacks are lowered by the backend
+    auto cst = mcs->methodCall->arguments->at(0)->expression->to<IR::Constant>();
+    if (!cst || !cst->fitsInt()) return mcs;
+
+    int n = cst->asInt();
+    int size = stack->getSize();
+    auto srcInfo = mcs->srcInfo;
+    if (n <= 0) return new IR::BlockStatement(srcInfo);
+
+    IR::IndexedVector<IR::StatOrDecl> block;
+    auto elem = [&](int i) {
+        return new IR::ArrayIndex(srcInfo, mem->expr->clone(), new IR::Constant(i));
+    };
+    // Copy element by element. A whole-union assignment would need CopyStructures, which
+    // has already run; HandleValidityHeaderUnion lowers each copy and keeps validity right.
+    auto copy = [&](int dst, int src) {
+        for (auto f : hu->fields)
+            block.push_back(
+                new IR::AssignmentStatement(srcInfo, new IR::Member(srcInfo, elem(dst), f->name),
+                                            new IR::Member(srcInfo, elem(src), f->name)));
+    };
+    auto invalidate = [&](int i) {
+        for (auto f : hu->fields) {
+            auto method = new IR::Member(srcInfo, new IR::Member(srcInfo, elem(i), f->name),
+                                         IR::ID(IR::Type_Header::setInvalid));
+            block.push_back(new IR::MethodCallStatement(
+                srcInfo,
+                new IR::MethodCallExpression(srcInfo, method, new IR::Vector<IR::Argument>())));
+        }
+    };
+
+    if (push) {  // shift up, invalidate the new front elements
+        for (int t = size - 1; t >= n; t--) copy(t, t - n);
+        for (int i = 0; i < n && i < size; i++) invalidate(i);
+    } else {  // shift down, invalidate the new back elements
+        for (int t = 0; t + n < size; t++) copy(t, t + n);
+        for (int i = (size - n > 0 ? size - n : 0); i < size; i++) invalidate(i);
+    }
+    return new IR::BlockStatement(srcInfo, std::move(block));
+}
+
 bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
-        if (auto hus = ftype->to<IR::Type_Stack>()) {
+        if (auto hus = ftype->to<IR::Type_Array>()) {
             if (hus->elementType->is<IR::Type_HeaderUnion>()) return true;
         }
     }
@@ -211,7 +270,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
     std::vector<cstring> indexVec;
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
-        if (auto hus = ftype->to<IR::Type_Stack>()) {
+        if (auto hus = ftype->to<IR::Type_Array>()) {
             if (hus->elementType->is<IR::Type_HeaderUnion>()) {
                 size_t stackSize = hus->getSize();
                 for (size_t i = 0; i < stackSize; i++) {
@@ -219,7 +278,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
                     fields.push_back(new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
                     indexVec.push_back(uName);
                 }
-                stackMap.emplace(sf->name.name, indexVec);
+                stackFieldMap.emplace(std::make_pair(s->name.name, sf->name.name), indexVec);
                 indexVec.clear();
             } else {
                 fields.push_back(sf);
@@ -237,7 +296,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
     auto ftype = typeMap->getTypeType(dv->type, true);
     IR::IndexedVector<IR::Declaration> toInsert;
     std::vector<cstring> indexVec;
-    if (auto hus = ftype->to<IR::Type_Stack>()) {
+    if (auto hus = ftype->to<IR::Type_Array>()) {
         if (hus->elementType->is<IR::Type_HeaderUnion>()) {
             size_t stackSize = hus->getSize();
             for (size_t i = 0; i < stackSize; i++) {
@@ -258,26 +317,32 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
 /* Replace all occurence of header union stack element references with the header union variables */
 const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
     auto ftype = typeMap->getType(e->left, true);
-    if (auto stack = ftype->to<IR::Type_Stack>()) {
+    if (auto stack = ftype->to<IR::Type_Array>()) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
-            if (!e->right->is<IR::Constant>())
+            if (!e->right->is<IR::Constant>()) {
                 ::P4::error(
                     ErrorType::ERR_INVALID,
                     "Target expects constant array indices for accessing header union stack "
                     "elements, %1% is not a constant",
                     e->right);
+                return e;
+            }
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
                 ::P4::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
-                auto uName = stackMap[mem->member.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
-                auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
+                auto ownerType = mem->expr->type->checkedTo<IR::Type_Struct>();
+                auto key = std::make_pair(ownerType->name.name, mem->member.name);
+                auto names = stackFieldMap.find(key);
+                BUG_CHECK(names != stackFieldMap.end() && names->second.size() > cst,
+                          "Header stack element mapping not found for %1%", e);
+                auto member =
+                    new IR::Member(stack->elementType, mem->expr, IR::ID(names->second[cst]));
                 return member;
             } else if (auto path = e->left->to<IR::PathExpression>()) {
                 auto uName = stackMap[path->path->name.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
                 auto path1 =
                     new IR::PathExpression(stack->elementType, new IR::Path(IR::ID(uName[cst])));
                 return path1;
@@ -315,7 +380,7 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::Type_Struct *s) {
                     fieldMap.emplace(sfu->name.name, uName);
                     fields.push_back(new IR::StructField(IR::ID(uName), uType));
                 }
-                replacementMap.emplace(sf->name.name, fieldMap);
+                structReplacementMap.emplace(std::make_pair(s->name.name, sf->name.name), fieldMap);
             } else {
                 fields.push_back(sf);
             }
@@ -345,10 +410,15 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
 const IR::Node *DoFlattenHeaderUnion::postorder(IR::Member *m) {
     if (m->expr->type->to<IR::Type_HeaderUnion>()) {
         if (auto huf = m->expr->to<IR::Member>()) {
-            if (replacementMap.count(huf->member.name)) {
-                if (replacementMap.at(huf->member.name).count(m->member.name)) {
-                    auto newHuName = replacementMap.at(huf->member.name).at(m->member.name);
-                    return new IR::Member(huf->expr, IR::ID(newHuName));
+            auto ownerType = huf->expr->type->to<IR::Type_Struct>();
+            if (ownerType != nullptr) {
+                auto key = std::make_pair(ownerType->name.name, huf->member.name);
+                auto fields = structReplacementMap.find(key);
+                if (fields != structReplacementMap.end()) {
+                    auto replacement = fields->second.find(m->member.name);
+                    if (replacement != fields->second.end()) {
+                        return new IR::Member(huf->expr, IR::ID(replacement->second));
+                    }
                 }
             }
             return m;
@@ -380,7 +450,7 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Action *action) {
             }
         }
     }
-    auto body = new IR::BlockStatement(action->body->srcInfo);
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     for (auto a : actiondecls) body->push_back(a);
     action->body = body;
     return action;

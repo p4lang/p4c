@@ -24,9 +24,9 @@
 #include <boost/property_map/transform_value_property_map.hpp>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "backends/tofino/bf-p4c/parde/parser_loops_info.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace BFN {
 
@@ -499,7 +499,7 @@ class AddParserPad : public Modifier {
     // New IR nodes created by this pass
     IR::StructField *padField = nullptr;
     IR::Type_Header *padHdr = nullptr;
-    std::map<cstring, IR::Type_Stack *> padHdrStack;
+    std::map<cstring, IR::Type_Array *> padHdrStack;
     std::map<cstring, IR::StructField *> padHdrStackField;
     std::map<cstring, const IR::Type_Struct *> hdrStruct;
     std::vector<const IR::Type_Struct *> addedHdrStruct;
@@ -507,13 +507,11 @@ class AddParserPad : public Modifier {
     // Tofino1-like architectures
     std::set<cstring> tofArch = {
         "tna"_cs,
-#if HAVE_JBAY
         "t2na"_cs,
-#endif /* HAVE_JBAY */
     };
 
     /**
-     * Create Type_Header, Type_Stack, and StructField IR objects to be inserted during
+     * Create Type_Header, Type_Array, and StructField IR objects to be inserted during
      * traversal
      */
     void createHdrStacks() {
@@ -542,7 +540,7 @@ class AddParserPad : public Modifier {
             }
 
             auto *stack =
-                new IR::Type_Stack(new IR::Type_Name(ParserEnforceDepthReq::pad_hdr_type_name),
+                new IR::Type_Array(new IR::Type_Name(ParserEnforceDepthReq::pad_hdr_type_name),
                                    new IR::Constant(num_states));
             std::string field_name =
                 ParserEnforceDepthReq::pad_hdr_name + "_" + std::to_string(stackId++);

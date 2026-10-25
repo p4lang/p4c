@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
@@ -11,3 +15,8 @@ updates:
     # Specify labels for github-actions pull requests
     labels:
       - "infrastructure"
+    # Bundle updates into a single PR.
+    groups:
+      actions:
+        patterns:
+          - "*"

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
-#define BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
 
 #include <optional>
 #include <vector>
@@ -126,7 +126,7 @@ enum class ErrorCode {
 struct Error {
     ErrorCode code;
     cstring msg;
-    Error(ErrorCode code, cstring msg) : code(code), msg(msg){};
+    Error(ErrorCode code, cstring msg) : code(code), msg(msg) {};
 };
 
 /// ContainerSpec container specification.
@@ -340,7 +340,7 @@ class ActionMoveSolver : public ActionSolverBase {
 /// are not set in this action need to be not live.
 class ActionMochaSolver : public ActionSolverBase {
  public:
-    ActionMochaSolver(){};
+    ActionMochaSolver() {};
     Result solve() override;
 };
 
@@ -351,10 +351,10 @@ class ActionMochaSolver : public ActionSolverBase {
 /// are not set in this action need not to be not live.
 class ActionDarkSolver : public ActionSolverBase {
  public:
-    ActionDarkSolver(){};
+    ActionDarkSolver() {};
     Result solve() override;
 };
 
 }  // namespace solver
 
-#endif /* BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_ */

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "parseAnnotations.h"
 
@@ -21,13 +10,15 @@ namespace P4 {
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
         // These annotations have empty bodies.
-        PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+        PARSE_EMPTY(IR::Annotation::atomicAnnotation),
         PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
         PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
-        PARSE_EMPTY(IR::Annotation::atomicAnnotation),
+        PARSE_EMPTY(IR::Annotation::likelyAnnotation),
+        PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
         PARSE_EMPTY(IR::Annotation::optionalAnnotation),
         PARSE_EMPTY(IR::Annotation::pureAnnotation),
-        PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
+        PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+        PARSE_EMPTY(IR::Annotation::unlikelyAnnotation),
         PARSE_EMPTY("disable_optimization"_cs),
         PARSE_EMPTY("unroll"_cs),
         PARSE_EMPTY("nounroll"_cs),
@@ -51,6 +42,9 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
         // @match has an expression argument
         PARSE(IR::Annotation::matchAnnotation, Expression),
+
+        // @command_line to add to the command line
+        PARSE_STRING_LITERAL_LIST("command_line"_cs),
     };
 }
 
@@ -127,7 +121,11 @@ bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation *annotation
 }
 
 void ParseAnnotations::postorder(IR::Annotation *annotation) {
-    if (!annotation->needsParsing()) return;
+    if (!annotation->needsParsing()) {
+        if (errorRequireParse && annotation->structured && handlers.count(annotation->name.name))
+            error(ErrorType::ERR_UNEXPECTED, "Expected a normal annotation: %1%", annotation);
+        return;
+    }
 
     cstring name = annotation->name.name;
     auto handler = handlers.find(name);

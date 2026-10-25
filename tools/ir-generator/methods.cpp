@@ -1,22 +1,12 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2013-present Barefoot Networks, Inc.
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "irclass.h"
 #include "lib/algorithm.h"
 #include "lib/enumerator.h"
+#include "type.h"
 
 namespace P4 {
 
@@ -53,7 +43,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                       << parent->qualified_name(cl->containedIn) << " &>(a))";
               first = false;
           }
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
               if (!first) buf << std::endl << cl->indent << cl->indent << "&& ";
@@ -99,7 +89,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << LineDirective(srcInfo, true) << body;
           } else {
               bool first = true;
-              for (auto f : *cl->getFields()) {
+              for (auto f : cl->getFields()) {
                   if (f->type && *f->type == NamedType::SourceInfo())
                       continue;  // FIXME -- deal with SourcInfo
                   if (first) {
@@ -107,7 +97,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                           << " &>(a_);\n";
                       // See, if we are having any variant fields and therefore need to generate
                       // equiv visitors
-                      for (const auto *f : *cl->getFields()) {
+                      for (const auto *f : cl->getFields()) {
                           if (f->type) continue;
                           const auto *varF = f->to<IrVariantField>();
                           buf << cl->indent << cl->indent << "auto " << f->name
@@ -124,8 +114,9 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                                   buf << "return variant.equiv(std::get<" << type->toString()
                                       << ">(a." << f->name << ")); ";
                               } else {
-                                  buf << "return variant.equiv(std::get<" << type->toString()
-                                      << ">(a." << f->name << ")); ";
+                                  // Not an IR type, so it has no equiv()
+                                  buf << "return variant == std::get<" << type->toString() << ">(a."
+                                      << f->name << "); ";
                               }
                               buf << "}\n";
                               first = false;
@@ -174,22 +165,26 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       }}},
     {"visit_children"_cs,
      {&NamedType::Void(),
-      {new IrField(&ReferenceType::VisitorRef, "v"_cs)},
+      {new IrField(&ReferenceType::VisitorRef, "v"_cs),
+       new IrField(new PointerType(&NamedType::Char(), true), "n"_cs, "nullptr"_cs)},
       IN_IMPL + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << std::endl;
+          // Silence "not used" warnings in case of name `n` is not used
+          buf << cl->indent << "(void)n;" << std::endl;
           if (auto parent = cl->getParent())
-              buf << cl->indent << parent->qualified_name(cl->containedIn) << "::visit_children(v);"
-                  << std::endl;
-          for (auto f : *cl->getFields()) {
+              buf << cl->indent << parent->qualified_name(cl->containedIn)
+                  << "::visit_children(v, n);" << std::endl;
+          for (auto f : cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
                       // This is not an IR pointer
                       continue;
                   if (f->isInline)
-                      buf << cl->indent << f->name << ".visit_children(v);" << std::endl;
+                      buf << cl->indent << f->name << ".visit_children(v, \"" << f->name << "\");"
+                          << std::endl;
                   else
                       buf << cl->indent << "v.visit(" << f->name << ", \"" << f->name << "\");"
                           << std::endl;
@@ -225,10 +220,18 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       {},
       CONST + IN_IMPL + EXTEND + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+          // Only generate a validator if this class has checks of its own.
           bool needed = false;
           std::stringstream buf;
           buf << "{" << LineDirective(true);
-          for (auto f : *cl->getFields()) {
+          // Check inherited fields too. Interfaces have no Node base to validate.
+          if (cl->kind != NodeKind::Interface) {
+              if (auto parent = cl->getParent())
+                  buf << std::endl
+                      << cl->indent << cl->indent << parent->qualified_name(cl->containedIn)
+                      << "::validate();";
+          }
+          for (auto f : cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
                       // This is not an IR pointer
@@ -305,7 +308,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               }
           };
 
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
               if (f->type) {
@@ -343,13 +346,12 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent())
               buf << cl->indent << parent->qualified_name(cl->containedIn) << "::toJSON(json);"
                   << std::endl;
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
-              if (!f->isInline && f->nullOK)
-                  buf << cl->indent << "if (" << f->name << " != nullptr) ";
-              buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\"" << f->name
-                  << "\\\" : \" << " << "this->" << f->name << ";" << std::endl;
+              buf << cl->indent;
+              if (!f->isInline && f->nullOK) buf << "if (" << f->name << " != nullptr) ";
+              buf << "json.emit(\"" << f->name << "\", " << f->name << ");" << std::endl;
           }
           buf << "}";
           return {buf};
@@ -363,11 +365,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent())
               buf << ": " << parent->qualified_name(cl->containedIn) << "(json)";
           buf << " {" << std::endl;
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
-                  continue;  // FIXME -- deal with SourcInfo
-              buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
-                  << std::endl;
+                  continue;  // FIXME -- deal with SourceInfo
+              buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ")";
+              if (f->isInline || !f->nullOK)
+                  buf << " || json.error(\"missing field " << f->name << "\")";
+              buf << ";" << std::endl;
           }
           buf << "}";
           return {buf};
@@ -380,7 +384,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       FACTORY + IN_IMPL + CONCRETE_ONLY + INCL_NESTED,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
-          buf << "{ return new " << cl->name << "(json); }";
+          buf << "{\n"
+              << cl->indent << "json.track_decode();\n"
+              << cl->indent << "auto *rv = new " << cl->name << "(json);\n"
+              << cl->indent
+              << "json.undecoded([](JSONLoader &json, cstring key, const JsonData &) {\n"
+              << cl->indent << cl->indent << "json.error(\"unused field \" + key); });\n"
+              << cl->indent << "return rv;\n}";
           return {buf};
       }}},
     {"toString"_cs,
@@ -445,7 +455,7 @@ void IrClass::generateMethods() {
     }
     IrMethod *ctor = nullptr;
     bool user_defined_default_ctor = false;
-    for (auto m : *getUserMethods()) {
+    for (auto m : getUserMethods()) {
         if (m->rtype) {
             m->rtype->resolve(&local);
             continue;

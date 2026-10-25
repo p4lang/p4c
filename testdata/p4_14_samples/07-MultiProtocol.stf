@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 setdefault ethertype_match l2_packet()
 add ethertype_match etherType:0x800 ipv4_packet()
 add ethertype_match etherType:0x86dd ipv6_packet()

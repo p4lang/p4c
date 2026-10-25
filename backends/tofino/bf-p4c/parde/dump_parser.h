@@ -26,8 +26,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/dump.h"
 #include "lib/log.h"
 

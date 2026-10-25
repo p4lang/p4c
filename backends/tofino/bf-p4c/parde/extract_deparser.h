@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_EXTRACT_DEPARSER_H_
-#define BF_P4C_PARDE_EXTRACT_DEPARSER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_EXTRACT_DEPARSER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_EXTRACT_DEPARSER_H_
 
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
-#include "backends/tofino/bf-p4c/device.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -87,6 +87,7 @@ class ExtractDeparser : public DeparserInspector {
     IR::ID getTnaParamName(const IR::BFN::TnaDeparser *deparser, IR::ID orig_name);
 
     bool preorder(const IR::Annotation *annot) override;
+    bool preorder(const IR::BaseAssignmentStatement *) override { BUG("not handled"); }
     bool preorder(const IR::AssignmentStatement *stmt) override;
     void postorder(const IR::MethodCallExpression *mc) override;
     void end_apply() override;
@@ -154,4 +155,4 @@ struct AssignmentStmtErrorCheck : public DeparserInspector {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_PARDE_EXTRACT_DEPARSER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_EXTRACT_DEPARSER_H_ */

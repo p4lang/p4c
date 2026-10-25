@@ -49,6 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     @name("ingress.tmp") bool tmp;
     @name("ingress.hdr_0") headers hdr_1;
     @name("ingress.retval") bool retval;
+    @name("ingress.inlinedRetval") bool inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
@@ -70,7 +71,8 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         } else {
             retval = false;
         }
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         if (tmp) {
             hdr.base.t = 8w3;
         }

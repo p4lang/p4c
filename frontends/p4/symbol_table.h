@@ -1,23 +1,14 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* -*-C++-*- */
 
-#ifndef P4_SYMBOL_TABLE_H_
-#define P4_SYMBOL_TABLE_H_
+#ifndef FRONTENDS_P4_SYMBOL_TABLE_H_
+#define FRONTENDS_P4_SYMBOL_TABLE_H_
 
 /* A very simple symbol table that recognizes types; necessary because
    the v1.2 grammar is ambiguous without type information */
@@ -73,8 +64,8 @@ class ProgramStructure final {
     // the last namespace has been exited
     void pop();
     // Declares these types in the current scope
-    void declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars);
-    void declareParameters(const IR::IndexedVector<IR::Parameter> *params);
+    void declareTypes(const IR::IndexedVector<IR::Type_Var> &typeVars);
+    void declareParameters(const IR::IndexedVector<IR::Parameter> &params);
     SymbolKind lookupIdentifier(cstring identifier);
 
     void startAbsolutePath();
@@ -88,4 +79,4 @@ class ProgramStructure final {
 };
 
 }  // namespace P4::Util
-#endif /* P4_SYMBOL_TABLE_H_ */
+#endif /* FRONTENDS_P4_SYMBOL_TABLE_H_ */

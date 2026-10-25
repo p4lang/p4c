@@ -1,18 +1,9 @@
 /*
-Copyright 2019 RT-RK Computer Based Systems.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2019 RT-RK Computer Based Systems.
+ * SPDX-FileCopyrightText: 2019 RT-RK Computer Based Systems.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 
 #include <core.p4>
@@ -89,8 +80,8 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-    X tmp = X.Field_0;
-    Y tmp2 = Y.Field_00;
+      X tmp = X.Field_0;
+      Y tmp2 = Y.Field_00;
       if (tmp == X.Field_0){
         if (tmp2 == Y.Field_00){
           standard_metadata.egress_spec = port;

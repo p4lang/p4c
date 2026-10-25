@@ -1,0 +1,3 @@
+no-header2-bmv2.p4(50): [--Werror=type-error] error: b.emit(hdr): argument must be a header, stack or union, or a struct or tuple of such types
+        b.emit(hdr); // illegal data type
+        ^^^^^^^^^^^

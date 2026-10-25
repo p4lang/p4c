@@ -41,50 +41,50 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_2") bit<8> tmp_2;
     @name("ingress.val_0") bit<8> val;
-    @hidden action gauntlet_short_circuitbmv2l55() {
+    @hidden action gauntlet_short_circuitbmv2l61() {
         tmp_2 = 8w1;
     }
-    @hidden action gauntlet_short_circuitbmv2l55_0() {
+    @hidden action gauntlet_short_circuitbmv2l61_0() {
         tmp_2 = 8w2;
     }
-    @hidden action act() {
+    @hidden action gauntlet_short_circuitbmv2l61_1() {
         h.b.b = val;
     }
-    @hidden action gauntlet_short_circuitbmv2l55_1() {
+    @hidden action gauntlet_short_circuitbmv2l61_2() {
         h.b.a = tmp_2;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_short_circuitbmv2l61 {
         actions = {
-            act();
+            gauntlet_short_circuitbmv2l61_1();
         }
-        const default_action = act();
+        const default_action = gauntlet_short_circuitbmv2l61_1();
     }
-    @hidden table tbl_gauntlet_short_circuitbmv2l55 {
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_0 {
         actions = {
-            gauntlet_short_circuitbmv2l55();
+            gauntlet_short_circuitbmv2l61();
         }
-        const default_action = gauntlet_short_circuitbmv2l55();
+        const default_action = gauntlet_short_circuitbmv2l61();
     }
-    @hidden table tbl_gauntlet_short_circuitbmv2l55_0 {
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_1 {
         actions = {
-            gauntlet_short_circuitbmv2l55_0();
+            gauntlet_short_circuitbmv2l61_0();
         }
-        const default_action = gauntlet_short_circuitbmv2l55_0();
+        const default_action = gauntlet_short_circuitbmv2l61_0();
     }
-    @hidden table tbl_gauntlet_short_circuitbmv2l55_1 {
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_2 {
         actions = {
-            gauntlet_short_circuitbmv2l55_1();
+            gauntlet_short_circuitbmv2l61_2();
         }
-        const default_action = gauntlet_short_circuitbmv2l55_1();
+        const default_action = gauntlet_short_circuitbmv2l61_2();
     }
     apply {
-        tbl_act.apply();
+        tbl_gauntlet_short_circuitbmv2l61.apply();
         if (8w1 != val) {
-            tbl_gauntlet_short_circuitbmv2l55.apply();
+            tbl_gauntlet_short_circuitbmv2l61_0.apply();
         } else {
-            tbl_gauntlet_short_circuitbmv2l55_0.apply();
+            tbl_gauntlet_short_circuitbmv2l61_1.apply();
         }
-        tbl_gauntlet_short_circuitbmv2l55_1.apply();
+        tbl_gauntlet_short_circuitbmv2l61_2.apply();
     }
 }
 

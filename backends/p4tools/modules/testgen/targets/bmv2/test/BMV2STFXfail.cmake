@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
 
@@ -40,7 +44,6 @@ p4tools_add_xfail_reason(
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
   control-hs-index-test3.p4
-  parser-unroll-test1.p4
   # terminate called after throwing an instance of 'std::out_of_range'
   control-hs-index-test2.p4
 )
@@ -69,6 +72,12 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
+  "with type .* is not a Constant"
+  issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
   "Cast failed"
   # push front can not handle tainted header validity.
   header-stack-ops-bmv2.p4
@@ -91,8 +100,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-  # Issue with the clone implementation.
-  v1model-special-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -104,8 +111,17 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
   issue4739.p4
   loop-3-clause-tricky2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
+  "nested stack"
+  # testgen has issues with arrays
+  array1.p4
+  array2.p4
 )
 
 ####################################################################################################
@@ -182,14 +198,20 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
+  # P4Testgen reaches this error only if it skips the generic extern argument.
+  "Unknown or unimplemented extern method: observe"
+  generic-extern-instance-argument.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
   issue3225.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
-  "with type Type_Specialized is not a Type_Declaration"
+  "P4Testgen back end only supports a 'V1Switch' main"
   # Pipeline as a parameter of a switch, not a valid v1model program
   issue1304.p4
 )

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Google LLC
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
 namespace P4 {
@@ -15,18 +19,13 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
         }
         type = type->getP4Type();
     }
-    const auto *annotatedType = type->to<IR::IAnnotated>();
-    if (annotatedType == nullptr) {
-        return p4RuntimeAnnotations;
-    }
-    const auto *p4runtimeAnnotation = annotatedType->getAnnotation("p4runtime_translation"_cs);
-    if (p4runtimeAnnotation != nullptr) {
+    if (const auto *p4runtimeAnnotation = type->getAnnotation("p4runtime_translation"_cs)) {
         BUG_CHECK(!p4runtimeAnnotation->needsParsing(),
                   "The @p4runtime_translation annotation should have been parsed already.");
         p4RuntimeAnnotations.push_back(p4runtimeAnnotation);
     }
     const auto *p4runtimeTranslationMappings =
-        annotatedType->getAnnotation("p4runtime_translation_mappings"_cs);
+        type->getAnnotation("p4runtime_translation_mappings"_cs);
     if (p4runtimeTranslationMappings != nullptr) {
         BUG_CHECK(
             !p4runtimeTranslationMappings->needsParsing(),

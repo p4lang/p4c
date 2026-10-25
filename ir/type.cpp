@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <cstddef>
 #include <map>
@@ -31,12 +20,12 @@ limitations under the License.
 
 namespace P4::IR {
 
-const cstring IR::Type_Stack::next = "next"_cs;
-const cstring IR::Type_Stack::last = "last"_cs;
-const cstring IR::Type_Stack::arraySize = "size"_cs;
-const cstring IR::Type_Stack::lastIndex = "lastIndex"_cs;
-const cstring IR::Type_Stack::push_front = "push_front"_cs;
-const cstring IR::Type_Stack::pop_front = "pop_front"_cs;
+const cstring IR::Type_Array::next = "next"_cs;
+const cstring IR::Type_Array::last = "last"_cs;
+const cstring IR::Type_Array::arraySize = "size"_cs;
+const cstring IR::Type_Array::lastIndex = "lastIndex"_cs;
+const cstring IR::Type_Array::push_front = "push_front"_cs;
+const cstring IR::Type_Array::pop_front = "pop_front"_cs;
 const cstring IR::Type_Header::isValid = "isValid"_cs;
 const cstring IR::Type_Header::setValid = "setValid"_cs;
 const cstring IR::Type_Header::setInvalid = "setInvalid"_cs;
@@ -53,7 +42,7 @@ long Type_Declaration::nextId = 0;
 long Type_InfInt::nextId = 0;
 long Type_Any::nextId = 0;
 
-const Type *Type_Stack::at(size_t) const { return elementType; }
+const Type *Type_Array::at(size_t) const { return elementType; }
 
 const Type_Bits *Type_Bits::get(int width, bool isSigned) {
     // map (width, signed) to type
@@ -84,6 +73,13 @@ const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, int sz, bool isSigne
 
 const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, const IR::Expression *expression,
                                 bool isSigned) {
+    if (auto *k = expression->to<IR::Constant>()) {
+        if (!k->fitsInt())
+            error(ErrorType::ERR_OVERLIMIT,
+                  "%1$x: this implementation does not support bitstrings this large", k);
+        else
+            return get(si, k->asInt(), isSigned);
+    }
     return new IR::Type_Bits(si, expression, isSigned);
 }
 
@@ -121,6 +117,13 @@ const Type_String *Type_String::get(const Util::SourceInfo &si) {
 }
 
 const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, const IR::Expression *expr) {
+    if (auto *k = expr->to<IR::Constant>()) {
+        if (!k->fitsInt())
+            error(ErrorType::ERR_OVERLIMIT,
+                  "%1$x: this implementation does not support bitstrings this large", k);
+        else
+            return get(si, k->asInt());
+    }
     return new Type_Varbits(si, expr);
 }
 

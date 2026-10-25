@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_PHV_KIT_H_
-#define BF_P4C_PHV_V2_PHV_KIT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/mau/table_mutex.h"
@@ -30,13 +30,13 @@
 #include "backends/tofino/bf-p4c/phv/collect_table_keys.h"
 #include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
 #include "backends/tofino/bf-p4c/phv/make_clusters.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "backends/tofino/bf-p4c/phv/slicing/types.h"
 #include "backends/tofino/bf-p4c/phv/v2/action_packing_validator.h"
 #include "backends/tofino/bf-p4c/phv/v2/parser_packing_validator.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace PHV {
 namespace v2 {
@@ -210,4 +210,4 @@ struct PhvKit {
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_PHV_KIT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_ */

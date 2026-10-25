@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 extern void __e(in bit<28> arg);
 extern void __e2(in bit<28> arg);
 

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_VALIDATE_ALLOCATION_H_
-#define BF_P4C_PHV_VALIDATE_ALLOCATION_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_VALIDATE_ALLOCATION_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_VALIDATE_ALLOCATION_H_
 
 #include "backends/tofino/bf-p4c/phv/alloc_setting.h"
 #include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
@@ -72,4 +72,4 @@ class ValidateAllocation final : public Inspector {
 
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_VALIDATE_ALLOCATION_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_VALIDATE_ALLOCATION_H_ */

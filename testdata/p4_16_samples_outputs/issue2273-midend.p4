@@ -25,17 +25,17 @@ control ingress(inout headers hdr) {
             rv = 16w0xf0f0;
         }
     };
-    @hidden action issue2273l48() {
+    @hidden action issue2273l39() {
         hdr.data.h1 = read_0.pop();
     }
-    @hidden table tbl_issue2273l48 {
+    @hidden table tbl_issue2273l39 {
         actions = {
-            issue2273l48();
+            issue2273l39();
         }
-        const default_action = issue2273l48();
+        const default_action = issue2273l39();
     }
     apply {
-        tbl_issue2273l48.apply();
+        tbl_issue2273l39.apply();
     }
 }
 

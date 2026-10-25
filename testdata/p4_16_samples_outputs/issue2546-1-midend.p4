@@ -42,64 +42,64 @@ control ingress(inout Headers h) {
         }
         default_action = NoAction_2();
     }
-    @hidden action act() {
+    @hidden action issue25461l39() {
         tmp = true;
     }
-    @hidden action act_0() {
+    @hidden action issue25461l39_0() {
         tmp = false;
     }
-    @hidden action issue25461l33() {
+    @hidden action issue25461l39_1() {
         tmp_0 = 8w1;
     }
-    @hidden action issue25461l33_0() {
+    @hidden action issue25461l39_2() {
         tmp_0 = 8w2;
     }
-    @hidden action issue25461l40() {
+    @hidden action issue25461l46() {
         h.eth_hdr.dst_addr = 48w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue25461l39 {
         actions = {
-            act();
+            issue25461l39();
         }
-        const default_action = act();
+        const default_action = issue25461l39();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue25461l39_0 {
         actions = {
-            act_0();
+            issue25461l39_0();
         }
-        const default_action = act_0();
+        const default_action = issue25461l39_0();
     }
-    @hidden table tbl_issue25461l33 {
+    @hidden table tbl_issue25461l39_1 {
         actions = {
-            issue25461l33();
+            issue25461l39_1();
         }
-        const default_action = issue25461l33();
+        const default_action = issue25461l39_1();
     }
-    @hidden table tbl_issue25461l33_0 {
+    @hidden table tbl_issue25461l39_2 {
         actions = {
-            issue25461l33_0();
+            issue25461l39_2();
         }
-        const default_action = issue25461l33_0();
+        const default_action = issue25461l39_2();
     }
-    @hidden table tbl_issue25461l40 {
+    @hidden table tbl_issue25461l46 {
         actions = {
-            issue25461l40();
+            issue25461l46();
         }
-        const default_action = issue25461l40();
+        const default_action = issue25461l46();
     }
     apply {
         if (simple_table.apply().hit) {
-            tbl_act.apply();
+            tbl_issue25461l39.apply();
         } else {
-            tbl_act_0.apply();
+            tbl_issue25461l39_0.apply();
         }
         if (tmp) {
-            tbl_issue25461l33.apply();
+            tbl_issue25461l39_1.apply();
         } else {
-            tbl_issue25461l33_0.apply();
+            tbl_issue25461l39_2.apply();
         }
         if (simple_table_0.apply().hit) {
-            tbl_issue25461l40.apply();
+            tbl_issue25461l46.apply();
         }
     }
 }

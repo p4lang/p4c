@@ -330,10 +330,6 @@ class ConvertMetadata : public Transform {
             mkMember("ig_intr_md_for_dprsr"_cs, "mirror_ingress_cos"_cs, 3));
         cvt(INGRESS, "ig_intr_md_for_mb.mirror_deflect_on_drop"_cs, 1,
             mkMember("ig_intr_md_for_dprsr"_cs, "mirror_deflect_on_drop"_cs, 1));
-        cvt(INGRESS, "ig_intr_md_for_mb.mirror_copy_to_cpu_ctrl"_cs, 1,
-            mkMember("ig_intr_md_for_dprsr"_cs, "mirror_copy_to_cpu_ctrl"_cs, 1));
-        cvt(INGRESS, "ig_intr_md_for_mb.mirror_copy_to_cpu_ctrl"_cs, 1,
-            mkMember("ig_intr_md_for_dprsr"_cs, "mirror_copy_to_cpu_ctrl"_cs, 1));
         cvt(INGRESS, "ig_intr_md_for_mb.mirror_egress_port"_cs, portWidth,
             mkMember("ig_intr_md_for_dprsr"_cs, "mirror_egress_port"_cs, portWidth));
         cvt(INGRESS, "standard_metadata.ingress_port"_cs, 9,
@@ -362,10 +358,6 @@ class ConvertMetadata : public Transform {
             mkMember("eg_intr_md_for_dprsr"_cs, "mirror_ingress_cos"_cs, 3));
         cvt(EGRESS, "eg_intr_md_for_mb.mirror_deflect_on_drop"_cs, 1,
             mkMember("eg_intr_md_for_dprsr"_cs, "mirror_deflect_on_drop"_cs, 1));
-        cvt(EGRESS, "eg_intr_md_for_mb.mirror_copy_to_cpu_ctrl"_cs, 1,
-            mkMember("eg_intr_md_for_dprsr"_cs, "mirror_copy_to_cpu_ctrl"_cs, 1));
-        cvt(EGRESS, "eg_intr_md_for_mb.mirror_copy_to_cpu_ctrl"_cs, 1,
-            mkMember("eg_intr_md_for_dprsr"_cs, "mirror_copy_to_cpu_ctrl"_cs, 1));
         cvt(EGRESS, "eg_intr_md_for_mb.mirror_egress_port"_cs, portWidth,
             mkMember("eg_intr_md_for_dprsr"_cs, "mirror_egress_port"_cs, portWidth));
         cvt(EGRESS, "meta.standard_metadata.ingress_port"_cs, 9,
@@ -542,7 +534,7 @@ class FixPktgenHeaderPath : public RenameFieldPath {
 class FixParserPriority : public Transform {
  public:
     FixParserPriority() {}
-    IR::Node *preorder(IR::AssignmentStatement *assign) override;
+    IR::Node *preorder(IR::BaseAssignmentStatement *assign) override;
 };
 
 class ParserCounterSelectCaseConverter : public Transform {
@@ -1170,7 +1162,7 @@ class ModifyParserForChecksum : public Modifier {
         if (!inst->is<P4::ExternMethod>()) return;
         auto em = inst->to<P4::ExternMethod>();
         if (em->actualExternType->name != "Checksum" || em->method->name != "update") return;
-        auto assign = findOrigCtxt<IR::AssignmentStatement>();
+        auto assign = findOrigCtxt<IR::BaseAssignmentStatement>();
         if (assign == nullptr) return;
         auto destField = assign->left;
         // auto parser = findContext<IR::P4Control>();

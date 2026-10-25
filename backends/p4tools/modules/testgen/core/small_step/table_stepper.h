@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_
 
@@ -39,6 +45,9 @@ class TableStepper {
     static const IR::StateVariable &getTableStateVariable(
         const IR::Type *type, const IR::P4Table *table, cstring name,
         std::optional<int> idx1_opt = std::nullopt, std::optional<int> idx2_opt = std::nullopt);
+
+    /// @returns the string-typed state variable that tracks the current active table.
+    static const IR::StateVariable &getActiveTableVar();
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
