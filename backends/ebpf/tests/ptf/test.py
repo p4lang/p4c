@@ -11,8 +11,8 @@
 
 import copy
 import platform
+import re
 import unittest
-from distutils.version import LooseVersion
 
 from common import *
 from ptf.mask import Mask
@@ -22,6 +22,11 @@ from scapy.layers.inet import IP, UDP
 from scapy.layers.inet6 import IPv6
 from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet, bind_layers, split_layers
+
+
+def kernel_version():
+    """Return the running kernel version as a tuple of (major, minor)."""
+    return tuple(int(v) for v in re.match(r"(\d+)\.(\d+)", platform.release()).groups())
 
 
 class SimpleForwardingPSATest(P4EbpfTest):
@@ -591,7 +596,7 @@ class VerifyPSATest(P4EbpfTest):
 
 
 @unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
+    kernel_version() >= (5, 15),
     "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
 )
 class PSATernaryTest(P4EbpfTest):
@@ -787,7 +792,7 @@ class PassToKernelStackTest(P4EbpfTest):
 
 
 @unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
+    kernel_version() >= (5, 15),
     "Skipping on Ubuntu 22.04+ due to failure",
 )
 class LPMTableCachePSATest(P4EbpfTest):
