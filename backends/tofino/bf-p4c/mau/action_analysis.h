@@ -588,7 +588,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     bool preorder(const IR::MAU::Instruction *) override;
     bool preorder(const IR::MAU::StatefulCall *) override;
     bool preorder(const IR::MAU::StatefulCounter *sc) override;
-    bool preorder(const IR::MAU::Primitive *) override;
+    bool preorder(const IR::MAU::MauPrimitive *) override;
     void postorder(const IR::MAU::Instruction *) override;
     void postorder(const IR::MAU::Action *) override;
     bool preorder(const IR::BFN::ReinterpretCast *cast) override;
