@@ -434,7 +434,7 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->newline();
     builder->emitIndent();
 
-    builder->appendFormat("int %s = BYTES(%s) - (%s - (u8*)%s)", outerHdrOffsetVar.c_str(),
+    builder->appendFormat("long %s = BYTES(%s) - (%s - (u8*)%s)", outerHdrOffsetVar.c_str(),
                           outerHdrLengthVar.c_str(), program->headerStartVar.c_str(),
                           program->packetStartVar.c_str());
     builder->endOfStatement(true);
