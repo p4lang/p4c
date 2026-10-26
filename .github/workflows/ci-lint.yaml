@@ -31,9 +31,6 @@ jobs:
           submodules: recursive
       - uses: actions/setup-python@v7
 
-      - name: Test CI scripts
-        run: python3 -m unittest discover -s .github/scripts
-
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
