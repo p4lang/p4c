@@ -195,6 +195,10 @@ class TCIngressPipeline : public EBPFIngressPipeline {
     void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
     void emitTrafficManager(CodeBuilder *builder) override;
 
+ protected:
+    /// Clears the global metadata of a packet that this pipeline has not marked yet.
+    void emitResetUnmarkedGlobalMetadata(CodeBuilder *builder);
+
  private:
     void emitTCWorkaroundUsingMeta(CodeBuilder *builder);
     void emitTCWorkaroundUsingHead(CodeBuilder *builder);

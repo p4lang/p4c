@@ -457,8 +457,25 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
 }
 
 // =====================TCIngressPipeline=============================
+void TCIngressPipeline::emitResetUnmarkedGlobalMetadata(CodeBuilder *builder) {
+    // The global metadata lives in skb->cb. Only packets that this pipeline has
+    // already marked, such as recirculated packets and packets passed to the
+    // kernel stack, carry valid metadata there. Any other packet may arrive with
+    // leftover data in skb->cb (for example from veth with XDP attached on newer
+    // kernels), so clear it before it is read.
+    builder->emitIndent();
+    builder->appendFormat("if (%v->mark != %u) ", compilerGlobalMetadata, packetMark);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("__builtin_memset(%v, 0, sizeof(struct psa_global_metadata))",
+                          compilerGlobalMetadata);
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
+    emitResetUnmarkedGlobalMetadata(builder);
 
     // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
     builder->emitIndent();
@@ -737,6 +754,7 @@ void XDPEgressPipeline::emitCheckPacketMarkMetadata(CodeBuilder *builder) {
 
 void TCTrafficManagerForXDP::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
+    emitResetUnmarkedGlobalMetadata(builder);
 
     // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
     builder->emitIndent();
