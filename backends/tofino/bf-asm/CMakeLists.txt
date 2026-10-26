@@ -181,6 +181,7 @@ set (BFAS_COMMON_SOURCES
 
 
 BISON_TARGET (asm-parse asm-parse.ypp ${BFASM_GEN_DIR}/asm-parse.cpp VERBOSE)
+add_custom_target(bfasm_parser DEPENDS ${BISON_asm-parse_OUTPUTS})
 
 add_custom_command(
   OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
@@ -243,7 +244,7 @@ add_executable (bfas ${BFAS_SOURCES})
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(bfas PUBLIC "-Wno-error")
 target_link_libraries (bfas ${BFASM_LIBS} ${BFASM_LIB_DEPS})
-add_dependencies(bfas bfasm_yaml)
+add_dependencies(bfas bfasm_yaml bfasm_parser)
 
 install (TARGETS bfas
   RUNTIME DESTINATION bin)
@@ -274,7 +275,7 @@ if (ENABLE_GTESTS)
   add_library (bfas_lib ${BFAS_SOURCES})
   target_compile_definitions(bfas_lib PRIVATE BUILDING_FOR_GTEST)  # removes main()
   target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS})
-  add_dependencies(bfas_lib bfasm_yaml)
+  add_dependencies(bfas_lib bfasm_yaml bfasm_parser)
 
   set(BFAS_GTEST_SOURCES
     gtest/gtestasm.cpp

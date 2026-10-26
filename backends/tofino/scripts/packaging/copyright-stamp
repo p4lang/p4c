@@ -67,7 +67,6 @@ ignoreFilePatterns=(
   '.*\.md$'    # Markdown
   '^LICENSE.in$'
   '^\.git/'
-  '(^|/)CPPLINT\.cfg$'  # cpplint controls -- no comments
   '^bf-asm/test/'
   '^build/'
   '^docker/'

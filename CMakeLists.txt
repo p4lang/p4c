@@ -204,7 +204,7 @@ endif ()
 
 # When FORMATTING_ONLY is set, skip all build dependencies and jump
 # straight to the linter/formatter targets.  This allows running
-# clang-format, cpplint, black, and isort without installing flex,
+# clang-format, black, and isort without installing flex,
 # bison, Boost, Protobuf, or any other compile-time dependency.
 if (NOT FORMATTING_ONLY)
 
@@ -399,7 +399,6 @@ set(CONFIG_PKGDATADIR ${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${P4C_CXX_FLAGS}")
-set (CPPLINT_FILES)           # list to collect all files that need lint
 set (TEST_TAGS "p4" CACHE INTERNAL "test tags") # list to collect all test tags
 set (IR_DEF_FILES)           # list to collect all .def files
 

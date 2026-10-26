@@ -23,6 +23,7 @@ unified-compilation.am
 *.json.p4
 *p4.json
 build/
+/build-tidy*/
 # ccache directory
 .ccache
 *.pyc

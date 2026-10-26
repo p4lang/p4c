@@ -50,7 +50,9 @@ set (BFAS_JBAY_SRCS
   PARENT_SCOPE
   )
 
+add_custom_target(regs_jbay-gen DEPENDS ${GEN_JBAY_SRCS} ${GEN_JBAY_HDRS})
 add_library (regs_jbay ${GEN_JBAY_SRCS})
+add_dependencies(regs_jbay regs_jbay-gen)
 target_link_libraries (regs_jbay p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(regs_jbay PUBLIC -Wno-error -Wno-unused-parameter -Wno-unused-variable -Wno-type-limits -Wno-sign-compare)

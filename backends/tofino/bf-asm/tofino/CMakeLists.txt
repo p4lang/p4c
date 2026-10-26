@@ -54,7 +54,9 @@ set (BFAS_TOFINO_SRCS
   )
 
 
+add_custom_target(regs_tofino-gen DEPENDS ${GEN_TOFINO_SRCS} ${GEN_TOFINO_HDRS})
 add_library (regs_tofino ${GEN_TOFINO_SRCS})
+add_dependencies(regs_tofino regs_tofino-gen)
 target_link_libraries (regs_tofino p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(regs_tofino PUBLIC -Wno-error -Wno-unused-parameter -Wno-unused-variable -Wno-type-limits -Wno-sign-compare)

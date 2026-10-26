@@ -39,6 +39,12 @@ protobuf_generate(
   mkP4configdir dpdk_runtime_dir
 )
 
+# Keep generation independent of the linked control-plane/frontend libraries.
+add_custom_target(dpdk_runtime-gen
+  DEPENDS ${DPDK_P4RUNTIME_INFO_CPP_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_PY_GEN_SRCS})
+add_dependencies(dpdk_runtime-gen mkP4configdir dpdk_runtime_dir)
+add_dependencies(dpdk_runtime dpdk_runtime-gen)
+
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties(${DPDK_P4RUNTIME_INFO_CPP_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
 

@@ -5,6 +5,8 @@
 name: "p4c-lint"
 
 on:
+  # Manual runs audit every configured translation unit with the full policy.
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -14,7 +16,7 @@ on:
 
 # Cancel any preceding run on the pull request.
 concurrency:
-  group: p4c-lint-${{ github.event.pull_request.number || github.ref }}
+  group: p4c-lint-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -37,9 +39,6 @@ jobs:
           ccache-key: "ubuntu-24.04-gcc-unity-lint"
           use-ccache: "false"
 
-      - name: Run cpplint on C/C++ files.
-        run: uv run cmake --build build --target cpplint
-
       - name: Run clang-format on C/C++ files.
         run: |
           uv run clang-format --version
@@ -51,3 +50,185 @@ jobs:
           uv run cmake --build build --target black
           uv run isort --version
           uv run cmake --build build --target isort
+
+      - name: Test clang-tidy coverage selection and failure handling
+        run: uv run python tools/test_clang_tidy.py
+
+  prepare-clang-tidy:
+    name: clang-tidy inputs (${{ matrix.profile }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [portable, tofino]
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+      PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Select analysis scope
+        id: scope
+        shell: bash
+        run: |
+          if [ "$PROFILE" = tofino ]; then
+            scope=(--prefix backends/tofino/ --prefix backends/p4tools/modules/testgen/targets/tofino/)
+          else
+            scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            needed=true
+          else
+            needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes "${scope[@]}")
+          fi
+          echo "needed=$needed" >> "$GITHUB_OUTPUT"
+
+      - name: Install analysis prerequisites
+        if: steps.scope.outputs.needed == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bison flex libfl-dev libboost-iostreams-dev libboost-graph-dev \
+            libgmp-dev ninja-build clang ccache python3-dev pkg-config rapidjson-dev
+          tools/install-uv.sh
+
+      - name: Restore generator compilation cache
+        if: steps.scope.outputs.needed == 'true'
+        id: cache
+        uses: ./.github/actions/restore-ccache
+        with:
+          key: ubuntu24-clang-tidy-generators-${{ matrix.profile }}
+
+      - name: Configure compilation commands
+        if: steps.scope.outputs.needed == 'true'
+        shell: bash
+        run: |
+          if [ "$PROFILE" = tofino ]; then
+            options=(-DENABLE_TOFINO=ON -DENABLE_TEST_TOOLS=ON)
+            # Ubuntu's RapidJSON 1.1.0 headers contain an invalid assignment to
+            # a const member, rejected by Clang 22. Use fixed, pinned headers.
+            mkdir -p build-tidy/_deps/rapidjson-src
+            curl -fsSL https://github.com/Tencent/rapidjson/archive/24b5e7a8b27f42fa16b96fc70aade9106cf7102f.tar.gz | \
+              tar -xz --strip-components=1 -C build-tidy/_deps/rapidjson-src
+            options+=("-DCMAKE_CXX_FLAGS=-isystem $PWD/build-tidy/_deps/rapidjson-src/include")
+          else
+            options=(-DENABLE_TOFINO=OFF -DENABLE_TEST_TOOLS=ON)
+          fi
+          uv run cmake -S . -B build-tidy -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_UNITY_BUILD=OFF -DENABLE_UNIFIED_COMPILATION=OFF \
+            -DENABLE_GTESTS=ON "${options[@]}"
+
+      - name: Generate analysis inputs
+        if: steps.scope.outputs.needed == 'true'
+        run: >-
+          uv run --with pyyaml==6.0.3 --with jsl==0.2.4 --with jsonschema==4.23.0
+          cmake --build build-tidy --target clang-tidy-prepare -j 4
+
+      - name: Save generator compilation cache
+        if: steps.scope.outputs.needed == 'true'
+        uses: ./.github/actions/save-ccache
+        with:
+          prefix: ${{ steps.cache.outputs.prefix }}
+
+      - name: Bundle generated inputs and dependency headers
+        if: steps.scope.outputs.needed == 'true'
+        run: |
+          extra=()
+          if [ "$PROFILE" = tofino ]; then
+            extra=(--extra backends/tofino/third_party/spdlog/include)
+          fi
+          python3 tools/pack-clang-tidy-inputs.py build-tidy --output clang-tidy-inputs.tar.gz "${extra[@]}"
+
+      - uses: actions/upload-artifact@v7
+        if: steps.scope.outputs.needed == 'true'
+        with:
+          name: clang-tidy-inputs-${{ matrix.profile }}
+          path: clang-tidy-inputs.tar.gz
+          compression-level: 0
+          retention-days: 3
+
+  clang-tidy:
+    name: clang-tidy (${{ matrix.profile }}, ${{ matrix.shard }})
+    needs: prepare-clang-tidy
+    runs-on: ubuntu-24.04
+    # Let a manual benchmark finish even when it exceeds the PR runtime budget.
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 120 || 60 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [portable, tofino]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+      PROFILE: ${{ matrix.profile }}
+      SHARD: ${{ matrix.shard }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Select shard scope
+        id: scope
+        shell: bash
+        run: |
+          if [ "$PROFILE" = tofino ]; then
+            scope=(--prefix backends/tofino/ --prefix backends/p4tools/modules/testgen/targets/tofino/)
+          else
+            scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            needed=true
+          else
+            needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes --shard "$SHARD" --shards 8 "${scope[@]}")
+          fi
+          echo "needed=$needed" >> "$GITHUB_OUTPUT"
+
+      - name: Install analysis tools and system headers
+        if: steps.scope.outputs.needed == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang libboost-iostreams-dev libboost-graph-dev libgmp-dev libfl-dev python3-dev rapidjson-dev
+          tools/install-uv.sh
+
+      - uses: actions/download-artifact@v8
+        if: steps.scope.outputs.needed == 'true'
+        with:
+          name: clang-tidy-inputs-${{ matrix.profile }}
+
+      - name: Restore analysis inputs
+        if: steps.scope.outputs.needed == 'true'
+        run: tar -xzf clang-tidy-inputs.tar.gz
+
+      - name: Analyze C++ code
+        if: steps.scope.outputs.needed == 'true'
+        shell: bash
+        run: |
+          if [ "$PROFILE" = tofino ]; then
+            scope=(--prefix backends/tofino/ --prefix backends/p4tools/modules/testgen/targets/tofino/)
+          else
+            scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
+          fi
+          mode=(--base "$BASE_SHA" --timeout 3600)
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            mode=(--timeout 3600)
+          fi
+          uv run clang-tidy --version
+          uv run python tools/run-clang-tidy.py \
+            --build-dir build-tidy "${mode[@]}" \
+            --shard "$SHARD" --shards 8 -j 4 \
+            --report build-tidy/clang-tidy-report.json "${scope[@]}"
+
+      - name: Upload analysis timings and diagnostics
+        if: always() && steps.scope.outputs.needed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: clang-tidy-${{ matrix.profile }}-${{ matrix.shard }}
+          path: build-tidy/clang-tidy-report.json
