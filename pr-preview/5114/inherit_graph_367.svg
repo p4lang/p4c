@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p4_1_1_compile_context_stack.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="struct_memories_1_1_use_1_1_gateway.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="140,-19 0,-19 0,0 140,0 140,-19"/>
-<text text-anchor="middle" x="70" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">P4::CompileContextStack</text>
+<text text-anchor="middle" x="70" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Memories::Use::Gateway</text>
 </a>
 </g>
 </g>

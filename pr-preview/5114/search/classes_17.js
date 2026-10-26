@@ -7,5 +7,7 @@ var searchData=
   ['xdphelpprogram_4',['XDPHelpProgram',['../class_p4_1_1_e_b_p_f_1_1_x_d_p_help_program.html',1,'P4::EBPF']]],
   ['xdpingressdeparserpsa_5',['XDPIngressDeparserPSA',['../class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_deparser_p_s_a.html',1,'P4::EBPF']]],
   ['xdpingresspipeline_6',['XDPIngressPipeline',['../class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_pipeline.html',1,'P4::EBPF']]],
-  ['xdptarget_7',['XdpTarget',['../class_p4_1_1_e_b_p_f_1_1_xdp_target.html',1,'P4::EBPF']]]
+  ['xdptarget_7',['XdpTarget',['../class_p4_1_1_e_b_p_f_1_1_xdp_target.html',1,'P4::EBPF']]],
+  ['xor_8',['Xor',['../class_hash_expr_1_1_xor.html',1,'HashExpr']]],
+  ['xorhash_9',['XorHash',['../class_hash_expr_1_1_xor_hash.html',1,'HashExpr']]]
 ];

@@ -1,0 +1,15 @@
+<map id="Target" name="Target">
+<area shape="rect" id="Node000001" title=" " alt="" coords="335,5,398,31"/>
+<area shape="rect" id="Node000002" href="$class_target_1_1_j_bay.html" title=" " alt="" coords="253,79,352,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="349,43,315,80,311,77,345,39"/>
+<area shape="rect" id="Node000007" href="$class_target_1_1_tofino.html" title=" " alt="" coords="377,79,485,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="388,39,422,77,418,80,384,43"/>
+<area shape="rect" id="Node000003" href="$class_target_1_1_tofino2_a0.html" title=" " alt="" coords="5,152,139,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="253,111,110,154,109,149,252,106"/>
+<area shape="rect" id="Node000004" href="$class_target_1_1_tofino2_h.html" title=" " alt="" coords="163,152,290,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="282,115,241,154,237,150,279,111"/>
+<area shape="rect" id="Node000005" href="$class_target_1_1_tofino2_m.html" title=" " alt="" coords="315,152,443,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="327,111,368,150,364,154,323,115"/>
+<area shape="rect" id="Node000006" href="$class_target_1_1_tofino2_u.html" title=" " alt="" coords="467,152,594,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="353,106,495,149,493,154,352,111"/>
+</map>

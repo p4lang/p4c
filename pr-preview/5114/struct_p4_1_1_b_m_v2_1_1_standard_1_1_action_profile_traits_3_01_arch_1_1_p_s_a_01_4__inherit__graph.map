@@ -1,0 +1,9 @@
+<map id="P4::BMV2::Standard::ActionProfileTraits&lt; Arch::PSA &gt;" name="P4::BMV2::Standard::ActionProfileTraits&lt; Arch::PSA &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,45,156,100"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_b_m_v2_1_1_standard_1_1_action_profile_traits_3_01_arch_1_1_p_n_a_01_4.html" title=" " alt="" coords="208,5,359,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,53,207,45,208,50,170,58"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_b_m_v2_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html" title=" " alt="" coords="204,84,363,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,87,204,94,203,99,169,92"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_b_m_v2_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_n_a_01_4.html" title=" " alt="" coords="411,84,569,139"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="377,109,411,109,411,114,377,114"/>
+</map>

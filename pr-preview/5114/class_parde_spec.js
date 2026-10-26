@@ -15,7 +15,7 @@ var class_parde_spec =
     [ "clkFreq", "class_parde_spec.html#accc8acdf3abd1f343b19108b854d09dd", null ],
     [ "extractorSpec", "class_parde_spec.html#abb9a005860312640a09c239ff9ccf833", null ],
     [ "lineRate", "class_parde_spec.html#a21dab9b8fc0e36949323d65ba304da2c", null ],
-    [ "matchRegisters", "class_parde_spec.html#ab9be7d6827a9d54625035f786d8c812a", null ],
+    [ "matchRegisters", "class_parde_spec.html#a5f0abf44c43d1975fb0b393d23bddf45", null ],
     [ "maxClotsLivePerGress", "class_parde_spec.html#a1932e5e16dcead5435cb644f1fa95063", null ],
     [ "maxClotsPerState", "class_parde_spec.html#a9f880e46d151b8e65dc74aa5a38916a5", null ],
     [ "maxParseDepth", "class_parde_spec.html#a522a0fd4e411976258f8f6fede6f93a5", null ],
@@ -26,5 +26,5 @@ var class_parde_spec =
     [ "numParsers", "class_parde_spec.html#a09991f9defc2cdc4ae09131f67efaf10", null ],
     [ "numTcamRows", "class_parde_spec.html#a16cc0c4ac88a47e6ae23a9c055735ad3", null ],
     [ "parserAllExtractorsSupportSingleByte", "class_parde_spec.html#adde50423601eef3758b963fb6491b18d", null ],
-    [ "scratchRegisters", "class_parde_spec.html#a61a682dfa9f237e5cc956b871ccb0166", null ]
+    [ "scratchRegisters", "class_parde_spec.html#a210d2764ca6860370ef8df07add1a5cc", null ]
 ];

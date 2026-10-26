@@ -36,10 +36,11 @@ var searchData=
   ['coveractions_33',['coverActions',['../namespace_p4_1_1_coverage.html#a62cbb237ffbf9465884cc5eb37832802',1,'P4::Coverage::CoverageOptions']]],
   ['coverage_34',['coverage',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#a3717ef8052d31aac5e56cc2de766d676',1,'P4::P4Tools::P4Testgen::TestBackEnd']]],
   ['coverageoptions_35',['coverageOptions',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a1566698ec88ae985f61ca980b5524cea',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
-  ['coverstatements_36',['coverStatements',['../namespace_p4_1_1_coverage.html#a2a3d638920ba9282563d3f4c90b8df3a',1,'P4::Coverage::CoverageOptions']]],
-  ['covertableentries_37',['coverTableEntries',['../namespace_p4_1_1_coverage.html#af76b789b10235cedf806d8bdd178394f',1,'P4::Coverage::CoverageOptions']]],
-  ['csum_5funit_38',['csum_unit',['../class_clot.html#a53335034a5f53215e75015505923d7bf',1,'Clot']]],
-  ['ctxtfile_39',['ctxtFile',['../class_p4_1_1_d_p_d_k_1_1_dpdk_options.html#aa67aa215657bf1d2641cb1fdd4b16ec1',1,'P4::DPDK::DpdkOptions']]],
-  ['currentactionlist_40',['currentActionList',['../class_p4_1_1_type_inference_base.html#aeeb4654c1d4a535e2944285252488f41',1,'P4::TypeInferenceBase']]],
-  ['currentdefinitions_41',['currentDefinitions',['../class_p4_1_1_compute_write_set.html#a534487ed7707c490a3fb667e509708dc',1,'P4::ComputeWriteSet']]]
+  ['coverparserstates_36',['coverParserStates',['../namespace_p4_1_1_coverage.html#a114dcea0a6e81725dd798d35165b6dc4',1,'P4::Coverage::CoverageOptions']]],
+  ['coverstatements_37',['coverStatements',['../namespace_p4_1_1_coverage.html#a2a3d638920ba9282563d3f4c90b8df3a',1,'P4::Coverage::CoverageOptions']]],
+  ['covertableentries_38',['coverTableEntries',['../namespace_p4_1_1_coverage.html#af76b789b10235cedf806d8bdd178394f',1,'P4::Coverage::CoverageOptions']]],
+  ['csum_5funit_39',['csum_unit',['../class_clot.html#a53335034a5f53215e75015505923d7bf',1,'Clot']]],
+  ['ctxtfile_40',['ctxtFile',['../class_p4_1_1_d_p_d_k_1_1_dpdk_options.html#aa67aa215657bf1d2641cb1fdd4b16ec1',1,'P4::DPDK::DpdkOptions']]],
+  ['currentactionlist_41',['currentActionList',['../class_p4_1_1_type_inference_base.html#aeeb4654c1d4a535e2944285252488f41',1,'P4::TypeInferenceBase']]],
+  ['currentdefinitions_42',['currentDefinitions',['../class_p4_1_1_compute_write_set.html#a534487ed7707c490a3fb667e509708dc',1,'P4::ComputeWriteSet']]]
 ];

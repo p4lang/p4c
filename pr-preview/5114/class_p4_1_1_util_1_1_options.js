@@ -7,5 +7,6 @@ var class_p4_1_1_util_1_1_options =
       [ "OptionalArgument", "class_p4_1_1_util_1_1_options.html#ad4c4600e98d9769b486b8237751e5f7aaa5cac25e1db11b06011be4b50bd838a4", null ]
     ] ],
     [ "process", "class_p4_1_1_util_1_1_options.html#a2a7dc36ab913c606b9dc89cdd96fd560", null ],
+    [ "process_options", "class_p4_1_1_util_1_1_options.html#a18d3aabd730c0233bf78651497980120", null ],
     [ "validateOptions", "class_p4_1_1_util_1_1_options.html#a1c35d0860feaf1b6b56f7e400c9f781c", null ]
 ];

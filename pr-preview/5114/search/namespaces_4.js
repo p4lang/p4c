@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logging_0',['Logging',['../namespace_logging.html',1,'']]]
+  ['ir_0',['IR',['../namespace_i_r.html',1,'']]]
 ];

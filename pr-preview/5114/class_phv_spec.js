@@ -1,9 +1,9 @@
 var class_phv_spec =
 [
     [ "MauGroupType", "struct_phv_spec_1_1_mau_group_type.html", null ],
+    [ "PhVCache", "class_phv_spec.html#struct_phv_spec_1_1_ph_v_cache", null ],
     [ "RangeSpec", "class_phv_spec.html#struct_phv_spec_1_1_range_spec", null ],
     [ "addType", "class_phv_spec.html#a06ae8fe6a2c9a22922bbba2c05d74db4", null ],
-    [ "applyGlobalPragmas", "class_phv_spec.html#a41f1081b23653433c85ed8a9f19c52d8", null ],
     [ "containerKinds", "class_phv_spec.html#ab82584539a4164c0b1dfe91bb81b8e95", null ],
     [ "containerSetToString", "class_phv_spec.html#adf9751c299d390abfce184e899df4d61", null ],
     [ "containerSizes", "class_phv_spec.html#a828a49235951fb81a749e87852b0a5d9", null ],

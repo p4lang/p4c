@@ -32,9 +32,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="class_p4_1_1_transform.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="115,-85 32,-85 32,-66 115,-66 115,-85"/>
-<text text-anchor="middle" x="73.5" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Transform</text>
+<g id="a_Node000002"><a xlink:href="class_p4_1_1_inspector.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="113.5,-85 33.5,-85 33.5,-66 113.5,-66 113.5,-85"/>
+<text text-anchor="middle" x="73.5" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Inspector</text>
 </a>
 </g>
 </g>

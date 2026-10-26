@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['midend_0',['Midend',['../midend.html',1,'']]],
-  ['model_20backend_1',['Behavioral Model Backend',['../behavioral_model_backend.html',1,'']]]
+  ['intermediate_20representation_20ir_0',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]],
+  ['ir_1',['IR',['../ir.html',1,'IR'],['../intermediate_representation_ir.html',1,'P4C Intermediate Representation (IR)']]]
 ];

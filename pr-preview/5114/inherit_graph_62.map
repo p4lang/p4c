@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$struct_b_f_n_1_1_b_f_r_t_1_1_b_f_runtime_generator_1_1_counter.html" title="Common counter representation between PSA and other architectures." alt="" coords="5,5,240,45"/>
+<area shape="rect" id="Node000000" href="$class_b_f_n_1_1_alloc1_dbase.html" title=" " alt="" coords="5,56,191,81"/>
+<area shape="rect" id="Node000001" href="$class_b_f_n_1_1_alloc1_d.html" title=" " alt="" coords="260,5,429,60"/>
+<area shape="poly" id="edge23_Node000000_Node000001" title=" " alt="" coords="198,51,259,42,260,48,199,57"/>
+<area shape="rect" id="Node000002" href="$class_b_f_n_1_1_alloc1_d.html" title=" " alt="" coords="239,85,451,125"/>
+<area shape="poly" id="edge24_Node000000_Node000002" title=" " alt="" coords="199,81,239,87,238,92,198,86"/>
 </map>

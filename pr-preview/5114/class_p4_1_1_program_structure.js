@@ -9,6 +9,6 @@ var class_p4_1_1_program_structure =
     [ "match_kinds", "class_p4_1_1_program_structure.html#a397081667ea65b1d62f89b6985a920ae", null ],
     [ "nonActionParameters", "class_p4_1_1_program_structure.html#a5bc8ec7152ddb5e6fc4dc4b7a8ad390e", null ],
     [ "resourceMap", "class_p4_1_1_program_structure.html#ac0188eb142e62d18c14ebd8d81e6b171", null ],
-    [ "scalarMetadataFields", "class_p4_1_1_program_structure.html#adeb3cee6ed7c3da89bf9c651123dc8b4", null ],
+    [ "scalarMetadataFields", "class_p4_1_1_program_structure.html#a7b5ebd632bc8a84f65e855e70fa74016", null ],
     [ "variables", "class_p4_1_1_program_structure.html#a9431e58d1bff9b3b0ac9c190c1d1a4fc", null ]
 ];
