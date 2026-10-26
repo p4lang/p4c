@@ -326,17 +326,26 @@ class P4RuntimeTest(BaseTest):
                 yield p
 
         def stream_recv(stream):
-            for p in stream:
-                now = time.time()
-                logging.debug(
-                    f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
-                )
-                self.stream_in_q.put({"time": now, "message": p})
+            try:
+                for p in stream:
+                    now = time.time()
+                    logging.debug(
+                        f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
+                    )
+                    self.stream_in_q.put({"time": now, "message": p})
+            except grpc.RpcError as error:
+                if error.code() != grpc.StatusCode.CANCELLED:
+                    logging.error("P4Runtime stream terminated: %s", error)
 
         self.stream = self.stub.StreamChannel(stream_req_iterator())
         self.stream_recv_thread = threading.Thread(target=stream_recv, args=(self.stream,))
+        self.stream_recv_thread.daemon = True
         self.stream_recv_thread.start()
-
+        # Register the teardown of the stream as a cleanup. unittest does
+        # not call tearDown when setUp fails, but registered cleanups always
+        # run. The stream threads must not outlive a failed test: they keep
+        # the gRPC server of the switch from shutting down.
+        self.addCleanup(self.tear_down_stream)
         self.handshake()
 
     def handshake(self):
@@ -359,8 +368,17 @@ class P4RuntimeTest(BaseTest):
         BaseTest.tearDown(self)
 
     def tear_down_stream(self):
+        # This method may run twice: as a registered cleanup and from
+        # tearDown. After the first run, this method does nothing.
+        if getattr(self, "_stream_torn_down", False):
+            return
+        self._stream_torn_down = True
         self.stream_out_q.put(None)
-        self.stream_recv_thread.join()
+        self.stream.cancel()
+        self.stream_recv_thread.join(timeout=5)
+        self.channel.close()
+        if self.stream_recv_thread.is_alive():
+            raise RuntimeError("P4Runtime stream receive thread did not stop")
 
     def get_packet_in(self, timeout=1):
         msg = self.get_stream_packet("packet", timeout)

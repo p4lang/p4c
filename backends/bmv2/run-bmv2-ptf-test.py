@@ -4,6 +4,8 @@ import argparse
 import logging
 import os
 import random
+import shlex
+import signal
 import subprocess
 import sys
 import tempfile
@@ -12,6 +14,8 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
+
+from ptf import runner as ptf_runner
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
@@ -106,6 +110,8 @@ class Options:
 class PTFTestEnv:
     options: Options = Options()
     switch_proc: Optional[subprocess.Popen] = None
+    # Whether PTF and the switch run inside an isolated network namespace.
+    use_namespace: bool = False
 
     def __init__(self, options: Options) -> None:
         self.options = options
@@ -149,8 +155,47 @@ class PTFTestEnv:
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> Optional[subprocess.Popen]:
         raise NotImplementedError("method run_simple_switch_grpc not implemented for this class")
 
+    def make_ptf_config(
+        self,
+        grpc_port: int,
+        json_name: Path,
+        info_name: Path,
+    ) -> ptf_runner.PtfConfig:
+        """Construct the PTF configuration for this environment."""
+        raise NotImplementedError("method make_ptf_config not implemented for this class")
+
+    def exec_ptf(self, config: ptf_runner.PtfConfig) -> int:
+        """Execute a PTF run from the given configuration.
+
+        The enclosing test runner is already a process-per-test boundary.
+        Only environments whose interfaces live in a network namespace need
+        a child process in that namespace."""
+        if not self.use_namespace:
+            try:
+                return ptf_runner.run(
+                    config,
+                    output=ptf_runner.RunOutput(logger=testutils.log),
+                )
+            except ptf_runner.PtfError as error:
+                testutils.log.error("PTF failed: %s", error)
+                return testutils.FAILURE
+        return self.exec_ptf_in_ns(config)
+
+    def exec_ptf_in_ns(self, config: ptf_runner.PtfConfig) -> int:
+        """Execute a PTF run inside the network namespace of this
+        environment. A child process in the namespace calls the PTF library
+        API (ptf.runner)."""
+        if not self.bridge:
+            testutils.log.error("Unable to run PTF tests without a bridge.")
+            return testutils.FAILURE
+        run_ptf_cmd = shlex.join([sys.executable, "-m", "ptf.runner", "-"])
+        return self.bridge.ns_exec(run_ptf_cmd, input=config.to_json())
+
     def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
-        raise NotImplementedError("method run_ptf not implemented for this class")
+        """Run the PTF test."""
+        testutils.log.info("---------------------- Run PTF test ----------------------")
+        config = self.make_ptf_config(grpc_port, json_name, info_name)
+        return self.exec_ptf(config)
 
 
 class NNEnv(PTFTestEnv):
@@ -181,7 +226,11 @@ class NNEnv(PTFTestEnv):
         if not simple_switch_bin:
             return None
 
-        thrift_port = testutils.pick_tcp_port(GRPC_ADDRESS, THRIFT_PORT)
+        # Network namespaces may reuse the conventional port. Host-mode tests
+        # need randomized candidates so parallel runners do not all select the
+        # same currently-free default before any switch has bound it.
+        thrift_candidate = THRIFT_PORT if self.use_namespace else random.randrange(1024, 65535)
+        thrift_port = testutils.pick_tcp_port(GRPC_ADDRESS, thrift_candidate)
         simple_switch_grpc = (
             f"{simple_switch_bin} --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
             f"--log-flush --packet-in ipc://{self.options.testdir}/bmv2_packets_1.ipc  --no-p4 "
@@ -197,51 +246,51 @@ class NNEnv(PTFTestEnv):
         self.switch_proc = testutils.open_process(run_cmd)
         return self.switch_proc
 
-    def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
-        """Run the PTF test."""
-        testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the tools PTF folder to the python path, it contains the base test.
+    def make_ptf_config(
+        self,
+        grpc_port: int,
+        json_name: Path,
+        info_name: Path,
+    ) -> ptf_runner.PtfConfig:
+        """Construct the PTF configuration for the nanomsg platform."""
+        # Add the tools PTF folder to the python path. The folder contains
+        # the base test.
         pypath = ROOT_DIR.joinpath("tools/ptf")
-        # Show list of the tests
-        test_list_cmd = (
-            f"ptf --pypath {pypath} "
-            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-dir {self.options.testdir} --list"
-        )
-        if self.use_namespace:
-            if not self.bridge:
-                testutils.log.error("Unable to run run_ptf without a bridge.")
-                return testutils.FAILURE
-            returncode = self.bridge.ns_exec(test_list_cmd)
-        else:
-            returncode = testutils.exec_process(test_list_cmd).returncode
-        if returncode != testutils.SUCCESS:
-            return returncode
-        test_params = (
-            f"grpcaddr='{GRPC_ADDRESS}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-            f"packet_wait_time='0.1';"
-        )
         # TODO: There is currently a bug where we can not support more than 344 ports at once.
         # The nanomsg test back end simply hangs, the reason is unclear.
-        port_range = f"0-{self.options.num_ifaces - 1}"
-        run_ptf_cmd = (
-            f"ptf --platform nn --device-socket 0-{{{port_range}}}@ipc://{self.options.testdir}/"
-            f"bmv2_packets_1.ipc --pypath {pypath} "
-            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-params={test_params} --test-dir {self.options.testdir}"
+        port_range = set(range(self.options.num_ifaces))
+        config = ptf_runner.PtfConfig(
+            pypath=[str(pypath)],
+            test_selection=ptf_runner.TestSelectionOptions(test_dir=str(self.options.testdir)),
+            platform=ptf_runner.PlatformOptions(
+                platform="nn",
+                device_sockets=[
+                    ptf_runner.DeviceSocket(
+                        device=0,
+                        ports=port_range,
+                        address=f"ipc://{self.options.testdir}/bmv2_packets_1.ipc",
+                    )
+                ],
+            ),
+            logging=ptf_runner.LoggingOptions(
+                log_file=str(self.options.testdir.joinpath("ptf.log"))
+            ),
+            test_behavior=ptf_runner.TestBehaviorOptions(
+                test_params={
+                    "grpcaddr": f"{GRPC_ADDRESS}:{grpc_port}",
+                    "p4info": str(info_name),
+                    "config": str(json_name),
+                    "packet_wait_time": "0.1",
+                }
+            ),
         )
-        if self.use_namespace:
-            if not self.bridge:
-                testutils.log.error("Unable to run run_ptf without a bridge.")
-                return testutils.FAILURE
-            returncode = self.bridge.ns_exec(run_ptf_cmd)
-        else:
-            returncode = testutils.exec_process(run_ptf_cmd).returncode
-        return returncode
+        return config
 
 
 class VethEnv(PTFTestEnv):
     bridge: Optional[Bridge] = None
+    # The veth-based environment always runs inside a network namespace.
+    use_namespace: bool = True
 
     def __init__(self, options: Options) -> None:
         super().__init__(options)
@@ -282,34 +331,64 @@ class VethEnv(PTFTestEnv):
         self.switch_proc = testutils.open_process(bridge_cmd)
         return self.switch_proc
 
-    def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
-        if not self.bridge:
-            testutils.log.error("Unable to run run_ptf without a bridge.")
-            return testutils.FAILURE
-        """Run the PTF test."""
-        testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the tools PTF folder to the python path, it contains the base test.
+    def make_ptf_config(
+        self,
+        grpc_port: int,
+        json_name: Path,
+        info_name: Path,
+    ) -> ptf_runner.PtfConfig:
+        """Construct the PTF configuration for the veth platform. The br_*
+        interfaces of the namespace are the PTF ports."""
+        # Add the tools PTF folder to the python path. The folder contains
+        # the base test.
         pypath = ROOT_DIR.joinpath("tools/ptf")
-        # Show list of the tests
-        test_list_cmd = (
-            f"ptf --pypath {pypath} "
-            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-dir {self.options.testdir} --list"
+        config = ptf_runner.PtfConfig(
+            pypath=[str(pypath)],
+            test_selection=ptf_runner.TestSelectionOptions(test_dir=str(self.options.testdir)),
+            platform=ptf_runner.PlatformOptions(
+                interfaces=[
+                    # Use br_<n> (the bridge side of the n-th veth pair) as port n.
+                    ptf_runner.Interface(device=0, port=iface_num, interface=f"br_{iface_num}")
+                    for iface_num in range(self.options.num_ifaces)
+                ]
+            ),
+            logging=ptf_runner.LoggingOptions(
+                log_file=str(self.options.testdir.joinpath("ptf.log"))
+            ),
+            test_behavior=ptf_runner.TestBehaviorOptions(
+                test_params={
+                    "grpcaddr": f"{GRPC_ADDRESS}:{grpc_port}",
+                    "p4info": str(info_name),
+                    "config": str(json_name),
+                    "packet_wait_time": "0.5",
+                }
+            ),
         )
-        returncode = self.bridge.ns_exec(test_list_cmd)
-        if returncode != testutils.SUCCESS:
-            return returncode
-        ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces, prefix="br_")
-        test_params = (
-            f"grpcaddr='{GRPC_ADDRESS}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-            f"packet_wait_time='0.5';"
-        )
-        run_ptf_cmd = (
-            f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-params={test_params} --test-dir {self.options.testdir}"
-        )
-        returncode = self.bridge.ns_exec(run_ptf_cmd)
-        return returncode
+        return config
+
+
+def reap_switch(switch_proc: subprocess.Popen, grace_period: float = 3.0) -> None:
+    """Make sure that the switch process has exited.
+
+    The teardown of the test environment sends SIGTERM to the process
+    group of the switch. A switch with open gRPC streams may not react to
+    SIGTERM. This function waits for the grace period and then sends
+    SIGKILL to the process group. Without this fallback, a running switch
+    blocks the failure report of this driver, because the report reads
+    the stdout pipe of the switch."""
+    try:
+        switch_proc.wait(timeout=grace_period)
+        return
+    except subprocess.TimeoutExpired:
+        pass
+    except Exception:  # pylint: disable=broad-except
+        return
+    testutils.log.error("Switch did not exit after SIGTERM, sending SIGKILL.")
+    try:
+        os.killpg(os.getpgid(switch_proc.pid), signal.SIGKILL)
+        switch_proc.wait(timeout=grace_period)
+    except Exception:  # pylint: disable=broad-except
+        pass
 
 
 def run_test(options: Options) -> int:
@@ -333,7 +412,8 @@ def run_test(options: Options) -> int:
 
     # Pick available ports for the gRPC switch.
     switchlog = options.testdir.joinpath("switchlog")
-    grpc_port = testutils.pick_tcp_port(GRPC_ADDRESS, P4RUNTIME_PORT)
+    grpc_candidate = P4RUNTIME_PORT if testenv.use_namespace else random.randrange(1024, 65535)
+    grpc_port = testutils.pick_tcp_port(GRPC_ADDRESS, grpc_candidate)
     switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
     if switch_proc is None:
         return testutils.FAILURE
@@ -343,6 +423,8 @@ def run_test(options: Options) -> int:
     result = testenv.run_ptf(grpc_port, json_name, info_name)
     # Delete the test environment and trigger a clean up.
     del testenv
+    # Make sure the switch is really terminated before reading its output.
+    reap_switch(switch_proc)
     # Print switch log if the results were not successful.
     if result != testutils.SUCCESS:
         if switchlog.with_suffix(".txt").exists():
@@ -427,4 +509,10 @@ if __name__ == "__main__":
     if not (ARGS.nocleanup or test_result != testutils.SUCCESS):
         testutils.log.info("Removing temporary test directory.")
         testutils.del_dir(test_options.testdir)
-    sys.exit(test_result)
+    # Flush the output and terminate the process directly. A failed PTF
+    # test may leave non-daemon threads behind, for example gRPC stream
+    # iterators. These threads can block a normal interpreter exit. The
+    # ptf runner uses the same exit strategy. The tests run in its process.
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(test_result)
