@@ -4,14 +4,6 @@
 
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-# Append a command that checks whether the test folder is empty.
-# Arguments:
-#   - testfile is the testing script that this script is written to.
-#   - testfolder is target folder of the test.
-function(check_empty_folder testfile testfolder)
-  file(APPEND ${testfile} "exit $(ls -A ${testfolder})\n")
-endfunction(check_empty_folder)
-
 # Append commands to run PNA/DPDK PTF tests.
 # Arguments:
 #   - testcontent is the name of the variable to append the script to.
@@ -26,11 +18,11 @@ macro(check_pna_with_ptf testcontent testfolder p4test)
     "for item in \${ptffiles[@]}\n"
     "do\n"
     "\techo \"Found \${item}\"\n"
-  )
-  string(APPEND ${testcontent} "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
+    "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
       --ipdk-install-dir=${IPDK_INSTALL_DIR} \
-      -ll=DEBUG ${p4test}\n")
-  string(APPEND ${testcontent} "done\n")
+      -ll=DEBUG ${p4test}\n"
+    "done\n"
+  )
 endmacro(check_pna_with_ptf)
 
 # Add a single test to the testsuite.
@@ -103,4 +95,3 @@ function(p4tools_add_test_with_args)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
 endfunction(p4tools_add_test_with_args)
-

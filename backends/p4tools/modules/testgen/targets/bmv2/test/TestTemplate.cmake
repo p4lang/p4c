@@ -80,16 +80,6 @@ function(validate_protobuf_ir testcontent testfolder)
 endfunction(validate_protobuf_ir)
 
 
-
-# Append a command that checks whether the test folder is empty.
-# Arguments:
-#   - testfile is the testing script that this script is written to.
-#   - testfolder is target folder of the test.
-function(check_empty_folder testfile testfolder)
-  file(APPEND ${testfile} "exit $(ls -A ${testfolder})\n")
-endfunction(check_empty_folder)
-
-
 # Add a single test to the testsuite.
 # Arguments:
 #   - TAG is a label for the set of test suite where this test belongs
