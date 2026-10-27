@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add Main.fib_table prefix:0x0a000000/8 Main.set_nhid(index:0x1)
 add Main.nh_table nh_index:0x1 Main.set_nh(dmac:0x133713371337, port:0x1)
 
