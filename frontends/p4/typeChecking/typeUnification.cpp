@@ -372,6 +372,15 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                "Cannot unify %1% and %2% both of which "
                                                "contain unspecified fields",
                                                strct, st);
+            if (!strctHasDots) {
+                for (auto f : st->fields) {
+                    if (f->name != "..."_cs && !strct->getField(f->name))
+                        return constraint->reportError(
+                            constraints->getCurrentSubstitution(),
+                            "Field %1% in initializer is not a member of structure %2%", f->name,
+                            strct);
+                }
+            }
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
             if ((strct->fields.size() != st->fields.size()) && !strctHasDots && !stHasDots)
