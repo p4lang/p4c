@@ -166,6 +166,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abbc507f4de02759e606bd666d64c1ee0" id="r_abbc507f4de02759e606bd666d64c1ee0"><td class="memItemLeft" align="right" valign="top"><a id="abbc507f4de02759e606bd666d64c1ee0" name="abbc507f4de02759e606bd666d64c1ee0"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SymbolicExecutor</b> (<a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor.html">SymbolicExecutor</a> &amp;&amp;)=delete</td></tr>
 <tr class="separator:abbc507f4de02759e606bd666d64c1ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f7783a7a157eee999a51aad4800e49b" id="r_a0f7783a7a157eee999a51aad4800e49b"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, size_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f7783a7a157eee999a51aad4800e49b">getSkippedPaths</a> () const</td></tr>
+<tr class="separator:a0f7783a7a157eee999a51aad4800e49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f5df76ebc78a568b75091b00ff64201" id="r_a9f5df76ebc78a568b75091b00ff64201"><td class="memItemLeft" align="right" valign="top"><a id="a9f5df76ebc78a568b75091b00ff64201" name="a9f5df76ebc78a568b75091b00ff64201"></a>
 const <a class="el" href="namespace_p4_1_1_coverage.html#a7e1ff1127c2c2a850efe0f1297046dd9">P4::Coverage::CoverageSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getVisitedNodes</b> ()</td></tr>
 <tr class="memdesc:a9f5df76ebc78a568b75091b00ff64201"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter to access visitedNodes. <br /></td></tr>
@@ -192,6 +194,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>updateVisitedNodes</b
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:acd2d56417c6fef1bc1614c964580038e" id="r_acd2d56417c6fef1bc1614c964580038e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd2d56417c6fef1bc1614c964580038e">handleTerminalState</a> (const <a class="el" href="#ae36f556ece8e4cca1846a552c18a4e90">Callback</a> &amp;callback, const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_execution_state.html">ExecutionState</a> &amp;terminalState)</td></tr>
 <tr class="separator:acd2d56417c6fef1bc1614c964580038e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac504ec1a5c93c12dc76769c54ed7e7a1" id="r_ac504ec1a5c93c12dc76769c54ed7e7a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac504ec1a5c93c12dc76769c54ed7e7a1">handleUnimplemented</a> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_unimplemented.html">TestgenUnimplemented</a> &amp;e)</td></tr>
+<tr class="separator:ac504ec1a5c93c12dc76769c54ed7e7a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6750146bdceff553a31b11344e86b298" id="r_a6750146bdceff553a31b11344e86b298"><td class="memItemLeft" align="right" valign="top"><a id="a6750146bdceff553a31b11344e86b298" name="a6750146bdceff553a31b11344e86b298"></a>
 StepResult&#160;</td><td class="memItemRight" valign="bottom"><b>step</b> (<a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_execution_state.html">ExecutionState</a> &amp;state)</td></tr>
 <tr class="memdesc:a6750146bdceff553a31b11344e86b298"><td class="mdescLeft">&#160;</td><td class="mdescRight">Take one step in the program and return list of possible branches. <br /></td></tr>
@@ -215,6 +219,10 @@ const <a class="el" href="namespace_p4_1_1_coverage.html#a7e1ff1127c2c2a850efe0f
 const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>programInfo</b></td></tr>
 <tr class="memdesc:aabc664e33096532d4aaff4f8ca804222"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target-specific information about the P4 program. <br /></td></tr>
 <tr class="separator:aabc664e33096532d4aaff4f8ca804222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42fc00f659e354985bdce520beb27ad4" id="r_a42fc00f659e354985bdce520beb27ad4"><td class="memItemLeft" align="right" valign="top"><a id="a42fc00f659e354985bdce520beb27ad4" name="a42fc00f659e354985bdce520beb27ad4"></a>
+<a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>skippedPaths</b></td></tr>
+<tr class="memdesc:a42fc00f659e354985bdce520beb27ad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The paths the executor has skipped, one entry per exception. <br /></td></tr>
+<tr class="separator:a42fc00f659e354985bdce520beb27ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9c998f4de617cd3e3d32745ed770543" id="r_ac9c998f4de617cd3e3d32745ed770543"><td class="memItemLeft" align="right" valign="top"><a id="ac9c998f4de617cd3e3d32745ed770543" name="ac9c998f4de617cd3e3d32745ed770543"></a>
 <a class="el" href="class_p4_1_1_abstract_solver.html">AbstractSolver</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>solver</b></td></tr>
 <tr class="memdesc:ac9c998f4de617cd3e3d32745ed770543"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SMT solver backing this executor. <br /></td></tr>
@@ -273,6 +281,32 @@ const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.
 
 </div>
 </div>
+<a id="a0f7783a7a157eee999a51aad4800e49b" name="a0f7783a7a157eee999a51aad4800e49b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f7783a7a157eee999a51aad4800e49b">&#9670;&#160;</a></span>getSkippedPaths()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, size_t &gt; &amp; P4::P4Tools::P4Testgen::SymbolicExecutor::getSkippedPaths </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the number of paths the executor skipped, one entry per message. </dd></dl>
+
+</div>
+</div>
 <a id="acd2d56417c6fef1bc1614c964580038e" name="acd2d56417c6fef1bc1614c964580038e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acd2d56417c6fef1bc1614c964580038e">&#9670;&#160;</a></span>handleTerminalState()</h2>
 
@@ -301,6 +335,32 @@ const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.
 </div><div class="memdoc">
 <p>Handles processing at the end of a P4 program.</p>
 <dl class="section return"><dt>Returns</dt><dd>true if symbolic execution should end; false if symbolic execution should continue on a different path. </dd></dl>
+
+</div>
+</div>
+<a id="ac504ec1a5c93c12dc76769c54ed7e7a1" name="ac504ec1a5c93c12dc76769c54ed7e7a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac504ec1a5c93c12dc76769c54ed7e7a1">&#9670;&#160;</a></span>handleUnimplemented()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::P4Tools::P4Testgen::SymbolicExecutor::handleUnimplemented </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_unimplemented.html">TestgenUnimplemented</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>e</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Handles a path that reached a construct the target does not model. Must be called from within the catch block of <code class="param">e</code>. In strict mode, rethrows the active exception. </p>
 
 </div>
 </div>

@@ -1,5 +1,11 @@
 var NAVTREEINDEX36 =
 {
+"struct_i_x_bar_1_1_use_1_1_byte.html":[13,0,392,5,0],
+"struct_i_x_bar_1_1_use_1_1_byte.html#a07e2ff056a259323b009c862c8c6d613":[13,0,392,5,0,0],
+"struct_i_x_bar_1_1_use_1_1_group_info.html":[13,0,392,5,1],
+"struct_i_x_bar_1_1_use_1_1_total_info.html":[13,0,392,5,2],
+"struct_i_x_bar_1_1_use_1_1_way.html":[13,0,392,5,3],
+"struct_i_x_bar_1_1failure.html":[13,0,392,0],
 "struct_i_x_bar_random.html":[13,0,397],
 "struct_infer_write_mode.html":[13,0,367],
 "struct_infer_write_mode.html#a454f014c1d6bbff655dc73d58c358cfe":[13,0,367,1],
@@ -243,11 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder.html#a57242b198d3db1d3defc5b2cd74a354c":[13,0,12,3,1,24,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html":[12,0,14,1,1,25],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html":[13,0,12,3,1,25],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[12,0,14,1,1,25,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[13,0,12,3,1,25,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[12,0,14,1,1,26],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[13,0,12,3,1,26],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[12,0,14,1,1,26,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[13,0,12,3,1,26,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[12,0,14,1,1,27]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[12,0,14,1,1,25,0]
 };
