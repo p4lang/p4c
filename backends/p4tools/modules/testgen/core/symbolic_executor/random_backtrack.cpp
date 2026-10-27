@@ -15,7 +15,6 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4::P4Tools::P4Testgen {
 
@@ -60,13 +59,9 @@ void RandomBacktrack::runImpl(const Callback &callBack, ExecutionStateReference 
                     continue;
                 }
             }
-        } catch (TestgenUnimplemented &e) {
-            // If strict is enabled, bubble the exception up.
-            if (TestgenOptions::get().strict) {
-                throw;
-            }
-            // Otherwise we try to roll back as we typically do.
-            warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+        } catch (const TestgenUnimplemented &e) {
+            // Rethrows in strict mode. Otherwise, we roll back as we typically do.
+            handleUnimplemented(e);
         }
 
         // Roll back to a previous branch and continue execution from there, but if there are no

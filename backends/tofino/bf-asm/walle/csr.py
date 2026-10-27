@@ -1482,7 +1482,7 @@ class csr_composite_object(csr_object):
     def find_alias_arrays(self, args, classname):
         self.alias_arrays = []
         potential_alias_arrays = {}
-        array_match = re.compile('^(\w+)_(\d+)$')
+        array_match = re.compile(r'^(\w+)_(\d+)$')
         for el in self.children():
             el = self.check_child_rewrite(el, args)
             if el is None:
