@@ -349,7 +349,7 @@ class TCInfra:
         if produced.endswith(".h"):
             sedcommand = "sed -i.bak '1d;2d' " + produced
             subprocess.call(sedcommand, shell=True)
-        sedcommand = "sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
+        sedcommand = r"sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
         subprocess.call(sedcommand, shell=True)
 
         result = testutils.SUCCESS
