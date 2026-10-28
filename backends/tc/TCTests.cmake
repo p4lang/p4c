@@ -44,6 +44,10 @@ endif()
 # Only enable P4TC and P4TC STF tests when all required tools are available.
 p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/pna-large-header-init.p4"
+  "testdata/p4_16_samples/pna-large-header-init.p4" "" "")
+
 if (ENABLE_P4TC_STF_TESTS)
   # Setup fixture
   add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup "https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest")
@@ -68,4 +72,11 @@ if (ENABLE_P4TC_STF_TESTS)
       "testdata/p4tc_samples_stf/${comparison_test}.p4"
       "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/${comparison_test}.stf" "")
   endforeach()
+  add_test(NAME "p4tc/testdata/p4_16_samples/pna-large-header-init-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-large-header-init.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-large-header-init.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/pna-large-header-init-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
 endif()
