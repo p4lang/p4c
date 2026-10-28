@@ -33,7 +33,7 @@ def execute(command, directory, tag, data=None, success=True):
 
 def build(compiler, directory, mode, flags):
     directory.mkdir(parents=True)
-    fixtures = {'counter': 'pna-codegen-counter.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4'}
+    fixtures = {'counter': 'pna-codegen-counter.p4', 'reject-error': 'pna-codegen-reject-error.p4', 'narrow-cache': 'pna-codegen-narrow-cache.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4'}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
@@ -130,6 +130,30 @@ def cases(kind, variant="default"):
                 indices.extend([index + 1, (index >> 1) + 1])
             rows.append((frame, frame, indices))
         return rows, None
+    if kind == "narrow-cache":
+        specs = []
+        for flags, offset, expected in ((0, 0, True), (1, 1, True),
+                                        (1, 5, False), (1, 0, False), (7, 255, False)):
+            frame = ethernet + b"\x88\xb5" + ((flags << 13) | offset).to_bytes(2, "big") + b"\x5a"
+            rows.append((frame, frame if expected else None, []))
+            specs.append((3, 0, 136) if expected else (3, 6, 128))
+        return rows, specs
+    if kind == "reject-error":
+        specs = []
+        for flags in (0, 1, 7):
+            for offset in (0, 1, 255) if flags == 7 else (0,):
+                frame = ethernet + b"\x88\xb5" + ((flags << 13) | offset).to_bytes(2, "big") + b"\x5a"
+                if offset == 0:
+                    rows.append((frame, frame, []))
+                    specs.append((3, 0, 136))
+                else:
+                    rows.append((frame, None, []))
+                    specs.append((3, 6, 128))
+        rows.append((ethernet + b"\x88\xb5", None, []))
+        specs.append((3, 1, 112))
+        rows.append((ethernet + b"\x88\xb6\0\0\x5a", None, []))
+        specs.append((2, 0, 0))
+        return rows, specs
     for flags in range(8):
         for offset in [0, 1, 31, 255, 256, 4095, 8191]:
             frame = ethernet + b"\x88\xb5" + ((flags << 13) | offset).to_bytes(2, "big") + b"\x5a"
@@ -171,7 +195,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
     parser.add_argument("--mode",
-                        choices=['counter', 'emission', 'comparison', 'advance', 'bitfields'],
+                        choices=['counter', 'emission', 'parser', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -181,8 +205,34 @@ def main():
     output = args.output or Path(tempfile.mkdtemp(prefix="p4tc-codegen-"))
     output.mkdir(parents=True, exist_ok=True)
     variants = {"default": []}
+    if args.mode in ("parser", "reject-error"):
+        variants.update({
+            "one-range": ["--tc-outline-parser-range=parse_flags:finish"],
+            "two-ranges": ["--tc-outline-parser-range=start:parse_flags",
+                           "--tc-outline-parser-range2=parse_flags:finish"],
+            "cached-local": ["--tc-outline-parser-range=start:parse_flags",
+                             "--tc-outline-parser-range2=parse_flags:finish",
+                             "--tc-outline-parser-bound=left:8191",
+                             "--tc-outline-parser-local=left:cached_left:8191",
+                             "--tc-outline-parser-offset-max=1522"],
+        })
+        if args.mode == "parser":
+            variants["cached-runtime-name"] = [
+                "--tc-outline-parser-range=start:parse_flags",
+                "--tc-outline-parser-range2=parse_flags:finish",
+                "--tc-outline-parser-local=left:getPrimitive32:8191"]
+    if args.mode == "narrow-cache":
+        variants = {"inline": [],
+                    "cached-local": ["--tc-outline-parser-range=start:parse_flags",
+                                     "--tc-outline-parser-range2=parse_flags:finish",
+                                     "--tc-outline-parser-bound=left:8191",
+                                     "--tc-outline-parser-local=left:cached_left:8191",
+                                     "--tc-outline-parser-offset-max=1522"]}
     if args.mode == "emission":
         variants["frag-offset-name"] = ["-DFRAGMENT_OFFSET=fragOffset"]
+    if args.mode == "advance":
+        variants["outlined"] = ["--tc-outline-parser-range=skip:finish",
+                                "--tc-outline-parser-offset-max=1522"]
     record = {"mode": args.mode, "variants": {}, "scope": "BPF compilation and modeled host execution"}
     for name, flags in variants.items():
         directory = output / name
@@ -194,6 +244,136 @@ def main():
             record["variants"][name]["counter_calls"] = sum(len(row[2]) for row in rows)
         if specs:
             record["variants"][name]["rejection_specs"] = specs
+    if args.mode == "advance":
+        code = (output / "outlined/case_parser.c").read_text()
+        assert "ebpf_outline_offset > 1522 * 8" in code, "one region ignored the offset bound"
+    if args.mode == "parser":
+        two_ranges = ["--tc-outline-parser-range=start:parse_flags",
+                      "--tc-outline-parser-range2=parse_flags:finish"]
+        for name, flags, program, diagnostic in [
+            ("bound-one-range", ["--tc-outline-parser-range=parse_flags:finish",
+                                 "--tc-outline-parser-bound=left:8191"],
+             "emission", "require --tc-outline-parser-range2"),
+            ("local-one-range", ["--tc-outline-parser-range=parse_flags:finish",
+                                 "--tc-outline-parser-local=left:cached_left:8191"],
+             "emission", "require --tc-outline-parser-range2"),
+            ("no-hdr-one-range", ["--tc-outline-parser-range=parse_flags:finish",
+                                  "--tc-outline-parser-no-hdr2"],
+             "emission", "require --tc-outline-parser-range2"),
+            ("range2-alone", ["--tc-outline-parser-range2=parse_flags:finish"],
+             "emission", "requires --tc-outline-parser-range"),
+            ("offset-alone", ["--tc-outline-parser-offset-max=1522"],
+             "emission", "requires --tc-outline-parser-range"),
+            ("bound-field", [*two_ranges, "--tc-outline-parser-bound=nosuch:5"],
+             "emission", "not a member of the user metadata"),
+            ("local-name", [*two_ranges, "--tc-outline-parser-local=left:1bad:5"],
+             "emission", "must be a C identifier"),
+            ("local-keyword", [*two_ranges, "--tc-outline-parser-local=left:while:5"],
+             "emission", "must be a C identifier"),
+            ("local-reserved", [*two_ranges, "--tc-outline-parser-local=left:__cache:5"],
+             "emission", "must be a C identifier"),
+            ("parser-local", ["--tc-outline-parser-range=parse_tail:finish"],
+             "outline-local", "crosses the boundary"),
+        ]:
+            directory = output / ("negative-" + name)
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", *flags,
+                              ROOT / f"testdata/p4_16_samples/pna-codegen-{program}.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
+                name, result.returncode, result.stderr)
+            record.setdefault("negative", []).append(name)
+        for local in ("skb", "hdr", "meta", "pkt", "ebpf_outline_offset",
+                      "ebpf_packetOffsetInBits", "ebpf_packetOffsetInBits_save",
+                      "ebpf_outline_base", "adv"):
+            directory = output / ("negative-collision-" + local)
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", *two_ranges,
+                              "--tc-outline-parser-local=left:" + local + ":5",
+                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and b"conflicts with a generated helper name" in result.stderr
+            record.setdefault("negative", []).append("collision-" + local)
+    if args.mode in ("parser", "reject-error"):
+        for name, flag, diagnostic in [
+            ("syntax", "--tc-outline-parser-range=:finish", "expects START:END"),
+            ("unknown", "--tc-outline-parser-range=missing:finish", "unknown parser states"),
+            ("accept", "--tc-outline-parser-range=parse_flags:start", "accept transition"),
+        ]:
+            directory = output / ("negative-" + name)
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", flag,
+                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and diagnostic.encode() in result.stderr, result.stderr
+            record.setdefault("negative", []).append(name)
+    if args.mode == "narrow-cache":
+        for name, flag, diagnostic in [
+            ("missing", "--tc-outline-parser-local=missing:cached_missing:8191",
+             "not a member of the user metadata"),
+            ("narrow", "--tc-outline-parser-local=narrow:cached_narrow:8191",
+             "scalar integer"),
+            ("bound-narrow", "--tc-outline-parser-bound=narrow:5", "scalar integer"),
+        ]:
+            directory = output / ("negative-" + name)
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                              "--tc-outline-parser-range=start:parse_flags",
+                              "--tc-outline-parser-range2=parse_flags:finish",
+                              "--tc-outline-parser-offset-max=1522", flag,
+                              ROOT / "testdata/p4_16_samples/pna-codegen-narrow-cache.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
+                name, result.returncode, result.stderr)
+            record.setdefault("negative", []).append(name)
+    if args.mode == "parser":
+        bounds = {"invalid": [], "valid": []}
+        malformed = ["-1", "+1", "4294967296", "1522junk", "", " 1522", "1522 ",
+                     "0x10", "1.0", "999999999999999999999999"]
+        bounds_cases = [
+            ("--tc-outline-parser-offset-max", "{v}", "decimal BYTES",
+             malformed[:9] + ["268435456", malformed[9]]),
+            ("--tc-outline-parser-local", "left:cached_left:{v}", "decimal MAX",
+             [value for value in malformed if value]),
+            ("--tc-outline-parser-bound", "left:{v}", "decimal uint32 MAX",
+             [value for value in malformed if value]),
+        ]
+        for name, template, diagnostic, values in bounds_cases:
+            for number, value in enumerate(values):
+                directory = output / f"invalid-{name.strip('-')}-{number}"
+                directory.mkdir()
+                result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                                  "--tc-outline-parser-range=start:parse_flags",
+                                  "--tc-outline-parser-range2=parse_flags:finish",
+                                  name + "=" + template.format(v=value),
+                                  ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                                  "-o", directory], directory, "p4", success=False)
+                assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
+                    name, value, result.returncode, result.stderr)
+                bounds["invalid"].append([name, value])
+        valid = [
+            ("--tc-outline-parser-offset-max", "{v}", [],
+             ["0", "1", "1522", "0001522", "268435455"], "ebpf_outline_offset > {v} * 8"),
+            ("--tc-outline-parser-bound", "left:{v}",
+             ["--tc-outline-parser-local=left:cached_left:8191"],
+             ["0", "1", "8191", "0008191", "4294967295"], "if (__p4tc_cache_cached_left > {v})"),
+            ("--tc-outline-parser-local", "left:cached_left:{v}", [],
+             ["0", "1", "8191", "0008191", "4294967295"], "__p4tc_cache_cached_left = meta->left;"),
+        ]
+        for name, template, extra, values, expected in valid:
+            for number, value in enumerate(values):
+                directory = output / f"valid-{name.strip('-')}-{number}"
+                directory.mkdir()
+                execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                         "--tc-outline-parser-range=start:parse_flags",
+                         "--tc-outline-parser-range2=parse_flags:finish", *extra,
+                         name + "=" + template.format(v=value),
+                         ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                         "-o", directory], directory, "p4")
+                code = (directory / "pna-codegen-emission_parser.c").read_text()
+                assert expected.replace("{v}", str(int(value))) in code, (name, value)
+                bounds["valid"].append([name, value])
+        record["parser_bounds"] = bounds
     (output / "result.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps(record, indent=2))
     return 0

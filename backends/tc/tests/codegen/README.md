@@ -30,7 +30,7 @@ python3 backends/tc/tests/codegen/run.py \
   --mode counter --output /tmp/p4tc-counter-check
 ```
 
-Modes: counter, emission, comparison, advance, bitfields.
+Modes: counter, emission, parser, reject-error, narrow-cache, comparison, advance, bitfields.
 
 The comparison fixture checks narrow signed values and network-order MAC
 fields against constants. The advance fixture exercises counts without a
@@ -38,6 +38,10 @@ guarding verify; rejection checks include the error and consumed cursor.
 
 Emission checks all flag values and boundary offsets with poisoned output.
 Bitfields checks broad patterns and a walking one at every bit.
+
+Parser variants cover one/two regions, metadata caching, narrow wraparound,
+and selected error/cursor preservation. Negative cases cover invalid
+bounds, names, missing regions and cross-boundary parser locals.
 
 Each invocation keeps its generated sources, BPF objects, host objects, driver
 output and `result.json`. A failed invocation retains the successful earlier
