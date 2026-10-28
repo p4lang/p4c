@@ -107,6 +107,7 @@ class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
 
     void emit(EBPF::CodeBuilder *builder) override;
     void emitLocalVariables(EBPF::CodeBuilder *builder) override;
+    void emitCPUMAPInitializers(EBPF::CodeBuilder *builder) override;
     void emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) override;
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
 

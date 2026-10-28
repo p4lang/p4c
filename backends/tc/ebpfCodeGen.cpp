@@ -312,6 +312,37 @@ void PNAArchTC::emitHeaderDefs(EBPF::CodeBuilder *builder) const {
 }
 
 // =====================TCIngressPipelinePNA=============================
+void TCIngressPipelinePNA::emitCPUMAPInitializers(EBPF::CodeBuilder *builder) {
+    emitCPUMAPLookup(builder);
+    builder->emitIndent();
+    builder->appendLine("if (!hdrMd)");
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %v;", dropReturnCode());
+    builder->newline();
+    builder->decreaseIndent();
+
+    // Large constant memsets exceed the BPF backend's inline expansion limit.
+    // Keep small instances inline and clear larger map values with bounded stores.
+    builder->emitIndent();
+    builder->append("if (sizeof(struct hdr_md) <= 256) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(hdrMd, 0, sizeof(struct hdr_md));");
+    builder->blockEnd(false);
+    builder->append(" else ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("#pragma clang loop unroll(disable)");
+    builder->emitIndent();
+    builder->append("for (u32 hdr_md_i = 0; hdr_md_i < sizeof(struct hdr_md); hdr_md_i++) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("((volatile u8 *)hdrMd)[hdr_md_i] = 0;");
+    builder->blockEnd(true);
+    builder->blockEnd(true);
+}
+
 void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     cstring msgStr, varStr;
 
