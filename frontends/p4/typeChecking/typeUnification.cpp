@@ -458,9 +458,16 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                     "Number of components %1% in initializer %2% is different "
                     "than stack size %3%",
                     listSize, list, dstack->getSize());
-            for (size_t index = 0; index < listSize - 1; index++) {
-                const IR::Type *comp = list->components.at(index);
-                constraints->add(constraint->create(dstack->elementType, comp));
+            if (dstack->size->to<IR::Constant>()->asInt() < 0) {
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "Cannot unify header stack '%1%' with negative size %2%", dstack, dstack->size);
+            }
+            if (listSize > 0) {
+                for (size_t index = 0; index < listSize - 1; index++) {
+                    const IR::Type *comp = list->components.at(index);
+                    constraints->add(constraint->create(dstack->elementType, comp));
+                }
             }
             if (hasDots) {
                 auto dotsType = new IR::Type_Array(
