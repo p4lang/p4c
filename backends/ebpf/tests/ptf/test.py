@@ -65,6 +65,18 @@ class DeparserMetadataEmitPSATest(P4EbpfTest):
         testutils.verify_packet(self, exp_pkt, PORT1)
 
 
+class EgressOwnTypesPSATest(P4EbpfTest):
+    """Egress uses other header and user metadata types than ingress"""
+
+    p4_file_path = "p4testdata/egress-own-types.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        pkt[Ether].src = "11:22:33:44:55:66"
+        testutils.verify_packet(self, pkt, PORT1)
+
+
 class PSAResubmitTest(P4EbpfTest):
     p4_file_path = "p4testdata/resubmit.p4"
 

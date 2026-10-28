@@ -130,12 +130,13 @@ void EBPFPipeline::emitCPUMAPInitializers(CodeBuilder *builder) {
 
 void EBPFPipeline::emitHeadersFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("%v = &(hdrMd->cpumap_hdr);", parser->headers->name);
+    builder->appendFormat("%v = &(hdrMd->%v);", parser->headers->name, cpumapHeadersField);
 }
 
 void EBPFPipeline::emitMetadataFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("%v = &(hdrMd->cpumap_usermeta);", control->user_metadata->name);
+    builder->appendFormat("%v = &(hdrMd->%v);", control->user_metadata->name,
+                          cpumapUserMetadataField);
 }
 
 void EBPFPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
