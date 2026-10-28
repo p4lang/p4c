@@ -35,6 +35,19 @@ class SimpleForwardingPSATest(P4EbpfTest):
         testutils.verify_packet(self, pkt, PORT2)
 
 
+class DeparserMetadataPSATest(P4EbpfTest):
+    """Both deparsers read the user metadata"""
+
+    p4_file_path = "p4testdata/deparser-metadata.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        pkt[IP].chksum = 0x1111
+        pkt[IP].id = 0x2222
+        testutils.verify_packet(self, pkt, PORT1)
+
+
 class PSAResubmitTest(P4EbpfTest):
     p4_file_path = "p4testdata/resubmit.p4"
 

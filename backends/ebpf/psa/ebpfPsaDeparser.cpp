@@ -106,6 +106,7 @@ bool EgressDeparserPSA::build() {
     auto it = pl->parameters.begin();
     packet_out = *it;
     headers = *(it + 3);
+    user_metadata = *(it + 4);
 
     auto ht = program->typeMap->getType(headers);
     if (ht == nullptr) {
