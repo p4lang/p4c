@@ -12,6 +12,7 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -59,7 +60,7 @@ class Z3Solver : public AbstractSolver {
     /// Only useful in incremental mode.
     std::optional<bool> checkSat();
 
-    [[nodiscard]] const SymbolicMapping &getSymbolicMapping() const override;
+    [[nodiscard]] SymbolicMapping getSymbolicMapping() const override;
 
     void toJSON(JSONGenerator & /*json*/) const override;
 
@@ -122,6 +123,9 @@ class Z3Solver : public AbstractSolver {
 
     /// Helper function which converts a z3::check_result to a std::optional<bool>.
     static std::optional<bool> interpretSolverResult(z3::check_result result);
+
+    // Declared first so all Z3 objects are destroyed before their context.
+    std::unique_ptr<z3::context> context;
 
     /// The underlying Z3 instance.
     z3::solver z3solver;

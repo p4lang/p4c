@@ -74,11 +74,12 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
 };
 
 class FrontEnd {
+    inline static FrontEndPolicy defaultPolicy;
     FrontEndPolicy *policy;
     std::vector<DebugHook> hooks;
 
  public:
-    FrontEnd() : FrontEnd(new FrontEndPolicy()) {}
+    FrontEnd() : FrontEnd(&defaultPolicy) {}
     explicit FrontEnd(FrontEndPolicy *policy) : policy(policy), hooks(policy->getDebugHooks()) {}
 
     void addDebugHook(const DebugHook &hook) { hooks.push_back(hook); }

@@ -31,7 +31,7 @@ debug = 0
 
 
 def escape_cpp(to_translate, translate_to='_'):
-    not_letters_or_digits = '!"#%\'()*+,-./:;<=>?@[\]^`{|}~'
+    not_letters_or_digits = '!"#%\'()*+,-./:;<=>?@[\\]^`{|}~'
     # translate_table = dict((ord(char), translate_to) for char in not_letters_or_digits)
     translate_table = str.maketrans(
         not_letters_or_digits, translate_to * len(not_letters_or_digits)

@@ -12,11 +12,13 @@ namespace P4 {
 
 const IR::P4Program *MissingIdAssigner::preorder(IR::P4Program *program) {
     auto evaluator = P4::EvaluatorPass(refMap, typeMap);
-    const auto *newProg = program->apply(evaluator);
-    auto *toplevel = evaluator.getToplevelBlock();
+    auto newProg = program->apply(evaluator);
+    auto toplevel = evaluator.getToplevelBlock();
     CHECK_NULL(toplevel);
+    std::unique_ptr<ControlPlaneAPI::P4RuntimeArchHandlerIface> archHandler(
+        archBuilder(refMap, typeMap, toplevel));
     symbols = ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
-        toplevel->getProgram(), toplevel, refMap, typeMap, archBuilder(refMap, typeMap, toplevel));
+        toplevel->getProgram(), toplevel, refMap, typeMap, archHandler.get());
     return newProg;
 }
 

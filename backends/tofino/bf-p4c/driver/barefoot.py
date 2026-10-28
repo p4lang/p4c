@@ -1143,8 +1143,9 @@ class BarefootBackend(BackendDriver):
                     self.runCleaner()
                 if run_archiver:
                     self.checkAndRunCmd('archiver')
-            finally:
-                return rc
+            except Exception:
+                pass
+            return rc
 
         # ir_to_json exits early, serializing only the IR
         # print pragmas also needs to exit early, it's just like help

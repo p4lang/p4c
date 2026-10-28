@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "copyright-license-check"
+
+# Note: Until we add these annotations to all files in the p4c repo,
+# do the checks only on new or modified files in a pull request, both
+# when it is created, and when it is updated.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v7
+        with:
+          # Ensures we have the full history for diff
+          fetch-depth: 0
+
+      - name: Install uv and reuse
+        run: |
+          ./tools/install-uv.sh
+          uv venv
+          uv pip install reuse
+
+      - name: Get changed files and check copyright and license annotations
+        id: changes
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          ./tools/reuse-lint-only-changed-files.sh ${{ github.base_ref }}

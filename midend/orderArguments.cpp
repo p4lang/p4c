@@ -13,7 +13,7 @@ static IR::Vector<IR::Argument> *reorder(const ParameterSubstitution &substituti
     auto reordered = new IR::Vector<IR::Argument>();
 
     bool foundOptional = false;
-    for (auto p : *substitution.getParametersInOrder()) {
+    for (auto p : substitution.getParametersInOrder()) {
         auto arg = substitution.lookup(p);
         if (arg == nullptr) {
             // This argument may be missing either because it is
