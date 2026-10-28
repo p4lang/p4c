@@ -458,11 +458,8 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
 
 // =====================TCIngressPipeline=============================
 void TCIngressPipeline::emitResetUnmarkedGlobalMetadata(CodeBuilder *builder) {
-    // The global metadata lives in skb->cb. Only packets that this pipeline has
-    // already marked, such as recirculated packets and packets passed to the
-    // kernel stack, carry valid metadata there. Any other packet may arrive with
-    // leftover data in skb->cb (for example from veth with XDP attached on newer
-    // kernels), so clear it before it is read.
+    // Global metadata in skb->cb is only valid for packets marked by this
+    // pipeline. Clear it for other packets, which may carry stale data.
     builder->emitIndent();
     builder->appendFormat("if (%v->mark != %u) ", compilerGlobalMetadata, packetMark);
     builder->blockStart();
