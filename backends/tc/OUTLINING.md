@@ -143,3 +143,25 @@ The caller is responsible for choosing consistent bounds and non-overlapping
 regions. Generated helpers still need BPF compilation, verifier loading and
 packet tests for the selected program and target kernel.
 
+## Deparser headers
+
+`--tc-outline-deparser` moves fixed-layout top-level header emission into one
+helper per header type. The deparser still computes output size and adjusts skb
+geometry before calling the helpers. `--tc-outline-deparser-max=BYTES` bounds
+helper entry offsets and the resulting output size; its default is 1522 bytes.
+This is an explicit limit for this option, not a universal tc frame limit.
+BYTES must contain only decimal digits and lie in 0–268435455, so the bit
+bound fits the helper's signed 32-bit return value. Signs, whitespace, suffixes
+and overflow are rejected. Leading zeros are accepted as decimal. Zero is a
+valid bound that permits no nonempty emitted header.
+
+The qualified shape is a flat header struct with ordinary fixed-width emits.
+Header stacks, variable-width emits and arbitrary deparser expressions need
+separate qualification. Per-header functions intentionally stop LLVM from
+inlining all writes into one verification unit.
+
+## Regression scope
+
+`tests/codegen/` checks BPF compilation and modeled native packet execution.
+Those checks do not prove verifier acceptance or kernel-helper behavior.
+Keep target loading and interface-packet evidence separate from these tests.

@@ -253,19 +253,27 @@ class DeparserBodyTranslatorPNA : public EBPF::DeparserBodyTranslatorPSA {
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
+    const TCOptions &tcOptions;
+
  public:
     mutable bool touched_skb_metadata;
 
     IngressDeparserPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
-                       const IR::Parameter *parserHeaders, const IR::Parameter *istd)
+                       const IR::Parameter *parserHeaders, const IR::Parameter *istd,
+                       const TCOptions &tcOptions)
         : EBPF::EBPFDeparserPSA(program, control, parserHeaders, istd),
+          tcOptions(tcOptions),
           touched_skb_metadata(false) {
         codeGen = new DeparserBodyTranslatorPNA(this);
     }
 
     bool addExternDeclaration = false;
+    bool headersOutlined = false;
+    std::string outlinedHeaderCode;
+    std::map<cstring, cstring> outlinedHelperNames;
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
+    void outlineDeparserHeaders(EBPF::CodeBuilder *builder);
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
     void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) override;
 
@@ -435,6 +443,7 @@ class ConvertToEBPFControlPNA : public Inspector {
 // Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFDeparserPNA : public Inspector {
+    const TCOptions &tcOptions;
     EBPF::EBPFProgram *program;
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
@@ -445,8 +454,9 @@ class ConvertToEBPFDeparserPNA : public Inspector {
  public:
     ConvertToEBPFDeparserPNA(EBPF::EBPFProgram *program, const IR::Parameter *parserHeaders,
                              const IR::Parameter *istd, const ConvertToBackendIR *tcIR,
-                             std::vector<EBPF::EBPFType *> ebpfTypes)
-        : program(program),
+                             std::vector<EBPF::EBPFType *> ebpfTypes, const TCOptions &tcOptions)
+        : tcOptions(tcOptions),
+          program(program),
           parserHeaders(parserHeaders),
           istd(istd),
           tcIR(tcIR),
