@@ -33,7 +33,7 @@ def execute(command, directory, tag, data=None, success=True):
 
 def build(compiler, directory, mode, flags):
     directory.mkdir(parents=True)
-    fixtures = {'counter': 'pna-codegen-counter.p4', 'reject-error': 'pna-codegen-reject-error.p4', 'narrow-cache': 'pna-codegen-narrow-cache.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4'}
+    fixtures = {'counter': 'pna-codegen-counter.p4', 'reject-error': 'pna-codegen-reject-error.p4', 'narrow-cache': 'pna-codegen-narrow-cache.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4', 'deparser-bits': 'tc-codegen-deparser-bits.p4'}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
@@ -103,6 +103,12 @@ def cases(kind, variant="default"):
         patterns = [bytes(length), b"\xff" * length, b"\x5a" * length, bytes(range(1, length + 1))]
         patterns += [(1 << bit).to_bytes(length, "big") for bit in range(length * 8)]
         return [(prefix + pattern, prefix + pattern, []) for pattern in patterns], None
+    if kind == "deparser-bits":
+        # The deparser stores an unsigned and a signed four-bit field into one
+        # byte. -1 in the signed field sets all eight bits, so only a masked
+        # partial write keeps the neighbouring field.
+        frame = ethernet + b"\x88\xb5\x00"
+        return [(frame, frame[:-1] + b"\xaf", [])], None
     if kind == "advance":
         prefix = ethernet + b"\x88\xb5"
 
@@ -195,7 +201,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
     parser.add_argument("--mode",
-                        choices=['counter', 'emission', 'parser', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
+                        choices=['counter', 'emission', 'parser', 'deparser', 'deparser-bits', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -233,6 +239,10 @@ def main():
     if args.mode == "advance":
         variants["outlined"] = ["--tc-outline-parser-range=skip:finish",
                                 "--tc-outline-parser-offset-max=1522"]
+    if args.mode == "deparser":
+        variants["outlined"] = ["--tc-outline-deparser", "--tc-outline-deparser-max=1522"]
+    if args.mode == "deparser-bits":
+        variants["outlined"] = ["--tc-outline-deparser", "--tc-outline-deparser-max=1522"]
     record = {"mode": args.mode, "variants": {}, "scope": "BPF compilation and modeled host execution"}
     for name, flags in variants.items():
         directory = output / name
@@ -247,6 +257,12 @@ def main():
     if args.mode == "advance":
         code = (output / "outlined/case_parser.c").read_text()
         assert "ebpf_outline_offset > 1522 * 8" in code, "one region ignored the offset bound"
+    if args.mode == "deparser-bits":
+        code = (output / "outlined/case_control_blocks.c").read_text()
+        assert (
+            "__p4tc_deparser_emit_nibbles_t(skb, &pkt_hdrs->nibbles" in code
+        ), "the outlined deparser did not name the header argument"
+        assert "&hdr->nibbles" not in code, "the outlined deparser kept a hard-coded name"
     if args.mode == "parser":
         two_ranges = ["--tc-outline-parser-range=start:parse_flags",
                       "--tc-outline-parser-range=parse_flags:finish"]
@@ -371,6 +387,33 @@ def main():
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
+    if args.mode == "deparser":
+        bounds = {"invalid": [], "valid": []}
+        for number, value in enumerate([
+            "-1", "+1", "4294967296", "1522junk", "", " 1522", "1522 ",
+            "0x10", "1.0", "268435456", "536870911", "999999999999999999999999",
+        ]):
+            directory = output / f"invalid-bound-{number}"
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                              "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
+                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and b"expects decimal BYTES" in result.stderr, (
+                value, result.returncode, result.stderr)
+            assert not list(directory.glob("*_control_blocks.c")), value
+            bounds["invalid"].append(value)
+        for number, value in enumerate(["0", "1", "1522", "0001522", "268435455"]):
+            directory = output / f"valid-bound-{number}"
+            directory.mkdir()
+            execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                     "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
+                     ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                     "-o", directory], directory, "p4")
+            code = (directory / "pna-codegen-emission_control_blocks.c").read_text()
+            assert f"offset_bits > {int(value)} * 8" in code, value
+            bounds["valid"].append(value)
+        record["deparser_bounds"] = bounds
     (output / "result.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps(record, indent=2))
     return 0
