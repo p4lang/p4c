@@ -71,6 +71,8 @@ class TCOptions : public CompilerOptions {
     unsigned outlineOffsetMax = 0;
     bool outlineOffsetMaxSet = false;
     bool outlineNoHdr2 = false;
+    bool outlineDeparser = false;
+    unsigned outlineDeparserMax = 1522;
     std::string outlineParserBoundField;
     unsigned outlineParserBoundValue = 0;
 
@@ -146,6 +148,31 @@ class TCOptions : public CompilerOptions {
                 return true;
             },
             "Outline a second contiguous parser-state range.");
+        registerOption(
+            "--tc-outline-deparser", nullptr,
+            [this](const char *) {
+                outlineDeparser = true;
+                return true;
+            },
+            "Outline deparser header emission into noinline helpers.");
+        registerOption(
+            "--tc-outline-deparser-max", "BYTES",
+            [this](const char *arg) {
+                constexpr unsigned maxBytes = std::numeric_limits<int>::max() / 8;
+                unsigned value = 0;
+                const char *end = arg + std::strlen(arg);
+                auto result = std::from_chars(arg, end, value, 10);
+                if (result.ec != std::errc{} || result.ptr != end || value > maxBytes) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-deparser-max expects decimal BYTES in [0, %1%], "
+                                "got '%2%'",
+                                maxBytes, arg);
+                    return false;
+                }
+                outlineDeparserMax = value;
+                return true;
+            },
+            "Bound deparser helper offsets and output length in bytes.");
         registerOption(
             "--tc-outline-parser-no-hdr2", nullptr,
             [this](const char *) {

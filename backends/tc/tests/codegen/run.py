@@ -195,7 +195,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
     parser.add_argument("--mode",
-                        choices=['counter', 'emission', 'parser', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
+                        choices=['counter', 'emission', 'parser', 'deparser', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -233,6 +233,8 @@ def main():
     if args.mode == "advance":
         variants["outlined"] = ["--tc-outline-parser-range=skip:finish",
                                 "--tc-outline-parser-offset-max=1522"]
+    if args.mode == "deparser":
+        variants["outlined"] = ["--tc-outline-deparser", "--tc-outline-deparser-max=1522"]
     record = {"mode": args.mode, "variants": {}, "scope": "BPF compilation and modeled host execution"}
     for name, flags in variants.items():
         directory = output / name
@@ -374,6 +376,33 @@ def main():
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
+    if args.mode == "deparser":
+        bounds = {"invalid": [], "valid": []}
+        for number, value in enumerate([
+            "-1", "+1", "4294967296", "1522junk", "", " 1522", "1522 ",
+            "0x10", "1.0", "268435456", "536870911", "999999999999999999999999",
+        ]):
+            directory = output / f"invalid-bound-{number}"
+            directory.mkdir()
+            result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                              "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
+                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              "-o", directory], directory, "p4", success=False)
+            assert result.returncode != 0 and b"expects decimal BYTES" in result.stderr, (
+                value, result.returncode, result.stderr)
+            assert not list(directory.glob("*_control_blocks.c")), value
+            bounds["invalid"].append(value)
+        for number, value in enumerate(["0", "1", "1522", "0001522", "268435455"]):
+            directory = output / f"valid-bound-{number}"
+            directory.mkdir()
+            execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                     "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
+                     ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                     "-o", directory], directory, "p4")
+            code = (directory / "pna-codegen-emission_control_blocks.c").read_text()
+            assert f"offset_bits > {int(value)} * 8" in code, value
+            bounds["valid"].append(value)
+        record["deparser_bounds"] = bounds
     (output / "result.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps(record, indent=2))
     return 0

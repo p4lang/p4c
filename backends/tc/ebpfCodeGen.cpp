@@ -718,6 +718,11 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
 void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     cstring msgStr, varStr;
 
+    if (name == "tc-ingress" && tcOptions.outlineDeparser) {
+        auto *d = dynamic_cast<IngressDeparserPNA *>(deparser);
+        if (d != nullptr) d->outlineDeparserHeaders(builder);
+    }
+
     if (name == "tc-parse") {
         bool oneRange = !tcOptions.outlineParserStart.empty();
         bool twoRanges = !tcOptions.outlineParserStart2.empty();
@@ -2456,6 +2461,119 @@ void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
+void IngressDeparserPNA::outlineDeparserHeaders(EBPF::CodeBuilder *builder) {
+    if (headersOutlined || !tcOptions.outlineDeparser) return;
+    headersOutlined = true;
+
+    auto headerType = program->typeMap->getType(headers, true);
+    auto headerStruct = headerType == nullptr ? nullptr : headerType->to<IR::Type_StructLike>();
+    BUG_CHECK(headerStruct != nullptr, "Deparser header type is not a struct");
+    std::map<cstring, const IR::Type *> fieldTypes;
+    for (auto field : headerStruct->fields) fieldTypes[field->name.name] = field->type;
+
+    auto temp = new EBPF::CodeBuilder(builder->target);
+    auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
+    hdrEmitTranslator->setBuilder(temp);
+    hdrEmitTranslator->copyPointerVariables(codeGen);
+    hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
+    controlBlock->container->body->apply(*hdrEmitTranslator);
+    std::string code = temp->toString();
+
+    static const std::regex blockRe(R"((^[ \t]*)if \(hdr->([A-Za-z_]\w*)\.ebpf_valid\) \{)",
+                                    std::regex::multiline);
+    struct Block {
+        size_t start;
+        size_t open;
+        size_t close;
+        std::string indent;
+        cstring field;
+    };
+    std::vector<Block> blocks;
+    for (std::sregex_iterator it(code.begin(), code.end(), blockRe), end; it != end; ++it) {
+        Block b;
+        b.start = it->position();
+        b.indent = (*it)[1].str();
+        b.field = cstring((*it)[2].str());
+        b.open = code.find('{', b.start + it->length() - 1);
+        BUG_CHECK(b.open != std::string::npos, "No opening brace in deparser block");
+        int depth = 0;
+        b.close = std::string::npos;
+        for (size_t i = b.open; i < code.size(); i++) {
+            if (code[i] == '{')
+                depth++;
+            else if (code[i] == '}') {
+                depth--;
+                if (depth == 0) {
+                    b.close = i;
+                    break;
+                }
+            }
+        }
+        BUG_CHECK(b.close != std::string::npos, "Unterminated deparser block");
+        blocks.push_back(b);
+    }
+
+    std::vector<std::string> helpers;
+    for (auto it = blocks.rbegin(); it != blocks.rend(); ++it) {
+        auto &b = *it;
+        auto typeIt = fieldTypes.find(b.field);
+        BUG_CHECK(typeIt != fieldTypes.end(), "Unknown deparser header field %1%", b.field);
+        auto *st = typeIt->second->to<IR::Type_StructLike>();
+        BUG_CHECK(st != nullptr, "Deparser field %1% is not a header", b.field);
+        cstring typeName = st->name.name;
+        cstring helperName = outlinedHelperNames.count(typeName)
+                                 ? outlinedHelperNames[typeName]
+                                 : cstring(std::string("__p4tc_deparser_emit_") + typeName.c_str());
+        if (!outlinedHelperNames.count(typeName)) {
+            outlinedHelperNames[typeName] = helperName;
+            std::string body = code.substr(b.open + 1, b.close - b.open - 1);
+            std::string fieldRef = "hdr->" + std::string(b.field.c_str());
+            size_t p = 0;
+            while ((p = body.find(fieldRef, p)) != std::string::npos) {
+                body.replace(p, fieldRef.size(), "header");
+                p += strlen("header");
+            }
+            p = 0;
+            while ((p = body.find("header.", p)) != std::string::npos) {
+                body.replace(p, strlen("header."), "header->");
+                p += strlen("header->");
+            }
+            p = 0;
+            while ((p = body.find("return TC_ACT_SHOT;", p)) != std::string::npos) {
+                body.replace(p, strlen("return TC_ACT_SHOT;"), "return -1;");
+                p += strlen("return -1;");
+            }
+            std::string helper;
+            helper += "__attribute__((noinline)) int " + std::string(helperName.c_str()) +
+                      "(struct __sk_buff *skb, struct " + std::string(typeName.c_str()) +
+                      " *header, unsigned offset_bits)\n{\n";
+            helper += "    if (!header || offset_bits > " +
+                      std::to_string(tcOptions.outlineDeparserMax) +
+                      " * 8 || (offset_bits & 7)) return -1;\n";
+            helper += "    if (!header->ebpf_valid) return offset_bits;\n";
+            helper += "    void *pkt = (void *)(long)skb->data + (offset_bits >> 3);\n";
+            helper += "    void *ebpf_packetEnd = (void *)(long)skb->data_end;\n";
+            helper += "    unsigned ebpf_packetOffsetInBits = 0;\n";
+            helper += "    unsigned char ebpf_byte;\n";
+            helper += body;
+            helper += "    return offset_bits + ebpf_packetOffsetInBits;\n}\n\n";
+            helpers.push_back(helper);
+        }
+        std::string call;
+        call += b.indent + "{\n";
+        call += b.indent + "    int next = " + std::string(helperName.c_str()) + "(skb, &hdr->" +
+                std::string(b.field.c_str()) + ", ebpf_packetOffsetInBits);\n";
+        call += b.indent + "    if (next < 0 || (unsigned)next > " +
+                std::to_string(tcOptions.outlineDeparserMax) + " * 8) return TC_ACT_SHOT;\n";
+        call += b.indent + "    ebpf_packetOffsetInBits = (unsigned)next;\n";
+        call += b.indent + "}";
+        code.replace(b.start, b.close - b.start + 1, call);
+    }
+
+    for (auto &helper : helpers) builder->append(helper);
+    outlinedHeaderCode = code;
+}
+
 void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
     emitExternDefinition(builder);
@@ -2546,11 +2664,15 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 
     // emit headers
-    auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
-    hdrEmitTranslator->setBuilder(builder);
-    hdrEmitTranslator->copyPointerVariables(codeGen);
-    hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
-    controlBlock->container->body->apply(*hdrEmitTranslator);
+    if (headersOutlined) {
+        builder->append(outlinedHeaderCode);
+    } else {
+        auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
+        hdrEmitTranslator->setBuilder(builder);
+        hdrEmitTranslator->copyPointerVariables(codeGen);
+        hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
+        controlBlock->container->body->apply(*hdrEmitTranslator);
+    }
 
     builder->newline();
 }
@@ -2763,9 +2885,9 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
 
-    auto deparser_converter =
-        new ConvertToEBPFDeparserPNA(pipeline, pipeline->parser->headers,
-                                     pipeline->control->outputStandardMetadata, tcIR, ebpfTypes);
+    auto deparser_converter = new ConvertToEBPFDeparserPNA(
+        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, tcIR,
+        ebpfTypes, tcOptions);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -2954,7 +3076,7 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
 
 // =====================ConvertToEBPFDeparserPNA=============================
 bool ConvertToEBPFDeparserPNA::preorder(const IR::ControlBlock *ctrl) {
-    deparser = new IngressDeparserPNA(program, ctrl, parserHeaders, istd);
+    deparser = new IngressDeparserPNA(program, ctrl, parserHeaders, istd, tcOptions);
     if (!deparser->build()) {
         BUG("failed to build deparser");
     }
