@@ -44,6 +44,15 @@ endif()
 # Only enable P4TC and P4TC STF tests when all required tools are available.
 p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+foreach(mode counter comparison advance)
+  add_test(NAME "p4tc-codegen/${mode}"
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/run.py
+      --compiler $<TARGET_FILE:p4c-pna-p4tc> --mode ${mode})
+  set_tests_properties("p4tc-codegen/${mode}" PROPERTIES
+    SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
+endforeach()
+
 p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
   "testdata/p4_16_samples/pna-large-header-init.p4"
   "testdata/p4_16_samples/pna-large-header-init.p4" "" "")

@@ -150,8 +150,9 @@ void EBPFCounterPNA::emitCount(EBPF::CodeBuilder *builder, const P4::ExternMetho
     builder->appendFormat("ext_params.inst_id = %d;", instId);
     builder->newline();
     builder->emitIndent();
-    builder->append("ext_params.index = ");
+    builder->append("ext_params.index = (");
     translator->visit(index);
+    builder->append(") + 1");
     builder->endOfStatement(true);
     builder->newline();
     builder->emitIndent();
