@@ -8,14 +8,50 @@
 #ifndef BACKENDS_TC_OPTIONS_H_
 #define BACKENDS_TC_OPTIONS_H_
 
+#include <charconv>
 #include <cstdlib>
+#include <cstring>
 #include <limits>
+#include <string>
 
+#include "absl/strings/ascii.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "frontends/common/options.h"
 #include "lib/error.h"
 
 namespace P4::TC {
+
+// Parse a decimal unsigned value: digits only, the whole argument consumed,
+// and the result inside [0, maxValue]. Signs, whitespace, radix prefixes and
+// suffixes are rejected.
+static bool parseDecimalUnsigned(const char *arg, unsigned maxValue, unsigned &value) {
+    const char *end = arg + std::strlen(arg);
+    unsigned parsed = 0;
+    auto result = std::from_chars(arg, end, parsed, 10);
+    if (result.ec != std::errc{} || result.ptr != end || parsed > maxValue) return false;
+    value = parsed;
+    return true;
+}
+
+// The cache name is only a stem: the emitter prefixes it before handing it to
+// refMap->newName(), which owns the reserved namespace and the collisions.
+static bool isCIdentifierStem(const std::string &name) {
+    if (name.empty() || !(absl::ascii_isalpha(name[0]) || name[0] == '_')) return false;
+    for (unsigned char c : name) {
+        if (!absl::ascii_isalnum(c) && c != '_') return false;
+    }
+    return true;
+}
+
+// Split START:END for --tc-outline-parser-range.
+static bool parseStateRange(const char *arg, std::string &start, std::string &end) {
+    std::string range(arg);
+    auto colon = range.find(':');
+    if (colon == std::string::npos || colon == 0 || colon + 1 == range.size()) return false;
+    start = range.substr(0, colon);
+    end = range.substr(colon + 1);
+    return true;
+}
 
 class TCOptions : public CompilerOptions {
  public:
@@ -27,6 +63,18 @@ class TCOptions : public CompilerOptions {
     // XDP2TC mode for PSA-eBPF
     enum XDP2TC xdp2tcMode = XDP2TC_META;
     unsigned timerProfiles = 4;
+    std::string outlineParserStart;
+    std::string outlineParserEnd;
+    std::string outlineParserStart2;
+    std::string outlineParserEnd2;
+    std::string outlineLocalField;
+    std::string outlineLocalName;
+    unsigned outlineLocalMax = 0;
+    unsigned outlineOffsetMax = 0;
+    bool outlineOffsetMaxSet = false;
+    bool outlineNoHdr2 = false;
+    std::string outlineParserBoundField;
+    unsigned outlineParserBoundValue = 0;
 
     TCOptions() {
         registerOption(
@@ -70,6 +118,117 @@ class TCOptions : public CompilerOptions {
             },
             "Select the mode used to pass metadata from XDP to TC "
             "(possible values: meta, head, cpumap).");
+        registerOption(
+            "--tc-outline-parser-range", "START:END",
+            [this](const char *arg) {
+                std::string start, end;
+                if (!parseStateRange(arg, start, end)) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-range expects START:END, got '%1%'", arg);
+                    return false;
+                }
+                if (outlineParserStart.empty()) {
+                    outlineParserStart = start;
+                    outlineParserEnd = end;
+                } else if (outlineParserStart2.empty()) {
+                    outlineParserStart2 = start;
+                    outlineParserEnd2 = end;
+                } else {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-range takes at most two ranges, got '%1%'",
+                                arg);
+                    return false;
+                }
+                return true;
+            },
+            "Outline a contiguous parser-state range into a noinline helper. "
+            "Repeat the option for a second range.");
+        registerOption(
+            "--tc-outline-parser-no-hdr2", nullptr,
+            [this](const char *) {
+                outlineNoHdr2 = true;
+                return true;
+            },
+            "Omit the header pointer from the second outlined helper.");
+        registerOption(
+            "--tc-outline-parser-offset-max", "BYTES",
+            [this](const char *arg) {
+                constexpr unsigned maxBytes = std::numeric_limits<int>::max() / 8;
+                unsigned value = 0;
+                if (!parseDecimalUnsigned(arg, maxBytes, value)) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-offset-max expects decimal BYTES in [0, "
+                                "%1%], got '%2%'",
+                                maxBytes, arg);
+                    return false;
+                }
+                outlineOffsetMax = value;
+                outlineOffsetMaxSet = true;
+                return true;
+            },
+            "Bound the outlined helper entry offset in bytes.");
+        registerOption(
+            "--tc-outline-parser-local", "FIELD:LOCAL:MAX",
+            [this](const char *arg) {
+                std::string spec(arg);
+                auto c1 = spec.find(':');
+                auto c2 = c1 == std::string::npos ? std::string::npos : spec.find(':', c1 + 1);
+                if (c1 == std::string::npos || c2 == std::string::npos || c1 == 0 || c1 + 1 == c2 ||
+                    c2 + 1 == spec.size()) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-local expects FIELD:LOCAL:MAX, got '%1%'",
+                                arg);
+                    return false;
+                }
+                auto max = spec.substr(c2 + 1);
+                unsigned maxValue = 0;
+                if (!parseDecimalUnsigned(max.c_str(), std::numeric_limits<unsigned>::max(),
+                                          maxValue)) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-local expects a decimal MAX in [0, %1%], "
+                                "got '%2%'",
+                                std::numeric_limits<unsigned>::max(), max);
+                    return false;
+                }
+                auto local = spec.substr(c1 + 1, c2 - c1 - 1);
+                if (!isCIdentifierStem(local)) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-local LOCAL must be an identifier stem, got "
+                                "'%1%'",
+                                local);
+                    return false;
+                }
+                outlineLocalField = spec.substr(0, c1);
+                outlineLocalName = local;
+                outlineLocalMax = maxValue;
+                return true;
+            },
+            "Cache FIELD in LOCAL for the last outlined parser range.");
+        registerOption(
+            "--tc-outline-parser-bound", "FIELD:MAX",
+            [this](const char *arg) {
+                std::string range(arg);
+                auto colon = range.find(':');
+                if (colon == std::string::npos || colon == 0 || colon + 1 == range.size()) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-bound expects FIELD:MAX, got '%1%'", arg);
+                    return false;
+                }
+                auto max = range.substr(colon + 1);
+                unsigned maxValue = 0;
+                if (!parseDecimalUnsigned(max.c_str(), std::numeric_limits<unsigned>::max(),
+                                          maxValue)) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--tc-outline-parser-bound expects a decimal uint32 MAX in "
+                                "[0, %1%], got '%2%'",
+                                std::numeric_limits<unsigned>::max(), max);
+                    return false;
+                }
+                outlineParserBoundField = range.substr(0, colon);
+                outlineParserBoundValue = maxValue;
+                return true;
+            },
+            "Bound a metadata field at the outlined parser-region entry.");
         registerOption(
             "--num-timer-profiles", "profiles",
             [this](const char *arg) {

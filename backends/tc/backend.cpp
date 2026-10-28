@@ -1888,7 +1888,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     main->apply(*parsePnaArch);
     program = top->getProgram();
 
-    auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, refMapEBPF, typeMapEBPF, tcIR);
+    auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, options, refMapEBPF, typeMapEBPF, tcIR);
     PassManager toEBPF = {
         new P4::DiscoverStructure(&structure),
         new InspectPnaProgram(refMapEBPF, typeMapEBPF, &structure),

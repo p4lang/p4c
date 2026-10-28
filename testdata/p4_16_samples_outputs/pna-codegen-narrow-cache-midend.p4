@@ -1,0 +1,118 @@
+#include <core.p4>
+#include <tc/pna.p4>
+
+header ethernet_t {
+    bit<48> dst;
+    bit<48> src;
+    bit<16> kind;
+}
+
+header flags_t {
+    bit<3>  flags;
+    bit<13> fragment_offset;
+}
+
+header tail_t {
+    bit<8> value;
+}
+
+struct headers_t {
+    ethernet_t ethernet;
+    flags_t    ipv4;
+    tail_t     tail;
+}
+
+struct metadata_t {
+    bit<8>  left;
+    bit<32> leftover;
+    bit<20> narrow;
+}
+
+parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        meta.left = 8w0;
+        meta.leftover = 32w1;
+        meta.narrow = 20w0;
+        transition select(hdr.ethernet.kind) {
+            16w0x88b5: parse_flags;
+            default: reject;
+        }
+    }
+    state parse_flags {
+        pkt.extract<flags_t>(hdr.ipv4);
+        meta.left = (bit<8>)hdr.ipv4.fragment_offset;
+        transition select(hdr.ipv4.flags) {
+            3w0: finish;
+            default: validate;
+        }
+    }
+    state validate {
+        meta.left = meta.left + 8w255;
+        verify(meta.left == 8w0, error.ParserInvalidArgument);
+        meta.leftover = meta.leftover + 32w1;
+        transition finish;
+    }
+    state finish {
+        pkt.extract<tail_t>(hdr.tail);
+        transition accept;
+    }
+}
+
+control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
+    @hidden action pnacodegennarrowcache47() {
+        drop_packet();
+    }
+    @hidden action pnacodegennarrowcache48() {
+        drop_packet();
+    }
+    @hidden action pnacodegennarrowcache49() {
+        send_to_port(32w1);
+    }
+    @hidden table tbl_pnacodegennarrowcache47 {
+        actions = {
+            pnacodegennarrowcache47();
+        }
+        const default_action = pnacodegennarrowcache47();
+    }
+    @hidden table tbl_pnacodegennarrowcache48 {
+        actions = {
+            pnacodegennarrowcache48();
+        }
+        const default_action = pnacodegennarrowcache48();
+    }
+    @hidden table tbl_pnacodegennarrowcache49 {
+        actions = {
+            pnacodegennarrowcache49();
+        }
+        const default_action = pnacodegennarrowcache49();
+    }
+    apply {
+        if (istd.parser_error != error.NoError) {
+            tbl_pnacodegennarrowcache47.apply();
+        } else if (meta.leftover == 32w0) {
+            tbl_pnacodegennarrowcache48.apply();
+        } else {
+            tbl_pnacodegennarrowcache49.apply();
+        }
+    }
+}
+
+control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
+    @hidden action pnacodegennarrowcache54() {
+        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit<flags_t>(hdr.ipv4);
+        pkt.emit<tail_t>(hdr.tail);
+    }
+    @hidden table tbl_pnacodegennarrowcache54 {
+        actions = {
+            pnacodegennarrowcache54();
+        }
+        const default_action = pnacodegennarrowcache54();
+    }
+    apply {
+        tbl_pnacodegennarrowcache54.apply();
+    }
+}
+
+PNA_NIC<headers_t, metadata_t>(Parser(), Ingress(), Deparser()) main;
