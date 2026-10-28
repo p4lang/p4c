@@ -171,6 +171,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
     @hidden action pnacodegencomparison48() {
         pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit<values_t>(hdr.values);
     }
     @hidden table tbl_pnacodegencomparison48 {
         actions = {

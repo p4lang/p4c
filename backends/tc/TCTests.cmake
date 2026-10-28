@@ -45,7 +45,7 @@ endif()
 p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
-foreach(mode counter comparison advance)
+foreach(mode counter emission comparison advance bitfields)
   add_test(NAME "p4tc-codegen/${mode}"
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/run.py
       --compiler $<TARGET_FILE:p4c-pna-p4tc> --mode ${mode})

@@ -33,7 +33,7 @@ def execute(command, directory, tag, data=None, success=True):
 
 def build(compiler, directory, mode, flags):
     directory.mkdir(parents=True)
-    fixtures = {'counter': 'pna-codegen-counter.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4'}
+    fixtures = {'counter': 'pna-codegen-counter.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4'}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
@@ -94,9 +94,15 @@ def cases(kind, variant="default"):
             frame = (ethernet + b"\x88\xb5" + bytes([op]) + packed.to_bytes(2, "big")
                      + (n24 & 0xffffff).to_bytes(3, "big")
                      + address.to_bytes(6, "big"))
-            rows.append((frame, frame[:14] if expected else None, []))
+            rows.append((frame, frame if expected else None, []))
             specs.append((3, 0, 208))
         return rows, specs
+    if kind == "bitfields":
+        length = 36
+        prefix = ethernet + b"\x88\xb5"
+        patterns = [bytes(length), b"\xff" * length, b"\x5a" * length, bytes(range(1, length + 1))]
+        patterns += [(1 << bit).to_bytes(length, "big") for bit in range(length * 8)]
+        return [(prefix + pattern, prefix + pattern, []) for pattern in patterns], None
     if kind == "advance":
         prefix = ethernet + b"\x88\xb5"
 
@@ -124,7 +130,14 @@ def cases(kind, variant="default"):
                 indices.extend([index + 1, (index >> 1) + 1])
             rows.append((frame, frame, indices))
         return rows, None
-    raise ValueError("unknown mode: " + kind)
+    for flags in range(8):
+        for offset in [0, 1, 31, 255, 256, 4095, 8191]:
+            frame = ethernet + b"\x88\xb5" + ((flags << 13) | offset).to_bytes(2, "big") + b"\x5a"
+            rows.append((frame, frame, []))
+    for length in [0, 1, 13, 14, 15, 16]:
+        rows.append((rows[0][0][:length], None, []))
+    rows.append((ethernet + b"\x88\xb6\0\0\x5a", None, []))
+    return rows, None
 
 
 def run_frames(driver, directory, rows, specs=None):
@@ -158,7 +171,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
     parser.add_argument("--mode",
-                        choices=['counter', 'comparison', 'advance'],
+                        choices=['counter', 'emission', 'comparison', 'advance', 'bitfields'],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -168,6 +181,8 @@ def main():
     output = args.output or Path(tempfile.mkdtemp(prefix="p4tc-codegen-"))
     output.mkdir(parents=True, exist_ok=True)
     variants = {"default": []}
+    if args.mode == "emission":
+        variants["frag-offset-name"] = ["-DFRAGMENT_OFFSET=fragOffset"]
     record = {"mode": args.mode, "variants": {}, "scope": "BPF compilation and modeled host execution"}
     for name, flags in variants.items():
         directory = output / name

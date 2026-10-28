@@ -139,11 +139,11 @@ ingress_h_reg ^ 0xFFFFFFFF;
             }
             
             ebpf_byte = ((char*)(&hdr->crc.f1))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->crc.f2))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             hdr->crc.f3 = htonl(hdr->crc.f3);
