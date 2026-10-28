@@ -1441,7 +1441,43 @@ void PnaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
             builder->append(state->parser->program->lengthVar);
             return;
         } else if (ext->method->name.name == p4lib.packetIn.advance.name) {
-            compileAdvance(ext);
+            auto program = state->parser->program;
+            auto argument = expression->arguments->at(0)->expression;
+            auto advance = program->refMap->newName("advance_bits");
+            builder->emitIndent();
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("u32 %s = ", advance.c_str());
+            visit(argument);
+            builder->endOfStatement(true);
+            builder->emitIndent();
+            builder->appendFormat("if ((%s & 7) || %s > (0xffffffffU - %s)) ", advance.c_str(),
+                                  advance.c_str(), program->offsetVar.c_str());
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("%s = ParserInvalidArgument;", program->errorVar.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("goto reject;");
+            builder->blockEnd(true);
+            builder->emitIndent();
+            builder->appendFormat("if ((%s >> 3) > (u32)((u8 *)%s - %s)) ", advance.c_str(),
+                                  program->packetEndVar.c_str(), program->headerStartVar.c_str());
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("%s = PacketTooShort;", program->errorVar.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("goto reject;");
+            builder->blockEnd(true);
+            builder->emitIndent();
+            builder->appendFormat("%s += %s;", program->offsetVar.c_str(), advance.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("%s = (u8 *)%s + BYTES(%s);", program->headerStartVar.c_str(),
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str());
+            builder->newline();
+            builder->blockEnd(true);
             return;
         }
         BUG("Unhandled packet method %1%", expression->method);

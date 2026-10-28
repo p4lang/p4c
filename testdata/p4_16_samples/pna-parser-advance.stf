@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+# Dynamic zero/one-byte skips, a constant skip, extraction and an unparsed suffix.
+packet 0 00112233445566778899aabb88b500000000aabb00000000000000000000000000000000
+expect 0 00112233445566778899aabb88b500000000bb00000000000000000000000000000000
+packet 0 00112233445566778899aabb88b500000008aabbccdd00000000000000000000000000000000
+expect 0 00112233445566778899aabb88b500000008ccdd00000000000000000000000000000000
+# Unaligned and truncated advances must drop. The program's verify drops the
+# wrap-shaped count; the pna-codegen-advance fixture covers the advance check.
+packet 0 00112233445566778899aabb88b500000007aabb
+packet 0 00112233445566778899aabb88b500000010aabb
+packet 0 00112233445566778899aabb88b5fffffff8aabb
+packet 0 00112233445566778899aabb88b500000008aa

@@ -47,6 +47,9 @@ p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
   "testdata/p4_16_samples/pna-large-header-init.p4"
   "testdata/p4_16_samples/pna-large-header-init.p4" "" "")
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/pna-parser-advance.p4"
+  "testdata/p4_16_samples/pna-parser-advance.p4" "" "")
 
 if (ENABLE_P4TC_STF_TESTS)
   # Setup fixture
@@ -77,6 +80,13 @@ if (ENABLE_P4TC_STF_TESTS)
       ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-large-header-init.p4
       -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-large-header-init.stf)
   set_tests_properties("p4tc/testdata/p4_16_samples/pna-large-header-init-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/pna-parser-advance-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-parser-advance.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-parser-advance.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/pna-parser-advance-stf"
     PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
       WORKING_DIRECTORY ${P4C_BINARY_DIR})
 endif()
