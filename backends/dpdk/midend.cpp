@@ -192,7 +192,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::FlattenInterfaceStructs(&typeMap),
             new P4::EliminateTypedef(&typeMap),
             new P4::HSIndexSimplifier(&typeMap),
-            // EliminateInvalidHeaders can introduce state-local temporaries.
+            // EliminateInvalidHeaders can introduce parser-state-local declarations that must be
+            // hoisted before ParsersUnroll.
             new P4::MoveDeclarations(true),
             new P4::ParsersUnroll(config, &refMap, &typeMap),
             new P4::FlattenHeaderUnion(&refMap, &typeMap),
