@@ -1,7 +1,20 @@
-issue5889.p4(10): [--Werror=type-error] error: { ... }: could not find default value
+issue5889.p4(10): [--Werror=type-error] error: 'h'
         H h = { f0 = { f1 = { ... }, ... }, ... };
-                            ^^^^^^^
-[--Werror=type-error] error: ...: could not find default value
-issue5889.p4(10): [--Werror=type-error] error: { f1 = { ... }, ... = ... }: could not find default value
-        H h = { f0 = { f1 = { ... }, ... }, ... };
-                     ^^^^^^^^^^^^^^^^^^^^^
+          ^
+  ---- Actual error:
+issue5889.p4(10): Field f0 in initializer is not a member of structure struct H
+          H h = { f0 = { f1 = { ... }, ... }, ... };
+                  ^^
+issue5889.p4(6)
+  struct H { }
+         ^
+  ---- Originating from:
+issue5889.p4(10): Source expression '{ f0 = { f1 = { ... }, ... = ... }, ... = ... }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct H'
+          H h = { f0 = { f1 = { ... }, ... }, ... };
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue5889.p4(10)
+          H h = { f0 = { f1 = { ... }, ... }, ... };
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue5889.p4(6)
+  struct H { }
+         ^
