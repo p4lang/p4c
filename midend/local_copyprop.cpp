@@ -345,7 +345,8 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
         if (var->val) {
             if (policy(getChildContext(), var->val, this)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
-                CopySrcInfo copy(srcInfo);
+                // Prefer the value's own source position.
+                CopySrcInfo copy(var->val->srcInfo.isValid() ? var->val->srcInfo : srcInfo);
                 return var->val->apply(copy);
             }
             LOG3("  policy rejects propagation of " << name << ": " << var->val);
