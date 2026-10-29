@@ -1,0 +1,3 @@
+psa-varbit-unaligned-header.p4(8): [--Werror=target-error] error: header variable_t: Found header with fields totaling 65 bits.  BMv2 target only supports headers with fields totaling a multiple of 8 bits.
+header variable_t {
+       ^^^^^^^^^^
