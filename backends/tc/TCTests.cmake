@@ -98,4 +98,18 @@ if (ENABLE_P4TC_STF_TESTS)
   set_tests_properties("p4tc/testdata/p4_16_samples/pna-parser-advance-stf"
     PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
       WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/pna-codegen-counter-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-codegen-counter.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-codegen-counter.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/pna-codegen-counter-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/pna-codegen-emission-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-codegen-emission.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-codegen-emission.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/pna-codegen-emission-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
 endif()
