@@ -342,8 +342,7 @@ class csr_composite_object(csr_object):
                         description = description + '\n'
                 if len(child.children()) != 1 or child.count != (1,):
                     raise CsrException(
-                        "unknown rewrite '%s' for %s.%s"
-                        % (rewrite[child.name][0], name, child.name)
+                        "unknown rewrite '%s' for %s.%s" % (rewrite[0], self.name, child.name)
                     )
                 child = child.children()[0]
             if hasattr(child, 'description') and child.description:
@@ -392,7 +391,7 @@ class csr_composite_object(csr_object):
             return child
         else:
             raise CsrException(
-                "unknown rewrite '%s' for %s.%s" % (rewrite[el.name][0], name, el.name)
+                "unknown rewrite '%s' for %s.%s" % (rewrite[0], self.name, child.name)
             )
         return None
 
@@ -1824,7 +1823,7 @@ class address_map(csr_composite_object):
         if data == 0:
             # No-op
             return {}
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             # Refernce to template
 
             type_name = self.parent + "." + self.name
@@ -1850,7 +1849,7 @@ class address_map(csr_composite_object):
             for obj in self.objs:
                 if obj.name not in data:
                     raise CsrException("Could not find key '" + obj.name + "'")
-                if data[obj.name] != 0 and not isinstance(data[obj.name], basestring):
+                if data[obj.name] != 0 and not isinstance(data[obj.name], str):
                     if obj.count == (1,):
                         if type(data[obj.name]) is not dict:
                             raise CsrException("Expected dictionary at key '" + obj.name + "'")
@@ -2209,7 +2208,7 @@ class reg(csr_composite_object):
         if data == 0:
             # No-op
             return None
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             # Refernce to template
 
             path[-1].path.append(self.name)
