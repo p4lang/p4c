@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 bit<8> increment(inout bit<8> value) {
     value = value + 1;
     return value;
