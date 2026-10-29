@@ -20,6 +20,7 @@ TODO: document this file
 """
 
 import struct
+import sys
 from copy import copy
 
 
