@@ -268,10 +268,10 @@ struct FindPhase0Table : public Inspector {
 
     bool hasCorrectSize(const IR::P4Table *table) const {
         // The phase 0 table's size must have a specific value.
-        auto *sizeProperty = table->properties->getProperty("size"_cs);
+        auto sizeProperty = table->properties->getProperty("size"_cs);
         if (sizeProperty == nullptr) return false;
         if (!sizeProperty->value->is<IR::ExpressionValue>()) return false;
-        auto *expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
+        auto expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
         if (!expression->is<IR::Constant>()) return false;
         auto *size = expression->to<IR::Constant>();
         return size->fitsInt() && size->asInt() == phase0TableSize;
@@ -295,7 +295,7 @@ struct FindPhase0Table : public Inspector {
 
         // Statefuls aren't allowed.
         errStr = "Statefuls not allowed on phase 0 table"_cs;
-        auto *al = table->getActionList();
+        auto al = table->getActionList();
         // Check for stateful execute call within table actions
         for (auto act : al->actionList) {
             bool hasStateful = false;
@@ -312,13 +312,13 @@ struct FindPhase0Table : public Inspector {
     bool hasCorrectKey(const IR::P4Table *table, cstring &errStr) const {
         // The phase 0 table must match against 'ingress_intrinsic_metadata.ingress_port'.
         errStr = "Invalid key; the phase 0 table should match against ingress_port"_cs;
-        auto *key = table->getKey();
+        auto key = table->getKey();
         if (key == nullptr) return false;
         if (key->keyElements.size() != 1) return false;
-        auto *keyElem = key->keyElements[0];
+        auto keyElem = key->keyElements[0];
         if (!keyElem->expression->is<IR::Member>()) return false;
         auto *member = keyElem->expression->to<IR::Member>();
-        auto *containingType = typeMap->getType(member->expr, true);
+        auto containingType = typeMap->getType(member->expr, true);
         if (!containingType->is<IR::Type_Declaration>()) return false;
         auto *containingTypeDecl = containingType->to<IR::Type_Declaration>();
         if (containingTypeDecl->name != "ingress_intrinsic_metadata_t") return false;
@@ -326,7 +326,7 @@ struct FindPhase0Table : public Inspector {
 
         errStr = "Invalid match type; the phase 0 table should be an exact match table"_cs;
         // The match type must be 'exact'.
-        auto *matchType =
+        auto matchType =
             refMap->getDeclaration(keyElem->matchType->path, true)->to<IR::Declaration_ID>();
         if (matchType->name.name != P4::P4CoreLibrary::instance().exactMatch.name) return false;
 
@@ -337,23 +337,23 @@ struct FindPhase0Table : public Inspector {
     /// @return true if @expression is a parameter in the parameter list @params.
     bool isParam(const IR::Expression *expression, const IR::ParameterList *params) const {
         if (!expression->is<IR::PathExpression>()) return false;
-        auto *path = expression->to<IR::PathExpression>()->path;
-        auto *decl = refMap->getDeclaration(path, true);
+        auto path = expression->to<IR::PathExpression>()->path;
+        auto decl = refMap->getDeclaration(path, true);
         if (!decl->is<IR::Parameter>()) return false;
         auto *param = decl->to<IR::Parameter>();
-        for (auto *paramElem : params->parameters)
+        for (auto paramElem : params->parameters)
             if (paramElem == param) return true;
         return false;
     }
 
     bool hasValidAction(const IR::P4Table *table, cstring &errStr) {
         errStr = "Invalid action; action is empty"_cs;
-        auto *actions = table->getActionList();
+        auto actions = table->getActionList();
         if (actions == nullptr) return false;
 
         // Other than NoAction, the phase 0 table should have exactly one action.
         const IR::ActionListElement *actionElem = nullptr;
-        for (auto *elem : actions->actionList) {
+        for (auto elem : actions->actionList) {
             if (elem->getName().name.startsWith("NoAction")) continue;
             if (actionElem != nullptr) return false;
             actionElem = elem;
@@ -361,7 +361,7 @@ struct FindPhase0Table : public Inspector {
         errStr = "Invalid action; multiple actions present"_cs;
         if (actionElem == nullptr) return false;
 
-        auto *decl = refMap->getDeclaration(actionElem->getPath(), true);
+        auto decl = refMap->getDeclaration(actionElem->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "Action list element is not an action?");
         auto *action = decl->to<IR::P4Action>();
 
@@ -370,20 +370,20 @@ struct FindPhase0Table : public Inspector {
 
         // The action should have only action data parameters.
         errStr = "Invalid action; action does not have only action data parameters"_cs;
-        for (auto *param : *action->parameters)
+        for (auto param : *action->parameters)
             if (param->direction != IR::Direction::None) return false;
 
         // Save the action parameters; we'll use them to generate the header
         // type that defines the format of the phase 0 data.
         phase0->actionParams = action->parameters;
 
-        for (auto *statement : action->body->components) {
+        for (auto statement : action->body->components) {
             // The action should contain only assignments.
             errStr = "Invalid action; action does not contain only assignments"_cs;
             if (!statement->is<IR::AssignmentStatement>()) return false;
             auto *assignment = statement->to<IR::AssignmentStatement>();
-            auto *dest = assignment->left;
-            auto *source = assignment->right;
+            auto dest = assignment->left;
+            auto source = assignment->right;
 
             // The action should write to metadata fields only.
             // TODO: Ideally we'd also verify that it only writes to fields
@@ -452,7 +452,7 @@ struct FindPhase0Table : public Inspector {
         auto *constant = equ->left->to<IR::Constant>() ? equ->left->to<IR::Constant>()
                                                        : equ->right->to<IR::Constant>();
         if (member == nullptr || constant == nullptr) return false;
-        auto *containingType = typeMap->getType(member->expr, true);
+        auto containingType = typeMap->getType(member->expr, true);
         if (!containingType->is<IR::Type_Declaration>()) return false;
         auto *containingTypeDecl = containingType->to<IR::Type_Declaration>();
         if (containingTypeDecl->name != "ingress_intrinsic_metadata_t") return false;
@@ -485,7 +485,7 @@ struct FindPhase0Table : public Inspector {
     bool canPackDataIntoPhase0() {
         // Generate the phase 0 data layout.
         FieldPacking packing;
-        for (auto *param : *phase0->actionParams) {
+        for (auto param : *phase0->actionParams) {
             BUG_CHECK(param->type, "No type for phase 0 parameter %1%?", param);
 
             // Align the field so that its LSB lines up with a byte boundary,
@@ -518,13 +518,13 @@ struct FindPhase0Table : public Inspector {
             if (packedField.isPadding()) {
                 cstring padFieldName = "__pad_"_cs;
                 padFieldName += cstring::to_cstring(padFieldId++);
-                auto *padFieldType = IR::Type::Bits::get(packedField.width);
+                auto padFieldType = IR::Type::Bits::get(packedField.width);
                 fields.push_back(new IR::StructField(
                     padFieldName, {new IR::Annotation(IR::ID("padding"), {})}, padFieldType));
                 continue;
             }
 
-            auto *fieldType = IR::Type::Bits::get(packedField.width);
+            auto fieldType = IR::Type::Bits::get(packedField.width);
             fields.push_back(new IR::StructField(packedField.source, fieldType));
         }
 
@@ -757,7 +757,7 @@ IR::IndexedVector<IR::StructField> *UpdatePhase0NodeInParser::canPackDataIntoPha
     const IR::IndexedVector<IR::StructField> *fields, const int phase0Size) {
     // Generate the phase 0 data layout.
     BFN::FieldPacking *packing = new BFN::FieldPacking();
-    for (auto *param : *fields) {
+    for (auto param : *fields) {
         BUG_CHECK(param->type, "No type for phase 0 parameter %1%?", param);
 
         // Align the field so that its LSB lines up with a byte boundary,
@@ -803,13 +803,13 @@ IR::IndexedVector<IR::StructField> *UpdatePhase0NodeInParser::canPackDataIntoPha
         if (packedField.isPadding()) {
             cstring padFieldName = "__pad_"_cs;
             padFieldName += cstring::to_cstring(padFieldId++);
-            auto *padFieldType = IR::Type::Bits::get(packedField.width);
+            auto padFieldType = IR::Type::Bits::get(packedField.width);
             packFields->push_back(new IR::StructField(
                 padFieldName, {new IR::Annotation(IR::ID("padding"), {})}, padFieldType));
             continue;
         }
 
-        auto *fieldType = IR::Type::Bits::get(packedField.width);
+        auto fieldType = IR::Type::Bits::get(packedField.width);
         packFields->push_back(new IR::StructField(packedField.source, fieldType));
     }
 
@@ -838,7 +838,7 @@ IR::BFN::TnaParser *UpdatePhase0NodeInParser::preorder(IR::BFN::TnaParser *parse
         actionName = "set_port_metadata"_cs;
     }
 
-    auto *params = parser->getApplyParameters();
+    auto params = parser->getApplyParameters();
     cstring keyName = getPhase0TableKeyName(params);
     cstring hdrName = "__phase0_header"_cs + std::to_string(phase0_count);
     auto handle = 0x20 << 24 | phase0_count++ << 16;
@@ -868,11 +868,11 @@ IR::BFN::TnaParser *UpdatePhase0NodeInParser::preorder(IR::BFN::TnaParser *parse
     auto parserPackedFields = packedFields->clone();
     int ingress_padding = Device::pardeSpec().bitIngressPrePacketPaddingSize();
     if (ingress_padding) {
-        auto *fieldType = IR::Type::Bits::get(ingress_padding);
+        auto fieldType = IR::Type::Bits::get(ingress_padding);
         parserPackedFields->push_back(new IR::StructField("__ingress_pad__", fieldType));
     }
     auto phase0_type = new IR::Type_Header(hdrName, *parserPackedFields);
-    if (auto *old = declarations->getDeclaration(hdrName)) {
+    if (auto old = declarations->getDeclaration(hdrName)) {
         if (!phase0_type->equiv(*old->getNode()))
             error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                   "Inconsistent use of %1% between "
@@ -939,7 +939,7 @@ IR::Node *ConvertPhase0AssignToExtract::preorder(IR::MethodCallExpression *expr)
 }
 
 IR::Node *ConvertPhase0AssignToExtract::preorder(IR::AssignmentStatement *stmt) {
-    auto *lExpr = stmt->left;
+    auto lExpr = stmt->left;
     auto *rExpr = stmt->right->to<IR::MethodCallExpression>();
     if (!lExpr || !rExpr) return stmt;
     auto *extract = generate_phase0_extract_method_call(lExpr, rExpr);

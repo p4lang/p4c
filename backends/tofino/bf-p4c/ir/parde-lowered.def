@@ -419,7 +419,7 @@ class LoweredDeparserParameter {
         if (sources.size() > 1) {
             out << "[";
             std::string sep = "";
-            for (const auto* source : sources) {
+            for (const ContainerRef *source : sources) {
                 out << sep << source->toString();
                 sep = ", ";
             }
@@ -431,7 +431,7 @@ class LoweredDeparserParameter {
 
     validate {
         BUG_CHECK(sources.size() != 0, "LoweredDeparserParameter with 0 sources");
-        for (const auto* source : sources) CHECK_NULL(source);
+        for (const ContainerRef *source : sources) CHECK_NULL(source);
     }
 
     /// The deparser parameter to configure. The name is the one used in the

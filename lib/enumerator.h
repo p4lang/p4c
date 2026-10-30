@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "config.h"
 #include "iterator_range.h"
 
 namespace P4::Util {

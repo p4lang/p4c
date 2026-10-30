@@ -48,7 +48,7 @@ bool TableMutex::preorder(const IR::P4Control *c) {
     Log::TempIndent indent;
     LOG2("Find table mutex for control " << c->name);
     size_t first_table = data->tableById.size();
-    for (auto *decl : c->controlLocals) {
+    for (const IR::Declaration *decl : c->controlLocals) {
         if (auto *tbl = decl->to<IR::P4Table>()) {
             int tbl_id = data->tableById.size();
             if (size_t(tbl_id) == first_table && data->tableByName.count(tbl->name.name)) {
@@ -65,9 +65,9 @@ bool TableMutex::preorder(const IR::P4Control *c) {
             LOG3("table " << tbl->name << " is #" << tbl_id);
             data->tableByName[tbl->name.name] = tbl_id;
             data->tableById.push_back(tbl->name.name);
-            auto *actions = tbl->getActionList();
+            const IR::ActionList *actions = tbl->getActionList();
             BUG_CHECK(actions, "%s has no actions?", tbl);
-            for (auto *act : actions->actionList)
+            for (const IR::ActionListElement *act : actions->actionList)
                 data->tablesForAction[act->getName().name].insert(tbl_id);
         }
     }

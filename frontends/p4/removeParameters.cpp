@@ -164,8 +164,8 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
                 IR::IndexedVector<IR::StatOrDecl> tempAssigns;
                 ExtractArrayIndices eai(typeMap, *nameGen, tempDecls, tempAssigns);
                 eai.setCalledBy(this);
-                auto argExpr = arg->expression->apply(eai)->to<IR::Expression>();
-                for (auto *d : tempDecls) result->push_back(d);
+                IR::Ptr<IR::Expression> argExpr = arg->expression->apply(eai)->to<IR::Expression>();
+                for (const IR::Declaration *d : tempDecls) result->push_back(d);
                 body.append(tempAssigns);
 
                 auto left = new IR::PathExpression(p->name);
@@ -192,7 +192,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
 
     InsertBeforeExits ibf(&postamble);
     ibf.setCalledBy(this);
-    auto actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
+    IR::Ptr<IR::BlockStatement> actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
     body.append(actionBody->components);
     body.append(postamble);
 
@@ -216,11 +216,11 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::MethodCallExpression *ex
     if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     } else if (unsigned toRemove = invocations->argsToRemove(orig)) {
         RemoveMethodCallArguments rmca(toRemove);
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     }
     return expression;
 }

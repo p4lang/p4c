@@ -15,11 +15,11 @@ ResolutionContext::ResolutionContext() {
 #endif
 }
 
-const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
+const std::vector<IR::Ptr<IR::IDeclaration>> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
-    std::vector<const IR::IDeclaration *> decls;
+    std::vector<IR::Ptr<IR::IDeclaration>> decls;
     if (const auto *nest = ns->to<IR::INestedNamespace>()) {
-        for (const auto *nn : nest->getNestedNamespaces()) {
+        for (const IR::INamespace *nn : nest->getNestedNamespaces()) {
             for (const auto *decl : nn->getDeclarations()) decls.push_back(decl);
         }
     }
@@ -32,12 +32,13 @@ const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarati
 ResolutionContext::NamespaceDeclsByName &ResolutionContext::memoizeDeclsByName(
     const IR::INamespace *ns) const {
     auto &namesToDecls = namespaceDeclNames[ns];
-    for (const auto *d : getDeclarations(ns)) namesToDecls[d->getName().name].push_back(d);
+    for (const IR::IDeclaration *d : getDeclarations(ns))
+        namesToDecls[d->getName().name].push_back(d);
     return namesToDecls;
 }
 
-std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &name,
-                                                                 P4::ResolutionType type) const {
+std::vector<IR::Ptr<IR::IDeclaration>> ResolutionContext::resolve(const IR::ID &name,
+                                                                  P4::ResolutionType type) const {
     const Context *ctxt = nullptr;
     while (auto scope = findOrigCtxt<IR::INamespace>(ctxt)) {
         auto rv = lookup(scope, name, type);
@@ -47,9 +48,9 @@ std::vector<const IR::IDeclaration *> ResolutionContext::resolve(const IR::ID &n
     return {};
 }
 
-std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INamespace *current,
-                                                                const IR::ID &name,
-                                                                P4::ResolutionType type) const {
+std::vector<IR::Ptr<IR::IDeclaration>> ResolutionContext::lookup(const IR::INamespace *current,
+                                                                 const IR::ID &name,
+                                                                 P4::ResolutionType type) const {
     LOG2("Trying to resolve in " << dbp(current));
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
@@ -104,7 +105,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
             return vector;
         }
     } else if (const auto *simple = current->to<IR::ISimpleNamespace>()) {
-        const auto *decl = simple->getDeclByName(name);
+        const IR::IDeclaration *decl = simple->getDeclByName(name);
         if (decl) {
             switch (type) {
                 case P4::ResolutionType::Any:
@@ -151,7 +152,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
     }
     if (const auto *nested = current->to<IR::INestedNamespace>()) {
         auto nestedNamespaces = nested->getNestedNamespaces();
-        for (const auto *nn : Util::iterator_range(nestedNamespaces).reverse()) {
+        for (const IR::INamespace *nn : Util::iterator_range(nestedNamespaces).reverse()) {
             auto rv = lookup(nn, name, type);
             if (!rv.empty()) return rv;
         }
@@ -159,10 +160,11 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
     return {};
 }
 
-std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const IR::ID &name) const {
+std::vector<IR::Ptr<IR::IDeclaration>> ResolutionContext::lookupMatchKind(
+    const IR::ID &name) const {
     LOG2("Resolving " << name << " as match kind");
     if (const auto *global = findOrigCtxt<IR::P4Program>()) {
-        for (const auto *obj : global->objects) {
+        for (const IR::Node *obj : global->objects) {
             if (const auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
                 auto rv = lookup(match_kind, name, ResolutionType::Any);
                 if (!rv.empty()) return rv;
@@ -172,7 +174,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const I
     return {};
 }
 
-const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name) const {
+IR::Ptr<IR::Vector<IR::Argument>> ResolutionContext::methodArguments(cstring name) const {
     const Context *ctxt = getChildContext();
     while (ctxt) {
         const auto *node = ctxt->original;
@@ -212,9 +214,9 @@ const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name)
     return nullptr;
 }
 
-const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
-                                                         P4::ResolutionType type,
-                                                         const IR::INamespace *ns) const {
+IR::Ptr<IR::IDeclaration> ResolutionContext::resolveUnique(const IR::ID &name,
+                                                           P4::ResolutionType type,
+                                                           const IR::INamespace *ns) const {
     LOG2("Resolving " << name << " "
                       << (type == ResolutionType::Type ? "as type" : "as identifier"));
 
@@ -244,12 +246,13 @@ const IR::IDeclaration *ResolutionContext::resolveUnique(const IR::ID &name,
     }
 
     ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
-    for (const auto *a : decls) ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+    for (const IR::IDeclaration *a : decls)
+        ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
-const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
-                                                          bool notNull) const {
+IR::Ptr<IR::IDeclaration> ResolutionContext::getDeclaration(const IR::Path *path,
+                                                            bool notNull) const {
     const IR::IDeclaration *result = nullptr;
     const Context *ctxt = nullptr;
     if (findOrigCtxt<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
@@ -260,7 +263,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
         } else if (decls.size() != 1) {
             ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                         path->name);
-            for (const auto *a : decls) ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+            for (const IR::IDeclaration *a : decls)
+                ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls.front();
         }
@@ -277,8 +281,8 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
     return result;
 }
 
-const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointer,
-                                                          bool notNull) const {
+IR::Ptr<IR::IDeclaration> ResolutionContext::getDeclaration(const IR::This *pointer,
+                                                            bool notNull) const {
     auto result = findOrigCtxt<IR::Declaration_Instance>();
     if (findOrigCtxt<IR::Function>() == nullptr || result == nullptr)
         ::P4::error(ErrorType::ERR_INVALID,
@@ -287,7 +291,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointe
     return result;
 }
 
-const IR::Type *ResolutionContext::resolveType(const IR::Type *type) const {
+IR::Ptr<IR::Type> ResolutionContext::resolveType(const IR::Type *type) const {
     if (auto tname = type->to<IR::Type_Name>())
         return resolvePath(tname->path, true)->to<IR::Type>();
     return type;
@@ -300,7 +304,7 @@ ResolveReferences::ResolveReferences(ReferenceMap *refMap, bool checkShadow)
     visitDagOnce = false;
 }
 
-const IR::IDeclaration *ResolutionContext::resolvePath(const IR::Path *path, bool isType) const {
+IR::Ptr<IR::IDeclaration> ResolutionContext::resolvePath(const IR::Path *path, bool isType) const {
     LOG2("Resolving path " << path << " " << (isType ? "as type" : "as identifier"));
     const IR::INamespace *ctxt = nullptr;
     if (path->absolute) ctxt = findOrigCtxt<IR::P4Program>();
@@ -308,7 +312,7 @@ const IR::IDeclaration *ResolutionContext::resolvePath(const IR::Path *path, boo
     return resolveUnique(path->name, k, ctxt);
 }
 
-const IR::IDeclaration *ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
+IR::Ptr<IR::IDeclaration> ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
     auto decl = ResolutionContext::resolvePath(path, isType);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
@@ -324,7 +328,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     std::unordered_map<cstring, const IR::Node *>
         prev_in_scope;  // check for shadowing within a scope
     auto decls = getDeclarations(ns);
-    for (const auto *decl : decls) {
+    for (const IR::IDeclaration *decl : decls) {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>()) continue;
 
@@ -340,7 +344,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
         auto prev = resolve(decl->getName(), ResolutionType::Any);
         if (prev.empty()) continue;
 
-        for (const auto *p : prev) {
+        for (const IR::IDeclaration *p : prev) {
             const IR::Node *pnode = p->getNode();
             if (pnode == node) continue;
             if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>() ||
@@ -412,7 +416,8 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
     } else if (decls.size() != 1) {
         ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                     ke->matchType->path->name);
-        for (const auto *a : decls) ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
+        for (const IR::IDeclaration *a : decls)
+            ::P4::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls.front());
     }
