@@ -1,0 +1,7 @@
+issue5889.p4(10): [--Werror=type-error] error: { ... }: could not find default value
+        H h = { f0 = { f1 = { ... }, ... }, ... };
+                            ^^^^^^^
+[--Werror=type-error] error: ...: could not find default value
+issue5889.p4(10): [--Werror=type-error] error: { f1 = { ... }, ... = ... }: could not find default value
+        H h = { f0 = { f1 = { ... }, ... }, ... };
+                     ^^^^^^^^^^^^^^^^^^^^^

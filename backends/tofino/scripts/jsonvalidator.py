@@ -93,5 +93,5 @@ class JSONValidator:
                     json.dump(schema, schema_file, indent=2)
             else:
                 print("please provide a valid name for the output file")
-        except e:
+        except Exception as e:
             print(e)

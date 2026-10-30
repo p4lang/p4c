@@ -204,7 +204,7 @@ class TableKeyInstance(object):
                 raise Exception("Unexpected key type " + t)
 
     def set(self, key, value):
-        array = re.compile("(.*)\$([0-9]+)(.*)")
+        array = re.compile(r"(.*)\$([0-9]+)(.*)")
         m = array.match(key)
         if m:
             key = m.group(1) + "[" + m.group(2) + "]" + m.group(3)
