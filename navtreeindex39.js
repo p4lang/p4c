@@ -1,5 +1,7 @@
 var NAVTREEINDEX39 =
 {
+"struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher.html":[13,0,12,25,0,3],
+"struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher_3_010_00_01_types_8_8_8_01_4.html":[13,0,12,25,0,4],
 "struct_p4_1_1_util_1_1_hash.html":[13,0,12,25,17],
 "struct_p4_1_1_util_1_1_hasher_3_01_closed_range_3_01_unit_00_01_order_01_4_01_4.html":[13,0,12,25,22],
 "struct_p4_1_1_util_1_1_hasher_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html":[13,0,12,25,26],
@@ -247,7 +249,5 @@ var NAVTREEINDEX39 =
 "struct_stage_use_estimate.html#a89c7d9c09f6942f958516a30eb4acb44":[13,0,636,1],
 "struct_stage_use_estimate.html#a8d255017a16a771808568ca0daf63fbd":[13,0,636,4],
 "struct_stage_use_estimate.html#a8da43d7bc94147de3a0a51e2a93f5699":[13,0,636,6],
-"struct_stage_use_estimate.html#ab5b59e0358d2ad32bba859c49466a95f":[13,0,636,7],
-"struct_stage_use_estimate.html#ac311040dc0d5978529e094bd42cda3cb":[13,0,636,3],
-"struct_stage_use_estimate_1_1_r_a_m__counter.html":[13,0,636,0]
+"struct_stage_use_estimate.html#ab5b59e0358d2ad32bba859c49466a95f":[13,0,636,7]
 };

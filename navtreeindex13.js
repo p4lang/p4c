@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"class_p4_1_1_metrics_pass_manager.html":[13,0,12,327],
+"class_p4_1_1_mid_end_last.html":[12,0,14,315],
 "class_p4_1_1_mid_end_last.html":[13,0,12,328],
 "class_p4_1_1_minimal_name_generator.html":[12,0,14,316],
 "class_p4_1_1_minimal_name_generator.html":[13,0,12,329],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "class_p4_1_1_p4_tools_1_1_mid_end.html#a25397910da4ae344ffb78bb8235d9c64":[13,0,12,18,21,7],
 "class_p4_1_1_p4_tools_1_1_mid_end.html#a3a8111cf9150361aeb258810d4417ba0":[12,0,14,9,18,8],
 "class_p4_1_1_p4_tools_1_1_mid_end.html#a3a8111cf9150361aeb258810d4417ba0":[13,0,12,18,21,8],
-"class_p4_1_1_p4_tools_1_1_mid_end.html#a49a201883539751e7c59132ece12cef1":[12,0,14,9,18,6],
-"class_p4_1_1_p4_tools_1_1_mid_end.html#a49a201883539751e7c59132ece12cef1":[13,0,12,18,21,6],
-"class_p4_1_1_p4_tools_1_1_mid_end.html#a61b3e20cc9d69efad8e2a6912fa9931d":[12,0,14,9,18,1]
+"class_p4_1_1_p4_tools_1_1_mid_end.html#a49a201883539751e7c59132ece12cef1":[12,0,14,9,18,6]
 };

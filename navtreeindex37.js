@@ -1,5 +1,7 @@
 var NAVTREEINDEX37 =
 {
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html":[13,0,12,3,1,25],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[12,0,14,1,1,25,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html#af3dc2a369f0548902592f72959e1cc99":[13,0,12,3,1,25,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[12,0,14,1,1,26],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[13,0,12,3,1,26],
@@ -247,7 +249,5 @@ var NAVTREEINDEX37 =
 "struct_p4_1_1_p4_runtime_a_p_i.html#a452cc25320caaf24d52435205dcc73e8":[13,0,12,357,2],
 "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_constraints.html":[13,0,12,18,1,4],
 "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_declarations.html":[13,0,12,18,1,6],
-"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_probabilities.html":[13,0,12,18,1,12],
-"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_properties.html":[13,0,12,18,1,13],
-"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_requirements.html":[13,0,12,18,1,14]
+"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_probabilities.html":[13,0,12,18,1,12]
 };

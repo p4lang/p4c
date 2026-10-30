@@ -1,5 +1,7 @@
 var NAVTREEINDEX12 =
 {
+"class_p4_1_1_find_parameters.html":[13,0,12,214],
+"class_p4_1_1_find_redundant_parsers.html":[12,0,14,202],
 "class_p4_1_1_find_redundant_parsers.html":[13,0,12,215],
 "class_p4_1_1_find_repeated_action_uses.html":[12,0,14,203],
 "class_p4_1_1_find_repeated_action_uses.html":[13,0,12,216],
@@ -247,7 +249,5 @@ var NAVTREEINDEX12 =
 "class_p4_1_1_method_instance.html#aa2c67c8591b9d135b4277c6560d725b9":[13,0,12,325,2],
 "class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[12,0,14,312,1],
 "class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[13,0,12,325,1],
-"class_p4_1_1_metrics_pass_manager.html":[12,0,14,314],
-"class_p4_1_1_metrics_pass_manager.html":[13,0,12,327],
-"class_p4_1_1_mid_end_last.html":[12,0,14,315]
+"class_p4_1_1_metrics_pass_manager.html":[12,0,14,314]
 };
