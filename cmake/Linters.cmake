@@ -180,7 +180,7 @@ if(ENABLE_IWYU)
   # Apply IWYU to all targets.
   get_all_targets(ALL_IWYU_TARGETS)
   # Remove generated files from IWYU.
-  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "controlplane-gen")
+  list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "p4runtime_cpp")
   list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "dpdk_runtime")
   list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "ir-generated")
   list(FILTER ALL_IWYU_TARGETS EXCLUDE REGEX "genIR")
