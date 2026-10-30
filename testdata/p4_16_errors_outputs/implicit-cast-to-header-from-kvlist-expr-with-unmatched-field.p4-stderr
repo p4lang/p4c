@@ -8,9 +8,9 @@ implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=t
     H h = { b = 1 };
       ^
   ---- Actual error:
-implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to header H
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Field b in initializer is not a member of structure header H
       H h = { b = 1 };
-            ^^^^^^^^^
+              ^
 implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(3)
   header H {}
          ^

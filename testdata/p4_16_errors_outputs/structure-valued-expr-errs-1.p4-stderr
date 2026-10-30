@@ -162,9 +162,9 @@ structure-valued-expr-errs-1.p4(118): [--Werror=type-error] error: 'hdr.h1 = { f
             hdr.h1 = {f2=5, f1=2};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(118): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to header h1_t
+structure-valued-expr-errs-1.p4(118): Field f2 in initializer is not a member of structure header h1_t
               hdr.h1 = {f2=5, f1=2};
-                       ^^^^^^^^^^^^
+                        ^^
 structure-valued-expr-errs-1.p4(22)
   header h1_t {
          ^^^^
@@ -182,9 +182,12 @@ structure-valued-expr-errs-1.p4(119): [--Werror=type-error] error: 'hdr.h1 = { f
             hdr.h1 = {f2=5};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(23): No initializer for field f1
-      bit<8> f1;
-             ^^
+structure-valued-expr-errs-1.p4(119): Field f2 in initializer is not a member of structure header h1_t
+              hdr.h1 = {f2=5};
+                        ^^
+structure-valued-expr-errs-1.p4(22)
+  header h1_t {
+         ^^^^
   ---- Originating from:
 structure-valued-expr-errs-1.p4(119): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {f2=5};
@@ -199,9 +202,9 @@ structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: 'hdr.hstructs
             hdr.hstructs.s1 = {f2=5, f1=2};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(120): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to struct s1_t
+structure-valued-expr-errs-1.p4(120): Field f2 in initializer is not a member of structure struct s1_t
               hdr.hstructs.s1 = {f2=5, f1=2};
-                                ^^^^^^^^^^^^
+                                 ^^
 structure-valued-expr-errs-1.p4(34)
   struct s1_t {
          ^^^^
@@ -219,9 +222,12 @@ structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: 'hdr.hstructs
             hdr.hstructs.s1 = {f2=5};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(35): No initializer for field f1
-      bit<8> f1;
-             ^^
+structure-valued-expr-errs-1.p4(121): Field f2 in initializer is not a member of structure struct s1_t
+              hdr.hstructs.s1 = {f2=5};
+                                 ^^
+structure-valued-expr-errs-1.p4(34)
+  struct s1_t {
+         ^^^^
   ---- Originating from:
 structure-valued-expr-errs-1.p4(121): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {f2=5};
@@ -276,9 +282,12 @@ structure-valued-expr-errs-1.p4(129): [--Werror=type-error] error: '{ f0 = hdr.e
 ..._0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(46): No initializer for field f2
-      bit<16> f2;
-              ^^
+structure-valued-expr-errs-1.p4(129): Field f2147483647 in initializer is not a member of structure struct tuple_0
+  ..._0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
+                                                               ^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct tuple_0 {
+         ^^^^^^^
   ---- Originating from:
 structure-valued-expr-errs-1.p4(129): Initializer type 'unknown struct' does not match expected type 'struct tuple_0'
   ..._0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
