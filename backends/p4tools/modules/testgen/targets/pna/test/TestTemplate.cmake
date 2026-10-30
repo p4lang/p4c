@@ -10,16 +10,17 @@
 #   - testfolder is target folder of the test.
 #   - p4test is the file that is to be tested.
 macro(check_pna_with_ptf testcontent testfolder p4test)
-  set(__p4cdpdkpath "${P4C_BINARY_DIR}")
   set(__dpdk_runner " ${P4C_SOURCE_DIR}/backends/dpdk/run-dpdk-ptf-test.py")
   # Find all the ptf tests generated for this P4 file and test them
   string(APPEND ${testcontent}
     "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n"
+    "if (( \${#ptffiles[@]} == 0 )); then echo 'No PTF tests generated'; exit 1; fi\n"
     "for item in \${ptffiles[@]}\n"
     "do\n"
     "\techo \"Found \${item}\"\n"
-    "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
+    "\t python3 ${__dpdk_runner} -tf \"\${item}\" -td \"\${item%.py}.ptf\" ${P4C_SOURCE_DIR} \
       --ipdk-install-dir=${IPDK_INSTALL_DIR} \
+      --compiler=${P4C_BINARY_DIR}/p4c-dpdk \
       -ll=DEBUG ${p4test}\n"
     "done\n"
   )
@@ -80,7 +81,7 @@ function(p4tools_add_test_with_args)
   # TODO: not sure if we have assert/assume mode for PNA/DPDK as well
   # If P416_PTF is active, run the PTF PNA/DPDK runner.
   if(${TOOLS_PNA_TESTS_P416_PTF})
-    check_pna_with_ptf(__testcontent ${__testfolder} ${p4test} ${__ptfRunerFolder})
+    check_pna_with_ptf(__testcontent ${__testfolder} ${p4test})
   endif()
 
   p4c_write_test_script("${__testfile}" "${__testcontent}")
@@ -94,4 +95,8 @@ function(p4tools_add_test_with_args)
     set(${tag}_timeout 300)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
+  if(TOOLS_PNA_TESTS_P416_PTF)
+    # DPDK EAL files and hugepage allocations are shared across network namespaces.
+    set_tests_properties(${__testname} PROPERTIES RESOURCE_LOCK dpdk)
+  endif()
 endfunction(p4tools_add_test_with_args)
