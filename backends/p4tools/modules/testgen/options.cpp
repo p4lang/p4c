@@ -416,7 +416,7 @@ TestgenOptions::TestgenOptions()
         },
         "Produce only tests that violate the condition defined in assert calls. This will either "
         "produce no tests or only tests that contain counter examples.");
-    
+
     registerOption(
         "--reset-threshold", "resetThreshold",
         [this](const char *arg) {
@@ -428,8 +428,10 @@ TestgenOptions::TestgenOptions()
                     throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument &) {
-                error("Invalid input value %1% for --reset-threshold. "
-                    "Expected positive integer.", arg);
+                error(
+                    "Invalid input value %1% for --reset-threshold. "
+                    "Expected positive integer.",
+                    arg);
                 return false;
             }
             return true;
