@@ -26,7 +26,7 @@ class TestBackEnd {
     int64_t testCount = 0;
 
     /// Indicates the number of generated tests after which we reset memory.
-    static const int64_t RESET_THRESHOLD = 10000;
+    int64_t RESET_THRESHOLD = TestgenOptions::get().resetThreshold;
 
     /// ProgramInfo is used to access some target specific information for test generation.
     std::reference_wrapper<const ProgramInfo> programInfo;
