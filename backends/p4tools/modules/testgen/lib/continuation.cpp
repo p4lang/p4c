@@ -161,8 +161,15 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
             : subst(param, value) {}
     } subst(*parameterOpt, *value_opt);
 
+    bool substituted = false;
     for (const auto &cmd : body.cmds) {
         result.cmds.push_back(std::visit(subst, cmd));
+        if (!substituted) {
+            result.cmds.push_back(std::visit(subst, cmd));
+            substituted = true;
+        } else {
+            result.cmds.push_back(cmd);
+        }
     }
 
     return result;
