@@ -1,12 +1,12 @@
 <map id="P4::BMV2::SimpleSwitchMidEnd" name="P4::BMV2::SimpleSwitchMidEnd">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,233,324"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_b_m_v2_1_1_mid_end.html" title=" " alt="" coords="49,225,189,251"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,264,122,299,117,299,117,264"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="53,152,185,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,191,122,225,117,225,117,191"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="75,5,163,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="111,44,101,79,100,99,104,119,116,151,111,153,98,120,95,99,95,78,106,43"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="111,79,221,104"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="137,41,161,77,156,80,132,44"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="153,117,129,153,125,150,149,114"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,308,233,336"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_b_m_v2_1_1_mid_end.html" title=" " alt="" coords="49,232,189,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,274,121,309,117,306,117,278"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="53,157,185,184"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,198,122,233,116,231,118,202"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="75,5,163,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,45,102,81,102,108,116,156,111,156,96,109,96,81,107,50"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="110,81,221,109"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="136,43,160,80,155,81,135,49"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="151,120,130,158,125,155,148,124"/>
 </map>

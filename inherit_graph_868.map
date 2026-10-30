@@ -1,9 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p_h_v_1_1_cluster_stats.html" title="An interface for gathering statistics common across each kind of cluster." alt="" coords="5,55,140,80"/>
-<area shape="rect" id="Node000001" href="$class_p_h_v_1_1_aligned_cluster.html" title=" " alt="" coords="197,5,348,31"/>
-<area shape="poly" id="edge2644_Node000000_Node000001" title=" " alt="" coords="137,49,220,28,221,33,139,54"/>
-<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_rotational_cluster.html" title=" " alt="" coords="188,55,357,80"/>
-<area shape="poly" id="edge2645_Node000000_Node000002" title=" " alt="" coords="154,65,188,65,188,70,154,70"/>
-<area shape="rect" id="Node000003" href="$class_p_h_v_1_1_super_cluster.html" title=" " alt="" coords="203,104,342,129"/>
-<area shape="poly" id="edge2646_Node000000_Node000003" title=" " alt="" coords="139,81,221,101,220,107,137,86"/>
+<area shape="rect" id="Node000000" href="$class_p_h_v_1_1_cluster_stats.html" title="An interface for gathering statistics common across each kind of cluster." alt="" coords="5,57,140,85"/>
+<area shape="rect" id="Node000001" href="$class_p_h_v_1_1_aligned_cluster.html" title=" " alt="" coords="197,5,347,33"/>
+<area shape="poly" id="edge2644_Node000000_Node000001" title=" " alt="" coords="143,50,218,32,213,35,144,55"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_rotational_cluster.html" title=" " alt="" coords="188,57,356,85"/>
+<area shape="poly" id="edge2645_Node000000_Node000002" title=" " alt="" coords="155,69,190,70,185,72,156,74"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1_super_cluster.html" title=" " alt="" coords="203,109,341,137"/>
+<area shape="poly" id="edge2646_Node000000_Node000003" title=" " alt="" coords="144,87,218,108,213,109,143,92"/>
 </map>

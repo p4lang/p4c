@@ -1,17 +1,17 @@
 <map id="P4::P4V1::CounterOrMeter_Model" name="P4::P4V1::CounterOrMeter_Model">
-<area shape="rect" id="Node000001" title=" " alt="" coords="629,87,820,127"/>
-<area shape="rect" id="Node000005" href="$struct_p4_1_1_p4_v1_1_1_counter___model.html" title=" " alt="" coords="868,5,1053,31"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="777,79,867,41,907,28,909,33,869,46,779,84"/>
-<area shape="rect" id="Node000006" href="$struct_p4_1_1_p4_v1_1_1_direct_counter___model.html" title=" " alt="" coords="872,55,1049,95"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="833,90,872,85,872,90,834,95"/>
-<area shape="rect" id="Node000007" href="$struct_p4_1_1_p4_v1_1_1_direct_meter___model.html" title=" " alt="" coords="879,119,1043,159"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="834,119,879,126,878,131,833,125"/>
-<area shape="rect" id="Node000008" href="$struct_p4_1_1_p4_v1_1_1_meter___model.html" title=" " alt="" coords="875,184,1047,209"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="779,131,869,169,909,181,907,187,867,174,777,136"/>
-<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="399,95,581,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="595,105,629,105,629,110,595,110"/>
-<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="180,95,351,120"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,105,398,105,398,110,365,110"/>
-<area shape="rect" id="Node000004" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="5,95,132,120"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="146,105,180,105,180,110,146,110"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="628,92,819,136"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_p4_v1_1_1_counter___model.html" title=" " alt="" coords="867,5,1051,33"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="779,82,866,42,897,34,902,33,868,47,780,87"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_p4_v1_1_1_direct_counter___model.html" title=" " alt="" coords="871,57,1047,102"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="834,95,873,92,868,93,835,100"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_p4_v1_1_1_direct_meter___model.html" title=" " alt="" coords="877,126,1040,171"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="834,127,879,136,874,136,834,133"/>
+<area shape="rect" id="Node000008" href="$struct_p4_1_1_p4_v1_1_1_meter___model.html" title=" " alt="" coords="873,195,1044,222"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="780,141,868,181,902,194,897,194,866,186,779,146"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="398,100,580,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="596,111,631,114,625,114,596,116"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="180,100,350,128"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,111,400,113,395,114,366,116"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="5,100,132,128"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="147,111,181,113,177,115,148,116"/>
 </map>

@@ -1,9 +1,9 @@
 <map id="P4::Test::MetadataLiveRangeTest" name="P4::Test::MetadataLiveRangeTest">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,241,251"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_test_1_1_tofino_backend_test.html" title="A GTest fixture for Tofino tests." alt="" coords="24,152,223,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,191,126,225,121,225,121,191"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_test_1_1_backend_test.html" title="A GTest fixture base class for backend targets." alt="" coords="43,79,204,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="126,118,126,152,121,152,121,118"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="73,5,174,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,44,126,79,121,79,121,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,241,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_test_1_1_tofino_backend_test.html" title="A GTest fixture for Tofino tests." alt="" coords="24,157,222,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,198,125,233,121,231,121,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_test_1_1_backend_test.html" title="A GTest fixture base class for backend targets." alt="" coords="43,81,203,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,122,126,157,120,155,122,127"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="73,5,173,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="124,46,126,81,120,80,122,51"/>
 </map>

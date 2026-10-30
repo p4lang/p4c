@@ -1,17 +1,17 @@
 <map id="BFN::TypeInference" name="BFN::TypeInference">
-<area shape="rect" id="Node000001" title="Extended type inference pass from p4c used in barefoot&#39;s midend." alt="" coords="68,299,216,324"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_type_inference.html" title=" " alt="" coords="73,225,211,251"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,264,145,299,139,299,139,264"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="5,152,116,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="86,184,130,223,127,227,82,188"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="51,5,139,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="92,45,66,152,61,151,87,44"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="140,152,309,177"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="106,43,119,73,139,102,170,130,203,150,200,154,167,134,135,106,114,75,101,45"/>
-<area shape="rect" id="Node000006" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="149,79,316,104"/>
-<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="131,34,211,76,209,81,128,39"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="203,188,157,227,154,223,199,184"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="232,118,229,152,223,152,227,117"/>
-<area shape="rect" id="Node000007" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="164,5,331,31"/>
-<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="245,45,238,79,232,78,240,44"/>
+<area shape="rect" id="Node000001" title="Extended type inference pass from p4c used in barefoot&#39;s midend." alt="" coords="68,308,216,336"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_type_inference.html" title=" " alt="" coords="74,232,210,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,274,144,309,139,306,140,278"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="5,157,116,184"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,192,130,231,125,233,86,197"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="52,5,139,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,45,66,157,61,155,88,50"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="140,157,309,184"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="104,45,119,77,139,107,168,134,201,155,196,157,165,138,134,110,115,80,103,50"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="148,81,314,109"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="133,38,209,79,205,82,133,43"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="201,193,158,234,155,230,196,196"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="230,122,228,157,223,155,227,127"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="163,5,329,33"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="241,46,236,82,231,79,239,51"/>
 </map>

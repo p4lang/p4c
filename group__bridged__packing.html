@@ -138,7 +138,7 @@ $(function(){initNavTree('group__bridged__packing.html',''); initResizable(true)
 <div class="dynheader">
 Collaboration diagram for Packing of bridged and fixed-size headers:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="group__bridged__packing.svg" width="654" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="group__bridged__packing.svg" width="651" height="56"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
@@ -165,7 +165,7 @@ Typedefs</h2></td></tr>
 <p>The egress to ingress bridging is available on Tofino 32Q with loopbacks present at pipes 1 and 3. It is not available on Tofino 64Q with no loopbacks.</p>
 <p>The case of the combination of both bridging in a folded program is shown below:</p>
 <div class="dotgraph">
-<iframe scrolling="no" frameborder="0" src="dot_inline_dotgraph_2.svg" width="316" height="155"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 <p>Packets are processed in a "logical" pipe(line) that spans multiple "physical" pipe(line)s. Using the backend's terminology, the packet is processed by four threads of the IR::BFN::Pipe::thread_t type in a run-to-completion manner.</p>
 <p>All bridged headers needs to be analyzed in all threads they are used in. They are emitted by the source thread and extracted by the destination thread. In the case above, if a bridged header is used in all threads, the analysis is performed on pairs (pipe0:ingress, pipe1:egress), (pipe1:egress, pipe1:ingress), and (pipe1:ingress, pipe0:egress) (following the arrows).</p>
 <p>Packing of bridged headers is performed only for the headers/structs with the @flexible annotation and for resubmit headers, which are fixed-sized (transformed into the IR::BFN::Type_FixedSizeHeader type in midend).</p>
@@ -198,7 +198,7 @@ Typedefs</h2></td></tr>
 </div><div class="dynheader">
 Inheritance diagram for BridgedPacking:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_bridged_packing__inherit__graph.svg" width="179" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_bridged_packing__inherit__graph.svg" width="179" height="266"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
@@ -515,7 +515,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </div><div class="dynheader">
 Inheritance diagram for RenameArchParams:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_rename_arch_params__inherit__graph.svg" width="164" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_rename_arch_params__inherit__graph.svg" width="163" height="115"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
@@ -541,7 +541,7 @@ Inheritance diagram for RenameArchParams:</div>
 </div><div class="dynheader">
 Inheritance diagram for SubstitutePackedHeaders:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_substitute_packed_headers__inherit__graph.svg" width="207" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_substitute_packed_headers__inherit__graph.svg" width="206" height="266"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>

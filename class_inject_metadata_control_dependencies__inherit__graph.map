@@ -1,11 +1,11 @@
 <map id="InjectMetadataControlDependencies" name="InjectMetadataControlDependencies">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,264,324"/>
-<area shape="rect" id="Node000002" href="$class_abstract_dependency_injector.html" title="Common functionality for injecting dependencies into a DependencyGraph." alt="" coords="31,225,238,251"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,264,137,299,132,299,132,264"/>
-<area shape="rect" id="Node000003" href="$class_mau_inspector.html" title=" " alt="" coords="79,152,190,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="137,191,137,225,132,225,132,191"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="81,79,188,104"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="137,118,137,152,132,152,132,118"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="91,5,179,31"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="137,44,137,79,132,79,132,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,308,264,336"/>
+<area shape="rect" id="Node000002" href="$class_abstract_dependency_injector.html" title="Common functionality for injecting dependencies into a DependencyGraph." alt="" coords="32,232,237,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,274,137,309,132,306,133,278"/>
+<area shape="rect" id="Node000003" href="$class_mau_inspector.html" title=" " alt="" coords="80,157,189,184"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="136,198,137,233,132,231,133,202"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="82,81,187,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,122,137,157,132,156,134,127"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="91,5,178,33"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="135,46,137,81,132,80,134,51"/>
 </map>

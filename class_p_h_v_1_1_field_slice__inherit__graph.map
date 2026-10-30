@@ -1,11 +1,11 @@
 <map id="PHV::FieldSlice" name="PHV::FieldSlice">
-<area shape="rect" id="Node000001" title=" " alt="" coords="113,152,231,177"/>
-<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_abstract_field.html" title=" " alt="" coords="5,79,147,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,110,158,150,155,154,101,114"/>
-<area shape="rect" id="Node000003" href="$class_lift_compare.html" title=" " alt="" coords="171,79,365,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,114,189,154,186,150,240,110"/>
-<area shape="rect" id="Node000004" href="$class_lift_equal.html" title=" " alt="" coords="87,5,257,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="200,37,254,76,251,81,197,41"/>
-<area shape="rect" id="Node000005" href="$class_lift_less.html" title=" " alt="" coords="281,5,444,31"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="338,41,285,81,282,76,335,37"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="112,157,229,184"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_abstract_field.html" title=" " alt="" coords="5,81,146,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,116,156,156,151,157,103,121"/>
+<area shape="rect" id="Node000003" href="$class_lift_compare.html" title=" " alt="" coords="170,81,362,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="239,118,188,159,186,154,234,119"/>
+<area shape="rect" id="Node000004" href="$class_lift_equal.html" title=" " alt="" coords="87,5,256,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="201,40,252,80,247,81,200,45"/>
+<area shape="rect" id="Node000005" href="$class_lift_less.html" title=" " alt="" coords="280,5,442,33"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="334,42,284,83,282,78,330,44"/>
 </map>

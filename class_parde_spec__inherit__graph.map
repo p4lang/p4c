@@ -1,9 +1,9 @@
 <map id="PardeSpec" name="PardeSpec">
-<area shape="rect" id="Node000001" title=" " alt="" coords="101,5,191,31"/>
-<area shape="rect" id="Node000002" href="$class_j_bay_parde_spec.html" title=" " alt="" coords="13,79,132,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,42,86,80,83,77,122,38"/>
-<area shape="rect" id="Node000004" href="$class_tofino_parde_spec.html" title=" " alt="" coords="156,79,283,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,38,209,77,206,80,166,42"/>
-<area shape="rect" id="Node000003" href="$class_j_bay_a0_parde_spec.html" title=" " alt="" coords="5,152,140,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="75,118,75,152,70,152,70,118"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="100,5,189,33"/>
+<area shape="rect" id="Node000002" href="$class_j_bay_parde_spec.html" title=" " alt="" coords="14,81,131,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,46,87,82,83,79,123,42"/>
+<area shape="rect" id="Node000004" href="$class_tofino_parde_spec.html" title=" " alt="" coords="155,81,281,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,42,207,80,202,81,168,47"/>
+<area shape="rect" id="Node000003" href="$class_j_bay_a0_parde_spec.html" title=" " alt="" coords="5,157,140,184"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,123,75,157,70,155,71,126"/>
 </map>

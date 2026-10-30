@@ -1,5 +1,5 @@
 <map id="DesugarVarbitExtract" name="DesugarVarbitExtract">
-<area shape="rect" id="Node000001" title="Set of passes that rewrite usage of varbit." alt="" coords="191,31,351,56"/>
-<area shape="rect" id="Node000002" href="$group__midend.html" title="Overview of midend passes." alt="" coords="39,5,109,31"/>
-<area shape="rect" id="Node000003" href="$group__parde.html" title="Content related to parser and deparser." alt="" coords="5,55,143,80"/>
+<area shape="rect" id="Node000001" title="Set of passes that rewrite usage of varbit." alt="" coords="190,32,349,60"/>
+<area shape="rect" id="Node000002" href="$group__midend.html" title="Overview of midend passes." alt="" coords="39,5,108,33"/>
+<area shape="rect" id="Node000003" href="$group__parde.html" title="Content related to parser and deparser." alt="" coords="5,57,142,85"/>
 </map>

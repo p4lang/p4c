@@ -1,15 +1,15 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_target.html" title=" " alt="" coords="5,105,68,131"/>
-<area shape="rect" id="Node000001" href="$class_target_1_1_j_bay.html" title=" " alt="" coords="121,80,219,105"/>
-<area shape="poly" id="edge2775_Node000000_Node000001" title=" " alt="" coords="81,107,120,99,121,105,82,112"/>
-<area shape="rect" id="Node000006" href="$class_target_1_1_tofino.html" title=" " alt="" coords="116,129,224,155"/>
-<area shape="poly" id="edge2780_Node000000_Node000006" title=" " alt="" coords="82,123,116,130,116,135,81,129"/>
-<area shape="rect" id="Node000002" href="$class_target_1_1_tofino2_a0.html" title=" " alt="" coords="272,5,405,31"/>
-<area shape="poly" id="edge2776_Node000001_Node000002" title=" " alt="" coords="206,71,271,40,299,28,301,33,273,44,208,76"/>
-<area shape="rect" id="Node000003" href="$class_target_1_1_tofino2_h.html" title=" " alt="" coords="275,55,402,80"/>
-<area shape="poly" id="edge2777_Node000001_Node000003" title=" " alt="" coords="232,81,275,74,276,79,233,86"/>
-<area shape="rect" id="Node000004" href="$class_target_1_1_tofino2_m.html" title=" " alt="" coords="275,104,403,129"/>
-<area shape="poly" id="edge2778_Node000001_Node000004" title=" " alt="" coords="233,99,275,105,274,110,232,104"/>
-<area shape="rect" id="Node000005" href="$class_target_1_1_tofino2_u.html" title=" " alt="" coords="275,153,402,179"/>
-<area shape="poly" id="edge2779_Node000001_Node000005" title=" " alt="" coords="213,109,225,114,273,138,304,151,302,156,271,143,223,119,211,114"/>
+<area shape="rect" id="Node000000" href="$class_target.html" title=" " alt="" coords="5,111,67,138"/>
+<area shape="rect" id="Node000001" href="$class_target_1_1_j_bay.html" title=" " alt="" coords="119,84,218,112"/>
+<area shape="poly" id="edge2775_Node000000_Node000001" title=" " alt="" coords="81,113,121,106,117,109,83,118"/>
+<area shape="rect" id="Node000006" href="$class_target_1_1_tofino.html" title=" " alt="" coords="115,136,222,164"/>
+<area shape="poly" id="edge2780_Node000000_Node000006" title=" " alt="" coords="81,130,117,139,112,141,82,136"/>
+<area shape="rect" id="Node000002" href="$class_target_1_1_tofino2_a0.html" title=" " alt="" coords="270,5,402,33"/>
+<area shape="poly" id="edge2776_Node000001_Node000002" title=" " alt="" coords="208,74,269,43,301,32,296,35,271,48,210,79"/>
+<area shape="rect" id="Node000003" href="$class_target_1_1_tofino2_h.html" title=" " alt="" coords="274,57,399,85"/>
+<area shape="poly" id="edge2777_Node000001_Node000003" title=" " alt="" coords="232,85,276,80,271,82,234,90"/>
+<area shape="rect" id="Node000004" href="$class_target_1_1_tofino2_m.html" title=" " alt="" coords="272,109,400,137"/>
+<area shape="poly" id="edge2778_Node000001_Node000004" title=" " alt="" coords="233,105,275,113,269,114,233,110"/>
+<area shape="rect" id="Node000005" href="$class_target_1_1_tofino2_u.html" title=" " alt="" coords="274,161,399,189"/>
+<area shape="poly" id="edge2779_Node000001_Node000005" title=" " alt="" coords="212,117,271,146,301,161,296,160,269,151,211,122"/>
 </map>

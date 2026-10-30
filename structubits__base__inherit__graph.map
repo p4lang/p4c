@@ -1,9 +1,9 @@
 <map id="ubits_base" name="ubits_base">
-<area shape="rect" id="Node000001" title=" " alt="" coords="121,5,213,31"/>
-<area shape="rect" id="Node000002" href="$structubits.html" title=" " alt="" coords="5,79,97,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,40,72,81,69,76,136,35"/>
-<area shape="rect" id="Node000003" href="$structubits.html" title=" " alt="" coords="121,79,213,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,44,170,79,165,79,165,44"/>
-<area shape="rect" id="Node000004" href="$structubits.html" title=" " alt="" coords="237,79,332,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="199,35,267,76,264,81,197,40"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="121,5,213,33"/>
+<area shape="rect" id="Node000002" href="$structubits.html" title=" " alt="" coords="5,81,97,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,42,73,83,70,78,131,41"/>
+<area shape="rect" id="Node000003" href="$structubits.html" title=" " alt="" coords="121,81,213,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,47,169,82,165,79,165,51"/>
+<area shape="rect" id="Node000004" href="$structubits.html" title=" " alt="" coords="236,81,330,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="201,39,265,80,260,81,200,44"/>
 </map>

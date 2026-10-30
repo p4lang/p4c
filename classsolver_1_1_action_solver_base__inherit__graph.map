@@ -1,9 +1,9 @@
 <map id="solver::ActionSolverBase" name="solver::ActionSolverBase">
-<area shape="rect" id="Node000001" title="ActionSolverBase contains basic methods and states for all solvers." alt="" coords="218,5,402,31"/>
-<area shape="rect" id="Node000002" href="$classsolver_1_1_action_dark_solver.html" title=" " alt="" coords="5,79,188,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="264,37,132,81,130,76,262,32"/>
-<area shape="rect" id="Node000003" href="$classsolver_1_1_action_mocha_solver.html" title=" " alt="" coords="213,79,407,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="313,44,313,79,307,79,307,44"/>
-<area shape="rect" id="Node000004" href="$classsolver_1_1_action_move_solver.html" title=" " alt="" coords="432,79,620,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="359,32,492,76,490,81,357,37"/>
+<area shape="rect" id="Node000001" title="ActionSolverBase contains basic methods and states for all solvers." alt="" coords="217,5,400,33"/>
+<area shape="rect" id="Node000002" href="$classsolver_1_1_action_dark_solver.html" title=" " alt="" coords="5,81,188,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,39,135,83,134,78,254,37"/>
+<area shape="rect" id="Node000003" href="$classsolver_1_1_action_mocha_solver.html" title=" " alt="" coords="211,81,406,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="310,47,311,82,306,79,307,51"/>
+<area shape="rect" id="Node000004" href="$classsolver_1_1_action_move_solver.html" title=" " alt="" coords="430,81,617,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="362,36,487,80,482,81,361,41"/>
 </map>

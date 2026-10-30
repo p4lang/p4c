@@ -1,25 +1,25 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,325,115,350"/>
-<area shape="rect" id="Node000001" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="188,11,415,80"/>
-<area shape="poly" id="edge2736_Node000000_Node000001" title=" " alt="" coords="63,311,73,265,91,208,120,148,139,120,161,95,186,76,189,81,164,99,143,123,125,151,96,210,78,266,68,312"/>
-<area shape="rect" id="Node000003" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="163,109,440,208"/>
-<area shape="poly" id="edge2738_Node000000_Node000003" title=" " alt="" coords="75,312,112,266,161,219,181,206,184,210,164,223,116,269,80,315"/>
-<area shape="rect" id="Node000005" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="173,233,430,332"/>
-<area shape="poly" id="edge2740_Node000000_Node000005" title=" " alt="" coords="127,319,172,309,173,314,129,325"/>
-<area shape="rect" id="Node000007" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="190,356,413,425"/>
-<area shape="poly" id="edge2742_Node000000_Node000007" title=" " alt="" coords="129,350,191,363,189,369,128,355"/>
-<area shape="rect" id="Node000009" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="198,449,405,548"/>
-<area shape="poly" id="edge2744_Node000000_Node000009" title=" " alt="" coords="83,359,119,397,164,435,199,456,197,460,161,440,115,401,79,363"/>
-<area shape="rect" id="Node000011" href="$class_field_slice_set.html" title="Implements comparisons correctly." alt="" coords="249,573,354,598"/>
-<area shape="poly" id="edge2746_Node000000_Node000011" title=" " alt="" coords="68,363,78,407,96,460,124,514,143,537,164,558,183,569,205,577,249,584,248,590,203,582,181,574,161,562,139,541,120,516,91,462,73,408,63,364"/>
-<area shape="rect" id="Node000002" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="533,5,736,75"/>
-<area shape="poly" id="edge2737_Node000001_Node000002" title=" " alt="" coords="429,41,533,39,533,44,429,46"/>
-<area shape="rect" id="Node000004" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="519,99,750,213"/>
-<area shape="poly" id="edge2739_Node000003_Node000004" title=" " alt="" coords="454,155,519,154,519,160,454,160"/>
-<area shape="rect" id="Node000006" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="506,237,763,336"/>
-<area shape="poly" id="edge2741_Node000005_Node000006" title=" " alt="" coords="444,282,506,282,505,288,443,287"/>
-<area shape="rect" id="Node000008" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="493,360,776,429"/>
-<area shape="poly" id="edge2743_Node000007_Node000008" title=" " alt="" coords="426,389,493,390,493,396,426,395"/>
-<area shape="rect" id="Node000010" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="488,457,781,541"/>
-<area shape="poly" id="edge2745_Node000009_Node000010" title=" " alt="" coords="419,496,488,496,488,501,419,501"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,362,114,389"/>
+<area shape="rect" id="Node000001" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="187,9,413,88"/>
+<area shape="poly" id="edge2736_Node000000_Node000001" title=" " alt="" coords="62,345,71,295,88,231,117,164,137,132,160,104,188,84,185,88,164,108,141,135,122,166,93,232,76,296,67,346"/>
+<area shape="rect" id="Node000003" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="162,118,438,230"/>
+<area shape="poly" id="edge2738_Node000000_Node000003" title=" " alt="" coords="75,347,111,297,160,245,185,229,182,233,163,249,115,300,80,350"/>
+<area shape="rect" id="Node000005" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="172,259,428,372"/>
+<area shape="poly" id="edge2740_Node000000_Node000005" title=" " alt="" coords="127,356,173,346,169,349,130,360"/>
+<area shape="rect" id="Node000007" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="189,396,411,475"/>
+<area shape="poly" id="edge2742_Node000000_Node000007" title=" " alt="" coords="128,390,191,406,186,409,129,395"/>
+<area shape="rect" id="Node000009" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="197,499,402,612"/>
+<area shape="poly" id="edge2744_Node000000_Node000009" title=" " alt="" coords="80,399,118,442,163,484,199,508,194,510,160,488,114,446,80,405"/>
+<area shape="rect" id="Node000011" href="$class_field_slice_set.html" title="Implements comparisons correctly." alt="" coords="248,636,352,664"/>
+<area shape="poly" id="edge2746_Node000000_Node000011" title=" " alt="" coords="64,402,75,452,92,511,121,571,140,598,163,621,182,633,204,641,250,651,245,651,202,647,180,638,160,625,136,602,116,574,87,513,70,453,63,407"/>
+<area shape="rect" id="Node000002" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="531,5,733,84"/>
+<area shape="poly" id="edge2737_Node000001_Node000002" title=" " alt="" coords="427,45,533,44,528,47,429,50"/>
+<area shape="rect" id="Node000004" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="518,108,747,238"/>
+<area shape="poly" id="edge2739_Node000003_Node000004" title=" " alt="" coords="452,171,520,172,515,174,454,176"/>
+<area shape="rect" id="Node000006" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="504,262,760,374"/>
+<area shape="poly" id="edge2741_Node000005_Node000006" title=" " alt="" coords="443,314,506,316,501,318,444,319"/>
+<area shape="rect" id="Node000008" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="492,399,773,477"/>
+<area shape="poly" id="edge2743_Node000007_Node000008" title=" " alt="" coords="426,434,494,436,489,438,427,439"/>
+<area shape="rect" id="Node000010" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="486,508,778,603"/>
+<area shape="poly" id="edge2745_Node000009_Node000010" title=" " alt="" coords="417,553,488,555,483,556,418,558"/>
 </map>

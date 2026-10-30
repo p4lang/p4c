@@ -1,13 +1,13 @@
 <map id="P4::P4Tools::P4Testgen::TableStepper" name="P4::P4Tools::P4Testgen::TableStepper">
-<area shape="rect" id="Node000001" title="Implements small&#45;step operational semantics for tables." alt="" coords="5,101,175,141"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html" title=" " alt="" coords="223,5,477,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,92,222,55,259,43,261,48,224,60,141,97"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html" title=" " alt="" coords="257,69,443,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,107,256,98,257,103,189,112"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html" title=" " alt="" coords="243,133,457,173"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="189,131,243,137,242,143,188,136"/>
-<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_table_stepper.html" title=" " alt="" coords="251,197,449,237"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="141,146,224,183,261,195,259,200,222,188,139,150"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_table_stepper.html" title=" " alt="" coords="525,133,729,173"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="471,151,525,151,525,156,471,156"/>
+<area shape="rect" id="Node000001" title="Implements small&#45;step operational semantics for tables." alt="" coords="5,109,174,154"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html" title=" " alt="" coords="222,5,476,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,99,221,60,257,49,253,52,223,65,143,103"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html" title=" " alt="" coords="256,75,442,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,116,258,108,253,111,190,121"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html" title=" " alt="" coords="242,144,456,189"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="189,142,244,151,239,153,189,148"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_table_stepper.html" title=" " alt="" coords="250,213,448,258"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="143,160,223,199,258,213,252,213,221,203,141,165"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_table_stepper.html" title=" " alt="" coords="524,144,727,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="471,164,526,166,521,167,472,169"/>
 </map>

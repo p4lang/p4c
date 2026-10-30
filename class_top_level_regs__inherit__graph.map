@@ -1,7 +1,7 @@
 <map id="TopLevelRegs&lt; REGSET &gt;" name="TopLevelRegs&lt; REGSET &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="23,79,215,104"/>
-<area shape="rect" id="Node000002" href="$class_top_level.html" title=" " alt="" coords="5,5,84,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,38,109,77,105,80,65,42"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="108,5,283,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,42,134,80,130,76,171,38"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="24,81,215,109"/>
+<area shape="rect" id="Node000002" href="$class_top_level.html" title=" " alt="" coords="5,5,84,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,42,109,80,103,81,68,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="108,5,282,33"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,43,134,83,131,78,168,45"/>
 </map>

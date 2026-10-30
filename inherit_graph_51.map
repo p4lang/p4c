@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_arch_spec.html" title=" " alt="" coords="5,31,88,56"/>
-<area shape="rect" id="Node000001" href="$class_j_bay_arch_spec.html" title=" " alt="" coords="141,5,251,31"/>
-<area shape="poly" id="edge8_Node000000_Node000001" title=" " alt="" coords="101,31,140,25,141,30,102,37"/>
-<area shape="rect" id="Node000002" href="$class_tofino_arch_spec.html" title=" " alt="" coords="136,55,256,80"/>
-<area shape="poly" id="edge9_Node000000_Node000002" title=" " alt="" coords="102,49,136,55,136,60,101,55"/>
+<area shape="rect" id="Node000000" href="$class_arch_spec.html" title=" " alt="" coords="5,32,87,60"/>
+<area shape="rect" id="Node000001" href="$class_j_bay_arch_spec.html" title=" " alt="" coords="139,5,250,33"/>
+<area shape="poly" id="edge8_Node000000_Node000001" title=" " alt="" coords="102,33,141,28,136,30,103,38"/>
+<area shape="rect" id="Node000002" href="$class_tofino_arch_spec.html" title=" " alt="" coords="135,57,254,85"/>
+<area shape="poly" id="edge9_Node000000_Node000002" title=" " alt="" coords="102,53,137,60,131,61,102,58"/>
 </map>

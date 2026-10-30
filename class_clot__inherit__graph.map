@@ -1,9 +1,9 @@
 <map id="Clot" name="Clot">
-<area shape="rect" id="Node000001" title=" " alt="" coords="126,152,174,177"/>
-<area shape="rect" id="Node000002" href="$class_lift_compare.html" title=" " alt="" coords="71,79,229,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,118,153,152,147,152,147,118"/>
-<area shape="rect" id="Node000003" href="$class_lift_equal.html" title=" " alt="" coords="5,5,140,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,38,139,76,136,80,93,42"/>
-<area shape="rect" id="Node000004" href="$class_lift_less.html" title=" " alt="" coords="164,5,291,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="207,42,164,80,161,76,203,38"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="124,157,172,184"/>
+<area shape="rect" id="Node000002" href="$class_lift_compare.html" title=" " alt="" coords="70,81,226,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,123,150,158,146,155,146,126"/>
+<area shape="rect" id="Node000003" href="$class_lift_equal.html" title=" " alt="" coords="5,5,139,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,41,137,80,132,81,96,47"/>
+<area shape="rect" id="Node000004" href="$class_lift_less.html" title=" " alt="" coords="162,5,288,33"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="203,42,163,83,160,79,198,45"/>
 </map>

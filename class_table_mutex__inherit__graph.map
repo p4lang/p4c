@@ -1,13 +1,13 @@
 <map id="TableMutex" name="TableMutex">
-<area shape="rect" id="Node000001" title=" " alt="" coords="135,152,233,177"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,88,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,108,163,149,160,154,79,113"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="113,79,255,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,118,187,152,181,152,181,118"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="279,79,446,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="322,111,214,154,212,149,321,106"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="243,5,331,31"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="311,38,352,76,348,80,307,42"/>
-<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="355,5,522,31"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="418,42,377,80,373,76,415,38"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="134,157,230,184"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,81,87,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,114,160,155,156,158,83,119"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="111,81,253,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,123,184,158,180,155,180,126"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="277,81,442,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="316,115,214,159,213,154,311,115"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="240,5,327,33"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="308,41,349,81,343,80,307,46"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="351,5,517,33"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="412,43,374,83,371,78,407,46"/>
 </map>

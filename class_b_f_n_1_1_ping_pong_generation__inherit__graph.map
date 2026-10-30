@@ -1,10 +1,10 @@
 <map id="BFN::PingPongGeneration" name="BFN::PingPongGeneration">
-<area shape="rect" id="Node000001" title="PassManager that adds the ping pong mechanism for ghost thread." alt="" coords="5,225,195,251"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="34,152,166,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,191,103,225,97,225,97,191"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="56,5,144,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,44,82,73,81,104,97,151,92,153,76,104,77,72,86,42"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="91,79,202,104"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="117,41,141,77,137,80,113,44"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="134,117,110,153,105,150,129,114"/>
+<area shape="rect" id="Node000001" title="PassManager that adds the ping pong mechanism for ghost thread." alt="" coords="5,232,194,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="34,157,165,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,198,102,233,97,231,98,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="56,5,143,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,45,82,81,82,108,96,156,91,156,77,109,77,81,88,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="91,81,201,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="116,44,141,80,135,81,116,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="132,120,110,158,106,155,128,124"/>
 </map>

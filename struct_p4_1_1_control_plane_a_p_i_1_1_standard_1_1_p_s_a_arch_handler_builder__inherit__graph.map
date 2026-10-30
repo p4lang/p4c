@@ -1,5 +1,5 @@
 <map id="P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder" name="P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder">
-<area shape="rect" id="Node000001" title="The architecture handler builder implementation for PSA." alt="" coords="17,108,220,163"/>
-<area shape="rect" id="Node000002" href="$struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html" title=" " alt="" coords="5,5,232,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,74,121,108,116,108,116,74"/>
+<area shape="rect" id="Node000001" title="The architecture handler builder implementation for PSA." alt="" coords="18,115,219,177"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html" title=" " alt="" coords="5,5,232,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,80,121,115,116,114,117,85"/>
 </map>

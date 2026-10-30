@@ -1,10 +1,10 @@
 <map id="P4::RemoveRedundantParsers" name="P4::RemoveRedundantParsers">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,223,251"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="48,152,180,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,191,117,225,111,225,111,191"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="70,5,158,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,44,96,73,95,104,111,151,106,153,90,104,91,72,100,42"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="105,79,216,104"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="131,41,155,77,151,80,127,44"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="148,117,124,153,119,150,143,114"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,222,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="48,157,179,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,198,116,233,111,231,112,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="70,5,157,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,45,96,81,96,108,110,156,105,156,91,109,91,81,101,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="105,81,215,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="130,44,155,80,149,81,130,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="146,120,124,158,120,155,142,124"/>
 </map>

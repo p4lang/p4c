@@ -1,9 +1,9 @@
 <map id="InjectControlDependencies" name="InjectControlDependencies">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,203,251"/>
-<area shape="rect" id="Node000002" href="$class_mau_inspector.html" title=" " alt="" coords="49,152,159,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,191,107,225,101,225,101,191"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="51,79,157,104"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,118,107,152,101,152,101,118"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="60,5,148,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,44,107,79,101,79,101,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,202,260"/>
+<area shape="rect" id="Node000002" href="$class_mau_inspector.html" title=" " alt="" coords="49,157,158,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,198,106,233,101,231,102,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="51,81,156,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,122,106,157,101,156,102,127"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="60,5,147,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,46,106,81,101,80,103,51"/>
 </map>

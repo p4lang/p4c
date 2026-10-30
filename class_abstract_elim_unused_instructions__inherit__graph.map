@@ -1,11 +1,11 @@
 <map id="AbstractElimUnusedInstructions" name="AbstractElimUnusedInstructions">
-<area shape="rect" id="Node000001" title=" " alt="" coords="82,152,313,177"/>
-<area shape="rect" id="Node000004" href="$class_elim_unused_1_1_instructions.html" title=" " alt="" coords="5,225,189,251"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,187,115,227,112,223,169,183"/>
-<area shape="rect" id="Node000005" href="$class_remove_metadata_inits.html" title=" " alt="" coords="214,225,381,251"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="226,183,283,223,279,227,223,187"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="142,79,253,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,118,200,152,195,152,195,118"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="153,5,241,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,44,200,79,195,79,195,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="81,157,310,184"/>
+<area shape="rect" id="Node000004" href="$class_elim_unused_1_1_instructions.html" title=" " alt="" coords="5,232,189,260"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,193,116,234,113,230,163,194"/>
+<area shape="rect" id="Node000005" href="$class_remove_metadata_inits.html" title=" " alt="" coords="213,232,378,260"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="227,191,281,232,275,232,225,196"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="140,81,251,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,122,198,157,193,155,194,127"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="152,5,239,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="197,46,198,81,193,80,194,51"/>
 </map>

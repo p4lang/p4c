@@ -1,10 +1,10 @@
 <map id="BFN::RewriteEgressIntrinsicMetadataHeader" name="BFN::RewriteEgressIntrinsicMetadataHeader">
-<area shape="rect" id="Node000001" title="Pass that updates egress intrinsic metadata." alt="" coords="5,225,208,265"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="41,152,173,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,191,109,225,104,225,104,191"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="63,5,151,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,44,88,79,87,99,91,119,103,151,98,153,86,120,82,99,83,78,93,43"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="98,79,209,104"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="124,41,148,77,144,80,120,44"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="140,117,116,153,112,150,136,114"/>
+<area shape="rect" id="Node000001" title="Pass that updates egress intrinsic metadata." alt="" coords="5,232,207,277"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="40,157,172,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,198,108,233,104,231,104,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="62,5,150,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="96,45,89,81,89,108,103,156,98,156,83,109,83,81,94,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="98,81,208,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="123,43,147,80,142,81,122,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="138,120,116,158,112,155,135,124"/>
 </map>

@@ -1,9 +1,9 @@
 <map id="P4::P4Tools::Test::P4TestgenOutputOptionTest" name="P4::P4Tools::Test::P4TestgenOutputOptionTest">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,255,207,295"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_bmv2_test.html" title="Sets up the correct context for a P4Testgen BMv2 test." alt="" coords="30,167,182,207"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,221,109,254,103,254,103,221"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_test.html" title=" " alt="" coords="37,79,175,119"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,133,109,166,103,166,103,133"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="55,5,157,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,44,109,79,103,79,103,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,266,206,311"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_bmv2_test.html" title="Sets up the correct context for a P4Testgen BMv2 test." alt="" coords="30,174,181,218"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,232,108,267,103,265,104,236"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_test.html" title=" " alt="" coords="37,81,174,126"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="106,139,108,174,103,173,105,144"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="55,5,156,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="106,46,108,81,103,80,105,51"/>
 </map>
