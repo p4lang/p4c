@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # P4Runtime PTF test for small_sample
 # p4testgen seed: none
 

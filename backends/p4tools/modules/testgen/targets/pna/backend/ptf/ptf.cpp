@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/pna/backend/ptf/ptf.h"
 
 #include <algorithm>

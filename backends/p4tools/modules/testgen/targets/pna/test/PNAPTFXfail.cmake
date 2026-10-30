@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # ================================================
 # These cover Testgen, compiler, and pinned IPDK runtime limitations. Match the

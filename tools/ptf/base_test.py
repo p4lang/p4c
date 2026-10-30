@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This file was copied and then modified from the file
 # testlib/base_test.py in the https://github.com/jafingerhut/p4-guide/
 # repository. This file in turn was a modified version of
