@@ -61,6 +61,7 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
             LOG4("for in loop before body");
             cfv->visit(self->body, "body", 3);
             cfv->flow_merge_global_from("-CONTINUE-"_cs);
+            cfv->flow_merge(*top);
         } while (*cfv != *top);
         LOG4("for loop exit" << Log::unindent);
         cfv->flow_merge_global_from("-BREAK-"_cs);
