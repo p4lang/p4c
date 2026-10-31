@@ -6,7 +6,7 @@ macro(obtain_z3)
   option(USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
 
   if(USE_PREINSTALLED_Z3)
-    set(Z3_MIN_VERSION "4.8.14")
+    set(Z3_MIN_VERSION "4.8.12")
     find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
     if(ENABLE_GC)
@@ -33,7 +33,7 @@ macro(obtain_z3)
     set(Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
   else()
     # Pull in a specific version of Z3 and link against it.
-    set(Z3_VERSION "4.13.0")
+    set(Z3_VERSION "4.13.3")
     message(STATUS "Fetching Z3 version ${Z3_VERSION}...")
 
     # Unity builds do not work for Protobuf...
@@ -61,7 +61,7 @@ macro(obtain_z3)
     fetchcontent_declare(
       z3
       GIT_REPOSITORY https://github.com/Z3Prover/z3.git
-      GIT_TAG z3-4.13.3 # 4.13.0
+      GIT_TAG z3-${Z3_VERSION}
       GIT_PROGRESS TRUE
       GIT_SHALLOW TRUE
       # We need to patch because the Z3 CMakeLists.txt also adds an uinstall target.
