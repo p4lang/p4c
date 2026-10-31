@@ -14,8 +14,6 @@ parser p1(packet_in p, out Header h) {
     @name("p1.tmp_0") bit<32> tmp_0;
     @name("p1.tmp_1") bit<32> tmp_1;
     state start {
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
         h.data1 = 32w0;
         func(h);
         tmp = h.data2;
