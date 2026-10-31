@@ -50,6 +50,13 @@ p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec
 To load the 'spec' file in dpdk follow the instructions in the
 [Pipeline Application User Guide](https://doc.dpdk.org/guides/sample_app_ug/pipeline.html).
 
+When using `p4-dpdk-target`, include the
+[target-name handling fix](https://github.com/p4lang/p4-dpdk-target/pull/123)
+from commit `32ae0136c938806697f607caa3c77d22075bdf71`. It makes table deletion,
+default-action updates, and selector operations use the context's `target_name`,
+matching table insertion. Control-plane names can differ from the internal
+symbols in the spec. The DPDK CI workflow pins this runtime commit.
+
 
 ## Known issues
 ### Unsupported Language Features
