@@ -1,0 +1,9 @@
+issue5887.p4(21): [--Wwarn=unused] warning: 'e' is unused
+    E<_>(d) e;
+            ^
+issue5887.p4(21): [--Werror=type-error] error: d: argument cannot have type control D
+    E<_>(d) e;
+         ^
+issue5887.p4(15)
+control D() {
+        ^
