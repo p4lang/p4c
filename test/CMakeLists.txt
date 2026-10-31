@@ -8,6 +8,7 @@
 ################################################################################
 
 set (GTEST_UNITTEST_SOURCES
+  gtest/annotations.cpp
   gtest/arch_test.cpp
   gtest/bitrange.cpp
   gtest/bitvec_test.cpp

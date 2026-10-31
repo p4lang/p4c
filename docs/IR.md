@@ -278,6 +278,9 @@ method is not declared in the .def file, a standard definition (based on the fie
 declared in the class) will be created.  In this way, *most* classes can avoid including
 this boilerplate code in the .def file.
 
+The ir-generator supports the `explicit` modifier for constructors to forbid implicit conversions.  Declaring `explicit ClassName;` applies the modifier to the automatically
+generated constructors.
+
 ## Classes
 | **Class**      | **Description**  |
 |----------------|------------------|
