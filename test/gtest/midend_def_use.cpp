@@ -404,4 +404,55 @@ TEST_F(P4CMidendDefUse, slice_1) {
     EXPECT_TRUE(check_def_use(uses, "inout ParsedHeaders h", 0, {0, 2, 3, 10, 11, 14}));
 }
 
+TEST_F(P4CMidendDefUse, forin_zero_iterations) {
+    std::string headers = R"(
+        header hdr_h_t {
+            bit<16> f1;
+            bit<16> f2;
+        }
+        header hdr_b_t {
+            bit<8> f1;
+        }
+        struct ParsedHeaders {
+            hdr_h_t h1;
+            hdr_b_t h2;
+        }
+        struct Metadata {
+            bit<32> hdr;
+        }
+    )";
+    std::string parser_body = R"(
+        state start {
+            pkt.extract(h.h1);
+            m.hdr = 0;
+            transition accept;
+        }
+    )";
+    std::string control_body = R"(
+        apply {
+            h.h2.setInvalid();
+            for (bit<8> j in h.h1.f2[7:0] .. 8w3) {
+                h.h2.setValid();
+            }
+            if (h.h2.isValid()) {
+                h.h1.f1 = 1;
+            }
+        }
+    )";
+    std::string deparser_body = R"(
+        apply {
+            b.emit(h);
+        }
+    )";
+
+    auto program = make_program(headers, parser_body, control_body, deparser_body);
+    auto *defuse = computeDefUse(program);
+    ASSERT_TRUE(defuse);
+
+    auto defs = get_defs_uses(defuse).first;
+
+    // the loop can run zero times, so the setInvalid() before it reaches the read after it
+    EXPECT_TRUE(check_def_use(defs, "h.h2.isValid()", 6, {2, 4}));
+}
+
 }  // namespace P4::Test
