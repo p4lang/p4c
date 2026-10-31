@@ -251,21 +251,34 @@ part
 
 method
     : modifiers methodName BLOCK
-          { $$ = new IrMethod(@2, canon_name($2), $3); }
+          { $$ = new IrMethod(@2, canon_name($2), $3);
+            $$->isExplicit = ($1 & IrMethod::Explicit);
+            if ($$->isExplicit && $2 != $<irClass>0->name)
+                yyerror("explicit invalid on method %s", $2.c_str());
+            if ($2 == $<irClass>0->name)
+                if (auto mod = $1 & ~(IrMethod::Inline | IrMethod::Explicit))
+                    yyerror("%s invalid on constructor", IrElement::modifier(mod)); }
     | modifiers methodName ';'
-          { $$ = new IrMethod(@2, canon_name($2)); }
+          { $$ = new IrMethod(@2, canon_name($2));
+            $$->isExplicit = ($1 & IrMethod::Explicit);
+            if ($$->isExplicit && $2 != $<irClass>0->name)
+                yyerror("explicit invalid on method %s", $2.c_str());
+            if ($2 == $<irClass>0->name)
+                if (auto mod = $1 & ~(IrMethod::Inline | IrMethod::Explicit))
+                    yyerror("%s invalid on constructor", IrElement::modifier(mod)); }
     | modifiers IDENTIFIER '('
           { if ($2 != $<irClass>0->name)
                 yyerror("constructor name %s doesn't match class name %s", $2.c_str(),
                         $<irClass>0->name.c_str());
-            if ($1 & ~(IrField::Inline | IrField::Explicit))
-                yyerror("%s invalid on constructor", IrElement::modifier($1));
+            if (auto mod = $1 & ~(IrMethod::Inline | IrMethod::Explicit))
+                yyerror("%s invalid on constructor", IrElement::modifier(mod));
             $<irMethod>$ = new IrMethod(@2, $2);
-            $<irMethod>$->inImpl = !($1 & IrField::Inline);
-            $<irMethod>$->isExplicit = ($1 & IrField::Explicit);
+            $<irMethod>$->inImpl = !($1 & IrMethod::Inline);
+            $<irMethod>$->isExplicit = ($1 & IrMethod::Explicit);
             $<irMethod>$->clss = $<irClass>0; }
       optArgList { BEGIN(PARSE_CTOR_INIT); } ')' body
           { ($$ = $<irMethod>4)->body = $8;
+            if (!$8 || $8.startsWith("=")) $$->inImpl = false;
             $$->isUser = true;
             BEGIN(NORMAL); }
     | modifiers type methodName '('
@@ -331,16 +344,16 @@ body: BLOCK
 irField
     : modifiers type fieldName optInitializer ';'
           { $$ = new IrField(@3, $2, $3, $4, $1);
-            if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $3.c_str()); }
+            if (auto mod = $1 & (IrElement::Virtual | IrElement::Explicit))
+                yyerror("%s invalid on field %s", IrElement::modifier(mod), $3.c_str()); }
     | modifiers CONST nonRefType fieldName optInitializer ';'
           { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
-            if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $4.c_str()); }
+            if (auto mod = $1 & (IrElement::Virtual | IrElement::Explicit))
+                yyerror("%s invalid on field %s", IrElement::modifier(mod), $4.c_str()); }
     | modifiers VARIANT '<' type_args '>' fieldName optInitializer ';'
           { $$ = new IrVariantField(@6, $4, $6, $7, $1);
-            if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $6.c_str()); }
+            if (auto mod = $1 & (IrElement::Virtual | IrElement::Explicit))
+                yyerror("%s invalid on field %s", IrElement::modifier(mod), $6.c_str()); }
     ;
 
 modifier
@@ -468,7 +481,7 @@ IrDefinitions *parse(char** files, int count) {
             perror("");
             errors |= 1; } }
 
-    return errors ? nullptr : new IrDefinitions(global);
+    return errors || ::P4::errorCount() ? nullptr : new IrDefinitions(global);
 }
 
 }  // namespace P4
