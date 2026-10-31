@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <v1model.p4>
 
 header opt_t {
@@ -49,6 +53,7 @@ parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_
     }
 
     state invalidate {
+        // Also invalidate u.h when it was extracted and u.e is already invalid (issue #4448).
         h.u.e.setInvalid();
         transition accept;
     }

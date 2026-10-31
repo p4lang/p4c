@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <v1model.p4>
 
 header opt_t {
@@ -55,6 +59,7 @@ control vrfy(inout Headers h, inout Meta meta) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     apply {
+        // Also invalidate u.h when it was extracted and u.e is already invalid (issue #4448).
         h.u.e.setInvalid();
     }
 }

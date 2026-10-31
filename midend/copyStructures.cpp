@@ -60,11 +60,8 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         !ltype->is<IR::Type_Tuple>()) {
         return statement;
     }
-    /*
-       FIXME: this is not correct for header unions and should be fixed.
-       The fix bellow, commented-out, causes problems elsewhere.
-       https://github.com/p4lang/p4c/issues/3842
-    */
+    // Copying union members separately can invalidate a previously copied member.
+    // Targets that support union assignments can preserve them (see issue #3842).
     if (!config.expandUnions && ltype->is<IR::Type_HeaderUnion>()) {
         return statement;
     }
@@ -145,7 +142,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
     } else if (auto *tup = ltype->to<IR::Type_Tuple>()) {
-        if (!_config.copyTuples) return statement;
+        if (!config.copyTuples) return statement;
         int idx = 0;
         for (auto *el : tup->components) {
             const auto *left = new IR::ArrayIndex(el, statement->left, new IR::Constant(idx));

@@ -637,7 +637,8 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
                 auto result = convertParam(param, cstring::empty);
                 if (result == nullptr) {
                     auto r = new Util::JsonObject();
-                    r->emplace("type", "header");
+                    r->emplace("type",
+                               type->is<IR::Type_HeaderUnion>() ? "header_union" : "header");
                     r->emplace("value", param->name.name);
                     result = r;
                 }
@@ -657,7 +658,7 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
         auto result = new Util::JsonObject();
         auto type = typeMap->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
-            result->emplace("type", "header");
+            result->emplace("type", type->is<IR::Type_HeaderUnion>() ? "header_union" : "header");
             result->emplace("value", var->name);
         } else if (type->is<IR::Type_Bits>() ||
                    (type->is<IR::Type_Boolean>() && (leftValue || simpleExpressionsOnly))) {

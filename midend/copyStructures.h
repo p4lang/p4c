@@ -22,9 +22,8 @@ struct CopyStructuresConfig {
 
     /// Do not only copy normal structures but also perform copy assignments for headers.
     bool copyHeaders = false;
-    /// Also expand header union assignments.
-    /// TODO: This is only necessary because the copy structure pass does not correctly expand
-    /// header unions for some back ends.
+    /// Expand header union assignments into member assignments. This can change union validity
+    /// (see issue #3842); targets that support union assignments should disable it.
     bool expandUnions = true;
     /// Also split up assignments of tuples.
     bool copyTuples = false;
@@ -53,7 +52,7 @@ struct CopyStructuresConfig {
  *   Further, struct initialization is converted to assignment on struct fields
  *
  *   header assignments and tuple assignments are optionally converted in this pass, based
- *   on constructor argument
+ *   on the configuration
  *
  * @pre none
  * @post
