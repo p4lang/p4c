@@ -64,8 +64,8 @@ jobs:
       ENABLE_GTESTS: ${{ matrix.gtest }}
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
-      # BMv2 with lag_hash support (#1456); the OBS package predates it.
-      BMV2_REF: 7f4e1daca12b7fe52897687764b7e74ded7dab55
+      # Header union invalidation and copies (p4lang/behavioral-model#1478).
+      BMV2_REF: 7785a9270aa6163bf000975eca14108fb51cce2b
     steps:
       - uses: actions/checkout@v7
         with:
