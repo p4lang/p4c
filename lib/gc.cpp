@@ -24,6 +24,14 @@
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 
+#ifdef __GLIBC__
+#include <malloc.h>
+#elif defined(__APPLE__)
+#include <malloc/malloc.h>
+#elif defined(__FreeBSD__)
+#include <malloc_np.h>
+#endif
+
 #include <cstddef>
 #include <cstring>
 #include <new>
@@ -249,6 +257,38 @@ void *malloc(size_t size) {
     TRACE_ALLOC(size)
     return GC_malloc(size);
 }
+
+#if defined(__GLIBC__) || defined(__APPLE__) || defined(__FreeBSD__)
+namespace {
+
+// P4C replaces malloc with garbage-collected allocation. Replace the size query
+// too: system allocators use metadata that GC memory does not have. Libraries
+// such as Z3 call these functions to track memory use.
+size_t gc_allocation_size(void *ptr) {
+    if (ptr == nullptr) return 0;
+    if (done_init) {
+        if (auto *base = GC_base(ptr)) {
+            // Aligned allocations can start after the base. Report only the
+            // bytes available from the returned pointer to the end.
+            return GC_size(base) - (static_cast<char *>(ptr) - static_cast<char *>(base));
+        }
+    }
+    // malloc uses mmap while GC_INIT is running. Those allocations store their
+    // size in our own header and can remain alive after GC initialization.
+    return raw_size(ptr);
+}
+
+}  // namespace
+
+#ifdef __GLIBC__
+size_t malloc_usable_size(void *ptr) noexcept { return gc_allocation_size(ptr); }
+#elif defined(__APPLE__)
+size_t malloc_size(const void *ptr) { return gc_allocation_size(const_cast<void *>(ptr)); }
+#elif defined(__FreeBSD__)
+size_t malloc_usable_size(const void *ptr) { return gc_allocation_size(const_cast<void *>(ptr)); }
+#endif
+#endif
+
 void free(void *ptr) {
     if (done_init && GC_is_heap_ptr(ptr)) GC_free(ptr);
 }
