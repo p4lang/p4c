@@ -1,0 +1,20 @@
+issue5881.p4(14): [--Werror=type-error] error: 's'
+    S s = { b = ... };
+      ^
+  ---- Actual error:
+issue5881.p4(14): Field b in initializer is not a member of structure struct S
+      S s = { b = ... };
+              ^
+issue5881.p4(7)
+  struct S { }
+         ^
+  ---- Originating from:
+issue5881.p4(14): Source expression '{ b = ... }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S'
+      S s = { b = ... };
+            ^^^^^^^^^^^
+issue5881.p4(14)
+      S s = { b = ... };
+            ^^^^^^^^^^^
+issue5881.p4(7)
+  struct S { }
+         ^

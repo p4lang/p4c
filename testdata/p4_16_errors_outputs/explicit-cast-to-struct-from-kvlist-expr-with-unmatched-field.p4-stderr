@@ -11,9 +11,9 @@ explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): [--Werror=t
     test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
                               ^^^^^^^^^^^^^^^^
   ---- Actual error:
-explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): Number of fields 2 in initializer different than number of fields in structure 0: unknown struct to struct S1
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): Field T in initializer is not a member of structure struct S1
       test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
-                                ^^^^^^^^^^^^^^^^
+                                  ^
 explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4)
   struct S1<T1, T2> {}
          ^^
