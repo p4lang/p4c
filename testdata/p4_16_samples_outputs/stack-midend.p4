@@ -6,10 +6,6 @@ header h {
 parser p() {
     @name("p.stack") h[4] stack_0;
     state start {
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
-        stack_0[2].setInvalid();
-        stack_0[3].setInvalid();
         stack_0[3].setValid();
         transition accept;
     }

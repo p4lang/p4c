@@ -72,14 +72,10 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         if (hdr.u_byte.isValid()) {
             hdr_1_u_byte.setValid();
             hdr_1_u_byte = hdr.u_byte;
-            hdr_1_u_short.setInvalid();
-        } else {
-            hdr_1_u_byte.setInvalid();
         }
         if (hdr.u_short.isValid()) {
             hdr_1_u_short.setValid();
             hdr_1_u_short = hdr.u_short;
-            hdr_1_u_byte.setInvalid();
         } else {
             hdr_1_u_short.setInvalid();
         }

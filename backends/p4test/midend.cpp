@@ -24,6 +24,7 @@
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/def_use.h"
+#include "midend/elimDeadSetInvalid.h"
 #include "midend/eliminateActionRun.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
@@ -169,6 +170,8 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
+         new P4::TypeChecking(nullptr, &typeMap, true),  // update types before ElimDeadSetInvalid
+         new P4::ElimDeadSetInvalid(),
          new P4::SimplifyControlFlow(&typeMap, true),
          new P4::MidEndLast(),
          new P4::DumpPipe("MidEnd end")});

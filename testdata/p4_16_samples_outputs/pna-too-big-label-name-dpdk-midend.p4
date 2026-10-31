@@ -89,7 +89,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
     @hidden action pnatoobiglabelnamedpdk104() {
-        eth_0.setInvalid();
     }
     @hidden table tbl_pnatoobiglabelnamedpdk104 {
         actions = {
