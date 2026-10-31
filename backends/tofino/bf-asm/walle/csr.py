@@ -1509,7 +1509,7 @@ class csr_composite_object(csr_object):
             if pot['ok'] and pot['max'] > 0 and pot['mask'] == 2 ** (pot['max'] + 1) - 1:
                 self.alias_arrays.append((base, pot['type'], pot['max'] + 1))
 
-    def need_ctor(self):
+    def need_ctor(self, args):
         if self.alias_arrays:
             return True
         for el in self.children():
@@ -1635,7 +1635,7 @@ class csr_composite_object(csr_object):
             if args.enable_disable:
                 outfile.write("%sbool disabled_;\n" % indent)
                 outfile.write("%sbool disabled() const { return disabled_; }\n" % indent)
-            if args.enable_disable or self.need_ctor():
+            if args.enable_disable or self.need_ctor(args):
                 self.gen_ctor(outfile, args, namestr, indent)
             if self.top_level():
                 outfile.write(
@@ -1701,7 +1701,7 @@ class csr_composite_object(csr_object):
                     "%salias_array<%d, %s> %s;\n" % (indent, alias[2], alias[1], alias[0])
                 )
         if args.delete_copy and args.gen_decl != 'defn':
-            if not args.enable_disable and not self.need_ctor():
+            if not args.enable_disable and not self.need_ctor(args):
                 outfile.write("%s%s() = default;\n" % (indent, namestr))
             outfile.write("%s%s(const %s &) = delete;\n" % (indent, namestr, namestr))
             outfile.write("%s%s(%s &&) = delete;\n" % (indent, namestr, namestr))
