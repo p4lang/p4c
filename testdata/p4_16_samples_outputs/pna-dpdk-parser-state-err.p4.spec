@@ -114,7 +114,7 @@ action add_on_miss_action2 args none {
 	return
 }
 
-learner ipv4_da {
+learner ipv4_da_0 {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -137,7 +137,7 @@ learner ipv4_da {
 		}
 }
 
-learner ipv4_da2 {
+learner ipv4_da2_0 {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -182,8 +182,8 @@ apply {
 	LABEL_FALSE_0 :	mov m.MainControlT_tmp_3 0x0
 	LABEL_END_0 :	mov m.local_metadata_rng_result1 m.MainControlT_tmp_3
 	jmpnv LABEL_END_1 h.ipv4
-	table ipv4_da
-	table ipv4_da2
+	table ipv4_da_0
+	table ipv4_da2_0
 	LABEL_END_1 :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

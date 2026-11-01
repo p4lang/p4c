@@ -58,7 +58,7 @@ action pktbytecount args none {
 	return
 }
 
-table ipv4_host {
+table ipv4_host_0 {
 	key {
 		h.ipv4.dstAddr exact
 	}
@@ -70,7 +70,7 @@ table ipv4_host {
 }
 
 
-table ipv4_host_byte_count {
+table ipv4_host_byte_count_0 {
 	key {
 		h.ipv4.dstAddr exact
 	}
@@ -82,7 +82,7 @@ table ipv4_host_byte_count {
 }
 
 
-table ipv4_host_pkt_byte_count {
+table ipv4_host_pkt_byte_count_0 {
 	key {
 		h.ipv4.dstAddr exact
 	}
@@ -100,9 +100,9 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	table ipv4_host
-	table ipv4_host_byte_count
-	table ipv4_host_pkt_byte_count
+	MAINPARSERIMPL_ACCEPT :	table ipv4_host_0
+	table ipv4_host_byte_count_0
+	table ipv4_host_pkt_byte_count_0
 	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

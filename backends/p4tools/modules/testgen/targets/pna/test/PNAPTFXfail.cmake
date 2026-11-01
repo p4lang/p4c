@@ -158,17 +158,6 @@ p4tools_add_xfail_reason(
     pna-example-dpdk-optional.p4
 )
 
-# IPDK runtime: insertion succeeds, but deletion fails during cleanup. Later
-# cases can then report duplicate entries. In dal_mat.c, insertion uses
-# target_table_name while deletion uses name; these differ for nested tables
-# such as tunnel_encap_set_tunnel_encap. This points to a runtime name mismatch,
-# not a Python cleanup bug. A patch still needs packet-level validation.
-p4tools_add_xfail_reason(
-    "testgen-p4c-pna-ptf"
-    "Error deleting table entry with table_name: pipe.main_control.tunnel_encap.set_tunnel_encap"
-    pna-example-tunnel.p4
-)
-
 # Compiler: relational comparisons on the left of || have incorrect
 # short-circuit lowering. The emitted jumps implement the wrong condition,
 # causing the packet result to differ from the P4 program's expected behavior.

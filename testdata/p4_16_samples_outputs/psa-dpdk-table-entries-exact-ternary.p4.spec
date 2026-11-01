@@ -50,7 +50,7 @@ action a_with_control_params args instanceof a_with_control_params_arg_t {
 	return
 }
 
-table t_exact_ternary {
+table t_exact_ternary_0 {
 	key {
 		h.h.e exact
 		h.h.t wildcard
@@ -68,7 +68,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.h
-	table t_exact_ternary
+	table t_exact_ternary_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.h
 	tx m.psa_ingress_output_metadata_egress_port

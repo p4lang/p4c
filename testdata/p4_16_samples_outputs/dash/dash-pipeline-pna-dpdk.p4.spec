@@ -301,10 +301,10 @@ struct metadata_t {
 	bit<128> local_metadata__meta_43_overlay_data_sip_mask62
 	bit<128> local_metadata__meta_43_overlay_data_dip_mask63
 	bit<32> pna_main_output_metadata_output_port
-	bit<16> dash_ingress_pa_validation_local_metadata___vnet_id22
-	bit<32> dash_ingress_pa_validation_u0_ipv4_src_addr
-	bit<24> dash_ingress_inbound_routing_u0_vxlan_vni
-	bit<32> dash_ingress_inbound_routing_u0_ipv4_src_addr
+	bit<16> dash_ingress_pa_validation_0_local_metadata___vnet_id22
+	bit<32> dash_ingress_pa_validation_0_u0_ipv4_src_addr
+	bit<24> dash_ingress_inbound_routing_0_u0_vxlan_vni
+	bit<32> dash_ingress_inbound_routing_0_u0_ipv4_src_addr
 	;oldname:dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local_metadata___dst_vnet_id33
 	bit<16> dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local2
 	;oldname:dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local_metadata___is_lkup_dst_ip_v61717
@@ -1103,7 +1103,7 @@ action metering_update_stage_meter_bucket_action_0 args instanceof metering_upda
 	return
 }
 
-table vip {
+table vip_0 {
 	key {
 		h.u0_ipv4.dst_addr exact
 	}
@@ -1116,7 +1116,7 @@ table vip {
 }
 
 
-table appliance {
+table appliance_0 {
 	key {
 		m.local_metadata___appliance_id1515 wildcard
 	}
@@ -1129,7 +1129,7 @@ table appliance {
 }
 
 
-table eni {
+table eni_0 {
 	key {
 		m.local_metadata___eni_id44 exact
 	}
@@ -1142,10 +1142,10 @@ table eni {
 }
 
 
-table pa_validation {
+table pa_validation_0 {
 	key {
-		m.dash_ingress_pa_validation_local_metadata___vnet_id22 exact
-		m.dash_ingress_pa_validation_u0_ipv4_src_addr exact
+		m.dash_ingress_pa_validation_0_local_metadata___vnet_id22 exact
+		m.dash_ingress_pa_validation_0_u0_ipv4_src_addr exact
 	}
 	actions {
 		permit
@@ -1156,11 +1156,11 @@ table pa_validation {
 }
 
 
-table inbound_routing {
+table inbound_routing_0 {
 	key {
 		m.local_metadata___eni_id44 exact
-		m.dash_ingress_inbound_routing_u0_vxlan_vni exact
-		m.dash_ingress_inbound_routing_u0_ipv4_src_addr wildcard
+		m.dash_ingress_inbound_routing_0_u0_vxlan_vni exact
+		m.dash_ingress_inbound_routing_0_u0_ipv4_src_addr wildcard
 	}
 	actions {
 		tunnel_decap_1
@@ -1172,7 +1172,7 @@ table inbound_routing {
 }
 
 
-table acl_group {
+table acl_group_0 {
 	key {
 		m.local_metadata___stage1_dash_acl_group_id2626 exact
 	}
@@ -1546,11 +1546,11 @@ apply {
 	DASH_PARSER_PARSE_CUSTOMER_TCP :	extract h.customer_tcp
 	jmp DASH_PARSER_ACCEPT
 	DASH_PARSER_PARSE_U0_TCP :	extract h.u0_tcp
-	DASH_PARSER_ACCEPT :	table vip
+	DASH_PARSER_ACCEPT :	table vip_0
 	jmpnh LABEL_END_7
 	mov m.local_metadata___encap_data_underlay_sip4747 h.u0_ipv4.dst_addr
 	LABEL_END_7 :	table direction_lookup_stage_direction_lookup
-	table appliance
+	table appliance_0
 	jmpneq LABEL_FALSE_4 m.local_metadata___direction00 0x1
 	mov m.MainControlT_eni_lookup_stage_tmp h.customer_ethernet.src_addr
 	jmp LABEL_END_8
@@ -1569,14 +1569,14 @@ apply {
 	mov m.local_metadata___tunnel_pointer3939 0x0
 	jmp LABEL_END_10
 	LABEL_FALSE_6 :	jmpneq LABEL_END_10 m.local_metadata___direction00 0x2
-	mov m.dash_ingress_inbound_routing_u0_vxlan_vni h.u0_vxlan.vni
-	mov m.dash_ingress_inbound_routing_u0_ipv4_src_addr h.u0_ipv4.src_addr
-	table inbound_routing
+	mov m.dash_ingress_inbound_routing_0_u0_vxlan_vni h.u0_vxlan.vni
+	mov m.dash_ingress_inbound_routing_0_u0_ipv4_src_addr h.u0_ipv4.src_addr
+	table inbound_routing_0
 	jmpa LABEL_SWITCH tunnel_decap_pa_validate
 	jmp LABEL_END_10
-	LABEL_SWITCH :	mov m.dash_ingress_pa_validation_local_metadata___vnet_id22 m.local_metadata___vnet_id22
-	mov m.dash_ingress_pa_validation_u0_ipv4_src_addr h.u0_ipv4.src_addr
-	table pa_validation
+	LABEL_SWITCH :	mov m.dash_ingress_pa_validation_0_local_metadata___vnet_id22 m.local_metadata___vnet_id22
+	mov m.dash_ingress_pa_validation_0_u0_ipv4_src_addr h.u0_ipv4.src_addr
+	table pa_validation_0
 	mov m.local_metadata___tunnel_pointer3939 0x0
 	LABEL_END_10 :	mov m.local_metadata___is_overlay_ip_v61616 0x0
 	mov m.local_metadata___ip_protocol1818 0x0
@@ -1601,10 +1601,10 @@ apply {
 	LABEL_FALSE_10 :	jmpnv LABEL_END_14 h.customer_udp
 	mov m.local_metadata___src_l4_port2424 h.customer_udp.src_port
 	mov m.local_metadata___dst_l4_port2525 h.customer_udp.dst_port
-	LABEL_END_14 :	table eni
+	LABEL_END_14 :	table eni_0
 	jmpneq LABEL_END_16 m.local_metadata___eni_data_admin_state88 0x0
 	mov m.local_metadata___dropped4444 1
-	LABEL_END_16 :	table acl_group
+	LABEL_END_16 :	table acl_group_0
 	jmpneq LABEL_FALSE_13 m.local_metadata___direction00 0x1
 	mov m.local_metadata___target_stage4242 0xC8
 	jmpneq LABEL_FALSE_14 m.local_metadata___conntrack_data_allow_out2323 0x1

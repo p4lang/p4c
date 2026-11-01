@@ -126,7 +126,7 @@ action set_error_idx args instanceof set_error_idx_arg_t {
 	return
 }
 
-table parser_error_count_and_convert {
+table parser_error_count_and_convert_0 {
 	key {
 		m.psa_ingress_input_metadata_parser_error exact
 	}
@@ -222,7 +222,7 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	jmpeq LABEL_END_3 m.psa_ingress_input_metadata_parser_error 0x0
-	table parser_error_count_and_convert
+	table parser_error_count_and_convert_0
 	mov m.psa_ingress_output_metadata_drop 1
 	LABEL_END_3 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

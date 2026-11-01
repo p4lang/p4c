@@ -32,10 +32,10 @@ struct main_metadata_t {
 	bit<8> local_metadata_timeout
 	bit<32> local_metadata_meta
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlImpl_ipv4_da_ipv4_srcAddr
-	bit<32> MainControlImpl_ipv4_da_ipv4_dstAddr
-	bit<32> MainControlImpl_ipv4_da_local_metadata_meta
-	bit<8> MainControlImpl_ipv4_da_ethernet_isValid
+	bit<32> MainControlImpl_ipv4_da_0_ipv4_srcAddr
+	bit<32> MainControlImpl_ipv4_da_0_ipv4_dstAddr
+	bit<32> MainControlImpl_ipv4_da_0_local_metadata_meta
+	bit<8> MainControlImpl_ipv4_da_0_ethernet_isValid
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 	bit<32> learnArg
@@ -70,12 +70,12 @@ action add_on_miss_action2 args none {
 	return
 }
 
-learner ipv4_da {
+learner ipv4_da_0 {
 	key {
-		m.MainControlImpl_ipv4_da_ipv4_srcAddr
-		m.MainControlImpl_ipv4_da_ipv4_dstAddr
-		m.MainControlImpl_ipv4_da_local_metadata_meta
-		m.MainControlImpl_ipv4_da_ethernet_isValid
+		m.MainControlImpl_ipv4_da_0_ipv4_srcAddr
+		m.MainControlImpl_ipv4_da_0_ipv4_dstAddr
+		m.MainControlImpl_ipv4_da_0_local_metadata_meta
+		m.MainControlImpl_ipv4_da_0_ethernet_isValid
 	}
 	actions {
 		next_hop @tableonly
@@ -96,7 +96,7 @@ learner ipv4_da {
 		}
 }
 
-learner ipv4_da2 {
+learner ipv4_da2_0 {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -126,14 +126,14 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	mov m.MainControlImpl_ipv4_da_ipv4_srcAddr h.ipv4.srcAddr
-	mov m.MainControlImpl_ipv4_da_ipv4_dstAddr h.ipv4.dstAddr
-	mov m.MainControlImpl_ipv4_da_local_metadata_meta m.local_metadata_meta
-	mov m.MainControlImpl_ipv4_da_ethernet_isValid 1
+	mov m.MainControlImpl_ipv4_da_0_ipv4_srcAddr h.ipv4.srcAddr
+	mov m.MainControlImpl_ipv4_da_0_ipv4_dstAddr h.ipv4.dstAddr
+	mov m.MainControlImpl_ipv4_da_0_local_metadata_meta m.local_metadata_meta
+	mov m.MainControlImpl_ipv4_da_0_ethernet_isValid 1
 	jmpv LABEL_END_0 h.ethernet
-	mov m.MainControlImpl_ipv4_da_ethernet_isValid 0
-	LABEL_END_0 :	table ipv4_da
-	table ipv4_da2
+	mov m.MainControlImpl_ipv4_da_0_ethernet_isValid 0
+	LABEL_END_0 :	table ipv4_da_0
+	table ipv4_da2_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

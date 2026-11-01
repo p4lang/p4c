@@ -94,7 +94,7 @@ action a2_2 args instanceof a2_2_arg_t {
 	return
 }
 
-table tbl_idle_timeout {
+table tbl_idle_timeout_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -108,7 +108,7 @@ table tbl_idle_timeout {
 }
 
 
-table tbl_no_idle_timeout {
+table tbl_no_idle_timeout_0 {
 	key {
 		h.ethernet.srcAddr2 exact
 	}
@@ -122,7 +122,7 @@ table tbl_no_idle_timeout {
 }
 
 
-table tbl_no_idle_timeout_prop {
+table tbl_no_idle_timeout_prop_0 {
 	key {
 		h.ethernet.srcAddr2 exact
 	}
@@ -140,9 +140,9 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
-	table tbl_idle_timeout
-	table tbl_no_idle_timeout
-	table tbl_no_idle_timeout_prop
+	table tbl_idle_timeout_0
+	table tbl_no_idle_timeout_0
+	table tbl_no_idle_timeout_prop_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

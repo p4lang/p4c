@@ -65,7 +65,7 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> MyIC_tbl_ethernet_srcAddr
+	bit<48> MyIC_tbl_0_ethernet_srcAddr
 	bit<16> Ingress_tmp
 	bit<16> tmpMask
 	bit<8> tmpMask_0
@@ -90,9 +90,9 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.MyIC_tbl_ethernet_srcAddr exact
+		m.MyIC_tbl_0_ethernet_srcAddr exact
 		m.local_metadata_data lpm
 	}
 	actions {
@@ -105,7 +105,7 @@ table tbl {
 }
 
 
-table foo {
+table foo_0 {
 	actions {
 		NoAction
 	}
@@ -114,7 +114,7 @@ table foo {
 }
 
 
-table bar {
+table bar_0 {
 	actions {
 		NoAction
 	}
@@ -140,16 +140,16 @@ apply {
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tmp 0x10
 	mov m.Ingress_tmp 0x1
-	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
 	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp 0x1
-	table foo
+	table foo_0
 	jmp LABEL_ENDSWITCH
 	jmp LABEL_ENDSWITCH
-	LABEL_SWITCH_0 :	table bar
+	LABEL_SWITCH_0 :	table bar_0
 	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

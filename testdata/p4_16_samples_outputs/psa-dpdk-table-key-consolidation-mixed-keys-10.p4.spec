@@ -58,10 +58,10 @@ struct metadata {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
-	bit<48> ingress_tbl_ethernet_srcAddr
-	bit<48> ingress_tbl_ethernet_dstAddr
-	bit<16> ingress_tbl_local_metadata_data
-	bit<16> ingress_tbl_local_metadata_data1
+	bit<48> ingress_tbl_0_ethernet_srcAddr
+	bit<48> ingress_tbl_0_ethernet_dstAddr
+	bit<16> ingress_tbl_0_local_metadata_data
+	bit<16> ingress_tbl_0_local_metadata_data1
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -80,12 +80,12 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.ingress_tbl_ethernet_srcAddr exact
-		m.ingress_tbl_ethernet_dstAddr exact
-		m.ingress_tbl_local_metadata_data exact
-		m.ingress_tbl_local_metadata_data1 exact
+		m.ingress_tbl_0_ethernet_srcAddr exact
+		m.ingress_tbl_0_ethernet_dstAddr exact
+		m.ingress_tbl_0_local_metadata_data exact
+		m.ingress_tbl_0_local_metadata_data1 exact
 	}
 	actions {
 		NoAction
@@ -111,11 +111,11 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
-	mov m.ingress_tbl_local_metadata_data m.local_metadata_data
-	mov m.ingress_tbl_local_metadata_data1 m.local_metadata_data1
-	table tbl
+	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_0_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_tbl_0_local_metadata_data m.local_metadata_data
+	mov m.ingress_tbl_0_local_metadata_data1 m.local_metadata_data1
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
