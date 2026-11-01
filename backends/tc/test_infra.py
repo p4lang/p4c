@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2025 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -344,7 +349,7 @@ class TCInfra:
         if produced.endswith(".h"):
             sedcommand = "sed -i.bak '1d;2d' " + produced
             subprocess.call(sedcommand, shell=True)
-        sedcommand = "sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
+        sedcommand = r"sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
         subprocess.call(sedcommand, shell=True)
 
         result = testutils.SUCCESS

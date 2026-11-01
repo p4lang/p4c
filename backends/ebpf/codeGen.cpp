@@ -112,7 +112,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", b->left, type);
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
-        builder->append("memcmp(&");
+        builder->append("__builtin_memcmp(&");
         if (builder->target->name == "P4TC") {
             emitTCBinaryOperation(b);
         } else {

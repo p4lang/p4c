@@ -620,7 +620,7 @@ if (hdr->ipv4.protocol==6 || (hdr->ipv4.version>1 && hdr->ipv4.ihl<=2)) {
         }
         ;
 
-        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        long outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);

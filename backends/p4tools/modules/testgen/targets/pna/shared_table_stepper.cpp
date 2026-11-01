@@ -255,7 +255,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
 }
 
 bool SharedPnaTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("pna_implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -278,12 +278,12 @@ bool SharedPnaTableStepper::checkForActionProfile() {
                               implExpr->expression->node_type_name());
     }
 
-    if (implExtern->name != "action_profile") {
+    if (implExtern->name != "ActionProfile") {
         return false;
     }
 
     const auto *testObject =
-        state->getTestObject("action_profile"_cs, implExtern->controlPlaneName(), false);
+        state->getTestObject("action_profile"_cs, implDecl->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
@@ -297,7 +297,7 @@ bool SharedPnaTableStepper::checkForActionProfile() {
 }
 
 bool SharedPnaTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("pna_implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -320,21 +320,23 @@ bool SharedPnaTableStepper::checkForActionSelector() {
                               selectorExpr->expression->node_type_name());
     }
 
-    if (selectorExtern->name != "action_selector") {
+    if (selectorExtern->name != "ActionSelector") {
         return false;
     }
-    // Treat action selectors like action profiles for now.
-    // The behavioral model P4Runtime is unclear how to configure action selectors.
     const auto *testObject =
-        state->getTestObject("action_profile"_cs, selectorExtern->controlPlaneName(), false);
+        state->getTestObject("action_profile"_cs, selectorDecl->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
         SharedPnaProperties.addProfileToState = true;
         SharedPnaProperties.actionProfile = new PnaDpdkActionProfile(selectorDecl);
+        SharedPnaProperties.actionSelector =
+            new PnaDpdkActionSelector(selectorDecl, SharedPnaProperties.actionProfile);
         return true;
     }
     SharedPnaProperties.actionProfile = testObject->checkedTo<PnaDpdkActionProfile>();
+    SharedPnaProperties.actionSelector =
+        new PnaDpdkActionSelector(selectorDecl, SharedPnaProperties.actionProfile);
     SharedPnaProperties.addProfileToState = false;
     return true;
 }
@@ -363,8 +365,7 @@ void SharedPnaTableStepper::checkTargetProperties(
 
     // Check whether the table has an action selector associated with it.
     if (checkForActionSelector()) {
-        // TODO: This should be a selector. Implement.
-        SharedPnaProperties.implementaton = TableImplementation::profile;
+        SharedPnaProperties.implementaton = TableImplementation::selector;
         return;
     }
 }

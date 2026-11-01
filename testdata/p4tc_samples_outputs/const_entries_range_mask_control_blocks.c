@@ -128,7 +128,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
         }
         ;
 
-        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        long outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);

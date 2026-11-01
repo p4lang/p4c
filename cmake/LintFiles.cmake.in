@@ -1,0 +1,84 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Configured by Linters.cmake and run by the lint targets.
+cmake_minimum_required(VERSION 3.16.3)
+# Bracket arguments preserve configured paths and file lists without another expansion.
+set(P4C_SOURCE_DIR [====[@P4C_SOURCE_DIR@]====])
+set(P4C_BINARY_DIR [====[@P4C_BINARY_DIR@]====])
+
+function(p4c_collect_lint_files output patterns extensions excludes)
+  list(TRANSFORM patterns PREPEND "${P4C_SOURCE_DIR}/")
+  file(GLOB_RECURSE files FOLLOW_SYMLINKS ${patterns})
+  if(NOT "${extensions}" STREQUAL "")
+    list(FILTER files INCLUDE REGEX "${extensions}")
+  endif()
+  foreach(pattern IN LISTS excludes)
+    list(FILTER files EXCLUDE REGEX "${pattern}")
+  endforeach()
+  set(${output} "${files}" PARENT_SCOPE)
+endfunction()
+
+if(LINT_KIND STREQUAL "CPP")
+  # Scan each tree once for both C++ linters, then select extensions.
+  set(patterns
+    backends/*
+    control-plane/*
+    frontends/*
+    ir/*
+    lib/*
+    midend/*
+    test/*
+    tools/*
+  )
+  # Match file(GLOB_RECURSE)'s platform-specific case sensitivity.
+  if(WIN32 OR APPLE)
+    set(extensions "\\.([cC][pP][pP]|[hH])$")
+  else()
+    set(extensions "\\.(cpp|h)$")
+  endif()
+  set(excludes
+    "backends/ebpf/runtime"
+    "backends/ubpf/runtime"
+    "control-plane/p4runtime"
+    "backends/tc/runtime"
+    "test/frameworks"
+    "backends/tofino/third_party"
+  )
+  p4c_collect_lint_files(P4C_LINT_LIST "${patterns}" "${extensions}" "${excludes}")
+
+  # Explicit backend registrations are retained even outside the discovery rules.
+  set(CPPLINT_FILES [====[@CPPLINT_FILES@]====])
+  list(APPEND CPPLINT_FILES ${P4C_LINT_LIST})
+  list(REMOVE_DUPLICATES CPPLINT_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/cpplint_files.txt" "${CPPLINT_FILES}")
+
+  set(CLANG_FORMAT_FILES [====[@CLANG_FORMAT_FILES@]====])
+  list(APPEND CLANG_FORMAT_FILES ${P4C_LINT_LIST})
+  list(REMOVE_DUPLICATES CLANG_FORMAT_FILES)
+  list(SORT CLANG_FORMAT_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/clang_format_files.txt" "${CLANG_FORMAT_FILES}")
+elseif(LINT_KIND STREQUAL "PYTHON")
+  set(patterns
+    backends/*.py
+    testdata/*.py
+    tools/*.py
+  )
+  set(excludes
+    "backends/p4tools/submodules"
+    "backends/ebpf/runtime/contrib"
+    "backends/tofino/third_party"
+    "tools/cpplint.py"
+    "backends/tc/runtime"
+  )
+  p4c_collect_lint_files(P4C_PYTHON_LINT_LIST "${patterns}" "" "${excludes}")
+
+  set(BLACK_FILES [====[@BLACK_FILES@]====])
+  list(APPEND BLACK_FILES ${P4C_PYTHON_LINT_LIST})
+  list(REMOVE_DUPLICATES BLACK_FILES)
+  list(SORT BLACK_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/BLACK_files.txt" "${BLACK_FILES}")
+else()
+  message(FATAL_ERROR "Unknown lint file kind: ${LINT_KIND}")
+endif()

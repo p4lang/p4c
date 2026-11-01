@@ -644,10 +644,11 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
     applySetupJoinPoints(root);
 #if DEBUG_FLOW_JOIN
     erase_if(*flow_join_points,
-             [this](flow_join_points_t::value_type &el) { return el.second.count == 0; });
+             [this](const flow_join_points_t::value_type &el) { return el.second.count == 0; });
 #endif
-    erase_if(*flow_join_points,
-             [this](flow_join_points_t::value_type &el) { return filter_join_point(el.first); });
+    erase_if(*flow_join_points, [this](const flow_join_points_t::value_type &el) {
+        return filter_join_point(el.first);
+    });
 }
 
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {

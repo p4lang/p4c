@@ -222,7 +222,8 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
 bool TypeUnification::containsDots(const IR::Type_StructLike *type) {
     if (type->fields.empty()) return false;
     size_t lastIndex = type->fields.size() - 1;
-    return type->fields.at(lastIndex)->type->is<IR::Type_Any>();
+    const auto *lastField = type->fields.at(lastIndex);
+    return lastField->name == "..."_cs && lastField->type->is<IR::Type_Any>();
 }
 
 bool TypeUnification::containsDots(const IR::Type_BaseList *type) {
@@ -371,6 +372,15 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                "Cannot unify %1% and %2% both of which "
                                                "contain unspecified fields",
                                                strct, st);
+            if (!strctHasDots) {
+                for (auto f : st->fields) {
+                    if (f->name != "..."_cs && !strct->getField(f->name))
+                        return constraint->reportError(
+                            constraints->getCurrentSubstitution(),
+                            "Field %1% in initializer is not a member of structure %2%", f->name,
+                            strct);
+                }
+            }
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
             if ((strct->fields.size() != st->fields.size()) && !strctHasDots && !stHasDots)
