@@ -15,8 +15,6 @@ parser p() {
     H s_0_h1;
     H s_0_h2;
     state start {
-        s_0_h1.setInvalid();
-        s_0_h2.setInvalid();
         transition accept;
     }
 }
