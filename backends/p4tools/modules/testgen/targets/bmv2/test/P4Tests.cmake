@@ -27,10 +27,6 @@ p4c_find_tests("${TESTGEN_BMV2_P416_TESTS}" BMV2_P4_16_V1_TESTS INCLUDE "${V1_SE
 
 # Add BMv2 tests from p4c and from testgen/test/p4-programs/bmv2
 set(P4C_V1_TEST_SUITES_P416 ${P4_16_V1_TESTS} ${BMV2_P4_16_V1_TESTS})
-list(REMOVE_ITEM P4C_V1_TEST_SUITES_P416
-     # P4Testgen's slice evaluator requires compile-time constant bounds.
-     "${P4C_SOURCE_DIR}/testdata/p4_16_samples/shifted-dynamic-slice-bmv2.p4"
-)
 
 #############################################################################
 # TEST SUITES
