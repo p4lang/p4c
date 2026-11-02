@@ -1,0 +1,12 @@
+issue5891.p4(17): [--Werror=type-error] error: void: not supported as a tuple field
+        tuple<void, bit<8>> t1;
+              ^^^^
+issue5891.p4(18): [--Werror=type-error] error: match_kind: not supported as a tuple field
+        tuple<match_kind, bit<8>> t2 = { lpm, 1 };
+              ^^^^^^^^^^
+issue5891.p4(19): [--Werror=type-error] error: int: not supported as a tuple field
+        tuple<int> t3 = { 2 };
+              ^^^
+issue5891.p4(20): [--Werror=type-error] error: string: not supported as a tuple field
+        tuple<string, bit<8>> t4 = { "abc", 3 };
+              ^^^^^^
