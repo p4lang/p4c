@@ -42,7 +42,8 @@ jobs:
             --build-arg CCACHE_MAXSIZE --build-arg CCACHE_COMPILERCHECK .
       - name: Run p4c tests (Docker image)
         run: |
-          sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
+          sudo docker run --privileged -w /p4c/build \
+            -e CTEST_PARALLEL_LEVEL="$CTEST_PARALLEL_LEVEL" p4c-test \
             uv run ctest --output-on-failure --schedule-random
       - name: Export ccache
         run: ./tools/export_ccache.sh p4c-test
