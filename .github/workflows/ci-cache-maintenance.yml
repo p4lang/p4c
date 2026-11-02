@@ -6,9 +6,13 @@ on:
   schedule:
     - cron: "23 3 * * *"
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Preview cache deletions without applying them
+        type: boolean
+        default: false
 permissions:
   actions: write
-  contents: read
   pull-requests: read
 concurrency:
   group: cache-maintenance
@@ -17,10 +21,12 @@ jobs:
   prune:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: main
       - name: Keep main caches and clean up PR caches
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 .github/scripts/cache_retention.py --apply
+        uses: p4lang/.github/CI/cache-retention@3755e1d9912f7777eaffae6380a1ebdd224ccda3
+        with:
+          key-prefixes: |
+            ccache-v2-
+            bazel-v2-
+          pr-budget: "2000000000"
+          total-budget: "9000000000"
+          dry-run: ${{ inputs.dry-run || false }}
