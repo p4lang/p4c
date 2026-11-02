@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #include <ebpf_model.p4>
 
 header ethernet_t {
@@ -56,35 +57,45 @@ parser Parser(packet_in packet, out headers hdr) {
 
 control Ingress(inout headers hdr, out bool xout) {
     @name("Ingress.tmp") bit<48> tmp_5;
+    @name("Ingress.result") bit<32> result;
+    @name("Ingress.result") bit<32> result_1;
+    @name("Ingress.result") bit<32> result_2;
+    @name("Ingress.result") bit<32> result_3;
+    @name("Ingress.result") bit<32> result_4;
     @name("Ingress.operation_add") action operation_add() {
+        result = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
-        hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
+        hdr.p4calc.res = result;
     }
     @name("Ingress.operation_sub") action operation_sub() {
+        result_1 = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
-        hdr.p4calc.res = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_1;
     }
     @name("Ingress.operation_and") action operation_and() {
+        result_2 = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
-        hdr.p4calc.res = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_2;
     }
     @name("Ingress.operation_or") action operation_or() {
+        result_3 = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
-        hdr.p4calc.res = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_3;
     }
     @name("Ingress.operation_xor") action operation_xor() {
+        result_4 = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
-        hdr.p4calc.res = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_4;
     }
     @name("Ingress.operation_drop") action operation_drop() {
         xout = false;
