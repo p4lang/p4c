@@ -223,7 +223,17 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
             errpipe = LogPipe(logging.WARNING)
             output_args["stderr"] = errpipe
     try:
-        result = subprocess.run(args, check=True, **output_args)
+        try:
+            result = subprocess.run(args, check=True, **output_args)
+        finally:
+            # Process exit does not imply that the logging threads have drained
+            # the pipes. Close both write ends and wait before reading .out.
+            for pipe in (outpipe, errpipe):
+                if pipe:
+                    pipe.close()
+            for pipe in (outpipe, errpipe):
+                if pipe:
+                    pipe.join()
         if outpipe:
             out = outpipe.out
         else:
@@ -251,12 +261,6 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
             out = str(exception.stderr)
         returncode = FAILURE
         log.error("Timed out when executing %s.", " ".join(args))
-    finally:
-        if "capture_output" not in extra_args:
-            if "outpipe" in locals() and outpipe:
-                outpipe.close()
-            if "errpipe" in locals() and errpipe:
-                errpipe.close()
     return ProcessResult(out, returncode)
 
 
