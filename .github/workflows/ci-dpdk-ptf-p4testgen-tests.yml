@@ -99,7 +99,7 @@ jobs:
           python3 -m pip install -r requirements.txt
 
       - name: Install stratum dependencies
-        uses: robinraju/release-downloader@v1.12
+        uses: robinraju/release-downloader@v1.13
         with:
           repository: ${{ env.DEPS_REPOSITORY }}
           tag: ${{ env.DEPS_TAG }}
