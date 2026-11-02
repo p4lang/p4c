@@ -36,7 +36,7 @@ const IR::Node *SubstituteParameters::postorder(IR::PathExpression *expr) {
         (refMap ? refMap->getDeclaration(expr->path, true) : getDeclaration(expr->path, true));
     auto param = decl->to<IR::Parameter>();
     if (param != nullptr && subst->contains(param)) {
-        const auto *value = subst->lookup(param)->expression;
+        const IR::Expression *value = subst->lookup(param)->expression;
         LOG1("Replaced " << dbp(expr) << " with " << dbp(value));
         // Keep the argument's source location unless it is a compiler temporary.
         // For temporaries, use the location of the parameter reference.

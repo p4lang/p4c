@@ -15,8 +15,8 @@ using namespace P4;
 namespace P4::Test {
 
 struct RemoveDontcareArgsTest : P4CTest {
-    const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program);
+    IR::Ptr<IR::Node> parseAndProcess(std::string program) {
+        auto pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -36,14 +36,14 @@ class CollectActionAndControlLocals : public Inspector {
     unsigned controlDecls = 0;
 
     bool preorder(const IR::P4Action *action) override {
-        for (const auto *c : action->body->components) {
+        for (const IR::StatOrDecl *c : action->body->components) {
             if (c->is<IR::Declaration_Variable>()) ++actionDecls;
         }
         return true;
     }
 
     bool preorder(const IR::P4Control *control) override {
-        for (const auto *c : control->controlLocals) {
+        for (const IR::Declaration *c : control->controlLocals) {
             if (c->is<IR::Declaration_Variable>()) ++controlDecls;
         }
         return true;
@@ -79,7 +79,7 @@ package top(proto p);
 top(C()) main;
     )");
 
-    const auto *program = parseAndProcess(program_source);
+    auto program = parseAndProcess(program_source);
     ASSERT_TRUE(program);
     ASSERT_EQ(::P4::errorCount(), 0);
 

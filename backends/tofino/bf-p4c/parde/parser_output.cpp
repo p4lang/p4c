@@ -228,7 +228,7 @@ struct ParserAsmSerializer : public ParserInspector {
             out << indent << "  option: ignore_max_depth" << std::endl;
         }
 
-        for (auto *match : state->transitions) outputMatch(match, state->thread());
+        for (auto match : state->transitions) outputMatch(match, state->thread());
 
         return true;
     }
@@ -259,12 +259,12 @@ struct ParserAsmSerializer : public ParserInspector {
 
         if (match->priority) out << indent << "priority: " << match->priority->val << std::endl;
 
-        for (auto *csum : match->checksums) outputChecksum(csum);
+        for (auto csum : match->checksums) outputChecksum(csum);
 
-        for (auto *cntr : match->counters) outputCounter(cntr);
+        for (auto cntr : match->counters) outputCounter(cntr);
 
         int intrinsic_width = 0;
-        for (auto *stmt : match->extracts) {
+        for (auto stmt : match->extracts) {
             if (auto *extract = stmt->to<IR::BFN::LoweredExtractPhv>())
                 outputExtractPhv(extract, intrinsic_width);
             else if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>())
@@ -306,7 +306,7 @@ struct ParserAsmSerializer : public ParserInspector {
     void outputSave(const IR::Vector<IR::BFN::LoweredSave> &saves) {
         const char *sep = "load: { ";
         out << indent;
-        for (const auto *save : saves) {
+        for (auto save : saves) {
             if (auto *source = save->source->to<IR::BFN::LoweredInputBufferRVal>()) {
                 auto bytes = source->range;
                 out << sep << save->dest << " : " << Range(bytes.lo, bytes.hi);

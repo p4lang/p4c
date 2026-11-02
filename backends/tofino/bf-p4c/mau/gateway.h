@@ -73,7 +73,7 @@ class CanonGatewayExpr : public MauTransform {
     const IR::Expression *postorder(IR::MAU::TypedPrimitive *) override;
     const IR::Node *postorder(IR::MAU::Table *) override;
     // helper functions
-    using GWRow_t = std::pair<const IR::Expression *, cstring>;
+    using GWRow_t = std::pair<IR::Ptr<IR::Expression>, cstring>;
     void removeUnusedRows(IR::MAU::Table *, bool isCanon);
     void sortGatewayRows(safe_vector<GWRow_t> &gateway_rows);
     void splitGatewayRows(safe_vector<GWRow_t> &gateway_rows);

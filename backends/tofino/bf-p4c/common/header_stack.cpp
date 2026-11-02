@@ -150,7 +150,7 @@ IR::Node *RemovePushInitialization::preorder(IR::MAU::Action *act) {
     ordered_map<cstring, const IR::MAU::Primitive *> push_prims;
     IR::Vector<IR::MAU::Primitive> to_keep;
 
-    for (auto *prim : act->action) {
+    for (const IR::MAU::Primitive *prim : act->action) {
         to_keep.push_back(prim);
         if (prim->name == "push_front") {
             // If this is the first push to this field in this action, add it
@@ -229,7 +229,7 @@ IR::Node *ValidToStkvalid::postorder(IR::Member *member) {
     // Skip everything but header stack validity fields (hdr[x].$valid).
     if (!ref || member->member.toString() != "$valid") return member;
 
-    auto *stk = ref->baseRef();
+    const IR::HeaderOrMetadata *stk = ref->baseRef();
     if (!stack_info_->count(stk->name.toString())) return member;
     auto info = stack_info_->at(stk->name.toString());
 
