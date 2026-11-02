@@ -761,7 +761,9 @@ ternary</h3>
 <div class="line">        __u32 *mask = ((__u32 *) &amp;next);</div>
 <div class="line"><span class="preprocessor">        #pragma clang loop unroll(disable)</span></div>
 <div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <span class="keyword">sizeof</span>(<span class="keyword">struct </span>ingress_tbl_ternary_1_key_mask) / 4; i++) {</div>
-<div class="line">            chunk[i] = ((__u32 *) &amp;key)[i] &amp; mask[i];</div>
+<div class="line">            __u32 key_chunk;</div>
+<div class="line">            __builtin_memcpy(&amp;key_chunk, ((__u8 *) &amp;key) + i * 4, <span class="keyword">sizeof</span>(key_chunk));</div>
+<div class="line">            chunk[i] = key_chunk &amp; mask[i];</div>
 <div class="line">        }</div>
 <div class="line">        __u32 tuple_id = v-&gt;tuple_id;</div>
 <div class="line">        next = v-&gt;next_tuple_mask;</div>
