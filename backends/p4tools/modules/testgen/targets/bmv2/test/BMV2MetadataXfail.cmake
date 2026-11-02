@@ -13,6 +13,13 @@
 ####################################################################################################
 # These are failures in P4Testgen that need to be fixed.
 
+# P4Testgen does not support array expressions as state variables.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  "ArrayExpression is not a valid StateVariable"
+  stack-swap-alias-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-metadata"
   "Unknown or unimplemented extern method: .*[.]recirculate_preserving_field_list"
