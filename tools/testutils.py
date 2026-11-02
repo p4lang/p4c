@@ -224,14 +224,10 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
             output_args["stderr"] = errpipe
     try:
         result = subprocess.run(args, check=True, **output_args)
-        if outpipe:
-            out = outpipe.out
-        else:
-            out = result.stdout
+        out = result.stdout
         returncode = result.returncode
     except FileNotFoundError as exception:
-        if errpipe:
-            out = errpipe.out
+        out = ""
         returncode = FAILURE
         log.error(
             'Error %s with exception "%s" when executing "%s".',
@@ -240,23 +236,26 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
             " ".join(args),
         )
     except subprocess.CalledProcessError as exception:
-        if errpipe:
-            out = errpipe.out
+        out = exception.stderr
         returncode = exception.returncode
         log.error('Error %s when executing "%s".', returncode, " ".join(args))
     except subprocess.TimeoutExpired as exception:
-        if errpipe:
-            out = errpipe.out
-        else:
-            out = str(exception.stderr)
+        out = str(exception.stderr)
         returncode = FAILURE
         log.error("Timed out when executing %s.", " ".join(args))
     finally:
-        if "capture_output" not in extra_args:
-            if "outpipe" in locals() and outpipe:
-                outpipe.close()
-            if "errpipe" in locals() and errpipe:
-                errpipe.close()
+        # Process exit does not imply that the logging threads have drained
+        # the pipes. Close both write ends and wait before reading .out.
+        for pipe in (outpipe, errpipe):
+            if pipe:
+                pipe.close()
+        for pipe in (outpipe, errpipe):
+            if pipe:
+                pipe.join()
+
+    pipe = outpipe if returncode == SUCCESS else errpipe
+    if pipe:
+        out = pipe.out
     return ProcessResult(out, returncode)
 
 

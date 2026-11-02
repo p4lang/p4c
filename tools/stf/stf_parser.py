@@ -88,7 +88,9 @@ class STFParser:
         self.lexer = lexer
         self.lexer.build(reflags=re.UNICODE)
         self.tokens = self.lexer.tokens
-        self.parser = yacc.yacc(module=self)
+        # Parallel test processes share this directory. Keep parser tables in
+        # memory so another process cannot import a partially written parsetab.py.
+        self.parser = yacc.yacc(module=self, write_tables=False, debug=False)
         self.errors_cnt = 0
 
     def parse(self, data=None, filename="") -> Tuple[Dict[str, str], int]:
