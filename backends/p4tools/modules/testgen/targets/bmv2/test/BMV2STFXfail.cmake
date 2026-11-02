@@ -70,6 +70,13 @@ p4tools_add_xfail_reason(
 # These are failures in P4Testgen that need to be fixed.
 ####################################################################################################
 
+# P4Testgen does not support array expressions as state variables.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
+  "ArrayExpression is not a valid StateVariable"
+  stack-swap-alias-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "with type .* is not a Constant"
