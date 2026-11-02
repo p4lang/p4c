@@ -419,38 +419,16 @@ set(EXTENSION_IR_LIBS)
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
-if (ENABLE_CONTROL_PLANE)
-########################################## P4Runtime Begin #########################################
-# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
-# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
-# need to keep the P4Runtime installation in the top-level CMakelists file.
-# Print download state while setting up P4Runtime.
-set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-set(FETCHCONTENT_QUIET OFF)
-# Fetch and declare the P4Runtime library.
-FetchContent_Declare(
-  p4runtime
-  GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        26b75559f2fedcd11876d7ff21eec4180011dc36  # v1.6.0
-  GIT_PROGRESS TRUE
-)
-FetchContent_MakeAvailable(p4runtime)
-set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-message(STATUS "Done with setting up P4Runtime for P4C.")
-# The standard P4Runtime protocol buffers message definitions live in the PI
-# repo, which is included in this repo as a git module.
-set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
-                                                          "Path to the P4Runtime directory."
-)
-endif()
-########################################## P4Runtime End ##########################################
-
 add_subdirectory (frontends)
 add_subdirectory (midend)
 if (ENABLE_CONTROL_PLANE)
     OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
     include(Protobuf)
     p4c_obtain_protobuf()
+
+    # P4Runtime must use the same Protobuf library and protoc as P4C.
+    include(P4Runtime)
+    p4c_obtain_p4runtime()
     add_subdirectory (control-plane)
 endif()
 
