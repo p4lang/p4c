@@ -12,6 +12,9 @@ issue5268.p4(28): [--Werror=type-error] error: '{
         bool b5 = (S) { a = 1, b = 2 } == { a = 1, bb = 2 };
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-issue5268.p4(18): No initializer for field b
-      bit<32> b;
-              ^
+issue5268.p4(28): Field bb in initializer is not a member of structure struct S
+          bool b5 = (S) { a = 1, b = 2 } == { a = 1, bb = 2 };
+                                                     ^^
+issue5268.p4(16)
+  struct S {
+         ^

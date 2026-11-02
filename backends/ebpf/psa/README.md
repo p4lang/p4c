@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2022 Open Networking Foundation
+SPDX-FileCopyrightText: 2022 Orange
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!-- 
 Documentation Inclusion:
 This README is integrated as a subsection of the "eBPF Backend" page in the P4 compiler documentation.
@@ -307,7 +314,9 @@ if (val && val->has_next != 0) {
         __u32 *mask = ((__u32 *) &next);
         #pragma clang loop unroll(disable)
         for (int i = 0; i < sizeof(struct ingress_tbl_ternary_1_key_mask) / 4; i++) {
-            chunk[i] = ((__u32 *) &key)[i] & mask[i];
+            __u32 key_chunk;
+            __builtin_memcpy(&key_chunk, ((__u8 *) &key) + i * 4, sizeof(key_chunk));
+            chunk[i] = key_chunk & mask[i];
         }
         __u32 tuple_id = v->tuple_id;
         next = v->next_tuple_mask;

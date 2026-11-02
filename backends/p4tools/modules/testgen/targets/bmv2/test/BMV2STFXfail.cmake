@@ -74,6 +74,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "with type .* is not a Constant"
   issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+  shifted-dynamic-slice-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
 )
 
 p4tools_add_xfail_reason(

@@ -157,10 +157,17 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
                                        int position) {
     auto *keyField = new Util::JsonObject();
     const auto *fieldNamePos = name.findlast('.');
-    auto instanceName = name.replace(fieldNamePos, "");
-    // FIXME: trim string_view
-    cstring fieldName = cstring(fieldNamePos).trim(".\t\n\r");
+    // Control-local match keys have no containing header or metadata instance.
+    cstring instanceName = cstring::empty;
+    cstring fieldName = name;
+    if (fieldNamePos != nullptr) {
+        instanceName = name.before(fieldNamePos);
+        fieldName = cstring(fieldNamePos + 1);
+    }
     std::string keyName(nameAnnotation);
+    // BF-RT removes the trailing '$' from compiler-generated validity keys.
+    // Context key names must agree with the schema used by the target.
+    if (nameAnnotation.endsWith(".$valid$")) keyName.pop_back();
     // Replace header stack indices hdr[<index>] with hdr$<index>.
     std::regex hdrStackRegex(R"(\[([0-9]+)\])");
     keyName = std::regex_replace(keyName, hdrStackRegex, "$$$1");

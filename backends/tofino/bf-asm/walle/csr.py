@@ -342,8 +342,7 @@ class csr_composite_object(csr_object):
                         description = description + '\n'
                 if len(child.children()) != 1 or child.count != (1,):
                     raise CsrException(
-                        "unknown rewrite '%s' for %s.%s"
-                        % (rewrite[child.name][0], name, child.name)
+                        "unknown rewrite '%s' for %s.%s" % (rewrite[0], self.name, child.name)
                     )
                 child = child.children()[0]
             if hasattr(child, 'description') and child.description:
@@ -392,7 +391,7 @@ class csr_composite_object(csr_object):
             return child
         else:
             raise CsrException(
-                "unknown rewrite '%s' for %s.%s" % (rewrite[el.name][0], name, el.name)
+                "unknown rewrite '%s' for %s.%s" % (rewrite[0], self.name, child.name)
             )
         return None
 
@@ -1510,7 +1509,7 @@ class csr_composite_object(csr_object):
             if pot['ok'] and pot['max'] > 0 and pot['mask'] == 2 ** (pot['max'] + 1) - 1:
                 self.alias_arrays.append((base, pot['type'], pot['max'] + 1))
 
-    def need_ctor(self):
+    def need_ctor(self, args):
         if self.alias_arrays:
             return True
         for el in self.children():
@@ -1636,7 +1635,7 @@ class csr_composite_object(csr_object):
             if args.enable_disable:
                 outfile.write("%sbool disabled_;\n" % indent)
                 outfile.write("%sbool disabled() const { return disabled_; }\n" % indent)
-            if args.enable_disable or self.need_ctor():
+            if args.enable_disable or self.need_ctor(args):
                 self.gen_ctor(outfile, args, namestr, indent)
             if self.top_level():
                 outfile.write(
@@ -1702,7 +1701,7 @@ class csr_composite_object(csr_object):
                     "%salias_array<%d, %s> %s;\n" % (indent, alias[2], alias[1], alias[0])
                 )
         if args.delete_copy and args.gen_decl != 'defn':
-            if not args.enable_disable and not self.need_ctor():
+            if not args.enable_disable and not self.need_ctor(args):
                 outfile.write("%s%s() = default;\n" % (indent, namestr))
             outfile.write("%s%s(const %s &) = delete;\n" % (indent, namestr, namestr))
             outfile.write("%s%s(%s &&) = delete;\n" % (indent, namestr, namestr))
@@ -1824,7 +1823,7 @@ class address_map(csr_composite_object):
         if data == 0:
             # No-op
             return {}
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             # Refernce to template
 
             type_name = self.parent + "." + self.name
@@ -1850,7 +1849,7 @@ class address_map(csr_composite_object):
             for obj in self.objs:
                 if obj.name not in data:
                     raise CsrException("Could not find key '" + obj.name + "'")
-                if data[obj.name] != 0 and not isinstance(data[obj.name], basestring):
+                if data[obj.name] != 0 and not isinstance(data[obj.name], str):
                     if obj.count == (1,):
                         if type(data[obj.name]) is not dict:
                             raise CsrException("Expected dictionary at key '" + obj.name + "'")
@@ -2209,7 +2208,7 @@ class reg(csr_composite_object):
         if data == 0:
             # No-op
             return None
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             # Refernce to template
 
             path[-1].path.append(self.name)

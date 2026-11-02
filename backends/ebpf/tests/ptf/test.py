@@ -10,9 +10,6 @@
 # other GPL modules, please change the license to Apache-2.0.
 
 import copy
-import platform
-import unittest
-from distutils.version import LooseVersion
 
 from common import *
 from ptf.mask import Mask
@@ -590,10 +587,6 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
-)
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
 
@@ -786,10 +779,6 @@ class PassToKernelStackTest(P4EbpfTest):
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to failure",
-)
 class LPMTableCachePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/table-cache-lpm.p4"
     p4c_additional_args = "--table-caching"
@@ -825,7 +814,7 @@ class LPMTableCachePSATest(P4EbpfTest):
         # Update table entry to test if NIKSS library invalidates cache
         self.table_update(
             table="ingress_tbl_lpm",
-            key=["00:11:22:33:44:55"],
+            key=["00:11:22:33:44:55/48"],
             action=1,
             data=["11:22:33:44:55:66"],
         )

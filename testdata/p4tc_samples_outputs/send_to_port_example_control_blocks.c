@@ -168,7 +168,7 @@ ext_val = *ext_val_ptr;
         }
         ;
 
-        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        long outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);

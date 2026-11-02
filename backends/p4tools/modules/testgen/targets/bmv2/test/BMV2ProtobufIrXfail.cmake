@@ -43,6 +43,7 @@ p4tools_add_xfail_reason(
   "with type .* is not a Constant"
   # Most of these come from varbits
   issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+  shifted-dynamic-slice-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
 )
 
 p4tools_add_xfail_reason(
