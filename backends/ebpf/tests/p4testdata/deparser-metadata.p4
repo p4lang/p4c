@@ -52,7 +52,7 @@ control ingress(inout headers hdr,
                 inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        meta.state = 0x1111;
+        meta.state = 0x1234;
         send_to_port(ostd, (PortId_t) PORT1);
     }
 }
@@ -63,7 +63,7 @@ control egress(inout headers hdr,
                inout psa_egress_output_metadata_t ostd)
 {
     apply {
-        meta.state = 0x2222;
+        meta.state = 0x5678;
     }
 }
 

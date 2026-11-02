@@ -924,9 +924,9 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
         deparser->codeGen->useAsPointerVariable(deparser->resubmit_meta->name.name);
     }
 
-    // The deparser's metadata parameter refers to the control's user metadata
-    if (pipelineType == TC_INGRESS || pipelineType == XDP_INGRESS || pipelineType == TC_EGRESS ||
-        pipelineType == XDP_EGRESS) {
+    // The deparser's metadata parameter refers to the control's user metadata.
+    // The traffic manager has no user metadata, xdp2tc_metadata does not carry it.
+    if (pipelineType != TC_TRAFFIC_MANAGER) {
         deparser->codeGen->substitute(deparser->user_metadata, controlUserMetadata);
         deparser->codeGen->useAsPointerVariable(deparser->user_metadata->name.name);
     }

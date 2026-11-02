@@ -43,9 +43,26 @@ class DeparserMetadataPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
         testutils.send_packet(self, PORT0, pkt)
-        pkt[IP].chksum = 0x1111
-        pkt[IP].id = 0x2222
+        pkt[IP].chksum = 0x1234
+        pkt[IP].id = 0x5678
         testutils.verify_packet(self, pkt, PORT1)
+
+
+@tc_only
+class DeparserMetadataEmitPSATest(P4EbpfTest):
+    """
+    The ingress deparser emits a header kept in the user metadata.
+    TC only: with XDP the headers are emitted in TC and the user metadata is not passed there.
+    """
+
+    p4_file_path = "p4testdata/deparser-metadata-emit.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        raw = bytes(pkt)
+        exp_pkt = Ether(raw[:34] + b"\x9a\xbc" + raw[34:])
+        testutils.verify_packet(self, exp_pkt, PORT1)
 
 
 class PSAResubmitTest(P4EbpfTest):
