@@ -246,6 +246,8 @@ cc_library(
         ":p4_14_enabled": ["SUPPORT_P4_14=1"],
         "//conditions:default": [],
     }),
+    # The P4Runtime version is listed by --version. Keep it in sync with MODULE.bazel.
+    local_defines = ["P4C_P4RUNTIME_VERSION=\\\"1.6.0\\\""],
     textual_hdrs = glob([
         "ir/**/*.h",
         "frontends/**/*.h",

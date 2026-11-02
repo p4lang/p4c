@@ -82,4 +82,7 @@ target_link_libraries(controlplane
   PRIVATE absl::strings
 )
 
+# The P4Runtime version is listed by --version.
+target_compile_definitions(controlplane PRIVATE P4C_P4RUNTIME_VERSION="${P4C_P4RUNTIME_VERSION}")
+
 add_dependencies(controlplane mkP4configdir)

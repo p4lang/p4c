@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <set>
+#include <string>
 
 #include "../p4/metrics/metricsStructure.h"
 #include "ir/configuration.h"
@@ -101,6 +102,10 @@ class ParserOptions : public Util::Options {
     DebugHook getDebugHook() const;
     /// Check whether this particular annotation was disabled
     bool isAnnotationDisabled(const IR::Annotation *a) const;
+    /// Records the version of a library that this binary was built with. The libraries are listed
+    /// by --version. A library calls this from a static initializer in a source file that is only
+    /// linked into the binaries that use the library.
+    static void addLinkedLibrary(const std::string &name, const std::string &version);
     /// Search and set 'includePathOut' to be the first valid path from the
     /// list of possible relative paths.
     static bool searchForIncludePath(std::filesystem::path &includePathOut,

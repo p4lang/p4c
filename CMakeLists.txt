@@ -427,7 +427,8 @@ if (ENABLE_CONTROL_PLANE)
 # Print download state while setting up P4Runtime.
 set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
 set(FETCHCONTENT_QUIET OFF)
-# Fetch and declare the P4Runtime library.
+# Fetch and declare the P4Runtime library. Keep P4C_P4RUNTIME_VERSION in sync with GIT_TAG.
+set(P4C_P4RUNTIME_VERSION 1.6.0)
 FetchContent_Declare(
   p4runtime
   GIT_REPOSITORY https://github.com/p4lang/p4runtime.git

@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/stubs/common.h>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
 #pragma GCC diagnostic pop
@@ -34,6 +35,7 @@
 #include "control-plane/p4RuntimeSymbolTable.h"
 #include "control-plane/typeSpecConverter.h"
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
@@ -54,6 +56,21 @@ namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
 
 namespace P4 {
+
+/// List the Protobuf and P4Runtime versions in the output of --version. This file is only linked
+/// into binaries that use the control plane, so other binaries do not list them.
+[[maybe_unused]] static const bool registeredLinkedLibraries = [] {
+    // GOOGLE_PROTOBUF_VERSION encodes the version as MMMmmmppp, where MMM is the language-specific
+    // major version. The Protobuf release is named after the minor and patch numbers (4025003 is
+    // release 25.3).
+    ParserOptions::addLinkedLibrary("Protobuf",
+                                    std::to_string(GOOGLE_PROTOBUF_VERSION / 1000 % 1000) + "." +
+                                        std::to_string(GOOGLE_PROTOBUF_VERSION % 1000));
+#ifdef P4C_P4RUNTIME_VERSION
+    ParserOptions::addLinkedLibrary("P4Runtime", P4C_P4RUNTIME_VERSION);
+#endif
+    return true;
+}();
 
 /** \defgroup control_plane Control Plane API Generation */
 /** \addtogroup control_plane

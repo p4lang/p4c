@@ -15,6 +15,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "absl/strings/str_format.h"
+#include "frontends/common/parser_options.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
@@ -28,6 +29,18 @@
 #include "lib/timer.h"
 
 namespace P4::P4Tools {
+
+/// List the Z3 version in the output of --version.
+[[maybe_unused]] static const bool registeredZ3Version = [] {
+    unsigned major = 0;
+    unsigned minor = 0;
+    unsigned buildNumber = 0;
+    unsigned revisionNumber = 0;
+    Z3_get_version(&major, &minor, &buildNumber, &revisionNumber);
+    ParserOptions::addLinkedLibrary(
+        "Z3", absl::StrFormat("%u.%u.%u.%u", major, minor, buildNumber, revisionNumber));
+    return true;
+}();
 
 /// Converts a Z3 expression to a string.
 const char *toString(const z3::expr &e) { return Z3_ast_to_string(e.ctx(), e); }
