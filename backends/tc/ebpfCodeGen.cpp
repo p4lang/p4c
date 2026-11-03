@@ -1648,6 +1648,17 @@ bool PnaStateTranslationVisitor::preorder(const IR::Member *m) {
                 if (m->member.name == "input_port") {
                     builder->append("skb->ifindex");
                     return false;
+                } else if (m->member.name == "vlan_present") {
+                    builder->append("skb->vlan_present");
+                    return false;
+                } else if (m->member.name == "vlan_tci") {
+                    builder->append("skb->vlan_tci");
+                    return false;
+                } else if (m->member.name == "vlan_proto") {
+                    // skb->vlan_proto is a __be16; the P4 value is the
+                    // tag protocol in host byte order.
+                    builder->append("bpf_ntohs(skb->vlan_proto)");
+                    return false;
                 } else {
                     ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                 "%1%: this metadata field is not supported", m);
@@ -2795,10 +2806,16 @@ static bool is_skb_meta_func(const P4::cstring fname) {
            (fname == "skb_set_meta");
 }
 
+static bool is_skb_vlan_func(const P4::cstring fname) {
+    return (fname == "skb_get_vlan_present") || (fname == "skb_get_vlan_tci") ||
+           (fname == "skb_get_vlan_proto") || (fname == "skb_vlan_push") ||
+           (fname == "skb_vlan_pop");
+}
+
 void DeparserBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
     auto fname = function->expr->method->toString();
 
-    if (is_skb_meta_func(fname)) {
+    if (is_skb_meta_func(fname) || is_skb_vlan_func(fname)) {
         ::P4::error(ErrorType::ERR_UNEXPECTED,
                     "Unexpected call to extern function %s in the deparser", fname);
     }
@@ -3377,6 +3394,66 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
 
     auto fname = function->expr->method->toString();
 
+    if (fname == "skb_vlan_push" || fname == "skb_vlan_pop") {
+        auto program = control->program;
+        builder->emitIndent();
+        builder->blockStart();
+        // A tag that is still in the bytes moves the frame, and the frame
+        // length tells how much of the parsed region moved with it.
+        builder->emitIndent();
+        builder->appendFormat("u32 ebpf_vlan_parsed = %s - (u8 *)%s",
+                              program->headerStartVar.c_str(), program->packetStartVar.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->append("u32 ebpf_vlan_len = skb->len");
+        builder->endOfStatement(true);
+        if (fname == "skb_vlan_push") {
+            if (function->expr->arguments->size() != 2) {
+                ::P4::error("%1% takes exactly two arguments", fname);
+                return;
+            }
+            builder->emitIndent();
+            builder->append("long ebpf_vlan_ret = bpf_p4tc_skb_vlan_push(skb, (__u16)(");
+            visit(function->expr->arguments->at(0));
+            builder->append("), (__u16)(");
+            visit(function->expr->arguments->at(1));
+            builder->append("))");
+            builder->endOfStatement(true);
+        } else {
+            if (function->expr->arguments->size() != 0) {
+                ::P4::error("%1% takes no arguments", fname);
+                return;
+            }
+            builder->emitIndent();
+            builder->append("long ebpf_vlan_ret = bpf_p4tc_skb_vlan_pop(skb)");
+            builder->endOfStatement(true);
+        }
+        builder->emitIndent();
+        builder->append("if (ebpf_vlan_ret) ");
+        builder->blockStart();
+        builder->target->emitTraceMessage(builder, "Control: VLAN tag operation failed");
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->abortReturnCode().c_str());
+        builder->blockEnd(true);
+        // The helper invalidates every packet pointer, so reload them from the
+        // context. The tag bytes it inserted or removed belong to the region the
+        // parser consumed.
+        builder->emitIndent();
+        builder->appendFormat("%v = %v", program->packetStartVar,
+                              builder->target->dataOffset(program->model.CPacketName.toString()));
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("%v = %v", program->packetEndVar,
+                              builder->target->dataEnd(program->model.CPacketName.toString()));
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("%v = (u8 *)%v + ebpf_vlan_parsed + (skb->len - ebpf_vlan_len)",
+                              program->headerStartVar, program->packetStartVar);
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
+        return;
+    }
+
     if (is_skb_meta_func(fname)) {
         if (fname == "skb_get_meta") {
             if (function->expr->arguments->size() != 0) {
@@ -3660,7 +3737,9 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
         } else if ((mname == "skb_get_tstamp") || (mname == "skb_get_mark") ||
                    (mname == "skb_get_tc_classid") || (mname == "skb_get_tc_index") ||
                    (mname == "skb_get_queue_mapping") || (mname == "skb_get_protocol") ||
-                   (mname == "skb_get_tc_at_ingress") || (mname == "skb_get_from_ingress")) {
+                   (mname == "skb_get_tc_at_ingress") || (mname == "skb_get_from_ingress") ||
+                   (mname == "skb_get_vlan_present") || (mname == "skb_get_vlan_tci") ||
+                   (mname == "skb_get_vlan_proto")) {
             if (methodCallExpr->arguments->size() != 0) {
                 ::P4::error("%1% takes no arguments", mname);
                 return (false);
