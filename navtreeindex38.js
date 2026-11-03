@@ -1,5 +1,7 @@
 var NAVTREEINDEX38 =
 {
+"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_declarations.html":[13,0,12,18,1,6],
+"struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_probabilities.html":[13,0,12,18,1,12],
 "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_properties.html":[13,0,12,18,1,13],
 "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_requirements.html":[13,0,12,18,1,14],
 "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_abstract_test.html":[12,0,14,9,1,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX38 =
 "struct_p4_1_1_unroll_loops_1_1_policy.html":[12,0,14,542,1],
 "struct_p4_1_1_unroll_loops_1_1_policy.html":[13,0,12,555,1],
 "struct_p4_1_1_unused_code_instances.html":[12,0,14,544],
-"struct_p4_1_1_unused_code_instances.html":[13,0,12,557],
-"struct_p4_1_1_util_1_1_detail_1_1_float_hasher.html":[13,0,12,25,0,0],
-"struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html":[13,0,12,25,0,1]
+"struct_p4_1_1_unused_code_instances.html":[13,0,12,557]
 };

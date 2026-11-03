@@ -16,6 +16,7 @@ var class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options =
     [ "pathSelectionPolicy", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a3b7586f7715a8d81d223355d59263908", null ],
     [ "pattern", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a14fbbdfe3e96965387450bf68842ce13", null ],
     [ "permittedPortRanges", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a7d0752b0623db1107ef91b2858c970e2", null ],
+    [ "resetThreshold", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a17f40ab1ce20ffdb04d5ad3ea4bed4b0", null ],
     [ "selectedBranches", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a29989fa6ae060ff1179b6417cea7485a", null ],
     [ "skippedControlPlaneEntities", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a1a16b2f52b82c9aacdc560976a6a4c91", null ],
     [ "strict", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#aee153e750221c729a3c23c0cfdd942bc", null ],

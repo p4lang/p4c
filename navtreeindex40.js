@@ -1,5 +1,7 @@
 var NAVTREEINDEX40 =
 {
+"struct_stage_use_estimate.html#a8da43d7bc94147de3a0a51e2a93f5699":[13,0,636,6],
+"struct_stage_use_estimate.html#ab5b59e0358d2ad32bba859c49466a95f":[13,0,636,7],
 "struct_stage_use_estimate.html#ac311040dc0d5978529e094bd42cda3cb":[13,0,636,3],
 "struct_stage_use_estimate_1_1_r_a_m__counter.html":[13,0,636,0],
 "struct_start_len.html":[13,0,637],
