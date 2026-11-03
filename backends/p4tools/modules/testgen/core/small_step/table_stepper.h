@@ -75,7 +75,7 @@ class TableStepper {
     ExprStepper::Result getResult();
 
     /// tableMissCondition is true.
-    void addDefaultAction(std::optional<const IR::Expression *> tableMissCondition);
+    virtual void addDefaultAction(std::optional<const IR::Expression *> tableMissCondition);
 
     /// Helper function that collects the list of actions contained in the table.
     std::vector<const IR::ActionListElement *> buildTableActionList();
