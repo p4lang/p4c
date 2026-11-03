@@ -100,12 +100,21 @@ struct p4tc_table_entry_act_bpf_params__local {
     u32 tblid;
 };
 
+/*
+ * The kernel lays out the same packed action and sizes its entry-create
+ * parameters from it, rejecting a call whose size differs. Keep this capacity
+ * and the derived size identical to the target kernel's
+ * P4TC_MAX_PARAM_DATA_SIZE / P4TC_ENTRY_CREATE_BPF_PARAMS_SZ.
+ */
+#define P4TC_MAX_PARAM_DATA_SIZE 256
+#define P4TC_ENTRY_CREATE_BPF_PARAMS_SZ 292
+
 struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
         u32 act_id;
         u32 hit:1,
         is_default_miss_act:1,
         is_default_hit_act:1;
-        u8 params[124];
+        u8 params[P4TC_MAX_PARAM_DATA_SIZE];
 };
 
 struct p4tc_table_entry_create_bpf_params__local {
@@ -119,6 +128,18 @@ struct p4tc_table_entry_create_bpf_params__local {
         u16 proto;
         u16 prio;
 };
+
+/* Fail the build instead of the datapath if the ABI drifts from the kernel. */
+_Static_assert(sizeof(struct p4tc_table_entry_create_bpf_params__local) ==
+               P4TC_ENTRY_CREATE_BPF_PARAMS_SZ,
+               "P4TC entry-create parameter size does not match the kernel");
+_Static_assert(__builtin_offsetof(struct p4tc_table_entry_create_bpf_params__local,
+                                  profile_id) == 264,
+               "P4TC entry-create profile_id offset does not match the kernel");
+_Static_assert(__builtin_offsetof(struct p4tc_table_entry_create_bpf_params__local,
+                                  pipeid) == 268,
+               "P4TC entry-create pipeid offset does not match the kernel");
+
 extern struct p4tc_table_entry_act_bpf * 
 bpf_p4tc_tbl_read(struct __sk_buff *skb_ctx,
                   struct p4tc_table_entry_act_bpf_params__local *params,
