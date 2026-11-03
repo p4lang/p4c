@@ -33,7 +33,13 @@ def execute(command, directory, tag, data=None, success=True):
 
 def build(compiler, directory, mode, flags):
     directory.mkdir(parents=True)
-    fixtures = {'counter': 'pna-codegen-counter.p4', 'reject-error': 'pna-codegen-reject-error.p4', 'narrow-cache': 'pna-codegen-narrow-cache.p4', 'comparison': 'pna-codegen-comparison.p4', 'advance': 'pna-codegen-advance.p4', 'bitfields': 'pna-codegen-bitfields.p4'}
+    fixtures = {"counter": "pna-codegen-counter.p4",
+                "reject-error": "pna-codegen-reject-error.p4",
+                "narrow-cache": "pna-codegen-narrow-cache.p4",
+                "vlan": "pna-codegen-vlan.p4",
+                "comparison": "pna-codegen-comparison.p4",
+                "advance": "pna-codegen-advance.p4",
+                "bitfields": "pna-codegen-bitfields.p4"}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
@@ -59,6 +65,10 @@ long host_adjust_room(struct __sk_buff *, int, unsigned, unsigned long);
 #undef BPF_ANNOTATE_KV_PAIR
 #define BPF_ANNOTATE_KV_PAIR(...)
 #define bpf_skb_adjust_room(skb, delta, mode, flags) host_adjust_room(skb, delta, mode, flags)
+long host_vlan_push(struct __sk_buff *, unsigned short, unsigned short);
+long host_vlan_pop(struct __sk_buff *);
+#define bpf_skb_vlan_push(skb, proto, tci) host_vlan_push(skb, proto, tci)
+#define bpf_skb_vlan_pop(skb) host_vlan_pop(skb)
 #define bpf_redirect(port, flags) TC_ACT_REDIRECT
 """
     (directory / "ebpf_kernel.h").write_text(wrapper)
@@ -154,6 +164,35 @@ def cases(kind, variant="default"):
         rows.append((ethernet + b"\x88\xb6\0\0\x5a", None, []))
         specs.append((2, 0, 0))
         return rows, specs
+    if kind == "vlan":
+        def frame_for(mode):
+            return ethernet + b"\x08\x00" + bytes([mode]) + b"payload"
+
+        def tagged(frame, proto, tci):
+            return frame[:12] + proto.to_bytes(2, "big") + tci.to_bytes(2, "big") + frame[12:]
+
+        for present, proto, tci in ((1, 0x8100, 0x00a5), (1, 0x88a8, 0x2064),
+                                    (0, 0x0000, 0x0000)):
+            for mode in range(6):
+                frame = frame_for(mode)
+                if present == 0 and mode == 3:
+                    expected, out_tag = frame, (1, 0x0064, 0x8100)
+                elif mode == 5:
+                    expected, out_tag = frame, (0, 0, 0)
+                elif present == 1 and mode in (1, 2, 4):
+                    expected = tagged(frame, proto, tci)
+                    out_tag = (1, tci, proto) if mode == 1 else (0, 0, 0)
+                else:
+                    expected, out_tag = frame, (present, tci, proto)
+                rows.append((frame, expected, [], (present, tci, proto), out_tag))
+            # A tag left in the frame behind the metadata tag, or as the
+            # outermost tag. Popping removes it from the bytes; behind a
+            # metadata tag it becomes the metadata tag.
+            for inner in (0x8100, 0x88a8):
+                frame = tagged(frame_for(5), inner, 0x0123)
+                out_tag = (1, 0x0123, inner) if present else (0, 0, 0)
+                rows.append((frame, frame_for(5), [], (present, tci, proto), out_tag))
+        return rows, None
     for flags in range(8):
         for offset in [0, 1, 31, 255, 256, 4095, 8191]:
             frame = ethernet + b"\x88\xb5" + ((flags << 13) | offset).to_bytes(2, "big") + b"\x5a"
@@ -165,16 +204,22 @@ def cases(kind, variant="default"):
 
 
 def run_frames(driver, directory, rows, specs=None):
-    data = b"".join(struct.pack("=I", len(frame)) + frame for frame, _, _ in rows)
+    data = b""
+    for row in rows:
+        frame, tag = row[0], (row[3] if len(row) > 3 else (0, 0, 0))
+        data += struct.pack("=4I", len(frame), *tag) + frame
     result = execute([driver], directory, "frames", data=data)
     cursor = 0
-    for number, (frame, expected, indices) in enumerate(rows):
-        header = struct.unpack_from("=6I8I", result.stdout, cursor)
-        cursor += 56
+    for number, row in enumerate(rows):
+        frame, expected, indices = row[0], row[1], row[2]
+        expected_tag = row[4] if len(row) > 4 else None
+        header = struct.unpack_from("=6I11I", result.stdout, cursor)
+        cursor += 68
         wire = result.stdout[cursor:cursor + header[4]]
         cursor += header[4]
         if expected is None:
-            assert header[1] == 2 and (specs or header[0] == 2 or header[2] != 0), (number, "expected rejection", header)
+            assert header[1] == 2 and (specs or header[0] == 2 or header[2] != 0), (
+                number, "expected rejection", header)
             if specs:
                 assert (header[0], header[2], header[3]) == specs[number], (
                     number, "rejection", specs[number], header)
@@ -185,8 +230,11 @@ def run_frames(driver, directory, rows, specs=None):
             if specs:
                 assert (header[0], header[2], header[3]) == specs[number], (
                     number, "parse", specs[number], header)
+        if expected_tag is not None:
+            assert tuple(header[6:9]) == expected_tag, (number, "vlan tag", header[6:9],
+                                                        expected_tag)
         assert header[5] == len(indices), (number, "counter calls", header)
-        assert list(header[6:6 + len(indices)]) == indices, (number, "counter keys", header)
+        assert list(header[9:9 + len(indices)]) == indices, (number, "counter keys", header)
     assert cursor == len(result.stdout), "trailing driver output"
     return len(rows)
 
@@ -195,7 +243,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compiler", required=True, type=Path)
     parser.add_argument("--mode",
-                        choices=['counter', 'emission', 'parser', 'deparser', 'reject-error', 'narrow-cache', 'comparison', 'advance', 'bitfields'],
+                        choices=["counter", "emission", "parser", "deparser", "reject-error",
+                                 "narrow-cache", "vlan", "comparison", "advance", "bitfields"],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -309,6 +358,15 @@ def main():
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and diagnostic.encode() in result.stderr, result.stderr
             record.setdefault("negative", []).append(name)
+    if args.mode == "vlan":
+        directory = output / "negative-deparser"
+        directory.mkdir()
+        result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
+                          ROOT / "testdata/p4_16_samples/pna-codegen-vlan-deparser.p4",
+                          "-o", directory], directory, "p4", success=False)
+        assert result.returncode != 0 and b"Unexpected call to extern function" in result.stderr, (
+            result.returncode, result.stderr)
+        record.setdefault("negative", []).append("deparser")
     if args.mode == "narrow-cache":
         for name, flag, diagnostic in [
             ("missing", "--tc-outline-parser-local=missing:cached_missing:8191",
