@@ -59,7 +59,6 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: p4lang/p4-dpdk-target
-          # Use target names consistently: https://github.com/p4lang/p4-dpdk-target/pull/123
           ref: fa269ce837c18497c6b148a99de9406da817189c
           path: p4sde
           submodules: recursive
