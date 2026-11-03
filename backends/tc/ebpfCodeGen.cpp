@@ -3273,7 +3273,8 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine("};");
             builder->emitIndent();
             builder->append(
-                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key))");
+                "bpf_p4tc_entry_update(skb, &update_params, sizeof(update_params), &key, "
+                "sizeof(key))");
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
