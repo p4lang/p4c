@@ -1,0 +1,9 @@
+<map id="RandomExternUsedOncePerAction" name="RandomExternUsedOncePerAction">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,251,260"/>
+<area shape="rect" id="Node000002" href="$class_mau_inspector.html" title=" " alt="" coords="73,157,183,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,198,130,233,126,231,126,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="75,81,181,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,122,131,157,125,155,127,127"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="84,5,172,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,46,131,81,125,80,127,51"/>
+</map>

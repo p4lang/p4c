@@ -1,0 +1,12 @@
+<map id="AllocateParserChecksums" name="AllocateParserChecksums">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,308,195,336"/>
+<area shape="rect" id="Node000002" href="$class_logging_1_1_pass_manager.html" title=" " alt="" coords="17,232,183,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,274,102,309,98,307,98,278"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="34,157,166,184"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,198,103,233,97,231,99,203"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="56,5,144,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,45,83,81,83,108,97,156,92,156,77,109,77,81,88,50"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="92,81,202,109"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="116,43,141,80,136,81,116,49"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="129,124,111,158,106,155,132,120"/>
+</map>

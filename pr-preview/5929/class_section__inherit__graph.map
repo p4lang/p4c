@@ -1,0 +1,27 @@
+<map id="Section" name="Section">
+<area shape="rect" id="Node000001" title=" " alt="" coords="154,213,223,241"/>
+<area shape="rect" id="Node000004" href="$class_asm_stage.html" title=" " alt="" coords="317,5,404,33"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="192,197,201,162,217,121,239,80,269,44,291,30,319,23,314,26,294,35,273,48,243,83,221,123,207,164,197,199"/>
+<area shape="rect" id="Node000005" href="$class_b_f_a_s_m_1_1_flexible_headers.html" title=" " alt="" coords="271,57,450,85"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="198,197,225,146,245,119,269,96,295,84,291,87,273,100,249,122,230,148,203,200"/>
+<area shape="rect" id="Node000006" href="$class_base_asm_parser.html" title="Base class of parser assembly section." alt="" coords="300,109,422,137"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="209,200,236,173,270,148,301,136,297,139,272,152,240,177,213,204"/>
+<area shape="rect" id="Node000008" href="$class_default_error_mode.html" title=" " alt="" coords="292,161,429,189"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="236,210,270,199,313,188,309,191,272,204,239,214"/>
+<area shape="rect" id="Node000009" href="$group__parde.html#class_deparser" title=" " alt="" coords="320,213,401,241"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="238,225,322,226,318,228,240,230"/>
+<area shape="rect" id="Node000010" href="$class_dyn_hash.html" title=" " alt="" coords="320,265,401,293"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="237,240,272,250,323,267,318,268,270,255,238,245"/>
+<area shape="rect" id="Node000011" href="$class_phv.html" title=" " alt="" coords="338,317,383,345"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="211,250,240,278,272,302,306,317,340,327,335,328,304,322,270,307,236,282,210,255"/>
+<area shape="rect" id="Node000012" href="$class_primitives.html" title=" " alt="" coords="317,369,404,397"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="201,253,230,306,249,332,273,354,294,366,319,377,314,377,292,371,269,359,245,336,225,309,200,258"/>
+<area shape="rect" id="Node000013" href="$class_version.html" title=" " alt="" coords="326,421,395,449"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="196,254,207,291,221,331,243,372,273,406,298,421,328,432,323,432,296,426,269,411,239,375,217,333,201,292,194,259"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="17,187,94,214"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,209,156,219,151,222,110,214"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,239,106,266"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="120,238,155,232,151,235,122,242"/>
+<area shape="rect" id="Node000007" href="$class_asm_parser.html" title=" " alt="" coords="498,109,589,137"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="437,121,501,122,496,124,438,126"/>
+</map>
