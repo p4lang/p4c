@@ -4,6 +4,7 @@ version = 1
 path = [
     "p4_14_errors_outputs/**",
     "p4_14_samples_outputs/**",
+    "p4_16_bmv_errors_outputs/**",
     "p4_16_dpdk_errors_outputs/**",
     "p4_16_ebpf_errors_outputs/**",
     "p4_16_errors_outputs/**",
