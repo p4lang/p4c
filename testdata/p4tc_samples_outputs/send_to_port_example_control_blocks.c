@@ -109,7 +109,7 @@ if (/* hdr->ipv4.isValid() */
                                          return TC_ACT_SHOT;
 ext_val = *ext_val_ptr;
                                     __builtin_memcpy(&val_0, ext_val.out_params, sizeof(u32 ));
-                                                                        val_0 = val_0 + 10;
+                                                                        val_0 = (((u64)(val_0) + (u64)(10ULL)) & 4294967295ULL);
                                     /* reg1_0.write(value->u.MainControlImpl_next_hop.vport, val_0) */
                                     __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
                                     ext_params.pipe_id = p4tc_filter_fields.pipeid;

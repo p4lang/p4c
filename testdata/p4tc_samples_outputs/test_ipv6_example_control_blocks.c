@@ -86,7 +86,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST: 
                             {
 assign_128(&hdr->ipv6.dstAddr[0], loadfrom_128(&value->u.MainControlImpl_set_dst.addr6[0]));
-                                                                hdr->ipv6.hopLimit = hdr->ipv6.hopLimit + 255;
+                                                                hdr->ipv6.hopLimit = (((u64)(hdr->ipv6.hopLimit) + (u64)(255ULL)) & 255ULL);
                             }
                             break;
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION: 
