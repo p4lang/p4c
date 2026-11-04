@@ -435,6 +435,8 @@ class TCKey {
     bool emitID;
     bool emitValue;
     unsigned value;
+    bool emitDefaultValue;
+    cstring defaultValue;
     TCKey(unsigned id, unsigned width, cstring ptype, cstring name, cstring attr, bool isID) {
         keyID = id;
         bitwidth = width;
@@ -443,10 +445,16 @@ class TCKey {
         keyAttribute = attr;
         emitID = isID;
         emitValue = false;
+        emitDefaultValue = false;
+        defaultValue = cstring::empty;
     }
     void setValue(unsigned v) {
         value = v;
         emitValue = true;
+    }
+    void setDefaultValue(cstring v) {
+        defaultValue = v;
+        emitDefaultValue = true;
     }
     toString {
         std::string tckeyInstance = absl::StrCat(" ", keyAttribute, " ", keyName, " ptype ", type);
@@ -455,6 +463,9 @@ class TCKey {
         }
         if (emitValue) {
             absl::StrAppend(&tckeyInstance, " ", value);
+        }
+        if (emitDefaultValue) {
+            absl::StrAppend(&tckeyInstance, " default_value ", defaultValue);
         }
         return tckeyInstance;
     }
