@@ -55,6 +55,11 @@
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
 
+// CMake defines the commit when P4Runtime is a git checkout. Other builds list only the version.
+#ifndef P4C_P4RUNTIME_GIT_SHA
+#define P4C_P4RUNTIME_GIT_SHA ""
+#endif
+
 namespace P4 {
 
 /// List the Protobuf and P4Runtime versions in the output of --version. This file is only linked
@@ -67,7 +72,7 @@ namespace P4 {
                                     std::to_string(GOOGLE_PROTOBUF_VERSION / 1000 % 1000) + "." +
                                         std::to_string(GOOGLE_PROTOBUF_VERSION % 1000));
 #ifdef P4C_P4RUNTIME_VERSION
-    ParserOptions::addLinkedLibrary("P4Runtime", P4C_P4RUNTIME_VERSION);
+    ParserOptions::addLinkedLibrary("P4Runtime", P4C_P4RUNTIME_VERSION, P4C_P4RUNTIME_GIT_SHA);
 #endif
     return true;
 }();

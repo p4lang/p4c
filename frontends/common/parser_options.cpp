@@ -88,8 +88,14 @@ static std::map<std::string, std::string> &linkedLibraries() {
     return libraries;
 }
 
-void ParserOptions::addLinkedLibrary(const std::string &name, const std::string &version) {
-    linkedLibraries().emplace(name, version);
+void ParserOptions::addLinkedLibrary(const std::string &name, const std::string &version,
+                                     const std::string &gitSha) {
+    std::string description = version;
+    if (!gitSha.empty()) {
+        if (!description.empty()) description += " ";
+        description += "(SHA: " + gitSha + ")";
+    }
+    linkedLibraries().emplace(name, description);
 }
 
 ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(defaultMessage) {
@@ -110,8 +116,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             std::cerr << "Abseil " << ABSL_LTS_RELEASE_VERSION << "."
                       << ABSL_LTS_RELEASE_PATCH_LEVEL << std::endl;
 #endif
-            for (const auto &[name, version] : linkedLibraries()) {
-                std::cerr << name << " " << version << std::endl;
+            for (const auto &[name, description] : linkedLibraries()) {
+                std::cerr << name << " " << description << std::endl;
             }
             exit(0);
             return false;

@@ -28,6 +28,11 @@
 #include "lib/log.h"
 #include "lib/timer.h"
 
+// CMake defines the commit when Z3 is a git checkout. Other builds list only the version.
+#ifndef P4C_Z3_GIT_SHA
+#define P4C_Z3_GIT_SHA ""
+#endif
+
 namespace P4::P4Tools {
 
 /// List the Z3 version in the output of --version.
@@ -38,7 +43,8 @@ namespace P4::P4Tools {
     unsigned revisionNumber = 0;
     Z3_get_version(&major, &minor, &buildNumber, &revisionNumber);
     ParserOptions::addLinkedLibrary(
-        "Z3", absl::StrFormat("%u.%u.%u.%u", major, minor, buildNumber, revisionNumber));
+        "Z3", absl::StrFormat("%u.%u.%u.%u", major, minor, buildNumber, revisionNumber),
+        P4C_Z3_GIT_SHA);
     return true;
 }();
 

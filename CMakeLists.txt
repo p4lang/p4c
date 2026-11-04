@@ -436,6 +436,15 @@ FetchContent_Declare(
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)
+# The P4Runtime commit is listed by --version. Only read it from a git checkout, otherwise git
+# reports the commit of an enclosing repository, such as p4c itself.
+if (EXISTS "${p4runtime_SOURCE_DIR}/.git")
+  execute_process (COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE P4C_P4RUNTIME_GIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${p4runtime_SOURCE_DIR})
+endif()
 set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
 message(STATUS "Done with setting up P4Runtime for P4C.")
 # The standard P4Runtime protocol buffers message definitions live in the PI
