@@ -103,9 +103,17 @@ bool IngressDeparserPSA::build() {
 // =====================EgressDeparserPSA=============================
 bool EgressDeparserPSA::build() {
     auto pl = controlBlock->container->type->applyParams;
+
+    if (pl->size() != 7) {
+        ::P4::error(ErrorType::ERR_EXPECTED,
+                    "Expected egress deparser to have exactly 7 parameters");
+        return false;
+    }
+
     auto it = pl->parameters.begin();
     packet_out = *it;
     headers = *(it + 3);
+    user_metadata = *(it + 4);
 
     auto ht = program->typeMap->getType(headers);
     if (ht == nullptr) {
