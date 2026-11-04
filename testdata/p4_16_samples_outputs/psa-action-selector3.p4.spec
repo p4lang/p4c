@@ -39,7 +39,7 @@ struct user_meta_t {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data1
 	bit<16> local_metadata_data2
-	bit<48> MyIC_tbl_ethernet_srcAddr
+	bit<48> MyIC_tbl_0_ethernet_srcAddr
 }
 metadata instanceof user_meta_t
 
@@ -59,9 +59,9 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.MyIC_tbl_ethernet_srcAddr exact
+		m.MyIC_tbl_0_ethernet_srcAddr exact
 		m.local_metadata_data1 selector
 		m.local_metadata_data2 selector
 	}
@@ -79,8 +79,8 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
-	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

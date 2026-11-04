@@ -68,7 +68,7 @@ action macswp args none {
 	LABEL_END :	return
 }
 
-table stub_0 {
+table stub {
 	key {
 		m.local_metadata_k1 exact
 	}
@@ -86,7 +86,7 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.Ingress_flg 0x0
-	table stub_0
+	table stub
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

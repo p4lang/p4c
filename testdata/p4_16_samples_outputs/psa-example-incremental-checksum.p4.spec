@@ -99,7 +99,7 @@ action forward args instanceof forward_arg_t {
 	return
 }
 
-table route {
+table route_0 {
 	key {
 		h.ipv4.dstAddr lpm
 	}
@@ -124,7 +124,7 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	table route
+	table route_0
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

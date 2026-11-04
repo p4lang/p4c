@@ -20,9 +20,9 @@ header MainControlT_hdr_1_u_short instanceof O2
 struct metadata {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<8> ingress_debug_hdr_base_t
-	bit<8> ingress_debug_hdr_u_short_isValid
-	bit<8> ingress_debug_hdr_u_byte_isValid
+	bit<8> ingress_debug_hdr_0_base_t
+	bit<8> ingress_debug_hdr_0_u_short_isValid
+	bit<8> ingress_debug_hdr_0_u_byte_isValid
 	bit<8> MainControlT_retval
 }
 metadata instanceof metadata
@@ -32,11 +32,11 @@ action NoAction args none {
 	return
 }
 
-table debug_hdr {
+table debug_hdr_0 {
 	key {
-		m.ingress_debug_hdr_base_t exact
-		m.ingress_debug_hdr_u_short_isValid exact
-		m.ingress_debug_hdr_u_byte_isValid exact
+		m.ingress_debug_hdr_0_base_t exact
+		m.ingress_debug_hdr_0_u_short_isValid exact
+		m.ingress_debug_hdr_0_u_byte_isValid exact
 	}
 	actions {
 		NoAction
@@ -57,14 +57,14 @@ apply {
 	jmp PARSERIMPL_ACCEPT
 	PARSERIMPL_PARSEO1 :	extract h.u_byte
 	invalidate h.u_short
-	PARSERIMPL_ACCEPT :	mov m.ingress_debug_hdr_base_t h.base.t
-	mov m.ingress_debug_hdr_u_short_isValid 1
+	PARSERIMPL_ACCEPT :	mov m.ingress_debug_hdr_0_base_t h.base.t
+	mov m.ingress_debug_hdr_0_u_short_isValid 1
 	jmpv LABEL_END h.u_short
-	mov m.ingress_debug_hdr_u_short_isValid 0
-	LABEL_END :	mov m.ingress_debug_hdr_u_byte_isValid 1
+	mov m.ingress_debug_hdr_0_u_short_isValid 0
+	LABEL_END :	mov m.ingress_debug_hdr_0_u_byte_isValid 1
 	jmpv LABEL_END_0 h.u_byte
-	mov m.ingress_debug_hdr_u_byte_isValid 0
-	LABEL_END_0 :	table debug_hdr
+	mov m.ingress_debug_hdr_0_u_byte_isValid 0
+	LABEL_END_0 :	table debug_hdr_0
 	jmpnv LABEL_END_1 h.u_byte
 	validate h.MainControlT_hdr_1_u_byte
 	invalidate h.MainControlT_hdr_1_u_short

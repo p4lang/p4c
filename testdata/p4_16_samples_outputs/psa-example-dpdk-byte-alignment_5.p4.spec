@@ -128,7 +128,7 @@ action execute_1 args instanceof execute_1_arg_t {
 	LABEL_END_3 :	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -157,7 +157,7 @@ apply {
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in 0x2
 	jmpneq LABEL_END m.local_metadata_port_out 0x1
-	table tbl
+	table tbl_0
 	regadd counter0_0_packets 0x3FF 1
 	regadd counter0_0_bytes 0x3FF 0x14
 	regadd counter1_0 0x200 1

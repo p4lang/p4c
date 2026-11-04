@@ -72,7 +72,7 @@ action execute_1 args instanceof execute_1_arg_t {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -94,7 +94,7 @@ apply {
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in 0x2
 	jmpneq LABEL_END m.local_metadata_port_out 0x1
-	table tbl
+	table tbl_0
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

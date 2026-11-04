@@ -45,7 +45,7 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	actions {
 		execute_1
 	}
@@ -67,7 +67,7 @@ apply {
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
 	and m.Ingress_tmp_1 0xFFFFFFFF
 	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_1
-	table tbl
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
