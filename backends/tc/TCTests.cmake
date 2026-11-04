@@ -54,6 +54,16 @@ foreach(mode counter emission parser deparser deparser-bits reject-error narrow-
     SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
 endforeach()
 
+add_test(NAME "p4tc-codegen/register-init"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/register_init.py
+    --compiler $<TARGET_FILE:p4c-pna-p4tc>)
+set_tests_properties("p4tc-codegen/register-init" PROPERTIES
+  SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
+
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/pna-register-init.p4"
+  "testdata/p4_16_samples/pna-register-init.p4" "" "")
+
 p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
   "testdata/p4_16_samples/pna-large-header-init.p4"
   "testdata/p4_16_samples/pna-large-header-init.p4" "" "")

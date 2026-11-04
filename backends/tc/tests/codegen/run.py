@@ -32,7 +32,7 @@ def execute(command, directory, tag, data=None, success=True):
     return result
 
 
-def build(compiler, directory, mode, flags):
+def build(compiler, directory, mode, flags, prepare=None, extra_sources=()):
     directory.mkdir(parents=True)
     fixtures = {"counter": "pna-codegen-counter.p4",
                 "reject-error": "pna-codegen-reject-error.p4",
@@ -42,11 +42,14 @@ def build(compiler, directory, mode, flags):
                 "advance": "pna-codegen-advance.p4",
                 "bitfields": "pna-codegen-bitfields.p4",
                 "arithmetic": "pna-codegen-arithmetic.p4",
+                 "register-init": "pna-register-init.p4",
                 "deparser-bits": "tc-codegen-deparser-bits.p4"}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
-             directory / "case.p4", "-o", directory], directory, "p4")
+              directory / "case.p4", "-o", directory], directory, "p4")
+    if prepare is not None:
+        prepare(directory)
     includes = ["-I" + str(directory), "-I" + str(ROOT / "backends/tc/runtime/include"),
                 "-I" + str(ROOT / "backends/ebpf/runtime")]
     if Path("/usr/include/x86_64-linux-gnu").exists():
@@ -81,7 +84,7 @@ long host_vlan_pop(struct __sk_buff *);
                  "-c", directory / f"case_{unit}.c", "-o", directory / f"{unit}.host.o"],
                 directory, "host-" + unit)
     execute(["clang-19", "-O2", "-D__KERNEL__", *includes, HERE / "driver.c",
-             directory / "parser.host.o", directory / "control_blocks.host.o", "-o",
+             *extra_sources, directory / "parser.host.o", directory / "control_blocks.host.o", "-o",
              directory / "driver"], directory, "link")
     return directory / "driver"
 
