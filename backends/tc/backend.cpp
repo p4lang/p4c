@@ -2839,7 +2839,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
                     instance->num_elements = exp->to<IR::Constant>()->asInt();
                 }
             } else if (parameter->getAnnotation(ParseTCAnnotations::tc_init_val)) {
-                // TODO: Process tc_init_val.
+                instance->initial_value = exp;
             } else {
                 /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
                 constructor parameters.*/
@@ -2854,6 +2854,62 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
         }
     }
     return keys;
+}
+
+void ConvertToBackendIR::initializeExternControlPath(safe_vector<const IR::TCKey *> &keys,
+                                                    const IR::Expression *initialValue) {
+    if (initialValue == nullptr) return;
+
+    auto structure = initialValue->to<IR::StructExpression>();
+    auto list = initialValue->to<IR::ListExpression>();
+    size_t count = 0;
+    for (auto key : keys) {
+        if (key->keyAttribute == "param" || key->keyAttribute == "tc_data_scalar") count++;
+    }
+    if ((structure && structure->size() != count) ||
+        (list && list->components.size() != count) || (!structure && !list && count != 1)) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: extern initializer does not match the control-path data parameters",
+                    initialValue);
+        return;
+    }
+
+    size_t index = 0;
+    for (auto &key : keys) {
+        if (key->keyAttribute != "param" && key->keyAttribute != "tc_data_scalar") continue;
+        const IR::Expression *expression = initialValue;
+        if (structure) {
+            auto field = structure->getField(key->keyName);
+            if (field == nullptr) {
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: no initializer for extern parameter %2%", initialValue,
+                            key->keyName);
+                return;
+            }
+            expression = field->expression;
+        } else if (list) {
+            expression = list->components.at(index);
+        }
+        index++;
+        auto constant = expression->to<IR::Constant>();
+        if (constant == nullptr || key->bitwidth == 0) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: extern parameter initializer must be an integer constant", expression);
+            return;
+        }
+        big_int value = constant->value & ((big_int(1) << key->bitwidth) - 1);
+        if (key->type.startsWith("bit") || key->type.startsWith("be") || key->type == "ipv4" ||
+            key->type == "ipv6" || key->type == "macaddr") {
+            auto initialized = key->clone();
+            initialized->setDefaultValue(
+                formatTcValue(key->type, key->bitwidth, false, value, false));
+            key = initialized;
+        } else {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: extern initializer type %2% is not supported", expression, key->type);
+            return;
+        }
+    }
 }
 
 cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField *field) {
@@ -3063,6 +3119,7 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
 
         // Get Control Path information if specified for extern.
         auto controlKeys = processExternControlPath(extn, decl, eName);
+        initializeExternControlPath(controlKeys, instance->initial_value);
 
         bool has_exec_method = hasExecuteMethod(extn);
 

@@ -1,0 +1,121 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "pna-register-init",
+  "externs" : [
+    {
+      "name" : "Register",
+      "id" : "0x1",
+      "permissions" : "0x19b6",
+      "instances" : [
+        {
+          "inst_name" : "Ingress.scalar",
+          "inst_id" : 1,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit32",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        },
+        {
+          "inst_name" : "Ingress.wide",
+          "inst_id" : 2,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit64",
+              "attr" : "param",
+              "bitwidth" : 64
+            }
+          ]
+        },
+        {
+          "inst_name" : "Ingress.pair",
+          "inst_id" : 3,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "protocol",
+              "type" : "bit8",
+              "attr" : "param",
+              "bitwidth" : 8
+            },
+            {
+              "id" : 3,
+              "name" : "aux",
+              "type" : "bit8",
+              "attr" : "param",
+              "bitwidth" : 8
+            }
+          ]
+        },
+        {
+          "inst_name" : "Ingress.zero",
+          "inst_id" : 4,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit32",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        },
+        {
+          "inst_name" : "Ingress.unspecified",
+          "inst_id" : 5,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "a_value",
+              "type" : "bit32",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tables" : []
+}
