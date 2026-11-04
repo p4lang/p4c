@@ -12,6 +12,7 @@ import argparse
 import json
 from pathlib import Path
 import platform
+import random
 import re
 import shutil
 import struct
@@ -40,6 +41,7 @@ def build(compiler, directory, mode, flags):
                 "comparison": "pna-codegen-comparison.p4",
                 "advance": "pna-codegen-advance.p4",
                 "bitfields": "pna-codegen-bitfields.p4",
+                "arithmetic": "pna-codegen-arithmetic.p4",
                 "deparser-bits": "tc-codegen-deparser-bits.p4"}
     source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
@@ -89,6 +91,34 @@ def cases(kind, variant="default"):
     given, are per-row exact (parser_return, parser_error, consumed_bits)."""
     ethernet = bytes.fromhex("00112233445566778899aabb")
     rows = []
+    if kind == "arithmetic":
+        width = int(variant.split("-")[0])
+        parser_stage = variant.endswith("-parser")
+        specs = []
+        mask = (1 << width) - 1
+        pairs = [(0, 0), (0, 1), (1, 0), (2, 3), (3, 3), (13, 14),
+                 (14, 14), (20, 0), (21, 1), (1400, 1400), (1392, 1372),
+                 (mask, 1), (mask, mask), (mask - 1, mask),
+                 (1 << (width - 1), 2)]
+        rng = random.Random(0x5044 + width)
+        pairs += [(rng.getrandbits(width), rng.getrandbits(width)) for _ in range(16)]
+        for op in range(9):
+            for raw_x, raw_y in pairs:
+                x, y = raw_x & mask, raw_y & mask
+                expected = [int(x > ((y - 14) & mask)), int(((x - 20) & mask) != y),
+                            (x - 3) & mask, (x - y) & mask, (x + 3) & mask,
+                            (x + y) & mask, (x * y) & mask,
+                            (((x - 3) & mask) * y + 1) & mask, (x + mask) & mask][op]
+                frame = (ethernet + b"\x88\xb5" + bytes([op])
+                         + struct.pack("!QQQ", x, y, 0))
+                wire = frame[:-8] + expected.to_bytes(8, "big")
+                error = 0
+                if parser_stage and op < 2:
+                    wire = frame if expected else None
+                    error = 0 if expected else 2
+                rows.append((frame, wire, []))
+                specs.append((3, error, len(frame) * 8))
+        return rows, specs
     if kind == "comparison":
         specs = []
         mac = 0x021122334455
@@ -252,7 +282,7 @@ def main():
     parser.add_argument("--mode",
                         choices=["counter", "emission", "parser", "deparser", "deparser-bits",
                                  "reject-error", "narrow-cache", "vlan", "comparison", "advance",
-                                 "bitfields"],
+                                 "arithmetic", "bitfields"],
                         required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -262,6 +292,10 @@ def main():
     output = args.output or Path(tempfile.mkdtemp(prefix="p4tc-codegen-"))
     output.mkdir(parents=True, exist_ok=True)
     variants = {"default": []}
+    if args.mode == "arithmetic":
+        variants = {f"{width}-{stage}": [f"-DARITH_WIDTH={width}", f"-DARITH_STAGE={number}"]
+                    for width in (4, 8, 12, 16, 24, 32, 48, 64)
+                    for number, stage in enumerate(("parser", "control", "deparser", "action"))}
     if args.mode in ("parser", "reject-error"):
         variants.update({
             "one-range": ["--tc-outline-parser-range=parse_flags:finish"],
@@ -305,6 +339,20 @@ def main():
             record["variants"][name]["counter_calls"] = sum(len(row[2]) for row in rows)
         if specs:
             record["variants"][name]["rejection_specs"] = specs
+    if args.mode == "arithmetic":
+        oracle = {frame: wire for frame, wire, _ in cases("arithmetic", "32-control")[0]}
+        stf = (ROOT / "testdata/p4_16_samples/pna-codegen-arithmetic.stf").read_text()
+        packets = [line.split() for line in stf.splitlines() if line.startswith(("packet ", "expect "))]
+        rows = []
+        for packet, expect in zip(packets[::2], packets[1::2]):
+            assert packet[:2] == ["packet", "0"] and expect[:2] == ["expect", "0"]
+            frame, wire = bytes.fromhex(packet[2]), bytes.fromhex(expect[2])
+            assert wire == oracle[frame[:39]] + frame[39:], "STF differs from modulo oracle"
+            rows.append((frame, wire, []))
+        assert len(rows) == 11 and len(packets) == 22
+        directory = output / "stf"
+        directory.mkdir()
+        record["stf_frames"] = run_frames(output / "32-control/driver", directory, rows)
     if args.mode == "advance":
         code = (output / "outlined/case_parser.c").read_text()
         assert "ebpf_outline_offset > 1522 * 8" in code, "one region ignored the offset bound"

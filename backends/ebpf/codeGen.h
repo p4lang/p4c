@@ -121,6 +121,7 @@ class CodeGenInspector : public Inspector {
     bool scalarType(const IR::Node *node) const;
     void emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order);
     void emitTCBinaryOperation(const IR::Operation_Binary *);
+    bool emitTCUnsignedArithmetic(const IR::Operation_Binary *);
     void emitTCAssignmentEndianessConversion(const IR::Type *ltype, const IR::Expression *lexpr,
                                              const IR::Expression *rexpr, cstring lpath);
     void getBitAlignment(const IR::Expression *expression);

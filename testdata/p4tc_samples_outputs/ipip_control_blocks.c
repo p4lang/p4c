@@ -150,7 +150,7 @@ storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(valu
                                 hdr_1->outer.dstAddr = meta_1->dst;
                                 hdr_1->outer.ttl = 64;
                                 hdr_1->outer.protocol = 4;
-                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + 20);
+                                hdr_1->outer.totalLen = (((u64)(hdr_1->outer.totalLen) + (u64)(20ULL)) & 65535ULL);
                                 hdr_1->outer.hdrChecksum = 0;
                                 hdr = hdr_1;
             }
