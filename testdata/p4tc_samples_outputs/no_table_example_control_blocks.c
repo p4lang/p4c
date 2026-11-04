@@ -38,7 +38,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         u8 hit;
         {
 if (skb->ifindex==4) {
-                hdr->udp.src_port = hdr->udp.src_port + 1;            }
+                hdr->udp.src_port = (((u64)(hdr->udp.src_port) + (u64)(1ULL)) & 65535ULL);            }
 
         }
     }

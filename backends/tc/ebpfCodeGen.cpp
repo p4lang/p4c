@@ -4296,6 +4296,7 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Constant *expression) {
 
 bool ControlBodyTranslatorPNA::arithCommon(const IR::Operation_Binary *e, const char *smallop,
                                            const char *bigop) {
+    if (emitTCUnsignedArithmetic(e)) return false;
     auto lt = e->left->type->to<IR::Type_Bits>();
     if (lt) {
         auto rt = e->right->type->to<IR::Type_Bits>();

@@ -156,7 +156,7 @@ struct p4tc_ext_csum_params chk_csum = {};
                                 hdr_1->outer.dstAddr = bpf_htonl(meta_1->dst);
                                 hdr_1->outer.ttl = 64;
                                 hdr_1->outer.protocol = 4;
-                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + 20);
+                                hdr_1->outer.totalLen = (((u64)(hdr_1->outer.totalLen) + (u64)(20ULL)) & 65535ULL);
                                 hdr_1->outer.hdrChecksum = 0;
                                 hdr = hdr_1;
                                 ip = hdr->outer;
@@ -207,7 +207,7 @@ struct p4tc_ext_csum_params chk_csum = {};
                     bpf_p4tc_ext_csum_16bit_complement_sub(&chk_csum, sizeof(chk_csum), &chk_tmp_0, sizeof(chk_tmp_0));
                 }
 ;
-                                ip_2.ttl = (ip_2.ttl + 255);
+                                ip_2.ttl = (((u64)(ip_2.ttl) + (u64)(255ULL)) & 255ULL);
                 /* chk.add({ip_2.ttl, ip_2.protocol}) */
                 {
                     u16 chk_tmp_1 = 0;
