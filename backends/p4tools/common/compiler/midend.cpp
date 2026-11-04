@@ -130,8 +130,11 @@ void MidEnd::addDefaultPasses() {
         // Expand comparisons on structs and headers into comparisons on fields.
         new P4::SimplifyComparisons(&typeMap),
         // Expand header and struct assignments into sequences of field assignments.
+        // Preserve union copies: copying members separately can invalidate earlier members.
+        // Header copies still need expansion to update sibling validity in a union.
         new PassRepeated({
-            new P4::CopyStructures(&typeMap, false, true, false, nullptr),
+            new P4::CopyStructures(
+                &typeMap, {.errorOnMethodCall = false, .copyHeaders = true, .expandUnions = false}),
         }),
         new P4::RemoveParserControlFlow(&typeMap),
         // Flatten nested list expressions.

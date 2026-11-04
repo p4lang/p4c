@@ -60,17 +60,15 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         !ltype->is<IR::Type_Tuple>()) {
         return statement;
     }
-    /*
-       FIXME: this is not correct for header unions and should be fixed.
-       The fix bellow, commented-out, causes problems elsewhere.
-       https://github.com/p4lang/p4c/issues/3842
-    if (ltype->is<IR::Type_HeaderUnion>())
+    // Copying union members separately can invalidate a previously copied member.
+    // Targets that support union assignments can preserve them (see issue #3842).
+    if (!config.expandUnions && ltype->is<IR::Type_HeaderUnion>()) {
         return statement;
-    */
+    }
 
     // Do not copy structures for method calls.
     if (statement->right->is<IR::MethodCallExpression>()) {
-        if (errorOnMethodCall) {
+        if (config.errorOnMethodCall) {
             ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: functions or methods returning structures "
                         "are not supported on this target",
@@ -89,7 +87,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
-    } else if (copyHeaders && ltype->is<IR::Type_Header>()) {
+    } else if (config.copyHeaders && ltype->is<IR::Type_Header>()) {
         const auto *header = ltype->checkedTo<IR::Type_Header>();
         // Build a "src.isValid()" call.
         const auto *isSrcValidCall = new IR::MethodCallExpression(
@@ -144,7 +142,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
     } else if (auto *tup = ltype->to<IR::Type_Tuple>()) {
-        if (!copyTuples) return statement;
+        if (!config.copyTuples) return statement;
         int idx = 0;
         for (auto *el : tup->components) {
             const auto *left = new IR::ArrayIndex(el, statement->left, new IR::Constant(idx));
