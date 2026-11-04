@@ -193,7 +193,8 @@ Building</h2>
 Dependencies</h2>
 <ul>
 <li><a href="https://github.com/Z3Prover/z3">z3</a> SMT solver to compute path constraints.<ul>
-<li>Important: We currently only support Z3 versions 4.8.14 to 4.12.0.</li>
+<li>System installations require Z3 4.8.14 or newer (<code>-DUSE_PREINSTALLED_Z3=ON</code>).</li>
+<li>With garbage collection enabled, system Z3 4.12 or newer requires glibc. On other platforms, disable garbage collection.</li>
 </ul>
 </li>
 </ul>
