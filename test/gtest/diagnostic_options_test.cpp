@@ -30,7 +30,37 @@ DiagnosticAction actionFor(ErrorReporter &reporter, cstring name) {
 
 }  // namespace
 
-class DiagnosticOptions : public P4CTest {};
+// These tests process options from a synthetic argv. ParserOptions::process()
+// also rewrites the process-wide include paths from the location of the running
+// binary -- /proc/self/exe on Linux, the argv it is handed only as a fallback --
+// and isSystemFile() then decides what counts as a system file by comparing a
+// source path against them. The paths have to be restored for the tests that
+// run afterwards. The options themselves need no restoring: the fixture owns a
+// copy of them.
+class DiagnosticOptions : public P4CTest {
+ protected:
+    void SetUp() override {
+        P4CTest::SetUp();
+        savedP4includePath = p4includePath;
+#ifdef SUPPORT_P4_14
+        savedP4_14includePath = p4_14includePath;
+#endif
+    }
+
+    void TearDown() override {
+        p4includePath = savedP4includePath;
+#ifdef SUPPORT_P4_14
+        p4_14includePath = savedP4_14includePath;
+#endif
+        P4CTest::TearDown();
+    }
+
+ private:
+    std::filesystem::path savedP4includePath;
+#ifdef SUPPORT_P4_14
+    std::filesystem::path savedP4_14includePath;
+#endif
+};
 
 TEST_F(DiagnosticOptions, WdisableSingleDiagnostic) {
     auto &reporter = processOption("--Wdisable=some-warning");
