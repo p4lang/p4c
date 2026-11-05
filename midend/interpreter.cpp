@@ -4,6 +4,8 @@
 
 #include "interpreter.h"
 
+#include <algorithm>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
@@ -473,24 +475,21 @@ SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
 }
 
 void SymbolicArray::shift(int amount) {
-    // Clamp shift amount to prevent integer underflow in loop bounds.
-    // If the shift magnitude exceeds the array size, the entire stack
-    // becomes invalid, so the sign no longer matters.
-    if (static_cast<size_t>(std::abs(amount)) > values.size()) {
-        amount = static_cast<int>(values.size());
-    }
-
+    // Compute the magnitude without negating INT_MIN. Counts at least as large as
+    // the stack invalidate every header (P4-16 section 8.18), in either direction.
+    const auto magnitude =
+        amount < 0 ? 0U - static_cast<unsigned>(amount) : static_cast<unsigned>(amount);
+    const size_t count = std::min<size_t>(magnitude, values.size());
     if (amount < 0) {
-        for (unsigned i = 0; i < values.size() + amount; i++) values[i] = values[i - amount];
-        for (unsigned i = values.size() + amount; i < values.size(); i++) {
+        for (size_t i = 0; i < values.size() - count; i++) values[i]->assign(values[i + count]);
+        for (size_t i = values.size() - count; i < values.size(); i++) {
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
         }
     } else if (amount > 0) {
-        for (unsigned i = 0; i < values.size() - amount; i++)
-            values[values.size() - i - 1] = values[values.size() - i - amount - 1];
-        for (unsigned i = 0; i < (unsigned)amount; i++) {
+        for (size_t i = values.size(); i > count; i--) values[i - 1]->assign(values[i - count - 1]);
+        for (size_t i = 0; i < count; i++) {
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
