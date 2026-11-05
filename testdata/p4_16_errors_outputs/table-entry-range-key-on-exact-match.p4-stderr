@@ -1,0 +1,9 @@
+table-entry-range-key-on-exact-match.p4(16): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(inout Headers h) {
+        ^^^^^^^
+table-entry-range-key-on-exact-match.p4(19): [--Wwarn=unused] warning: table 't1' is unused
+    table t1 {
+          ^^
+table-entry-range-key-on-exact-match.p4(23): [--Werror=type-error] error: 1 .. 8: a range does not fit an exact match key
+            1..8 : a1(1);
+            ^^^^

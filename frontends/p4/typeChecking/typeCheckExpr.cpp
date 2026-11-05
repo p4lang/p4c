@@ -13,6 +13,7 @@ limitations under the License.
 */
 
 #include "constantTypeSubstitution.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/algorithm.h"
 #include "typeChecker.h"
@@ -21,6 +22,23 @@ limitations under the License.
 namespace P4 {
 
 using namespace literals;
+
+namespace {
+
+/// Reports the first range in a table entry key.  A masked value is not
+/// reported: for an exact key it folds to a single value, which is what the
+/// match compares.
+class FindRange : public Inspector {
+ public:
+    const IR::Range *found = nullptr;
+
+    bool preorder(const IR::Range *range) override {
+        found = range;
+        return false;
+    }
+};
+
+}  // namespace
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Parameter *param) {
     if (done()) return param;
@@ -481,6 +499,24 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
             nonConstantKeys = true;
         }
     if (nonConstantKeys) return entry;
+
+    // An exact key is compared in full, so a range in its entry cannot be
+    // matched: back-ends that expand the range into blocks would silently keep
+    // only the first value of each block once the mask is dropped.
+    for (size_t i = 0; i < key->keyElements.size(); i++) {
+        auto ke = key->keyElements.at(i);
+        auto mt = getDeclaration(ke->matchType->path, true);
+        if (mt == nullptr) continue;
+        auto mtid = mt->to<IR::Declaration_ID>();
+        if (mtid == nullptr ||
+            mtid->name.name != P4CoreLibrary::instance().exactMatch.name)
+            continue;
+
+        FindRange finder;
+        keyset->components.at(i)->apply(finder);
+        if (finder.found != nullptr)
+            typeError("%1%: a range does not fit an exact match key", finder.found);
+    }
 
     if (entry->priority && !isCompileTimeConstant(entry->priority)) {
         typeError("Entry priority must be a compile time constant: %1%", entry->priority);
