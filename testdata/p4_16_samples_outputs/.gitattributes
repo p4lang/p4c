@@ -1,5 +1,5 @@
 # Preserve byte-exact compiler output, including generated whitespace.
-pna-large-header-init_control_blocks.c whitespace=-blank-at-eol,-blank-at-eof
-pna-large-header-init_parser.h whitespace=-blank-at-eol,-blank-at-eof
-pna-parser-advance_control_blocks.c whitespace=-blank-at-eol,-blank-at-eof
-pna-parser-advance_parser.h whitespace=-blank-at-eol,-blank-at-eof
+tc-large-header-init_control_blocks.c whitespace=-blank-at-eol,-blank-at-eof
+tc-large-header-init_parser.h whitespace=-blank-at-eol,-blank-at-eof
+tc-parser-advance_control_blocks.c whitespace=-blank-at-eol,-blank-at-eof
+tc-parser-advance_parser.h whitespace=-blank-at-eol,-blank-at-eof

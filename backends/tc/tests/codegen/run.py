@@ -34,16 +34,16 @@ def execute(command, directory, tag, data=None, success=True):
 
 def build(compiler, directory, mode, flags, prepare=None, extra_sources=()):
     directory.mkdir(parents=True)
-    fixtures = {"counter": "pna-codegen-counter.p4",
-                "reject-error": "pna-codegen-reject-error.p4",
-                "narrow-cache": "pna-codegen-narrow-cache.p4",
-                "vlan": "pna-codegen-vlan.p4",
-                "comparison": "pna-codegen-comparison.p4",
-                "advance": "pna-codegen-advance.p4",
-                "bitfields": "pna-codegen-bitfields.p4",
-                 "arithmetic": "pna-codegen-arithmetic.p4",
-                 "register-init": "pna-register-init.p4"}
-    source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "pna-codegen-emission.p4")
+    fixtures = {"counter": "tc-codegen-counter.p4",
+                "reject-error": "tc-codegen-reject-error.p4",
+                "narrow-cache": "tc-codegen-narrow-cache.p4",
+                "vlan": "tc-codegen-vlan.p4",
+                "comparison": "tc-codegen-comparison.p4",
+                "advance": "tc-codegen-advance.p4",
+                "bitfields": "tc-codegen-bitfields.p4",
+                 "arithmetic": "tc-codegen-arithmetic.p4",
+                 "register-init": "tc-register-init.p4"}
+    source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "tc-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute([compiler, "-I", ROOT / "p4include", *flags,
               directory / "case.p4", "-o", directory], directory, "p4")
@@ -335,7 +335,7 @@ def main():
             record["variants"][name]["rejection_specs"] = specs
     if args.mode == "arithmetic":
         oracle = {frame: wire for frame, wire, _ in cases("arithmetic", "32-control")[0]}
-        stf = (ROOT / "testdata/p4_16_samples/pna-codegen-arithmetic.stf").read_text()
+        stf = (ROOT / "testdata/p4_16_samples/tc-codegen-arithmetic.stf").read_text()
         packets = [line.split() for line in stf.splitlines() if line.startswith(("packet ", "expect "))]
         rows = []
         for packet, expect in zip(packets[::2], packets[1::2]):
@@ -381,7 +381,7 @@ def main():
             directory = output / ("negative-" + name)
             directory.mkdir()
             result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", *flags,
-                              ROOT / f"testdata/p4_16_samples/pna-codegen-{program}.p4",
+                              ROOT / f"testdata/p4_16_samples/tc-codegen-{program}.p4",
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
                 name, result.returncode, result.stderr)
@@ -393,7 +393,7 @@ def main():
             directory.mkdir()
             result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", *two_ranges,
                               "--tc-outline-parser-local=left:" + local + ":5",
-                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and b"conflicts with a generated helper name" in result.stderr
             record.setdefault("negative", []).append("collision-" + local)
@@ -406,7 +406,7 @@ def main():
             directory = output / ("negative-" + name)
             directory.mkdir()
             result = execute([args.compiler.resolve(), "-I", ROOT / "p4include", flag,
-                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and diagnostic.encode() in result.stderr, result.stderr
             record.setdefault("negative", []).append(name)
@@ -414,7 +414,7 @@ def main():
         directory = output / "negative-deparser"
         directory.mkdir()
         result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
-                          ROOT / "testdata/p4_16_samples/pna-codegen-vlan-deparser.p4",
+                          ROOT / "testdata/p4_16_samples/tc-codegen-vlan-deparser.p4",
                           "-o", directory], directory, "p4", success=False)
         assert result.returncode != 0 and b"Unexpected call to extern function" in result.stderr, (
             result.returncode, result.stderr)
@@ -433,7 +433,7 @@ def main():
                               "--tc-outline-parser-range=start:parse_flags",
                               "--tc-outline-parser-range2=parse_flags:finish",
                               "--tc-outline-parser-offset-max=1522", flag,
-                              ROOT / "testdata/p4_16_samples/pna-codegen-narrow-cache.p4",
+                              ROOT / "testdata/p4_16_samples/tc-codegen-narrow-cache.p4",
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
                 name, result.returncode, result.stderr)
@@ -458,7 +458,7 @@ def main():
                                   "--tc-outline-parser-range=start:parse_flags",
                                   "--tc-outline-parser-range2=parse_flags:finish",
                                   name + "=" + template.format(v=value),
-                                  ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                                  ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                                   "-o", directory], directory, "p4", success=False)
                 assert result.returncode != 0 and diagnostic.encode() in result.stderr, (
                     name, value, result.returncode, result.stderr)
@@ -480,9 +480,9 @@ def main():
                          "--tc-outline-parser-range=start:parse_flags",
                          "--tc-outline-parser-range2=parse_flags:finish", *extra,
                          name + "=" + template.format(v=value),
-                         ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                         ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                          "-o", directory], directory, "p4")
-                code = (directory / "pna-codegen-emission_parser.c").read_text()
+                code = (directory / "tc-codegen-emission_parser.c").read_text()
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
@@ -496,7 +496,7 @@ def main():
             directory.mkdir()
             result = execute([args.compiler.resolve(), "-I", ROOT / "p4include",
                               "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
-                              ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                              ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                               "-o", directory], directory, "p4", success=False)
             assert result.returncode != 0 and b"expects decimal BYTES" in result.stderr, (
                 value, result.returncode, result.stderr)
@@ -507,9 +507,9 @@ def main():
             directory.mkdir()
             execute([args.compiler.resolve(), "-I", ROOT / "p4include",
                      "--tc-outline-deparser", "--tc-outline-deparser-max=" + value,
-                     ROOT / "testdata/p4_16_samples/pna-codegen-emission.p4",
+                     ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
                      "-o", directory], directory, "p4")
-            code = (directory / "pna-codegen-emission_control_blocks.c").read_text()
+            code = (directory / "tc-codegen-emission_control_blocks.c").read_text()
             assert f"offset_bits > {int(value)} * 8" in code, value
             bounds["valid"].append(value)
         record["deparser_bounds"] = bounds
