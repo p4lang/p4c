@@ -330,6 +330,19 @@ using Parser = P4::P4Parser;
 ";"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(SEMICOLON); }
 "@"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(AT); }
 
+"\xc2\xa0"      ;       // various UTF-8 whitespace
+"\xe2\x80\x80"  ;
+"\xe2\x80\x81"  ;
+"\xe2\x80\x82"  ;
+"\xe2\x80\x83"  ;
+"\xe2\x80\x87"  ;
+"\xe2\x80\x88"  ;
+"\xe2\x80\x89"  ;
+"\xe2\x80\x8a"  ;
+"\xe2\x81\xa0"  ;
+"\xe3\x80\x80"  ;
+"\xef\xbb\xbf"  ;
+
 <*>.|\n        { return makeToken(UNEXPECTED_TOKEN); }
 
 %%
