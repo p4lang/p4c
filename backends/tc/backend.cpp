@@ -2632,7 +2632,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
     const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
     struct ExternInstance *instance) {
     safe_vector<const IR::TCKey *> keys;
-    for (auto gd : *extn->getDeclarations()) {
+    for (auto gd : extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
             continue;
         }
@@ -2824,7 +2824,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
 }
 
 bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
-    for (auto gd : *extn->getDeclarations()) {
+    for (auto gd : extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
             continue;
         }

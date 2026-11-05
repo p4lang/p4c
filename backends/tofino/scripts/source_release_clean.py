@@ -202,7 +202,7 @@ for path, subs in SRC_SUBSTITUES.items():
 # =======================================================
 
 # Documentation strings to delete
-DOC_STRINGS = ['.*\<\(JIRA\|TOF[35]\)-DOC:.*']
+DOC_STRINGS = [r'.*\<\(JIRA\|TOF[35]\)-DOC:.*']
 
 for path in SRC_DIRS:
     for del_str in DOC_STRINGS:
@@ -219,7 +219,7 @@ for del_str in DOC_STRINGS:
 P4_INCLUDE_FILTER = ['CLOUDBREAK_ONLY', 'FLATROCK_ONLY']
 P4_INCLUDE_DIRS = ['bf-p4c/p4include']
 
-p4_include_re = r'/\<\(' + '\|'.join(P4_INCLUDE_FILTER) + r'\)\>/d'
+p4_include_re = r'/\<\(' + r'\|'.join(P4_INCLUDE_FILTER) + r'\)\>/d'
 
 for path in P4_INCLUDE_DIRS:
     for inc in glob.glob(path + '/*.p4'):
@@ -421,7 +421,7 @@ for src_dir in ['p4-tests']:
 # =======================================================
 
 SED_EXTRA = {
-    'bf-asm/cmake/config.h.in': '/flatrock\|cloudbreak/Id',
+    'bf-asm/cmake/config.h.in': r'/flatrock\|cloudbreak/Id',
     'bf-asm/test/runtests': [
         '/STF3/d',
         '/tofino3/d',

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Mojatatu Networks
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #include <tc/pna.p4>
 

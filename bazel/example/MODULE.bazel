@@ -13,7 +13,7 @@ local_path_override(
     path = "../..",
 )
 
-bazel_dep(name = "p4runtime", version = "1.5.0")
+bazel_dep(name = "p4runtime", version = "1.6.0")
 
 p4c_ir_extensions = use_extension("@p4c//bazel:extensions.bzl", "p4c_ir_extensions")
 p4c_ir_extensions.ir_extensions(srcs = ["//:my_custom_statement.ir"])

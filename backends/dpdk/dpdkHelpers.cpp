@@ -961,8 +961,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
                 if (a->isTableApply()) {
                     if (mem->member == IR::Type_Table::hit) {
                         auto tbl = a->object->to<IR::P4Table>();
-                        convert->instructions.push_back(
-                            new IR::DpdkApplyStatement(tbl->name.toString()));
+                        convert->instructions.push_back(new IR::DpdkApplyStatement(tbl->name.name));
                         if (is_and) {
                             convert->instructions.push_back(
                                 new IR::DpdkJmpMissStatement(false_label));
@@ -1035,7 +1034,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         LOG3("apply method: " << dbp(s) << std::endl << s);
         if (a->isTableApply()) {
             auto table = a->object->to<IR::P4Table>();
-            add_instr(new IR::DpdkApplyStatement(table->name.toString()));
+            add_instr(new IR::DpdkApplyStatement(table->name.name));
         } else {
             BUG("not implemented for `apply` other than table");
         }
@@ -1447,7 +1446,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     cstring default_label = cstring::empty;
     auto end_label = refmap->newName("label_endswitch");
     if (tc) {
-        add_instr(new IR::DpdkApplyStatement(tc->name.toString()));
+        add_instr(new IR::DpdkApplyStatement(tc->name.name));
     }
     // Emit jmp on action run/jmp on matching label statements and collect labels for
     // each case statement.

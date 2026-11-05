@@ -52,6 +52,7 @@ class ConstantFoldingPolicy {
  */
 class DoConstantFolding : public Transform, public ResolutionContext {
  protected:
+    std::shared_ptr<ConstantFoldingPolicy> defaultPolicy;
     ConstantFoldingPolicy *policy;
 
     /// Used to resolve IR nodes to declarations.
@@ -112,7 +113,8 @@ class DoConstantFolding : public Transform, public ResolutionContext {
  public:
     DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,
                       ConstantFoldingPolicy *policy = nullptr)
-        : policy(policy ? policy : new ConstantFoldingPolicy()),
+        : defaultPolicy(policy ? nullptr : std::make_shared<ConstantFoldingPolicy>()),
+          policy(policy ? policy : defaultPolicy.get()),
           refMap(refMap),
           typeMap(typeMap),
           typesKnown(typeMap != nullptr),

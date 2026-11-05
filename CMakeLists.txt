@@ -156,10 +156,6 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   endif()
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-  # Link Boost statically
-  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
-  set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # TODO: We can not use -static here because of compilation and portability problems:
@@ -228,14 +224,8 @@ p4c_obtain_abseil()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# The boost graph headers are optional and only required by the graphs back end.
-find_package (Boost QUIET COMPONENTS graph)
-if (Boost_FOUND)
-  set (HAVE_LIBBOOST_GRAPH 1)
-else ()
-  message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
-endif ()
-find_package (Boost REQUIRED COMPONENTS iostreams)
+include(Multiprecision)
+p4c_obtain_multiprecision()
 
 # Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
 # One can disable the GC, e.g., to run under Valgrind, by editing config.h.
@@ -247,9 +237,6 @@ if (ENABLE_MULTITHREAD)
   add_definitions("-DMULTITHREAD")
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-set (HAVE_LIBBOOST_IOSTREAMS 1)
-list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
   list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()
@@ -444,7 +431,7 @@ set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
   p4runtime
   GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5
+  GIT_TAG        26b75559f2fedcd11876d7ff21eec4180011dc36  # v1.6.0
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)
@@ -499,7 +486,7 @@ endif ()
 if (ENABLE_EBPF)
     add_subdirectory (backends/ebpf)
 endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+if (ENABLE_P4C_GRAPHS)
   add_subdirectory (backends/graphs)
 endif ()
 if (ENABLE_P4TC)

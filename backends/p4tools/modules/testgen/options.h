@@ -110,6 +110,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Defaults to the name of the input program, if provided.
     std::optional<cstring> testBaseName;
 
+    /// Specifies the reset threshold for the testgen test backend to reset memory after this
+    /// many generated tests.
+    int64_t resetThreshold = 10000;
+
  protected:
     bool validateOptions() const override;
 };

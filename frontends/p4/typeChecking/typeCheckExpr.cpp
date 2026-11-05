@@ -2398,6 +2398,18 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectExpression *express
               expression, selectType);
     if (!validateSelectTypes(selectType, expression)) return expression;
 
+    if (tuple->components.empty()) {
+        for (const auto *sc : expression->selectCases) {
+            if (!sc->keyset->is<IR::DefaultExpression>()) {
+                typeError(
+                    "%1%: key set expression must be default or _ when select expression list is "
+                    "empty",
+                    sc->keyset);
+                return expression;
+            }
+        }
+    }
+
     bool changes = false;
     IR::Vector<IR::SelectCase> vec;
     for (auto sc : expression->selectCases) {

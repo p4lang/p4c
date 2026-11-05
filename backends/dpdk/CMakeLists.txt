@@ -129,18 +129,23 @@ set (P4_16_SUITES
 set(DPDK_PTF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-mux-concat.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-local-key.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-ptf-ports.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-small_sample.p4"
 )
 
 # Check for infrap4d.
 find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
 # DPDK_SDK_INSTALL is the path to the dpdk-target install directory
-if(INFRAP4D AND EXISTS ${IPDK_INSTALL_DIR})
-  set (DPDK_LIB_PATH "${IPDK_INSTALL_DIR}/lib;${IPDK_INSTALL_DIR}/lib/x86_64-linux-gnu")
+if(INFRAP4D AND EXISTS "${IPDK_INSTALL_DIR}")
   p4c_add_tests(
     "dpdk-ptf" ${DPDK_PTF_DRIVER} "${DPDK_PTF_TEST_SUITES}" ""
-    "--ipdk-install-dir=${IPDK_INSTALL_DIR} -ll=DEBUG "
+    "--ipdk-install-dir=${IPDK_INSTALL_DIR} --compiler=${P4C_BINARY_DIR}/p4c-dpdk -ll=DEBUG "
   )
+  foreach(test IN LISTS DPDK_PTF_TEST_SUITES)
+    file(RELATIVE_PATH test_name ${P4C_SOURCE_DIR} ${test})
+    set_tests_properties(dpdk-ptf/${test_name} PROPERTIES RESOURCE_LOCK dpdk)
+  endforeach()
 else()
   message(WARNING "Either infrap4d or dpdk-target is not available (required environment variables are not defined). Skipping DPDK PTF tests")
 endif()

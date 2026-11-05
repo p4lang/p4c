@@ -31,6 +31,7 @@
 #include "midend/eliminateSwitch.h"
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateTypedefs.h"
+#include "midend/eliminateUnreachable.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
 #include "midend/flattenHeaders.h"
@@ -113,6 +114,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::ConstantFolding(&typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),
+         new P4::ElimUnreachableStmts,
          new PassRepeated({
              new P4::LocalCopyPropagation(&typeMap),
              new P4::ConstantFolding(&typeMap),

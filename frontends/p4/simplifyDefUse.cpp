@@ -642,8 +642,10 @@ class FindUninitialized : public Inspector {
             if (auto cst = ai->right->to<IR::Constant>()) {
                 auto index = cst->asInt();
                 loc = loc->getIndex(index);
+            } else {
+                // else let loc be the whole array
+                loc = loc->allElements();
             }
-            // else let loc be the whole array
         } else if (auto pe = parent->to<IR::PathExpression>()) {
             auto decl = refMap->getDeclaration(pe->path, true);
             auto storage = definitions->getStorage(decl);
@@ -1295,7 +1297,7 @@ class FindUninitialized : public Inspector {
             auto am = mi->to<ApplyMethod>();
             isControlOrParserApply = !am->isTableApply();
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction != IR::Direction::Out) {
                 visit(expr);
@@ -1359,7 +1361,7 @@ class FindUninitialized : public Inspector {
             fu.setCalledBy(this);
             for (auto c : callee) (void)c->getNode()->apply(fu);
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 bool save = lhs;
@@ -1504,8 +1506,9 @@ class FindUninitialized : public Inspector {
             visit(expression->right);
             visit(expression->left);
             auto storage = getReads(expression->left, true);
+            auto result = storage->allElements();
             lhs = save;
-            reads(expression, storage);
+            reads(expression, result);
         }
         registerUses(expression);
         return false;

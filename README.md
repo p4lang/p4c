@@ -233,6 +233,7 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
      - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.
      - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
      - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
@@ -283,7 +284,7 @@ platforms are untested; you can try to use them, but YMMV.
 
 - Google Protocol Buffers v3.25.3 or higher for control plane API generation
 
-- C++ boost library
+- Boost.Multiprecision library for arbitrary precision arithmetic
 
 - Python 3 and uv for scripting and running tests
 
@@ -301,8 +302,7 @@ Most dependencies can be installed using `apt-get install`:
 
 ```bash
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
-libfl-dev libboost-dev libboost-iostreams-dev \
-libboost-graph-dev llvm pkg-config python3 python3-pip \
+libfl-dev libboost-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
 ```
@@ -358,7 +358,7 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 
 ```bash
 sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
-libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
+libfl-devel gmp-devel boost-devel llvm pkg-config \
 python3 python3-pip tcpdump uv
 
 uv sync
@@ -586,11 +586,39 @@ add_black_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 
 The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
+The precise version of the formatting tools is specified in `pyproject.toml`, use `uv run` to run the tools with the correct version:
+
+```sh
+uv run cmake -S . -B build
 ```
-uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
+
+Check C++ and Python formatting:
+
+```sh
+uv run cmake --build build --target clang-format black isort
 ```
-clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
+
+Apply formatting fixes:
+
+```sh
+uv run cmake --build build --target \
+  clang-format-fix-errors black-fix-errors isort-fix-errors
+```
+
+To run just one formatter, specify only its target.
+
+<details>
+<summary>If an existing build still uses a system-installed formatter</summary>
+
+CMake caches the paths to formatter executables when you first configure a build.
+If you configured before installing the tools above, the build may still use a
+system-installed formatter with a different version. Use this command to clear the cached paths and reconfigure the build:
+
+```sh
+uv run cmake -S . -B build -U CLANG_FORMAT_CMD -U BLACK_CMD -U ISORT_CMD
+```
+
+</details>
 
 cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```

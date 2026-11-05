@@ -99,7 +99,7 @@ action macswp args none {
 	LABEL_END :	return
 }
 
-table stub {
+table stub_0 {
 	actions {
 		macswp
 		NoAction @defaultonly
@@ -115,7 +115,7 @@ apply {
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_egress_port m.psa_ingress_input_metadata_ingress_port
 	xor m.psa_ingress_output_metadata_egress_port 0x1
-	table stub
+	table stub_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

@@ -28,7 +28,8 @@ class ToP4 : public Inspector, ResolutionContext {
  protected:
     /// precedence of current IR::Operation
     int expressionPrecedence = DBPrint::Prec_Low;
-    bool isDeclaration = true;    /// current type is a declaration
+    bool isDeclaration = true;  /// current type is a declaration
+    std::shared_ptr<Util::SourceCodeBuilder> ownedBuilder;
     bool showIR;                  /// if true dump IR as comments
     bool withinArgument = false;  /// if true we are within a method call argument
     bool noIncludes = false;      /// If true do not generate #include statements.
@@ -95,8 +96,13 @@ class ToP4 : public Inspector, ResolutionContext {
         setName("ToP4");
     }
 
-    ToP4(std::ostream *outStream, bool showIR) : ToP4(*new Util::SourceCodeBuilder(), showIR) {
-        this->outStream = outStream;
+    ToP4(std::ostream *outStream, bool showIR)
+        : ownedBuilder(std::make_shared<Util::SourceCodeBuilder>()),
+          showIR(showIR),
+          builder(*ownedBuilder),
+          outStream(outStream) {
+        visitDagOnce = false;
+        setName("ToP4");
     }
 
     ToP4(Util::SourceCodeBuilder &builder, bool showIR, std::filesystem::path mainFile)
@@ -108,7 +114,7 @@ class ToP4 : public Inspector, ResolutionContext {
         this->mainFile = mainFile;
     }
 
-    ToP4() : ToP4(*new Util::SourceCodeBuilder(), false) {}
+    ToP4() : ToP4(nullptr, false) {}
 
     using Inspector::preorder;
 

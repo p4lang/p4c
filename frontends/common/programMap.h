@@ -18,7 +18,6 @@ namespace P4 {
 // If the program has not changed, the map is up-to-date.
 class ProgramMap : public IHasDbPrint {
  protected:
-    const IR::P4Program *fake = new IR::P4Program();
     const IR::P4Program *program = nullptr;
     cstring mapKind;
     explicit ProgramMap(std::string_view kind) : mapKind(kind) {}
@@ -37,21 +36,16 @@ class ProgramMap : public IHasDbPrint {
         return false;
     }
     void validateMap(const IR::Node *node) const {
-        if (node == nullptr || !node->is<IR::P4Program>() || program == nullptr) return;
         if (program != node)
             BUG("Invalid map %1%: computed for %2%, used for %3%", mapKind, dbp(program),
                 dbp(node));
     }
     void updateMap(const IR::Node *node) {
         if (node == nullptr || !node->is<IR::P4Program>()) return;
-        program = node->to<IR::P4Program>();
+        program = node ? node->to<IR::P4Program>() : nullptr;
         LOG2(mapKind << " updated to " << dbp(node));
     }
-    void clear() {
-        // This ensures that a clear map is never up-to-date,
-        // since the 'fake' node cannot appear in a program.
-        program = fake;
-    }
+    void clear() { program = nullptr; }
 };
 
 }  // namespace P4

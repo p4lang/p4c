@@ -30,6 +30,7 @@ class StatOrDecl;
 class StructExpression;
 class Type;
 class Type_Bits;
+class Type_Extern;
 template <typename T>
 class IndexedVector;
 
@@ -44,6 +45,11 @@ class IndexedVector;
 
 /// @returns a representation of bit<> that is just wide enough to fit the given value.
 const Type_Bits *getBitTypeToFit(int value);
+
+/// @returns the extern that @p type describes, or nullptr if @p type does not describe an extern.
+/// After type checking, an instance of a generic extern has the type Type_SpecializedCanonical.
+/// For this type, the result is the extern with the type arguments of the instance.
+const Type_Extern *getExternType(const Type *type);
 
 /* =========================================================================================
  *  Expressions

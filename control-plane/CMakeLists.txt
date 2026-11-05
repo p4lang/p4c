@@ -7,7 +7,8 @@ set(P4RUNTIME_INFO_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4info.proto)
 set(P4RUNTIME_TYPES_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4types.proto)
 set(P4RUNTIME_RT_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4runtime.proto)
 set(P4RUNTIME_DATA_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4data.proto)
-set(P4RUNTIME_DEPS_PROTO ${CMAKE_CURRENT_SOURCE_DIR}/google/rpc/status.proto)
+# google/rpc/status.proto is provided by P4Runtime (since v1.6.0).
+set(P4RUNTIME_DEPS_PROTO ${P4RUNTIME_STD_DIR}/google/rpc/status.proto)
 
 set(P4RUNTIME_PROTO ${P4RUNTIME_DEPS_PROTO} ${P4RUNTIME_INFO_PROTO} ${P4RUNTIME_TYPES_PROTO}
                     ${P4RUNTIME_RT_PROTO} ${P4RUNTIME_DATA_PROTO}

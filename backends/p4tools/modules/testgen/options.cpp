@@ -425,6 +425,29 @@ TestgenOptions::TestgenOptions()
         },
         "Produce only tests that violate the condition defined in assert calls. This will either "
         "produce no tests or only tests that contain counter examples.");
+
+    registerOption(
+        "--reset-threshold", "resetThreshold",
+        [this](const char *arg) {
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                resetThreshold = std::stoll(arg);
+                if (resetThreshold <= 0) {
+                    throw std::invalid_argument("Invalid input.");
+                }
+            } catch (std::invalid_argument &) {
+                error(
+                    "Invalid input value %1% for --reset-threshold. "
+                    "Expected positive integer.",
+                    arg);
+                return false;
+            }
+            return true;
+        },
+        "Sets the number of generated tests after which the Z3 solver's memory is reset "
+        "(context torn down and recreated) to bound per-call solver overhead on long runs "
+        " or large programs with many paths [default: 10000].");
 }
 
 bool TestgenOptions::validateOptions() const {

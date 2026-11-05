@@ -1,0 +1,9 @@
+issue5879.p4(12): [--Wwarn=unused] warning: 'New' is unused
+type Bad New;
+         ^^^
+issue5879.p4(11): [--Werror=type-error] error: H<bit<8>>: Type header H has 0 type parameter(s), but it is specialized with 1
+typedef H<bit<8>> Bad;
+        ^^^^^^^^^
+issue5879.p4(7)
+header H {
+       ^

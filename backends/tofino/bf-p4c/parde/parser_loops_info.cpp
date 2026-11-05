@@ -97,10 +97,10 @@ bool ParserPragmas::preorder(const IR::Annotation *annot) {
             return false;
         }
 
-        warning(
-            "Parser state %1% will be unrolled up to %2% "
-            "times due to @pragma max_loop_depth.",
-            ps->name, max_loop->asInt());
+        info(ErrorType::INFO_PROGRESS,
+             "Parser state '%1%': loop unrolling is limited to "
+             "%2% iterations (@max_loop_depth).",
+             ps->name, max_loop->asUnsigned());
 
         max_loop_depth[ps] = max_loop->asUnsigned();
     } else if (pragma_name == "dont_unroll") {

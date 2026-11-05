@@ -3,6 +3,30 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+if (P4C_USE_PREINSTALLED_MULTIPRECISION)
+  set(BOOST_MIN_VERSION 1.58)
+else ()
+  # Older Boost.Graph headers conflict with standalone Multiprecision.
+  set(BOOST_MIN_VERSION 1.83)
+endif ()
+find_package(Boost ${BOOST_MIN_VERSION} QUIET)
+if (NOT Boost_FOUND)
+  if (NOT P4C_USE_PREINSTALLED_MULTIPRECISION)
+    message(FATAL_ERROR
+      "The graphs backend requires Boost ${BOOST_MIN_VERSION} or newer headers. "
+      "Older Boost.Graph headers conflict with fetched standalone Multiprecision. "
+      "Install a compatible Boost version (set BOOST_ROOT for a custom installation), "
+      "or configure with -DP4C_USE_PREINSTALLED_MULTIPRECISION=ON to use matching "
+      "installed Multiprecision and Boost headers. To disable this backend, set "
+      "-DENABLE_P4C_GRAPHS=OFF.")
+  else ()
+    message(FATAL_ERROR
+      "The graphs backend requires Boost ${BOOST_MIN_VERSION} or newer headers. "
+      "Install them or set BOOST_ROOT to a compatible installation. "
+      "To disable this backend, set -DENABLE_P4C_GRAPHS=OFF.")
+  endif ()
+endif ()
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
@@ -21,7 +45,8 @@ set (GRAPHS_HDRS
 )
 
 add_library(p4cgraphs STATIC ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
-target_link_libraries(p4cgraphs ir-generated frontend)
+# Graphviz output uses only the header-only part of Boost.Graph.
+target_link_libraries(p4cgraphs ir-generated frontend Boost::headers)
 
 add_executable(p4c-graphs p4c-graphs.cpp)
 target_link_libraries (p4c-graphs p4cgraphs ir-generated frontend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})

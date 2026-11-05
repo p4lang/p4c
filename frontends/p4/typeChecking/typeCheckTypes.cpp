@@ -87,7 +87,7 @@ const IR::Type *TypeInferenceBase::setTypeType(const IR::Type *type, bool learn)
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Error *decl) {
     (void)setTypeType(decl);
-    for (auto id : *decl->getDeclarations()) setType(id->getNode(), decl);
+    for (auto id : decl->getDeclarations()) setType(id->getNode(), decl);
     return decl;
 }
 
@@ -269,13 +269,13 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_ActionEnum *type) {
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Enum *type) {
     auto canon = setTypeType(type);
-    for (auto e : *type->getDeclarations()) setType(e->getNode(), canon);
+    for (auto e : type->getDeclarations()) setType(e->getNode(), canon);
     return type;
 }
 
 TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Type_SerEnum *type) {
     auto canon = setTypeType(type);
-    for (auto e : *type->getDeclarations()) setType(e->getNode(), canon);
+    for (auto e : type->getDeclarations()) setType(e->getNode(), canon);
     return {type, false};
 }
 
@@ -388,6 +388,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Base *type) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Newtype *type) {
     (void)setTypeType(type);
     auto argType = getTypeType(type->type);
+    if (argType == nullptr) return type;
     if (!argType->is<IR::Type_Bits>() && !argType->is<IR::Type_Boolean>() &&
         !argType->is<IR::Type_Newtype>())
         typeError("%1%: `type' can only be applied to base types", type);

@@ -98,7 +98,7 @@ const IR::Node *CreateStructInitializers::postorder(IR::MethodCallExpression *ex
     auto result = expression;
     auto convertedArgs = new IR::Vector<IR::Argument>();
     bool modified = false;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::None) {
             auto paramType = typeMap->getType(p, true);

@@ -600,12 +600,12 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
 
         selectors.push_back(selector);
     } else if (structure->learner_tables.count(t->name.name) != 0) {
-        auto learner = new IR::DpdkLearner(t->name.toString(), t->getKey(), t->getActionList(),
+        auto learner = new IR::DpdkLearner(t->name.name, t->getKey(), t->getActionList(),
                                            t->getDefaultAction(), t->properties);
         learners.push_back(learner);
     } else {
-        auto paramList = structure->defActionParamList[t->toString()];
-        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+        auto paramList = structure->defActionParamList[t->name.name];
+        auto table = new IR::DpdkTable(t->name.name, t->getKey(), t->getActionList(),
                                        t->getDefaultAction(), t->properties, *paramList);
         tables.push_back(table);
     }

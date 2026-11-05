@@ -412,10 +412,10 @@ struct RegisterTraits<Arch::PNA> {
 
 //// The information about a digest call which is needed to serialize it.
 struct Digest {
-    const cstring name;                          // The fully qualified external name of the digest
-                                                 // *data* - in P4-14, the field list name, or in
-                                                 // P4-16, the type of the 'data' parameter.
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    const cstring name;  // The fully qualified external name of the digest
+                         // *data* - in P4-14, the field list name, or in
+                         // P4-16, the type of the 'data' parameter.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this digest
                                         // declaration.
 };
@@ -425,7 +425,7 @@ struct Register {
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied
                                         // to this field.
     const int64_t size;
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the stored data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the stored data.
     // If the type of the index is a user-defined type, this is the name of the type. Otherwise it
     // is nullptr.
     const cstring index_type_name;

@@ -93,7 +93,7 @@ def get_strategy_data(input_dir):
         folder = Path(folder)
         program_name = folder.stem
         # Make sure we escape hyphens
-        program_name = program_name.replace("-", "\-")
+        program_name = program_name.replace("-", r"\-")
         # exit(0)
         strategy_files = folder.glob("*_coverage_over_time.csv")
         strategy_data = {}

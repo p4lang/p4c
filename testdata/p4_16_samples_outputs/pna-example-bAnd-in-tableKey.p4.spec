@@ -43,7 +43,7 @@ action default_route_drop args none {
 	return
 }
 
-table ipv4_da_lpm {
+table ipv4_da_lpm_0 {
 	key {
 		m.MainControlT_key exact
 	}
@@ -65,7 +65,7 @@ apply {
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	mov m.MainControlT_key h.ipv4.dstAddr
 	and m.MainControlT_key 0xF
-	table ipv4_da_lpm
+	table ipv4_da_lpm_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

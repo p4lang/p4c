@@ -59,21 +59,22 @@ const Type_Method *Type_Package::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), this, constructorParams, getName());
 }
 
-Util::Enumerator<const IR::IDeclaration *> *IGeneralNamespace::getDeclsByName(cstring name) const {
+Util::EnumeratorPtr<const IR::IDeclaration *> IGeneralNamespace::getDeclsByName(
+    cstring name) const {
     return getDeclarations()->where([name](const IDeclaration *d) {
         CHECK_NULL(d);
         return name == d->getName().name;
     });
 }
 
-Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() const {
-    Util::Enumerator<const IDeclaration *> *rv = nullptr;
+Util::EnumeratorPtr<const IDeclaration *> INestedNamespace::getDeclarations() const {
+    Util::EnumeratorPtr<const IDeclaration *> rv = nullptr;
     for (const auto *nested : getNestedNamespaces()) {
         if (nested == nullptr) continue;
 
         rv = rv ? rv->concat(nested->getDeclarations()) : nested->getDeclarations();
     }
-    return rv ? rv : new Util::EmptyEnumerator<const IDeclaration *>;
+    return rv ? rv : std::make_shared<Util::EmptyEnumerator<const IDeclaration *>>();
 }
 
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
@@ -105,7 +106,7 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
 
 void IGeneralNamespace::checkDuplicateDeclarations() const {
     absl::flat_hash_set<ID, Util::Hash> seen;
-    for (const auto *decl : *getDeclarations()) {
+    for (const auto *decl : getDeclarations()) {
         IR::ID name = decl->getName();
         auto [it, inserted] = seen.emplace(name);
         if (!inserted) {
@@ -230,7 +231,7 @@ void Block::setValue(const Node *node, const CompileTimeValue *value) {
 void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue *> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
-    for (auto p : *getConstructorParameters()->getEnumerator()) {
+    for (auto p : getConstructorParameters()->getEnumerator()) {
         if (it == args->end()) {
             BUG_CHECK(p->isOptional(), "Missing nonoptional arg %s", p);
             continue;
@@ -255,7 +256,7 @@ const IR::CompileTimeValue *InstantiatedBlock::findParameterValue(cstring paramN
     return getValue(param->getNode());
 }
 
-Util::Enumerator<const IDeclaration *> *P4Program::getDeclarations() const {
+Util::EnumeratorPtr<const IDeclaration *> P4Program::getDeclarations() const {
     return objects.getEnumerator()->as<const IDeclaration *>()->where(
         [](const IDeclaration *d) { return d != nullptr; });
 }

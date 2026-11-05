@@ -26,6 +26,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/fdstream.cpp
   gtest/flat_map.cpp
   gtest/format_test.cpp
+  gtest/gc.cpp
   gtest/helpers.cpp
   gtest/hash.cpp
   gtest/hvec_map.cpp

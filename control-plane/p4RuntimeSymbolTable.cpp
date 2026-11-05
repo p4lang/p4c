@@ -26,7 +26,7 @@ bool isHidden(const IR::IAnnotated *node) {
 }
 
 std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
-    if (const auto *idAnn = node->getAnnotation(idAnnotation)) {
+    if (const IR::Annotation *idAnn = node->getAnnotation(idAnnotation)) {
         const auto *idConstant = idAnn->getExpr(0)->to<IR::Constant>();
         CHECK_NULL(idConstant);
         if (!idConstant->fitsUint()) {
@@ -76,7 +76,7 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 
-    const auto *control = controlBlock->container;
+    const IR::P4Control *control = controlBlock->container;
     CHECK_NULL(control);
 
     forAllMatching<IR::P4Action>(&control->controlLocals, [&](const IR::P4Action *action) {
@@ -86,7 +86,7 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
         // Collect any extern functions it may invoke.
         forAllMatching<IR::MethodCallExpression>(
             action->body, [&](const IR::MethodCallExpression *call) {
-                auto *instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+                auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
                 if (instance->is<P4::ExternFunction>()) {
                     archHandler->collectExternFunction(&symbols,
                                                        instance->to<P4::ExternFunction>());
@@ -103,7 +103,7 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
     // Collect any extern function invoked directly from the control.
     forAllMatching<IR::MethodCallExpression>(
         control->body, [&](const IR::MethodCallExpression *call) {
-            auto *instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
             if (instance->is<P4::ExternFunction>()) {
                 archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
             } else if (instance->is<P4::ExternMethod>()) {
@@ -130,17 +130,17 @@ void collectTableSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIfac
 void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *parserBlock) {
     CHECK_NULL(parserBlock);
 
-    const auto *parser = parserBlock->container;
+    const IR::P4Parser *parser = parserBlock->container;
     CHECK_NULL(parser);
 
-    for (const auto *s : parser->parserLocals) {
+    for (const IR::Declaration *s : parser->parserLocals) {
         if (const auto *inst = s->to<IR::P4ValueSet>()) {
             symbols.add(P4RuntimeSymbolType::P4RT_VALUE_SET(), inst);
         }
     }
 }
 
-P4::ControlPlaneAPI::P4RuntimeSymbolTable *
+std::unique_ptr<P4::ControlPlaneAPI::P4RuntimeSymbolTable>
 P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
     const IR::P4Program *program, const IR::ToplevelBlock *evaluatedProgram, ReferenceMap *refMap,
     TypeMap *typeMap, P4RuntimeArchHandlerIface *archHandler) {
@@ -293,7 +293,7 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     // the suffixes "a.c" and "b.c" are enough to identify the symbols
     // uniquely, so in both cases we only need two components.
     unsigned neededComponents = 0;
-    auto *node = suffixesRoot;
+    auto node = suffixesRoot;
     for (auto &component : Util::iterator_range(components).reverse()) {
         auto it = node->edges.find(component);
         BUG_CHECK(it != node->edges.end(), "Symbol is not in suffix set: %1%", symbol);
@@ -355,10 +355,10 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
     //   (root) -> "c" -> (3) -> "b" -> (2) -> "a" -> (1)
     //                       \-> "d" -> (1) -> "a" -> (1)
     // (Nodes are in parentheses, and edge labels are in quotes.)
-    auto *node = suffixesRoot;
+    auto node = suffixesRoot;
     for (auto &component : Util::iterator_range(components).reverse()) {
         auto [it, inserted] = node->edges.emplace(component, nullptr);
-        if (inserted) it->second = new SuffixNode;
+        if (inserted) it->second = std::make_shared<SuffixNode>();
         node = it->second;
         node->instances++;
     }

@@ -4,38 +4,45 @@
 
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-# Write the script to check Tofino STF tests to the designated test file.
+# Append commands to run Tofino STF tests.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
 #   - testharness is binary to use for execution.
 #   - aliasname is name of the test.
-function(check_with_test_harness testfile testfolder testharness aliasname)
+function(check_with_test_harness testcontent testfolder testharness aliasname)
   if(NOT testharness)
     message(WARNING "STF tests need the test harness for ${target}. No entry was found.\n")
     return()
   endif()
   # Find all the stf tests generated for this p4 and run the test harness
-  file(APPEND ${testfile} "stffiles=($(cd ${testfolder} && find * -name \"*.stf\"))\n")
-  file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\t${testharness} -l ${testfolder}/${aliasname}.conf ${testfolder}/\${item}\n")
-  file(APPEND ${testfile} "done\n")
+  string(APPEND ${testcontent}
+    "stffiles=($(cd ${testfolder} && find * -name \"*.stf\"))\n"
+    "for item in \${stffiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
+    "\t${testharness} -l ${testfolder}/${aliasname}.conf ${testfolder}/\${item}\n"
+    "done\n"
+  )
+  set(${testcontent} "${${testcontent}}" PARENT_SCOPE)
 endfunction(check_with_test_harness)
 
-# Write the script to check Tofino STF tests to the designated test file.
+# Append commands to run Tofino PTF tests.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
-#   - p4test is the file that is to be tested.
-function(check_with_model testfile testfolder target aliasname)
+#   - target is the device to test.
+#   - aliasname is the name of the test.
+function(check_with_model testcontent testfolder target aliasname)
   set(__cmakecache "${CMAKE_BINARY_DIR}/CMakeCache.txt")
   set(__ptfrunner "${CMAKE_SOURCE_DIR}/p4-tests/ptf_runner.py")
-  file(APPEND ${testfile} "if test -f \"${testfolder}/${aliasname}.py\"; then")
-  file(APPEND ${testfile} "\techo \"Starting PTF: ${CMAKE_SOURCE_DIR}/p4-tests/run-isolated python3 ${__ptfrunner} --testdir ${testfolder} --name ${aliasname} --ptfdir ${testfolder} --top-builddir ${__cmakecache} --device ${target} --bfrt-test ${testfolder}/${aliasname}.conf\"\n")
-  file(APPEND ${testfile} "\t${CMAKE_SOURCE_DIR}/p4-tests/run-isolated python3 ${__ptfrunner} --testdir ${testfolder} --name ${aliasname} --ptfdir ${testfolder} --top-builddir ${__cmakecache} --device ${target} --bfrt-test ${testfolder}/${aliasname}.conf\n")
-  file(APPEND ${testfile} "fi")
+  string(APPEND ${testcontent}
+    "if test -f \"${testfolder}/${aliasname}.py\"; then"
+    "\techo \"Starting PTF: ${CMAKE_SOURCE_DIR}/p4-tests/run-isolated python3 ${__ptfrunner} --testdir ${testfolder} --name ${aliasname} --ptfdir ${testfolder} --top-builddir ${__cmakecache} --device ${target} --bfrt-test ${testfolder}/${aliasname}.conf\"\n"
+    "\t${CMAKE_SOURCE_DIR}/p4-tests/run-isolated python3 ${__ptfrunner} --testdir ${testfolder} --name ${aliasname} --ptfdir ${testfolder} --top-builddir ${__cmakecache} --device ${target} --bfrt-test ${testfolder}/${aliasname}.conf\n"
+    "fi"
+  )
+  set(${testcontent} "${${testcontent}}" PARENT_SCOPE)
 endfunction(check_with_model)
 
 
@@ -85,18 +92,17 @@ macro(p4tools_add_test_with_args)
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
   set(__testfolder "${P4TESTGEN_DIR}/${tag}/${aliasname}.out")
   get_filename_component(__testdir ${p4test} DIRECTORY)
-  file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
-  file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
-  file(APPEND ${__testfile} "set -e\n")
-  file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file(
-    APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
+  string(CONCAT __testcontent
+    "#! /usr/bin/env bash\n"
+    "# Generated file, modify with care\n\n"
+    "set -e\n"
+    "cd ${P4C_BINARY_DIR}\n")
+  string(APPEND __testcontent "${driver} --target ${target} --arch ${arch} "
     "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
   # Compile the p4 file.
-  file(APPEND ${__testfile} "\techo \"Compiling ${p4test}...\"\n")
-  file(
-    APPEND ${__testfile} "${CMAKE_BINARY_DIR}/p4c --target ${target} --arch ${arch} "
+  string(APPEND __testcontent "\techo \"Compiling ${p4test}...\"\n")
+  string(APPEND __testcontent "${CMAKE_BINARY_DIR}/p4c --target ${target} --arch ${arch} "
     "--std p4-16 ${p4test} -I${CMAKE_SOURCE_DIR}/p4-tests/p4_16/includes "
     "-o ${__testfolder} ${ctest_p4c_args} || (echo Compiler failed && false)\n"
   )
@@ -112,16 +118,16 @@ macro(p4tools_add_test_with_args)
   #     get_property(testharness CACHE HARLYN_STF_${target} PROPERTY VALUE)
   #   endif()
   #   if (testharness)
-  #     check_with_test_harness(${__testfile} ${__testfolder} ${testharness} ${aliasname})
+  #     check_with_test_harness(__testcontent ${__testfolder} ${testharness} ${aliasname})
   #   else()
   #     message(WARNING "STF tests need the test harness for ${target}. No entry was found.\n")
   #   endif()
   # elseif(${TOOLS_TOFINO_TESTS_RUN_PTF})
   #   # Run PTF
-  #   check_with_model(${__testfile} ${__testfolder} ${target} ${aliasname})
+  #   check_with_model(__testcontent ${__testfolder} ${target} ${aliasname})
   # endif()
 
-  execute_process(COMMAND chmod +x ${__testfile})
+  p4c_write_test_script("${__testfile}" "${__testcontent}")
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test(
     NAME ${__testname}

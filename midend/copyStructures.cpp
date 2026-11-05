@@ -12,7 +12,7 @@ namespace P4 {
 
 const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     const auto *type = typeMap->getType(statement->left);
-    if (!type->is<IR::Type_StructLike>()) {
+    if (!type->is<IR::Type_StructLike>() && !type->is<IR::Type_Array>()) {
         return statement;
     }
 

@@ -6,8 +6,8 @@
 """Save the main cache, or just the files a PR added or changed.
 
 Compare file contents because ccache updates timestamps on cache hits.
-Only copy result files (R) and manifest files (M), which ccache uses to find
-results. Leave settings, statistics and temporary files out of PR caches.
+Only copy result and manifest entries, which ccache uses to find results.
+Leave settings, statistics and temporary files out of PR caches.
 """
 
 import argparse
@@ -19,13 +19,32 @@ import subprocess
 from collections.abc import Iterable
 from pathlib import Path
 
+# Every cache entry starts with this magic, a format version byte and an
+# entry type byte.
+ENTRY_MAGIC = b"\xcc\xac"
+RESULT_ENTRY = 0
+MANIFEST_ENTRY = 1
+
+
+def entry_type(path: Path) -> int | None:
+    """The entry type of a ccache entry, or None for any other file."""
+    with path.open("rb") as stream:
+        header = stream.read(4)
+    if len(header) < 4 or header[:2] != ENTRY_MAGIC:
+        return None
+    return header[3]
+
+
+def is_result(path: Path) -> bool:
+    return entry_type(path) == RESULT_ENTRY
+
 
 def cache_files(directory: Path) -> list[Path]:
     files = []
     for path in directory.rglob("*"):
         if path.is_symlink() or not path.is_file():
             continue
-        if path.name.endswith(("R", "M")):
+        if entry_type(path) in (RESULT_ENTRY, MANIFEST_ENTRY):
             files.append(path)
     return files
 
@@ -84,7 +103,7 @@ def prepare_cache(
     current = file_hashes(cache)
     before_build = json.loads((state / "before-build.json").read_text())
     changed = any(before_build.get(name) != digest for name, digest in current.items())
-    has_results = any(name.endswith("R") for name in current)
+    has_results = any(is_result(cache / name) for name in current)
     if not changed or not has_results:
         return "none"
 
@@ -96,7 +115,7 @@ def prepare_cache(
     main_cache = json.loads((state / "main-cache.json").read_text())
     additions = [name for name, digest in current.items() if main_cache.get(name) != digest]
     saved = save_pr_files(cache, pr_cache, additions, max_pr_bytes)
-    if any(name.endswith("R") for name in saved):
+    if any(is_result(cache / name) for name in saved):
         return "pr"
     return "none"
 

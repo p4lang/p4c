@@ -111,7 +111,7 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
     // occurrence of a table where the suffix matches.
     // Ideally, we would use originalName, but originalName currently is not preserved correctly.
     const IR::IDeclaration *tableDeclaration = nullptr;
-    for (const auto *decl : *ctrlContext.getDeclarations()) {
+    for (const auto *decl : ctrlContext.getDeclarations()) {
         auto declName = decl->controlPlaneName();
         if (declName.endsWith(tableReference)) {
             tableDeclaration = decl;

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2025 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
 BRIDGE_IP=$1
 
 brctl addbr br1 

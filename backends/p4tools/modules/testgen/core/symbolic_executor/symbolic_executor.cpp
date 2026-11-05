@@ -15,6 +15,7 @@
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"
 
@@ -23,6 +24,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4::P4Tools::P4Testgen {
 
@@ -113,6 +115,18 @@ bool SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNo
 }
 
 const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedNodes() { return visitedNodes; }
+
+void SymbolicExecutor::handleUnimplemented(const TestgenUnimplemented &e) {
+    if (TestgenOptions::get().strict) {
+        throw;
+    }
+    ++skippedPaths[cstring(e.what())];
+    warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+}
+
+const ordered_map<cstring, size_t> &SymbolicExecutor::getSkippedPaths() const {
+    return skippedPaths;
+}
 
 void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out,
                                                     const ExecutionState &executionState) {

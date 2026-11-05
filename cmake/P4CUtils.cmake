@@ -125,6 +125,28 @@ function(append value)
   endforeach(variable)
 endfunction()
 
+# Build scripts in memory and write once, only when their contents change.
+# configure_file copies executable permissions from the template on CMake 3.16;
+# @ONLY preserves shell variables in the supplied content.
+# Read the template once, but track edits even when all writes are skipped.
+set(_P4C_TEST_SCRIPT_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/test-script.in")
+file(READ "${_P4C_TEST_SCRIPT_TEMPLATE}" _P4C_TEST_SCRIPT_TEMPLATE_CONTENT)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_P4C_TEST_SCRIPT_TEMPLATE}")
+function(p4c_write_test_script filename content)
+  # The template supplies the final newline.
+  string(REGEX REPLACE "\n$" "" content "${content}")
+  string(CONFIGURE "${_P4C_TEST_SCRIPT_TEMPLATE_CONTENT}" expected_content @ONLY)
+  if(EXISTS "${filename}")
+    file(READ "${filename}" existing_content)
+    if(existing_content STREQUAL expected_content)
+      # configure_file preserves mtime, but still does temporary writes and chmod.
+      # Avoid that work for the thousands of unchanged test wrappers.
+      return()
+    endif()
+  endif()
+  configure_file("${_P4C_TEST_SCRIPT_TEMPLATE}" "${filename}" @ONLY)
+endfunction()
+
 # add a single test to the testsuite
 # Arguments:
 #   - tag is a label for the set of test suite where this test belongs
@@ -143,11 +165,12 @@ endfunction()
 #
 macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
   set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
-  file (WRITE  ${__testfile} "#! /usr/bin/env bash\n")
-  file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
-  file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${test_args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
-  execute_process(COMMAND chmod +x ${__testfile})
+  string(CONCAT __testcontent
+    "#! /usr/bin/env bash\n"
+    "# Generated file, modify with care\n\n"
+    "cd ${P4C_BINARY_DIR}\n"
+    "${driver} ${P4C_SOURCE_DIR} ${test_args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
+  p4c_write_test_script("${__testfile}" "${__testcontent}")
   p4c_test_set_name(__testname ${tag} ${alias})
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test (NAME ${__testname}

@@ -1,18 +1,17 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # P4Runtime PTF test for small_sample
 # p4testgen seed: none
 
 from enum import Enum
-from pathlib import Path
 
+# The runner supplies tools/ptf through --pypath.
+import base_test as bt
 from ptf import testutils as ptfutils
 from ptf.mask import Mask
 from ptf.packet import *
-
-# The base_test.py path is relative to the test file, this should be improved
-FILE_DIR = Path(__file__).resolve().parent
-BASE_TEST_PATH = FILE_DIR.joinpath("../../backends/dpdk/base_test.py")
-sys.path.append(str(BASE_TEST_PATH))
-import base_test as bt
 
 # This global variable ensure that the forwarding pipeline will only be pushed once in one tes
 pipeline_pushed = False
@@ -108,7 +107,7 @@ class Test0(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
@@ -167,7 +166,7 @@ class Test1(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
@@ -226,7 +225,7 @@ class Test2(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
@@ -285,7 +284,7 @@ class Test3(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
@@ -344,7 +343,7 @@ class Test4(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
@@ -403,7 +402,7 @@ class Test5(AbstractTest):
         )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()

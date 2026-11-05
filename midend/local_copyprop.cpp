@@ -488,10 +488,12 @@ IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
     visit(s->collection, "collection", 2);
     s->apply(LoopPrepass(*this), getContext());
     ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
+    auto &before_loop = flow_clone();
     visit(s->ref, "ref", 1);
     visit(s->body, "body", 3);
     flow_merge_global_from("-CONTINUE-"_cs);
     flow_merge_global_from("-BREAK-"_cs);
+    flow_merge(before_loop);
     prune();
     return s;
 }

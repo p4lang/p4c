@@ -163,7 +163,7 @@ def get_test_files(input_dir, extension):
     test_files = input_dir.glob(extension)
 
     def natsort(s):
-        return [int(t) if t.isdigit() else t.lower() for t in re.split("(\d+)", str(s))]
+        return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", str(s))]
 
     test_files = sorted(test_files, key=natsort)
     return test_files

@@ -76,6 +76,7 @@ set (MIDEND_HDRS
   eliminateSwitch.h
   eliminateTuples.h
   eliminateTypedefs.h
+  eliminateUnreachable.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h
