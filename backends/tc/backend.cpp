@@ -2137,6 +2137,10 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             auto keySetElement = keyset->components.at(itr);
             auto width = typeMap->getType(keyElement->expression, true)->width_bits();
             big_int fullMask = (big_int(1) << width) - 1;
+            auto mtdecl = refMap->getDeclaration(keyElement->matchType->path, true);
+            auto matchTypeInfo = mtdecl->getNode()->to<IR::Declaration_ID>();
+            bool exactKey = matchTypeInfo->name.name ==
+                            P4::P4CoreLibrary::instance().exactMatch.name;
             std::vector<std::pair<big_int, big_int>> alternatives;
             if (keySetElement->is<IR::DefaultExpression>()) {
                 alternatives.emplace_back(0, 0);
@@ -2161,7 +2165,9 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                     return;
                 }
                 big_int bits = maskValue->value & fullMask;
-                alternatives.emplace_back(value->value & bits, bits);
+                // An exact key compares its whole value, so a mask only folds
+                // into that value and the entry carries no mask of its own.
+                alternatives.emplace_back(value->value & bits, exactKey ? fullMask : bits);
             } else {
                 ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "%1%: Unsupported constant entry key", keySetElement);
