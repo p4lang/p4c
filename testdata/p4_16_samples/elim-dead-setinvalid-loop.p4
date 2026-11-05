@@ -1,0 +1,90 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Abhishek Agarwal
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// A setInvalid() read only through a loop back edge must be kept.
+
+#include <core.p4>
+
+header H {
+    bit<8> x;
+}
+
+struct headers_t {
+    H h1;
+    H h2;
+}
+
+parser P<T>(packet_in pkt, out T hdr);
+control C<T>(inout T hdr);
+control D<T>(packet_out pkt, in T hdr);
+package top<T>(P<T> p, C<T> c1, C<T> c2, D<T> d);
+
+parser ParserImpl(packet_in pkt, out headers_t hdr) {
+    H l;
+
+    state start {
+        transition head;
+    }
+
+    state head {
+        pkt.extract(hdr.h1);
+        transition select(l.isValid()) {
+            true: accept;
+            default: body;
+        }
+    }
+
+    state body {
+        l.setValid();
+        transition select(hdr.h1.x) {
+            0: clear;
+            default: head;
+        }
+    }
+
+    // only read by head after looping back
+    state clear {
+        l.setInvalid();
+        transition head;
+    }
+}
+
+control ingress(inout headers_t hdr) {
+    apply {
+        H c;
+        c.setValid();
+        for (bit<8> i = 0; i < hdr.h1.x; i = i + 1) {
+            if (c.isValid()) {
+                hdr.h2.x = hdr.h2.x + 1;
+            }
+            // only read in the next iteration
+            c.setInvalid();
+        }
+    }
+}
+
+control forin(inout headers_t hdr) {
+    apply {
+        H d;
+        d.setValid();
+        // read below when the loop runs zero times
+        d.setInvalid();
+        for (bit<8> j in hdr.h1.x .. 8w3) {
+            d.setValid();
+        }
+        if (d.isValid()) {
+            hdr.h2.x = 2;
+        }
+    }
+}
+
+control deparser(packet_out pkt, in headers_t hdr) {
+    apply {
+        pkt.emit(hdr);
+    }
+}
+
+top(ParserImpl(), ingress(), forin(), deparser()) main;

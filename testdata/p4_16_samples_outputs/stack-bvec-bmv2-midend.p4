@@ -58,7 +58,6 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c.tmp") hdr[1] c_tmp;
     @hidden action stackbvecbmv2l28() {
-        c_tmp[0].setInvalid();
         c_tmp[0]._row_alt1_valid3 = 1w1;
         c_tmp[0]._f0 = h.h._f0 + 32w1;
         h.h._f0 = h.h._f0 + 32w1;

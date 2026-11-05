@@ -25,7 +25,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") ethernet_t tmp_0;
     @hidden action gauntlet_mux_evalbmv2l33() {
-        tmp_0.setInvalid();
         tmp_0.setValid();
         h.eth_hdr.src_addr = tmp_0.src_addr;
     }
