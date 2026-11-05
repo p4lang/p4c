@@ -128,13 +128,13 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->blockStart();
     builder->emitIndent();
 
-    ingress->parser->headerType->declare(builder, "cpumap_hdr"_cs, false);
+    ingress->parser->headerType->declare(builder, ingress->cpumapHeadersField, false);
     builder->endOfStatement(true);
     builder->emitIndent();
     auto user_md_type = ingress->typeMap->getType(ingress->control->user_metadata);
     BUG_CHECK(user_md_type != nullptr, "cannot declare user metadata");
     auto userMetadataType = EBPFTypeFactory::instance->create(user_md_type);
-    userMetadataType->declare(builder, "cpumap_usermeta"_cs, false);
+    userMetadataType->declare(builder, ingress->cpumapUserMetadataField, false);
     builder->endOfStatement(true);
 
     // Fields for an egress pipeline that uses other types than the ingress pipeline

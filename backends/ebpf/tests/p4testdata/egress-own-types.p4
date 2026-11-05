@@ -13,7 +13,6 @@ struct metadata {
 
 struct headers {
     ethernet_t       ethernet;
-    ipv4_t           ipv4;
 }
 
 // The egress pipeline uses its own, larger, metadata and header types.
@@ -24,6 +23,7 @@ struct egress_metadata_t {
 
 struct egress_headers_t {
     ethernet_t       ethernet;
+    ipv4_t           ipv4;
 }
 
 parser IngressParserImpl(packet_in buffer,
@@ -35,14 +35,6 @@ parser IngressParserImpl(packet_in buffer,
 {
     state start {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
-        }
-    }
-
-    state parse_ipv4 {
-        buffer.extract(parsed_hdr.ipv4);
         transition accept;
     }
 }
@@ -57,6 +49,14 @@ parser EgressParserImpl(packet_in buffer,
 {
     state start {
         buffer.extract(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
+            0x0800: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_ipv4 {
+        buffer.extract(parsed_hdr.ipv4);
         transition accept;
     }
 }
@@ -92,7 +92,6 @@ control IngressDeparserImpl(packet_out packet,
 {
     apply {
         packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
     }
 }
 
@@ -106,6 +105,7 @@ control EgressDeparserImpl(packet_out packet,
 {
     apply {
         packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
