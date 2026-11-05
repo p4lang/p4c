@@ -72,7 +72,7 @@ action execute_1 args none {
 	return
 }
 
-table tbl_0 {
+table tbl {
 	key {
 		h.ethernet.srcAddr wildcard
 	}
@@ -102,7 +102,7 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	table tbl_0
+	INGRESSPARSERIMPL_ACCEPT :	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
