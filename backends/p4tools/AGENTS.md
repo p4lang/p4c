@@ -22,12 +22,12 @@ P4Tools is the P4C subproject that bundles tooling for testing and fuzzing P4 pr
 - `modules/`: tool implementations and their targets.
   - `testgen/`: P4Testgen implementation.
   - `smith/`: P4Smith implementation.
-- `p4tools.def`: IR extensions used by P4Tools.
+- `common/ir.def`: IR extensions used by P4Tools.
 - `CMakeLists.txt`: top-level CMake wiring and module discovery.
 - `BUILD.bazel`: Bazel build rules (limited scope).
 
 ## Core Concepts
-- **IR Extensions**: `p4tools.def` adds custom IR nodes such as `StateVariable`,
+- **IR Extensions**: `common/ir.def` adds custom IR nodes such as `StateVariable`,
   `TaintExpression`, `Extracted_Varbits`, and `ConcolicVariable`. These are
   compiled into the P4C IR via `IR_DEF_FILES`.
 - **Shared Infrastructure**: `common/` hosts libraries, solver bindings, and
@@ -101,4 +101,4 @@ canonical example: it requires the control-plane library for P4Runtime.
 - `modules/testgen/README.md`: P4Testgen usage, extensions, and limitations.
 - `modules/smith/README.md`: P4Smith usage and extension notes.
 - `CMakeLists.txt`: module/target discovery and build wiring.
-- `p4tools.def`: IR extensions used across tools.
+- `common/ir.def`: IR extensions used across tools.
