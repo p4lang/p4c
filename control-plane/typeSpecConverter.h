@@ -98,8 +98,8 @@ struct TranslationAnnotation {
 /// TranslationAnnotation with the values parsed from the annotation.
 bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *payload);
 
-/// getTypeName returns a cstring for use as type_name for a Type_Newtype. It
-/// returns nullptr if @type is not a Type_Newtype.
+/// getTypeName returns a cstring for use as type_name for a Type_Newtype or a
+/// Type_SerEnum. It returns nullptr if @type is neither.
 cstring getTypeName(const IR::Type *type, TypeMap *typeMap);
 
 }  // namespace ControlPlaneAPI

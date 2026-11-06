@@ -72,6 +72,11 @@ cstring getTypeName(const IR::Type *type, TypeMap *typeMap) {
     if (auto newt = t->to<IR::Type_Newtype>()) {
         return newt->name;
     }
+    // Serializable enums are user-defined types as well; their type_name refers
+    // to an entry in P4TypeInfo::serializable_enums.
+    if (auto serEnum = t->to<IR::Type_SerEnum>()) {
+        return serEnum->controlPlaneName();
+    }
     return nullptr;
 }
 
