@@ -8,6 +8,8 @@
 #ifndef IR_JSON_LOADER_H_
 #define IR_JSON_LOADER_H_
 
+#include <absl/container/flat_hash_set.h>
+
 #include <map>
 #include <memory>
 #include <optional>
@@ -17,7 +19,6 @@
 #include <utility>
 #include <variant>
 
-#include "absl/container/flat_hash_set.h"
 #include "ir.h"
 #include "json_parser.h"
 #include "lib/bitvec.h"

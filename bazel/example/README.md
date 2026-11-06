@@ -12,3 +12,12 @@ demonstrate how to:
 You can use this project as a template to get you started.
 
 The project is built during CI to ensure it is always up to date.
+
+This example is a separate Bazel root that tests p4c as a downstream dependency.
+Its `local_path_override` selects the current checkout instead of the published
+[Bazel Central Registry](https://registry.bazel.build/modules/p4c) release, so CI
+tests changes in the pull request. The override does not inherit p4c's `.bazelrc`.
+
+Building the example checks that downstream users inherit the include paths
+needed by p4c's public headers without enabling `external_include_paths` or
+adding their own include flags.

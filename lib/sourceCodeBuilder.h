@@ -10,8 +10,9 @@
 
 #include <ctype.h>
 
-#include "absl/strings/cord.h"
-#include "absl/strings/str_format.h"
+#include <absl/strings/cord.h>
+#include <absl/strings/str_format.h>
+
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/stringify.h"

@@ -4,6 +4,8 @@
 
 #include "backends/p4tools/common/core/z3_solver.h"
 
+#include <absl/strings/str_format.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <exception>
@@ -14,7 +16,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "absl/strings/str_format.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep

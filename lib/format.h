@@ -5,6 +5,10 @@
 #ifndef LIB_FORMAT_H_
 #define LIB_FORMAT_H_
 
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_format.h>
+#include <absl/types/span.h>
+
 #include <array>
 #include <functional>
 #include <ostream>
@@ -15,9 +19,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
-#include "absl/types/span.h"
 #include "lib/source_file.h"
 #include "lib/stringify.h"
 

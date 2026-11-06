@@ -12,12 +12,13 @@
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
+#include <absl/strings/str_format.h>
+
 #include <map>
 #include <sstream>
 #include <string_view>
 #include <vector>
 
-#include "absl/strings/str_format.h"
 #include "config.h"
 #include "cstring.h"
 #include "stringify.h"

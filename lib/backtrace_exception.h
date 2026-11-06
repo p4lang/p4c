@@ -8,10 +8,11 @@
 #ifndef LIB_BACKTRACE_EXCEPTION_H_
 #define LIB_BACKTRACE_EXCEPTION_H_
 
+#include <absl/debugging/stacktrace.h>
+
 #include <exception>
 #include <string>
 
-#include "absl/debugging/stacktrace.h"
 #include "config.h"
 
 namespace P4 {

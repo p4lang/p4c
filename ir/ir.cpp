@@ -7,13 +7,14 @@
 
 #include <strings.h>
 
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
+
 #include <functional>
 #include <list>
 #include <utility>
 #include <vector>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

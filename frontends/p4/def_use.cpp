@@ -5,7 +5,8 @@
 
 #include "def_use.h"
 
-#include "absl/strings/str_cat.h"
+#include <absl/strings/str_cat.h>
+
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "lib/ordered_set.h"

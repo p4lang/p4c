@@ -27,8 +27,9 @@
 #include <mutex>
 #endif
 
-#include "absl/debugging/stacktrace.h"
-#include "absl/debugging/symbolize.h"
+#include <absl/debugging/stacktrace.h>
+#include <absl/debugging/symbolize.h>
+
 #include "exceptions.h"
 #include "exename.h"
 #include "hex.h"

@@ -5,13 +5,14 @@
 
 #include "source_file.h"
 
+#include <absl/strings/match.h>
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_format.h>
+#include <absl/strings/str_replace.h>
+
 #include <algorithm>
 #include <sstream>
 
-#include "absl/strings/match.h"
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
-#include "absl/strings/str_replace.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/stringify.h"

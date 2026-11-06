@@ -8,9 +8,10 @@
 #ifndef TOOLS_IR_GENERATOR_TYPE_H_
 #define TOOLS_IR_GENERATOR_TYPE_H_
 
+#include <absl/strings/str_cat.h>
+
 #include <vector>
 
-#include "absl/strings/str_cat.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 

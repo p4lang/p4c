@@ -15,12 +15,13 @@ limitations under the License.
 #ifndef LIB_STRING_MAP_H_
 #define LIB_STRING_MAP_H_
 
+#include <absl/container/flat_hash_map.h>
+
 #include <initializer_list>
 #include <list>
 #include <stdexcept>
 #include <utility>
 
-#include "absl/container/flat_hash_map.h"
 #include "cstring.h"
 
 namespace P4 {

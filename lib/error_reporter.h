@@ -8,6 +8,9 @@
 #ifndef LIB_ERROR_REPORTER_H_
 #define LIB_ERROR_REPORTER_H_
 
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_format.h>
+
 #include <iostream>
 #include <ostream>
 #include <set>
@@ -15,8 +18,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"

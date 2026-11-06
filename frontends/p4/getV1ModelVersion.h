@@ -7,7 +7,8 @@
 #ifndef FRONTENDS_P4_GETV1MODELVERSION_H_
 #define FRONTENDS_P4_GETV1MODELVERSION_H_
 
-#include "absl/strings/numbers.h"
+#include <absl/strings/numbers.h>
+
 #include "backends/bmv2/common/v1model.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"

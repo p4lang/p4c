@@ -68,6 +68,7 @@ cc_library(
     defines = ["BOOST_MP_STANDALONE"],
     deps = [
         ":config_h",
+        "//bazel:abseil_system_includes",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:node_hash_set",
         "@abseil-cpp//absl/numeric:bits",

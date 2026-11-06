@@ -4,12 +4,13 @@
 
 #include "lib/format.h"
 
+#include <absl/strings/str_cat.h>
+
 #include <algorithm>
 #include <charconv>
 #include <cstdint>
 #include <iomanip>
 
-#include "absl/strings/str_cat.h"
 #include "lib/exceptions.h"
 
 namespace P4::FormatDetail {

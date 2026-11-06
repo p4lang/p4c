@@ -8,8 +8,9 @@
 #ifndef FRONTENDS_COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 #define FRONTENDS_COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
+
 #include "frontends/common/programMap.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
