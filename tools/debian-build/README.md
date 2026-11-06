@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2021 Fabian Ruffy
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 How to create Ubuntu (or Debian) packages, to be buildable locally or
