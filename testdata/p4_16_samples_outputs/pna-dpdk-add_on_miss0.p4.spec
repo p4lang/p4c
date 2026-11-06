@@ -49,11 +49,11 @@ header udp instanceof udp_h
 struct metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlImpl_ct_tcp_table_ipv4_src_addr
-	bit<32> MainControlImpl_ct_tcp_table_ipv4_dst_addr
-	bit<8> MainControlImpl_ct_tcp_table_ipv4_protocol
-	bit<16> MainControlImpl_ct_tcp_table_tcp_src_port
-	bit<16> MainControlImpl_ct_tcp_table_tcp_dst_port
+	bit<32> MainControlImpl_ct_tcp_table_0_ipv4_src_addr
+	bit<32> MainControlImpl_ct_tcp_table_0_ipv4_dst_addr
+	bit<8> MainControlImpl_ct_tcp_table_0_ipv4_protocol
+	bit<16> MainControlImpl_ct_tcp_table_0_tcp_src_port
+	bit<16> MainControlImpl_ct_tcp_table_0_tcp_dst_port
 	bit<48> MainControlT_tmp
 	bit<48> MainControlT_tmp_0
 	bit<8> MainControlT_new_expire_time_profile_id
@@ -92,7 +92,7 @@ action send args instanceof send_arg_t {
 	return
 }
 
-table ipv4_host {
+table ipv4_host_0 {
 	key {
 		h.ipv4.dst_addr exact
 	}
@@ -106,13 +106,13 @@ table ipv4_host {
 }
 
 
-learner ct_tcp_table {
+learner ct_tcp_table_0 {
 	key {
-		m.MainControlImpl_ct_tcp_table_ipv4_src_addr
-		m.MainControlImpl_ct_tcp_table_ipv4_dst_addr
-		m.MainControlImpl_ct_tcp_table_ipv4_protocol
-		m.MainControlImpl_ct_tcp_table_tcp_src_port
-		m.MainControlImpl_ct_tcp_table_tcp_dst_port
+		m.MainControlImpl_ct_tcp_table_0_ipv4_src_addr
+		m.MainControlImpl_ct_tcp_table_0_ipv4_dst_addr
+		m.MainControlImpl_ct_tcp_table_0_ipv4_protocol
+		m.MainControlImpl_ct_tcp_table_0_tcp_src_port
+		m.MainControlImpl_ct_tcp_table_0_tcp_dst_port
 	}
 	actions {
 		ct_tcp_table_hit @tableonly
@@ -148,14 +148,14 @@ apply {
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_new_expire_time_profile_id 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
-	mov m.MainControlImpl_ct_tcp_table_ipv4_src_addr h.ipv4.src_addr
-	mov m.MainControlImpl_ct_tcp_table_ipv4_dst_addr h.ipv4.dst_addr
-	mov m.MainControlImpl_ct_tcp_table_ipv4_protocol h.ipv4.protocol
-	mov m.MainControlImpl_ct_tcp_table_tcp_src_port h.tcp.src_port
-	mov m.MainControlImpl_ct_tcp_table_tcp_dst_port h.tcp.dst_port
-	table ct_tcp_table
+	mov m.MainControlImpl_ct_tcp_table_0_ipv4_src_addr h.ipv4.src_addr
+	mov m.MainControlImpl_ct_tcp_table_0_ipv4_dst_addr h.ipv4.dst_addr
+	mov m.MainControlImpl_ct_tcp_table_0_ipv4_protocol h.ipv4.protocol
+	mov m.MainControlImpl_ct_tcp_table_0_tcp_src_port h.tcp.src_port
+	mov m.MainControlImpl_ct_tcp_table_0_tcp_dst_port h.tcp.dst_port
+	table ct_tcp_table_0
 	LABEL_END :	jmpnv LABEL_END_0 h.ipv4
-	table ipv4_host
+	table ipv4_host_0
 	LABEL_END_0 :	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp

@@ -52,9 +52,9 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_port_out
-	bit<48> ingress_tbl_ethernet_srcAddr
-	bit<16> ingress_tbl_ipv4_hdrChecksum
-	bit<8> ingress_tbl_key
+	bit<48> ingress_tbl_0_ethernet_srcAddr
+	bit<16> ingress_tbl_0_ipv4_hdrChecksum
+	bit<8> ingress_tbl_0_key
 	bit<8> IngressParser_parser_tmp
 	bit<8> IngressParser_parser_tmp_0
 	bit<8> IngressParser_parser_tmp_1
@@ -134,11 +134,11 @@ action execute_1 args instanceof execute_1_arg_t {
 	LABEL_END_3 :	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.ingress_tbl_ethernet_srcAddr exact
-		m.ingress_tbl_ipv4_hdrChecksum exact
-		m.ingress_tbl_key exact
+		m.ingress_tbl_0_ethernet_srcAddr exact
+		m.ingress_tbl_0_ipv4_hdrChecksum exact
+		m.ingress_tbl_0_key exact
 	}
 	actions {
 		NoAction
@@ -171,10 +171,10 @@ apply {
 	and m.Ingress_tmp_22 0xF
 	mov m.Ingress_tmp_23 m.Ingress_tmp_22
 	and m.Ingress_tmp_23 0xF
-	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.ingress_tbl_ipv4_hdrChecksum h.ipv4.hdrChecksum
-	mov m.ingress_tbl_key m.Ingress_tmp_23
-	table tbl
+	mov m.ingress_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_0_ipv4_hdrChecksum h.ipv4.hdrChecksum
+	mov m.ingress_tbl_0_key m.Ingress_tmp_23
+	table tbl_0
 	regadd counter0_0_packets 0x3FF 1
 	regadd counter0_0_bytes 0x3FF 0x14
 	regadd counter1_0 0x200 1

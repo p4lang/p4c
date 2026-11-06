@@ -373,6 +373,9 @@ class P4RuntimeTest(BaseTest):
     def _cleanup_runtime_stream(self):
         if self.stream_out_q is not None:
             self.stream_out_q.put(None)
+        if self.stream_recv_thread is not None and self.stream_recv_thread.is_alive():
+            self.stream_recv_thread.join(timeout=2)
+        # Fall back to cancellation if the server did not close the stream in time.
         if self.stream is not None:
             self.stream.cancel()
         if self.channel is not None:

@@ -75,7 +75,7 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr wildcard
 	}
@@ -105,7 +105,7 @@ apply {
 	INGRESSPARSERIMPL_ACCEPT :	jmpeq LABEL_FALSE m.psa_ingress_input_metadata_parser_error 0x0
 	mov m.psa_ingress_output_metadata_drop 1
 	jmp LABEL_END
-	LABEL_FALSE :	table tbl
+	LABEL_FALSE :	table tbl_0
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

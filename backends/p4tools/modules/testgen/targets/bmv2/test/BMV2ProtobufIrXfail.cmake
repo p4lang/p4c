@@ -23,6 +23,13 @@ p4tools_add_xfail_reason(
 ####################################################################################################
 # These are failures in P4Testgen that need to be fixed.
 
+# P4Testgen does not support array expressions as state variables.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-protobuf-ir"
+  "ArrayExpression is not a valid StateVariable"
+  stack-swap-alias-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
   "Unknown or unimplemented extern method: .*[.]recirculate_preserving_field_list"
@@ -43,6 +50,7 @@ p4tools_add_xfail_reason(
   "with type .* is not a Constant"
   # Most of these come from varbits
   issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+  shifted-dynamic-slice-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
 )
 
 p4tools_add_xfail_reason(

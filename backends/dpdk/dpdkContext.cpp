@@ -83,9 +83,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 } else {
                     tblAttr.isHidden = false;
                     tblAttr.tableType = "match"_cs;
-                    tblAttr.tableKeys =
-                        ::P4::get(structure->key_map,
-                                  kv.second->name.originalName + "_" + tbl->name.originalName);
+                    tblAttr.tableKeys = ::P4::get(structure->key_map, tbl->controlPlaneName());
                 }
                 if (!hidden)
                     tables.push_back(d);
@@ -93,7 +91,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     action_data_tables.push_back(d);
                 else
                     selector_tables.push_back(d);
-                tableAttrmap.emplace(tbl->name.originalName, tblAttr);
+                tableAttrmap.emplace(tbl->name.name, tblAttr);
             }
         }
     }
@@ -138,7 +136,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
             }
             if (externTypeName == "DirectMeter" || externTypeName == "DirectCounter") {
                 auto ownerTable = ::P4::get(structure->direct_resource_map, ed->name.name);
-                auto tableAttr = ::P4::get(tableAttrmap, ownerTable->name.originalName);
+                auto tableAttr = ::P4::get(tableAttrmap, ownerTable->name.name);
                 externAttr.table_id = tableAttr.tableHandle;
             }
             externAttrMap.emplace(ed->name.name, externAttr);
@@ -300,13 +298,13 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     cstring default_action_name = cstring::empty;
     if (table->getDefaultAction()) default_action_name = toStr(table->getDefaultAction());
 
-    auto tableAttr = ::P4::get(tableAttrmap, table->name.originalName);
+    auto tableAttr = ::P4::get(tableAttrmap, table->name.name);
     for (auto action : table->getActionList()->actionList) {
         struct actionAttributes attr = ::P4::get(actionAttrMap, action->getName());
         if (toStr(action->expression) == default_action_name) {
             tableAttr.default_action_handle = attr.actionHandle;
             // Update default table handle in existing table attribute map
-            tableAttrmap.find(table->name.originalName)->second = tableAttr;
+            tableAttrmap.find(table->name.name)->second = tableAttr;
             break;
         }
     }
@@ -323,9 +321,7 @@ void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const c
 }
 
 /// This functions creates JSON object for match attributes of a table.
-Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *table,
-                                                           const cstring ctrlName) {
-    auto tableAttr = ::P4::get(tableAttrmap, table->name.originalName);
+Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *table) {
     auto *match_attributes = new Util::JsonObject();
     auto *actFmtArray = new Util::JsonArray();
     auto *stageTblArray = new Util::JsonArray();
@@ -333,11 +329,7 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
     for (auto action : table->getActionList()->actionList) {
         auto *oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::P4::get(actionAttrMap, action->getName());
-        auto name = action->externalName();
-        if (name != "NoAction") {
-            name = ctrlName + "." + name;
-        }
-        oneAction->emplace("action_name", name);
+        oneAction->emplace("action_name", attr.externalName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto *immFldArray = new Util::JsonArray();
         if (attr.params) {
@@ -442,9 +434,8 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         hasActionProfileSelector = true;
         *memberTable = structure->member_tables.at(tbl_name);
         auto *actionDataField = new Util::JsonObject();
-        auto tableAttr = ::P4::get(tableAttrmap, (*memberTable)->name.originalName);
-        auto tableName = tableAttr.controlName + "." + (*memberTable)->name.originalName;
-        actionDataField->emplace("name", tableName);
+        auto tableAttr = ::P4::get(tableAttrmap, (*memberTable)->name.name);
+        actionDataField->emplace("name", tableAttr.externalName);
         actionDataField->emplace("handle", tableAttr.tableHandle);
         actionDataJson->append(actionDataField);
         tableJson->emplace("action_data_table_refs"_cs, actionDataJson);
@@ -456,16 +447,15 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
         hasActionProfileSelector = true;
         auto groupTable = structure->group_tables.at(tbl_name);
         auto *selectField = new Util::JsonObject();
-        auto tableAttr = ::P4::get(tableAttrmap, groupTable->name.originalName);
-        auto tableName = tableAttr.controlName + "." + groupTable->name.originalName;
-        selectField->emplace("name", tableName);
+        auto tableAttr = ::P4::get(tableAttrmap, groupTable->name.name);
+        selectField->emplace("name", tableAttr.externalName);
         selectField->emplace("handle", tableAttr.tableHandle);
         selectionJson->append(selectField);
         tableJson->emplace("selection_table_refs", selectionJson);
     }
 
     if (hasActionProfileSelector) {
-        tableJson->emplace("action_profile", (*memberTable)->name.originalName);
+        tableJson->emplace("action_profile", (*memberTable)->name.name);
     }
     return hasActionProfileSelector;
 }
@@ -474,8 +464,8 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     for (auto t : tables) {
         auto tbl = t->to<IR::P4Table>();
-        auto tableAttr = ::P4::get(tableAttrmap, tbl->name.originalName);
-        auto *tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
+        auto tableAttr = ::P4::get(tableAttrmap, tbl->name.name);
+        auto *tableJson = initTableCommonJson(tbl->name.name, tableAttr);
         bool hasActionProfileSelector = false;
         bool isMatchTable = tableAttr.tableType == "match";
         const IR::P4Table *memberTable = nullptr;
@@ -506,11 +496,10 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
             setActionAttributes(table);
             setDefaultActionHandle(table);
 
-            tableAttr = ::P4::get(tableAttrmap, table->name.originalName);
+            tableAttr = ::P4::get(tableAttrmap, table->name.name);
             tableJson->emplace("actions", addActions(table, tableAttr.controlName, isMatchTable));
             if (isMatchTable) {
-                tableJson->emplace("match_attributes",
-                                   addMatchAttributes(table, tableAttr.controlName));
+                tableJson->emplace("match_attributes", addMatchAttributes(table));
             }
             tableJson->emplace("default_action_handle", tableAttr.default_action_handle);
         } else {

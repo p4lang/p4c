@@ -30,13 +30,7 @@ mark_as_advanced(Z3_FOUND Z3_INCLUDE_DIR Z3_LIBRARY Z3_EXEC)
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(
-  Z3 DEFAULT_MSG
-  Z3_INCLUDE_DIR
-  Z3_LIBRARY
-)
-
-if(Z3_FOUND)
+if(Z3_INCLUDE_DIR)
   message(STATUS "Found Z3 includes at ${Z3_INCLUDE_DIR}.")
   file(READ "${Z3_INCLUDE_DIR}/z3_version.h" Z3_VERSION_FILE)
 
@@ -55,6 +49,14 @@ if(Z3_FOUND)
 
   set(Z3_VERSION_STRING "${Z3_VERSION_MAJOR}.${Z3_VERSION_MINOR}.${Z3_VERSION_PATCH}.${Z3_VERSION_TWEAK}")
 endif()
+
+# Read the version before checking the package so find_package can enforce
+# the minimum version requested by its caller.
+find_package_handle_standard_args(
+  Z3
+  REQUIRED_VARS Z3_INCLUDE_DIR Z3_LIBRARY
+  VERSION_VAR Z3_VERSION_STRING
+)
 
 message(STATUS "Z3 version: ${Z3_VERSION_STRING}")
 message(STATUS "Z3 library: ${Z3_LIBRARY}")

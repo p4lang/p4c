@@ -12,8 +12,8 @@ header h instanceof H
 struct Metadata {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<8> MainControl_lookup_MainControl_lookup_value
-	bit<8> MainControl_lookup_MainControl_lookup_isValid
+	bit<8> MainControl_lookup_0_MainControl_lookup_0_value
+	bit<8> MainControl_lookup_0_MainControl_lookup_0_isValid
 }
 metadata instanceof Metadata
 
@@ -28,10 +28,10 @@ action discard args none {
 	return
 }
 
-table lookup {
+table lookup_0 {
 	key {
-		m.MainControl_lookup_MainControl_lookup_value exact
-		m.MainControl_lookup_MainControl_lookup_isValid exact
+		m.MainControl_lookup_0_MainControl_lookup_0_value exact
+		m.MainControl_lookup_0_MainControl_lookup_0_isValid exact
 	}
 	actions {
 		forward
@@ -45,11 +45,11 @@ table lookup {
 apply {
 	rx m.pna_main_input_metadata_input_port
 	extract h.h
-	mov m.MainControl_lookup_MainControl_lookup_value h.h.value
-	mov m.MainControl_lookup_MainControl_lookup_isValid 1
+	mov m.MainControl_lookup_0_MainControl_lookup_0_value h.h.value
+	mov m.MainControl_lookup_0_MainControl_lookup_0_isValid 1
 	jmpv LABEL_END h.h
-	mov m.MainControl_lookup_MainControl_lookup_isValid 0
-	LABEL_END :	table lookup
+	mov m.MainControl_lookup_0_MainControl_lookup_0_isValid 0
+	LABEL_END :	table lookup_0
 	emit h.h
 	tx m.pna_main_output_metadata_output_port
 }

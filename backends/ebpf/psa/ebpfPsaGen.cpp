@@ -723,7 +723,8 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     CHECK_NULL(pipeline->control);
 
     auto deparser_converter = new ConvertToEBPFDeparserPSA(
-        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, type);
+        pipeline, pipeline->parser->headers, pipeline->control->user_metadata,
+        pipeline->control->outputStandardMetadata, type);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -921,6 +922,12 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
 
     if (pipelineType == TC_INGRESS || pipelineType == XDP_INGRESS) {
         deparser->codeGen->useAsPointerVariable(deparser->resubmit_meta->name.name);
+    }
+
+    // The deparser's metadata parameter refers to the control's user metadata.
+    // The traffic manager has no user metadata, xdp2tc_metadata does not carry it.
+    if (pipelineType != TC_TRAFFIC_MANAGER) {
+        deparser->codeGen->substitute(deparser->user_metadata, controlUserMetadata);
         deparser->codeGen->useAsPointerVariable(deparser->user_metadata->name.name);
     }
 
