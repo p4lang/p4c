@@ -232,6 +232,24 @@ TEST(StructuredDiagnostics, SarifUsesTheSameOwnedRecordsDeterministically) {
     EXPECT_NE(first.str().find("\"ruleId\":\"parser\""), std::string::npos);
     EXPECT_NE(first.str().find("\"text\":\"bad syntax\""), std::string::npos);
     EXPECT_EQ(first.str().find("\"startLine\""), std::string::npos);
+    EXPECT_NE(first.str().find("/errata01/os/schemas/sarif-schema-2.1.0.json"), std::string::npos);
+}
+
+TEST(StructuredDiagnostics, SarifPreservesNulsControlsAndUnicodeWhileReplacingInvalidUtf8) {
+    Diagnostic diagnostic;
+    diagnostic.message = std::string("head\0tail", 9) + "\x01\n\"\\é😀\xff";
+    std::ostringstream serialized;
+    writeSarif(serialized, {diagnostic});
+    EXPECT_NE(serialized.str().find("head\\u0000tail"), std::string::npos);
+    std::istringstream input(serialized.str());
+    std::unique_ptr<JsonData> root;
+    parseJson(input, root, true);
+    ASSERT_TRUE(root);
+    const auto &runs = *root->to<JsonObject>()->at("runs")->to<JsonVector>();
+    const auto &results = *runs.at(0)->to<JsonObject>()->at("results")->to<JsonVector>();
+    const auto &message = *results.at(0)->to<JsonObject>()->at("message")->to<JsonObject>();
+    EXPECT_EQ(*message.at("text")->to<JsonString>(),
+              std::string("head\0tail", 9) + "\x01\n\"\\é😀\xef\xbf\xbd");
 }
 
 TEST(StructuredDiagnostics, InvalidPreprocessorRecordsAreVisibleAndEarlierWarningsSurvive) {

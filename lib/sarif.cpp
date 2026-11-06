@@ -6,8 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "lib/cstring.h"
-
 namespace P4 {
 namespace {
 
@@ -27,7 +25,20 @@ void string(std::ostream &out, const std::string &value) {
             ++i;
         }
     }
-    out << '"' << cstring(valid).escapeJson() << '"';
+    // Diagnostic strings are length-delimited and may contain embedded NULs.
+    // Keep them out of cstring, whose size() uses strlen().
+    out << '"';
+    constexpr char hex[] = "0123456789abcdef";
+    for (unsigned char ch : valid) {
+        if (ch == '"' || ch == '\\') {
+            out << '\\' << ch;
+        } else if (ch < 0x20) {
+            out << "\\u00" << hex[ch >> 4] << hex[ch & 15];
+        } else {
+            out << ch;
+        }
+    }
+    out << '"';
 }
 
 void location(std::ostream &out, const DiagnosticLocation &loc) {
@@ -50,7 +61,7 @@ void location(std::ostream &out, const DiagnosticLocation &loc) {
 }  // namespace
 
 void writeSarif(std::ostream &out, const std::vector<Diagnostic> &diagnostics) {
-    out << R"({"$schema":"https://docs.oasis-open.org/sarif/sarif/v2.1.0/cos02/schemas/sarif-schema-2.1.0.json",)"
+    out << R"({"$schema":"https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",)"
            R"("version":"2.1.0","runs":[{"tool":{"driver":{"name":"p4c",)"
            R"("informationUri":"https://github.com/p4lang/p4c"}},)"
            R"("columnKind":"utf16CodeUnits","results":[)";

@@ -207,7 +207,7 @@ class DiagnosticReport:
 
     def write(self):
         report = {
-            "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/cos02/schemas/sarif-schema-2.1.0.json",
+            "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
             "version": "2.1.0",
             "runs": [
                 {
@@ -263,11 +263,11 @@ class DiagnosticReport:
                 errors.seek(0)
                 raw = errors.read()
             try:
-                text = raw.decode("utf-8")
-            except UnicodeError as error:
-                self.error(f"Invalid UTF-8 in GCC diagnostics: {error}; {raw!r}")
-                return rc or 1
-            try:
+                try:
+                    text = raw.decode("utf-8")
+                except UnicodeError as error:
+                    self.error(f"Invalid UTF-8 in GCC diagnostics: {error}; {raw!r}")
+                    return rc or 1
                 decoded = self.gcc(text)
             except OSError as error:
                 print(f"Cannot write diagnostics file {self.file}: {error}", file=sys.stderr)
@@ -280,6 +280,8 @@ class DiagnosticReport:
             try:
                 with file.open(encoding="utf-8") as source:
                     report = json.load(source, parse_constant=_invalid_constant)
+                # Reject lone surrogate escapes before merging any child data.
+                json.dumps(report, ensure_ascii=False, allow_nan=False).encode("utf-8")
                 if report["version"] != "2.1.0" or len(report["runs"]) != 1:
                     raise ValueError("expected one SARIF 2.1.0 compiler run")
                 run = report["runs"][0]
@@ -298,7 +300,21 @@ class DiagnosticReport:
                         or "ruleIndex" in result
                     ):
                         raise ValueError("malformed or indexed compiler diagnostic")
-            except (OSError, UnicodeError, ValueError, KeyError, TypeError) as error:
+                    for key in ("locations", "relatedLocations"):
+                        for location in result.get(key, []):
+                            artifact = location.get("physicalLocation", {}).get(
+                                "artifactLocation", {}
+                            )
+                            if "index" in artifact or "uriBaseId" in artifact:
+                                raise ValueError("expected self-contained compiler locations")
+            except (
+                OSError,
+                UnicodeError,
+                ValueError,
+                KeyError,
+                TypeError,
+                AttributeError,
+            ) as error:
                 try:
                     self.error(
                         f"Cannot read compiler diagnostics; backend must support --diagnostics-file: {error}"

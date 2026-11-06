@@ -2,7 +2,7 @@
 
 Language servers and other tools need diagnostic data without interpreting terminal
 formatting. p4c provides owned C++ diagnostic records and an optional
-[SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html)
+[SARIF 2.1.0 plus Errata 01](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html)
 output adapter. This is a foundation for LSP integration; it is not an LSP server.
 
 ```sh
@@ -168,5 +168,8 @@ API without a SARIF file, lifetimes, policies, source ranges and subprocess capt
 fresh 27-group end-to-end acceptance suite when p4test and BMv2 are configured.
 Its per-invocation inputs, commands, stdout, stderr, statuses and SARIF reports
 remain under `Testing/StructuredDiagnostics`. Official schema validation can be
-run externally using Draft 7 and a format checker; no schema download is required
+run externally against the official [Errata 01 schema](https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json)
+using JSON Schema Draft 4 and a format checker; no schema download is required
 to run the compiler or the configured tests.
+External validation needs `jsonschema[format]`; the validator rejects missing
+URI/date-time validators rather than silently skipping their format checks.

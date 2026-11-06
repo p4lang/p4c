@@ -34,6 +34,10 @@ class DriverDiagnostics(unittest.TestCase):
         return subprocess.run(args, stdout=subprocess.PIPE, stderr=stderr, check=False).returncode
 
     def test_empty_report_is_valid_and_isolated(self):
+        self.assertEqual(
+            json.loads(self.report.file.read_text())["$schema"],
+            "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+        )
         self.assertEqual(json.loads(self.report.file.read_text())["runs"][0]["results"], [])
         self.report.error("first compilation")
         other = DiagnosticReport(self.root / "other.sarif")
@@ -176,6 +180,47 @@ class DriverDiagnostics(unittest.TestCase):
 
         self.assertEqual(self.report.run("compiler", ["compiler"], compiler), 1)
         self.assertEqual(self.report.results[-1]["level"], "error")
+
+    def test_invalid_compiler_run_and_unicode_retain_child_failure(self):
+        surrogate = json.loads(self.report.file.read_text())
+        surrogate["runs"][0]["results"] = [{"level": "error", "message": {"text": "\ud800"}}]
+        for malformed in (None, [], {"version": "2.1.0", "runs": [None]}, surrogate):
+            with self.subTest(malformed=malformed):
+
+                def compiler(args):
+                    Path(args[-1]).write_text(json.dumps(malformed))
+                    return 7
+
+                self.assertEqual(self.report.run("compiler", ["compiler"], compiler), 7)
+                self.assertEqual(self.report.results[-1]["level"], "error")
+
+    def test_indexed_compiler_locations_are_rejected(self):
+        for key in ("locations", "relatedLocations"):
+            for artifact in ({"index": 0}, {"uri": "input.p4", "uriBaseId": "SOURCE"}):
+                with self.subTest(key=key, artifact=artifact):
+
+                    def compiler(args):
+                        other = DiagnosticReport(Path(args[-1]))
+                        other.results = [
+                            {
+                                "level": "error",
+                                "message": {"text": "indexed"},
+                                key: [{"physicalLocation": {"artifactLocation": artifact}}],
+                            }
+                        ]
+                        other.write()
+                        return 7
+
+                    self.assertEqual(self.report.run("compiler", ["compiler"], compiler), 7)
+                    self.assertEqual(self.report.results[-1]["ruleId"], "driver-diagnostics")
+
+    def test_invalid_gcc_utf8_and_write_failure_retain_child_status(self):
+        def preprocessor(args, stderr=None):
+            stderr.write(b"\xff")
+            return 9
+
+        self.report.file = self.root
+        self.assertEqual(self.report.run("preprocessor", ["cpp"], preprocessor), 9)
 
     def test_large_separate_subprocess_output_does_not_deadlock(self):
         program = (

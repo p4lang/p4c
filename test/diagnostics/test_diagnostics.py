@@ -47,6 +47,10 @@ class DiagnosticsAcceptance(unittest.TestCase):
             return run, None
         self.assertTrue(file.exists(), f"No SARIF report: {run.stderr.decode(errors='replace')}")
         document = json.loads(file.read_text(encoding="utf-8"))
+        self.assertEqual(
+            document["$schema"],
+            "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+        )
         self.assertEqual(document["version"], "2.1.0")
         self.assertEqual(document["runs"][0]["columnKind"], "utf16CodeUnits")
         return run, document["runs"][0]["results"]
