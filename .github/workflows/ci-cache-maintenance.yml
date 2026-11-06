@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Keep main caches and clean up PR caches
-        uses: p4lang/.github/CI/cache-retention@3755e1d9912f7777eaffae6380a1ebdd224ccda3
+        uses: p4lang/.github/CI/cache-retention@4bec527fd3988345ec240ae8f4f000bc938e4259
         with:
           key-prefixes: |
             ccache-v2-
