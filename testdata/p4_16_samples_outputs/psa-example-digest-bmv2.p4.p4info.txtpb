@@ -124,6 +124,9 @@ actions {
     id: 2
     name: "serEnumT"
     bitwidth: 16
+    type_name {
+      name: "EthTypes"
+    }
   }
 }
 digests {
