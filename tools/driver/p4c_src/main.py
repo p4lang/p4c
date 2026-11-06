@@ -15,6 +15,7 @@ import sys
 
 import p4c_src
 import p4c_src.config as config
+from p4c_src.diagnostics import DiagnosticReport
 
 # \TODO: let the backends set their versions ...
 p4c_version = p4c_src.__version__
@@ -128,8 +129,14 @@ class PassThroughAction(argparse.Action):
         setattr(namespace, self.dest, opts + [option_string] + values)
 
 
-def main():
-    parser = argparse.ArgumentParser(conflict_handler="resolve")
+def _main(diagnostics=None):
+    class DiagnosticArgumentParser(argparse.ArgumentParser):
+        def error(self, message):
+            if diagnostics is not None:
+                diagnostics.error(message)
+            super().error(message)
+
+    parser = DiagnosticArgumentParser(conflict_handler="resolve")
     parser.add_argument(
         "-V",
         "--version",
@@ -472,7 +479,9 @@ def main():
     ###              this changeset into “main”.
 
     # parse the arguments
+    parser.add_argument("--diagnostics-file", metavar="FILE", help="Write SARIF 2.1.0 diagnostics")
     opts = parser.parse_args()
+    opts._diagnostics = diagnostics
 
     ### Accept multiple ways of specifying which language,
     ###   and ensure that it is a consistent string from now on.
@@ -615,6 +624,8 @@ def main():
 
         for pathname in pathnames_to_check:
             if not os.path.isfile(pathname):
+                if diagnostics is not None:
+                    diagnostics.error(f'Input file "{pathname}" does not exist.')
                 print(
                     '\nERROR: the input file "{}" does not exist.'.format(pathname),
                     file=sys.stderr,
@@ -687,3 +698,31 @@ def main():
     # run all commands
     rc = backend.run()
     sys.exit(rc)
+
+
+def main():
+    # Initialize before argparse/input validation so ordinary early failures also
+    # leave a valid document. No process-global accumulator or atexit hook.
+    file = None
+    for index, argument in enumerate(sys.argv[1:], 1):
+        if argument == "--":
+            break
+        if argument == "--diagnostics-file" and index + 1 < len(sys.argv):
+            file = sys.argv[index + 1]
+        if argument.startswith("--diagnostics-file="):
+            file = argument.split("=", 1)[1]
+    try:
+        diagnostics = DiagnosticReport(file) if file is not None else None
+    except OSError as error:
+        print(f"Cannot write diagnostics file {file}: {error}", file=sys.stderr)
+        sys.exit(1)
+    try:
+        _main(diagnostics)
+    except OSError as error:
+        if diagnostics is None:
+            raise
+        try:
+            diagnostics.error(f"Driver I/O failure: {error}")
+        except OSError as write_error:
+            print(f"Cannot write diagnostics file {file}: {write_error}", file=sys.stderr)
+        sys.exit(1)

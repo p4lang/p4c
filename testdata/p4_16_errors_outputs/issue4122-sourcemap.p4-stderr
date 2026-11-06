@@ -1,0 +1,4 @@
+issue4122 mapped"%.p4(40):syntax error, unexpected TRUE
+true
+^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

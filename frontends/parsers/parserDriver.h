@@ -76,7 +76,7 @@ class AbstractParserDriver {
 
  private:
     /// The line number from the most recent #line directive.
-    int lineDirectiveLine = 0;
+    unsigned lineDirectiveLine = 0;
 
     /// The file name from the most recent #line directive.
     cstring lineDirectiveFile;
