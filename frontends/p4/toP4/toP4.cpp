@@ -961,12 +961,12 @@ bool ToP4::preorder(const IR::Invalid *) {
 }
 
 bool ToP4::preorder(const IR::Dots *) {
-    builder.append("...");
+    builder.append(IR::Dots::name);
     return false;
 }
 
 bool ToP4::preorder(const IR::NamedDots *) {
-    builder.append("...");
+    builder.append(IR::Dots::name);
     return false;
 }
 

@@ -689,7 +689,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 if (src != compI->expression) changes = true;
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            if (hasDots) vec.push_back(si->getField("..."_cs));
+            if (hasDots) vec.push_back(si->getField(IR::Dots::name));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
                 sourceExpression =
