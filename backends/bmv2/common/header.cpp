@@ -187,6 +187,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     cstring name = st->controlPlaneName();
     auto fields = new Util::JsonArray();
     unsigned max_length = 0;  // for variable-sized headers
+    unsigned varbit_width = 0;
     bool varbitFound = false;
 
     if (st->is<IR::Type_HeaderUnion>()) {
@@ -220,6 +221,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             field->append(type->isSigned);
             max_length += type->size;
         } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            varbit_width = type->size;
             auto field = pushNewArray(fields);
             field->append(f->name.name);
             max_length += type->size;
@@ -264,6 +266,18 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
                 " totaling a multiple of 8 bits.",
                 st, max_length);
         }
+    }
+
+    // BMv2 constructs headers with an empty varbit field. The fixed fields must
+    // therefore also be byte-aligned, independently of the declared maximum.
+    // Its parser rejects non-byte-aligned runtime lengths with ParserInvalidArgument.
+    unsigned fixed_width = max_length - varbit_width;
+    if (st->is<IR::Type_Header>() && padding == 0 && fixed_width % 8 != 0) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Found header with fixed fields totaling %2% bits."
+                    "  BMv2 target only supports headers with fixed fields"
+                    " totaling a multiple of 8 bits.",
+                    st, fixed_width);
     }
 
     unsigned max_length_bytes = (max_length + padding) / 8;
