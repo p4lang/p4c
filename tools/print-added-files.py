@@ -1,5 +1,9 @@
 #! /usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This program expects standard input to be the output of a command
 # similar to this one:
 
