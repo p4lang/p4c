@@ -1,0 +1,33 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/const_range numtables 1
+
+$TC p4template create action/const_range/cb/hit actid 1 \
+	param value type bit8
+$TC p4template update action/const_range/cb/hit state active
+
+$TC p4template create action/const_range/cb/miss actid 2
+$TC p4template update action/const_range/cb/miss state active
+
+$TC p4template create table/const_range/cb/ranges \
+	tblid 1 \
+	type ternary \
+	keysz 32 permissions 0x3da4 tentries 32 nummasks 9 \
+	table_acts act name const_range/cb/hit \
+	act name const_range/cb/miss
+$TC p4template update table/const_range/cb/ranges default_miss_action action const_range/cb/miss
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x1 hdr.fields.right 0x3 hdr.fields.selector 0x7 hdr.fields.flags 0xab permissions 0x1024 action const_range/cb/hit param value 21
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x1 hdr.fields.right 0x3 hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x1 hdr.fields.right 0x4/0xfe hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x2/0xfe hdr.fields.right 0x3 hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x2/0xfe hdr.fields.right 0x4/0xfe hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x4/0xfc hdr.fields.right 0x3 hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x4/0xfc hdr.fields.right 0x4/0xfe hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x8 hdr.fields.right 0x3 hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x8 hdr.fields.right 0x4/0xfe hdr.fields.selector 0x7 hdr.fields.flags 0xa0/0xf0 permissions 0x1024 action const_range/cb/hit param value 23
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x0/0x2 hdr.fields.right 0x0/0x0 hdr.fields.selector 0x7 hdr.fields.flags 0x0/0x0 permissions 0x1024 action const_range/cb/hit param value 26
+$TC p4template create table/const_range/cb/ranges entry hdr.fields.left 0x0/0x0 hdr.fields.right 0x0/0x0 hdr.fields.selector 0x7 hdr.fields.flags 0x0/0x0 permissions 0x1024 action const_range/cb/hit param value 31
+$TC p4template update pipeline/const_range state ready

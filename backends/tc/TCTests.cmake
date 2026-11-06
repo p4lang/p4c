@@ -44,6 +44,33 @@ endif()
 # Only enable P4TC and P4TC STF tests when all required tools are available.
 p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+foreach(mode counter emission parser deparser reject-error narrow-cache vlan comparison
+             advance bitfields arithmetic)
+  add_test(NAME "p4tc-codegen/${mode}"
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/run.py
+      --compiler $<TARGET_FILE:p4c-pna-p4tc> --mode ${mode})
+  set_tests_properties("p4tc-codegen/${mode}" PROPERTIES
+    SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
+endforeach()
+
+add_test(NAME "p4tc-codegen/register-init"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/register_init.py
+    --compiler $<TARGET_FILE:p4c-pna-p4tc>)
+set_tests_properties("p4tc-codegen/register-init" PROPERTIES
+  SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
+
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/tc-register-init.p4"
+  "testdata/p4_16_samples/tc-register-init.p4" "" "")
+
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/tc-large-header-init.p4"
+  "testdata/p4_16_samples/tc-large-header-init.p4" "" "")
+p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+  "testdata/p4_16_samples/tc-parser-advance.p4"
+  "testdata/p4_16_samples/tc-parser-advance.p4" "" "")
+
 if (ENABLE_P4TC_STF_TESTS)
   # Setup fixture
   add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup "https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest")
@@ -62,4 +89,45 @@ if (ENABLE_P4TC_STF_TESTS)
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/ipip_decap" "testdata/p4tc_samples_stf/ipip.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/ipip_decap.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_pop" "testdata/p4tc_samples_stf/varbit_pop.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_pop.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_reflect" "testdata/p4tc_samples_stf/varbit_reflect.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_reflect.stf" "")
+  foreach(comparison_test mac_comparisons array_comparisons signed24_comparisons signed_scalar_comparisons const_range)
+    p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
+      "testdata/p4tc_samples_stf/${comparison_test}"
+      "testdata/p4tc_samples_stf/${comparison_test}.p4"
+      "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/${comparison_test}.stf" "")
+  endforeach()
+  add_test(NAME "p4tc/testdata/p4_16_samples/tc-large-header-init-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-large-header-init.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-large-header-init.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/tc-large-header-init-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/tc-parser-advance-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-parser-advance.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-parser-advance.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/tc-parser-advance-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/tc-codegen-counter-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-counter.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-counter.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/tc-codegen-counter-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/tc-codegen-emission-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-emission.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-emission.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/tc-codegen-emission-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  add_test(NAME "p4tc/testdata/p4_16_samples/tc-codegen-arithmetic-stf"
+    COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+      ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-arithmetic.p4
+      -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-arithmetic.stf)
+  set_tests_properties("p4tc/testdata/p4_16_samples/tc-codegen-arithmetic-stf"
+    PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK shared_lock TIMEOUT 1000
+      WORKING_DIRECTORY ${P4C_BINARY_DIR})
 endif()

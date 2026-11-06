@@ -5,6 +5,9 @@
 
 #include "ebpfCodeGen.h"
 
+#include <cctype>
+#include <regex>
+
 namespace P4::TC {
 
 DeparserBodyTranslatorPNA::DeparserBodyTranslatorPNA(const IngressDeparserPNA *deparser)
@@ -33,7 +36,7 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#define BYTES(w) ((w) / 8)");
     builder->appendLine("#define BYTES_ROUND_UP(w) (((w) + (8) - 1) / (8))");
     builder->appendLine(
-        "#define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
+        "#define write_partial_ex(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
         "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
     builder->appendLine(
         "#define write_byte(base, offset, v) do { "
@@ -312,8 +315,462 @@ void PNAArchTC::emitHeaderDefs(EBPF::CodeBuilder *builder) const {
 }
 
 // =====================TCIngressPipelinePNA=============================
+void TCIngressPipelinePNA::emitCPUMAPInitializers(EBPF::CodeBuilder *builder) {
+    emitCPUMAPLookup(builder);
+    builder->emitIndent();
+    builder->appendLine("if (!hdrMd)");
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("return %v;", dropReturnCode());
+    builder->newline();
+    builder->decreaseIndent();
+
+    // Large constant memsets exceed the BPF backend's inline expansion limit.
+    // Keep small instances inline and clear larger map values with bounded stores.
+    builder->emitIndent();
+    builder->append("if (sizeof(struct hdr_md) <= 256) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(hdrMd, 0, sizeof(struct hdr_md));");
+    builder->blockEnd(false);
+    builder->append(" else ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("#pragma clang loop unroll(disable)");
+    builder->emitIndent();
+    builder->append("for (u32 hdr_md_i = 0; hdr_md_i < sizeof(struct hdr_md); hdr_md_i++) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("((volatile u8 *)hdrMd)[hdr_md_i] = 0;");
+    builder->blockEnd(true);
+    builder->blockEnd(true);
+}
+
+// A cached metadata field keeps the field's own C type so that the cached
+// region preserves the field's assignment semantics (truncation and wrapping
+// on assignment). Only types the tc target represents as an integer scalar
+// can be cached; byte alignment mirrors EBPFScalarTypePNA.
+static bool cacheableLocalType(const P4::TypeMap *typeMap, const IR::Type *type) {
+    auto *canonical = typeMap->getTypeType(type, true);
+    if (canonical == nullptr) return false;
+    if (canonical->is<IR::Type_Boolean>()) return true;
+    auto *bits = canonical->to<IR::Type_Bits>();
+    if (bits == nullptr || bits->size > 64) return false;
+    unsigned width = bits->size;
+    return width <= 8 || width <= 16 || (width > 24 && width <= 32) || (width > 56);
+}
+
+namespace {
+
+/// Records which of the given parser-local variables the visited IR refers to.
+class ParserLocalUses : public Inspector {
+    const std::set<cstring> &locals;
+    std::set<cstring> &used;
+
+ public:
+    ParserLocalUses(const std::set<cstring> &locals, std::set<cstring> &used)
+        : locals(locals), used(used) {}
+    bool preorder(const IR::PathExpression *path) override {
+        if (locals.count(path->path->name.name)) used.insert(path->path->name.name);
+        return false;
+    }
+};
+
+}  // namespace
+
+// Outlined states get a private copy of each parser local, so a local shared
+// with code outside the region would not carry its value across the helper.
+static bool checkOutlineLocals(const EBPFPnaParser *parser) {
+    std::set<cstring> locals;
+    for (auto *local : parser->parserBlock->container->parserLocals) {
+        if (local->is<IR::Declaration_Variable>()) locals.insert(local->getName().name);
+    }
+    for (const auto &region : parser->outlineRegions) {
+        std::set<cstring> inside, outside;
+        for (auto *state : parser->states) {
+            bool isInside = region.states.count(state->state->name.name) != 0;
+            ParserLocalUses uses(locals, isInside ? inside : outside);
+            state->state->apply(uses);
+        }
+        for (auto name : inside) {
+            if (!outside.count(name)) continue;
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Parser local '%1%' crosses the boundary of the outlined region starting "
+                        "at state '%2%'",
+                        name, region.startState);
+            return false;
+        }
+    }
+    return true;
+}
+
+void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
+    BUG_CHECK(parser != nullptr, "Parser is missing");
+    auto *parser = this->parser->checkedTo<EBPFPnaParser>();
+    if (!parser->hasOutline()) return;
+
+    auto headerType = parser->headerType->to<EBPF::EBPFStructType>();
+    BUG_CHECK(headerType != nullptr, "Parser header type is not a struct");
+    auto metaType = EBPF::EBPFTypeFactory::instance->create(
+        parser->program->typeMap->getType(parser->user_metadata));
+    auto metaStruct = metaType->to<EBPF::EBPFStructType>();
+    BUG_CHECK(metaStruct != nullptr, "Parser metadata type is not a struct");
+
+    auto metadataField = [&](cstring name) -> EBPF::EBPFType * {
+        for (auto *field : metaStruct->fields)
+            if (field->field->name.name == name) return field->type;
+        return nullptr;
+    };
+    auto scalarMetadataField = [&](cstring name, const char *option) {
+        const IR::Type *fieldType = nullptr;
+        for (auto *field : metaStruct->fields) {
+            if (field->field->name.name == name) {
+                fieldType = field->field->type;
+                break;
+            }
+        }
+        if (fieldType == nullptr) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "Outline parser %1% field '%2%' is not a member of the user metadata",
+                        option, name);
+            return false;
+        }
+        if (!cacheableLocalType(parser->program->typeMap, fieldType)) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Outline parser %1% supports only boolean and scalar integer metadata "
+                        "fields; '%2%' is not one",
+                        option, name);
+            return false;
+        }
+        return true;
+    };
+    std::set<cstring> helperNames = {
+        model.CPacketName.toString(), parser->headers->name.name,
+        parser->user_metadata->name.name, packetStartVar, packetEndVar, headerStartVar,
+        offsetVar, offsetVar + "_save", errorVar, zeroKey, oneKey, byteVar, lengthVar,
+        timestampVar, "adv"_cs, "ebpf_outline_offset"_cs, "ebpf_outline_base"_cs};
+    for (const auto &region : parser->outlineRegions) {
+        if (region.localField && !scalarMetadataField(region.localField, "local")) return;
+        if (region.boundField && !scalarMetadataField(region.boundField, "bound")) return;
+        if (region.localField && helperNames.count(region.localName)) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "Outline parser local name '%1%' conflicts with a generated helper name",
+                        region.localName);
+            return;
+        }
+    }
+    if (!checkOutlineLocals(parser)) return;
+
+    // Keep cached locals separate from parser temporaries and C runtime names.
+    for (auto &region : parser->outlineRegions) {
+        if (region.localField)
+            region.localName = refMap->newName("__p4tc_cache_" + region.localName);
+    }
+
+    for (const auto &region : parser->outlineRegions) {
+        EBPF::CodeBuilder helper(builder->target);
+        helper.append("__attribute__((noinline)) unsigned int ");
+        helper.append(region.helperName.c_str());
+        helper.append("(");
+        helper.appendFormat("%s *%s, ", builder->target->packetDescriptorType().c_str(),
+                            model.CPacketName.str());
+        if (!region.noHdr)
+            helper.appendFormat("struct %s *%s, ", headerType->name.c_str(),
+                                parser->headers->name.name.c_str());
+        helper.appendFormat("struct %s *%s, ", metaStruct->name.c_str(),
+                            parser->user_metadata->name.name.c_str());
+        helper.append("unsigned int ebpf_outline_offset)");
+        helper.newline();
+        helper.blockStart();
+
+        emitLocalVariables(&helper);
+        helper.emitIndent();
+        if (region.noHdr)
+            helper.appendFormat("if (!%s) {", parser->user_metadata->name.name.c_str());
+        else
+            helper.appendFormat("if (!%s || !%s) {", parser->headers->name.name.c_str(),
+                                parser->user_metadata->name.name.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.emitIndent();
+        helper.append("return 0x80000000u | ((unsigned)PacketTooShort << 16);");
+        helper.newline();
+        helper.emitIndent();
+        helper.append("}");
+        helper.newline();
+        if (region.localField) {
+            helper.emitIndent();
+            auto *fieldType = metadataField(region.localField);
+            BUG_CHECK(fieldType != nullptr, "outline local field was validated");
+            fieldType->declare(&helper, region.localName, false);
+            helper.append(" = __P4TC_LOCAL_SOURCE__;");
+            helper.newline();
+        }
+        if (region.offsetMaxSet) {
+            helper.emitIndent();
+            helper.appendFormat("if ((ebpf_outline_offset & 7) || ebpf_outline_offset > %u * 8) {",
+                                region.offsetMax);
+            helper.newline();
+            helper.emitIndent();
+            helper.emitIndent();
+            helper.append("return 0x80000000u | ((unsigned)PacketTooShort << 16);");
+            helper.newline();
+            helper.emitIndent();
+            helper.append("}");
+            helper.newline();
+        }
+        if (region.boundField) {
+            helper.emitIndent();
+            if (region.boundField == region.localField) {
+                helper.appendFormat("if (%s > %u)", region.localName.c_str(), region.boundValue);
+            } else {
+                helper.appendFormat("if (%s->%s > %u)", parser->user_metadata->name.name.c_str(),
+                                    region.boundField.c_str(), region.boundValue);
+            }
+            helper.blockStart();
+            helper.emitIndent();
+            helper.append("return 0x80000000u | ((unsigned)PacketTooShort << 16);");
+            helper.newline();
+            helper.blockEnd(true);
+            helper.newline();
+        }
+        helper.emitIndent();
+        helper.appendFormat("unsigned %s = 0;", offsetVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("u32 ebpf_outline_base = ebpf_outline_offset >> 3;");
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("%s = (u8 *)%s + ebpf_outline_base;", packetStartVar.c_str(),
+                            packetStartVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("%s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
+        helper.newline();
+
+        for (auto l : parser->parserBlock->container->parserLocals) {
+            if (l->is<IR::Declaration_Variable>()) parser->emitDeclaration(&helper, l);
+        }
+
+        helper.emitIndent();
+        helper.appendFormat("goto %s;", region.startState.c_str());
+        helper.newline();
+
+        parser->visitor->setBuilder(&helper);
+        auto *visitor = static_cast<PnaStateTranslationVisitor *>(parser->visitor);
+        visitor->emittingOutlineRegion = true;
+        for (auto s : parser->states) {
+            if (!region.states.count(s->state->name.name)) continue;
+            parser->visitor->setState(s);
+            s->state->apply(*parser->visitor);
+        }
+        visitor->emittingOutlineRegion = false;
+        parser->visitor->setBuilder(builder);
+
+        helper.emitIndent();
+        helper.append("__p4tc_outline_done:");
+        helper.newline();
+        // The result carries the consumed bits in sixteen bits; anything larger
+        // would corrupt the error field, so such a region rejects instead.
+        helper.emitIndent();
+        helper.appendFormat("if (%s > 0xffff) {", offsetVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.emitIndent();
+        helper.append("return 0x80000000u | ((unsigned)ParserInvalidArgument << 16);");
+        helper.newline();
+        helper.emitIndent();
+        helper.append("}");
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("return %s;", offsetVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.append("reject:");
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("return 0x80000000u | ((unsigned int)%s << 16) | (%s & 0xffff);",
+                            errorVar.c_str(), offsetVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.append("__p4tc_outline_no_match:");
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("%s = NoMatch;", errorVar.c_str());
+        helper.newline();
+        helper.emitIndent();
+        helper.appendFormat("return 0x80000000u | ((unsigned int)%s << 16) | (%s & 0xffff);",
+                            errorVar.c_str(), offsetVar.c_str());
+        helper.newline();
+        helper.blockEnd(true);
+        helper.newline();
+
+        std::string code = helper.toString();
+        if (region.localField) {
+            std::string fieldRef = std::string(parser->user_metadata->name.name.c_str()) + "->" +
+                                   region.localField.c_str();
+            size_t localInit = code.find("__P4TC_LOCAL_SOURCE__");
+            size_t pos = 0;
+            while ((pos = code.find(fieldRef, pos)) != std::string::npos) {
+                size_t end = pos + fieldRef.size();
+                if (end < code.size() &&
+                    (std::isalnum(static_cast<unsigned char>(code[end])) || code[end] == '_')) {
+                    pos = end;
+                    continue;
+                }
+                code.replace(pos, fieldRef.size(), region.localName.c_str());
+                pos += region.localName.size();
+            }
+            cstring token = cstring("__P4TC_LOCAL_SOURCE__");
+            pos = 0;
+            while ((pos = code.find(token.c_str(), pos)) != std::string::npos) {
+                code.replace(pos, token.size(), fieldRef);
+                pos += fieldRef.size();
+            }
+            std::string writeBack = fieldRef + " = " + std::string(region.localName.c_str()) + "; ";
+            pos = 0;
+            while ((pos = code.find("return ", pos)) != std::string::npos) {
+                if (localInit != std::string::npos && pos < localInit) {
+                    pos += 7;
+                    continue;
+                }
+                code.insert(pos, writeBack);
+                pos += writeBack.size() + 1;
+            }
+        }
+        {
+            static const std::regex loadRe(
+                R"(load_(dword|word|half|byte)\(pkt, BYTES\(ebpf_packetOffsetInBits\)\))");
+            static const std::regex headerEndRe(R"(hdr_start \+= BYTES\([^;]*\);)");
+            static const std::regex extractRe(R"(/\* extract\([^\n]*\) \*/)");
+            static const std::regex advanceRe(R"(ebpf_packetOffsetInBits \+= (\d+);)");
+            std::string rewritten;
+            size_t last = 0;
+            size_t localBits = 0;
+            for (std::sregex_iterator it(code.begin(), code.end(), loadRe), end; it != end; ++it) {
+                std::string between = code.substr(last, it->position() - last);
+                // A load can span more bytes than the P4 field it extracts.
+                // Follow the cursor increments, and restart at each header.
+                size_t headerEnd = 0;
+                for (std::sregex_iterator h(between.begin(), between.end(), headerEndRe), he;
+                     h != he; ++h) {
+                    headerEnd = h->position() + h->length();
+                    localBits = 0;
+                }
+                for (std::sregex_iterator h(between.begin(), between.end(), extractRe), he; h != he;
+                     ++h) {
+                    headerEnd = h->position() + h->length();
+                    localBits = 0;
+                }
+                std::string fields = between.substr(headerEnd);
+                for (std::sregex_iterator a(fields.begin(), fields.end(), advanceRe), ae; a != ae;
+                     ++a)
+                    localBits += std::stoul((*a)[1].str());
+                std::string kind = (*it)[1].str();
+                rewritten += code.substr(last, it->position() - last);
+                rewritten += "load_" + kind + "(hdr_start, " + std::to_string(localBits / 8) + ")";
+                last = it->position() + it->length();
+            }
+            rewritten += code.substr(last);
+            code = std::move(rewritten);
+        }
+        std::string endGoto = "goto " + std::string(region.endState.c_str()) + ";";
+        cstring doneGoto = cstring("goto __p4tc_outline_done;");
+        size_t pos = 0;
+        while ((pos = code.find(endGoto.c_str(), pos)) != std::string::npos) {
+            code.replace(pos, endGoto.size(), doneGoto.c_str());
+            pos += doneGoto.size();
+        }
+        std::string noMatchGoto = "goto noMatch;";
+        cstring noMatchLabel = cstring("goto __p4tc_outline_no_match;");
+        pos = 0;
+        while ((pos = code.find(noMatchGoto.c_str(), pos)) != std::string::npos) {
+            code.replace(pos, noMatchGoto.size(), noMatchLabel.c_str());
+            pos += noMatchLabel.size();
+        }
+        {
+            static const std::regex declRe(
+                R"(^[ \t]+([A-Za-z_]\w*(?:\s+[A-Za-z_]\w*)*(?:\s*\*)?)\s+([A-Za-z_]\w*)\s*(?:=[^;]*)?;[ \t]*$)",
+                std::regex::multiline);
+            std::vector<std::pair<size_t, size_t>> dead;
+            for (std::sregex_iterator it(code.begin(), code.end(), declRe), end; it != end; ++it) {
+                std::string name = (*it)[2].str();
+                std::regex useRe("\\b" + name + "\\b");
+                auto begin = std::sregex_iterator(code.begin(), code.end(), useRe);
+                auto count = std::distance(begin, std::sregex_iterator());
+                if (count == 1) dead.emplace_back(it->position(), it->length());
+            }
+            if (!dead.empty()) {
+                std::string pruned;
+                size_t last = 0;
+                for (auto &range : dead) {
+                    pruned += code.substr(last, range.first - last);
+                    last = range.first + range.second;
+                }
+                pruned += code.substr(last);
+                code = std::move(pruned);
+            }
+        }
+        builder->append(code);
+    }
+}
+
 void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     cstring msgStr, varStr;
+
+    if (name == "tc-ingress" && tcOptions.outlineDeparser) {
+        auto *d = dynamic_cast<IngressDeparserPNA *>(deparser);
+        if (d != nullptr) d->outlineDeparserHeaders(builder);
+    }
+
+    if (name == "tc-parse") {
+        bool oneRange = !tcOptions.outlineParserStart.empty();
+        bool twoRanges = !tcOptions.outlineParserStart2.empty();
+        if (twoRanges && !oneRange) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "--tc-outline-parser-range2 requires --tc-outline-parser-range");
+            return;
+        }
+        if (tcOptions.outlineOffsetMaxSet && !oneRange) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "--tc-outline-parser-offset-max requires --tc-outline-parser-range");
+            return;
+        }
+        if (!twoRanges && (!tcOptions.outlineParserBoundField.empty() ||
+                           !tcOptions.outlineLocalField.empty() || tcOptions.outlineNoHdr2)) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "--tc-outline-parser-bound, --tc-outline-parser-local and "
+                        "--tc-outline-parser-no-hdr2 apply to the second region and require "
+                        "--tc-outline-parser-range2");
+            return;
+        }
+    }
+
+    if (name == "tc-parse" && !tcOptions.outlineParserStart.empty()) {
+        auto *parser = this->parser->checkedTo<EBPFPnaParser>();
+        if (!parser->setOutlineRange(cstring("__p4tc_parser_outline"),
+                                     cstring(tcOptions.outlineParserStart.c_str()),
+                                     cstring(tcOptions.outlineParserEnd.c_str()))) {
+            return;
+        }
+        if (!tcOptions.outlineParserStart2.empty()) {
+            if (!parser->setOutlineRange(cstring("__p4tc_parser_outline_2"),
+                                         cstring(tcOptions.outlineParserStart2.c_str()),
+                                         cstring(tcOptions.outlineParserEnd2.c_str()))) {
+                return;
+            }
+            if (!tcOptions.outlineParserBoundField.empty())
+                parser->setOutlineBound(cstring(tcOptions.outlineParserBoundField.c_str()),
+                                        tcOptions.outlineParserBoundValue);
+            if (!tcOptions.outlineLocalField.empty())
+                parser->setOutlineLocal(cstring(tcOptions.outlineLocalField.c_str()),
+                                        cstring(tcOptions.outlineLocalName.c_str()),
+                                        tcOptions.outlineLocalMax);
+            if (tcOptions.outlineNoHdr2) parser->setOutlineNoHdr();
+        }
+        if (tcOptions.outlineOffsetMaxSet) parser->setOutlineOffsetMax(tcOptions.outlineOffsetMax);
+        emitParserOutline(builder);
+    }
 
     // firstly emit process() in-lined function and then the actual BPF section.
     builder->append("static __always_inline");
@@ -642,6 +1099,169 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
 }
 
 // =====================EBPFPnaParser=============================
+static void collectParserTargets(const IR::Expression *select, std::set<cstring> &targets) {
+    if (select == nullptr) return;
+    if (auto pe = select->to<IR::PathExpression>()) {
+        targets.insert(pe->path->name.name);
+        return;
+    }
+    if (auto se = select->to<IR::SelectExpression>()) {
+        for (auto sc : se->selectCases) {
+            auto pe = sc->state->to<IR::PathExpression>();
+            BUG_CHECK(pe != nullptr, "Expected a parser state path");
+            targets.insert(pe->path->name.name);
+        }
+        return;
+    }
+    BUG("Unexpected parser select expression");
+}
+
+bool EBPFPnaParser::setOutlineRange(cstring helper, cstring start, cstring end) {
+    std::map<cstring, size_t> index;
+    for (size_t i = 0; i < states.size(); i++) index[states[i]->state->name.name] = i;
+
+    if (index.find(start) == index.end() || index.find(end) == index.end()) {
+        ::P4::error(ErrorType::ERR_INVALID, "Outline range names unknown parser states %1% and %2%",
+                    start, end);
+        return false;
+    }
+
+    std::set<cstring> region;
+    std::vector<cstring> work = {start};
+    region.insert(start);
+    while (!work.empty()) {
+        cstring name = work.back();
+        work.pop_back();
+        auto it = index.find(name);
+        BUG_CHECK(it != index.end(), "Unknown outlined parser state");
+        auto src = states[it->second]->state;
+        if (src->selectExpression == nullptr) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "Outlined parser state %1% has no explicit transition", name);
+            return false;
+        }
+        std::set<cstring> targets;
+        collectParserTargets(src->selectExpression, targets);
+        for (auto target : targets) {
+            if (target == end || target == IR::ParserState::reject || target == "noMatch" ||
+                target == IR::ParserState::accept)
+                continue;
+            if (index.find(target) == index.end()) {
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "Outlined parser state %1% transitions to unknown state %2%", name,
+                            target);
+                return false;
+            }
+            if (region.insert(target).second) work.push_back(target);
+        }
+    }
+
+    bool reachesEnd = false;
+    for (size_t i = 0; i < states.size(); i++) {
+        auto src = states[i]->state;
+        cstring srcName = src->name.name;
+        bool srcInside = region.count(srcName) != 0;
+        std::set<cstring> targets;
+        collectParserTargets(src->selectExpression, targets);
+        for (auto target : targets) {
+            bool targetInside = region.count(target) != 0;
+            if (srcInside) {
+                if (target == end) {
+                    reachesEnd = true;
+                    continue;
+                }
+                if (targetInside || target == IR::ParserState::reject || target == "noMatch")
+                    continue;
+                if (target == IR::ParserState::accept) {
+                    ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                                "Outlined range cannot contain an accept transition");
+                    return false;
+                }
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "Outlined range transition leaves the region: %1% -> %2%", srcName,
+                            target);
+                return false;
+            }
+            if (targetInside && target != start) {
+                ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                            "Parser state %1% enters the outlined region at %2%; only START may be "
+                            "an entry",
+                            srcName, target);
+                return false;
+            }
+        }
+    }
+    if (!reachesEnd) {
+        ::P4::error(ErrorType::ERR_INVALID, "Outlined parser region %1%..%2% does not reach END",
+                    start, end);
+        return false;
+    }
+
+    OutlineRegion newRegion;
+    newRegion.helperName = helper;
+    newRegion.startState = start;
+    newRegion.endState = end;
+    newRegion.states = region;
+    outlineRegions.push_back(newRegion);
+    outlinedStates.insert(region.begin(), region.end());
+    return true;
+}
+
+bool PnaStateTranslationVisitor::preorder(const IR::ParserState *parserState) {
+    auto *parser = this->parser->checkedTo<EBPFPnaParser>();
+    cstring stateName = parserState->name.name;
+    if (emittingOutlineRegion || !parser->outlinedStates.count(stateName))
+        return EBPF::PsaStateTranslationVisitor::preorder(parserState);
+
+    auto *outline = parser->getOutlineRegion(stateName);
+    if (outline == nullptr) return false;
+    auto *program = parser->program;
+    cstring entry = program->refMap->newName("outline_entry");
+    cstring result = program->refMap->newName("outline_result");
+    builder->emitIndent();
+    builder->appendFormat("%s: {", stateName.c_str());
+    builder->newline();
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendFormat("unsigned int %s = %s;", entry.c_str(), program->offsetVar.c_str());
+    builder->newline();
+    builder->emitIndent();
+    if (outline->noHdr) {
+        builder->appendFormat("unsigned int %s = %s(%s, %s, %s);", result.c_str(),
+                              outline->helperName.c_str(), program->model.CPacketName.str(),
+                              parser->user_metadata->name.name.c_str(), entry.c_str());
+    } else {
+        builder->appendFormat("unsigned int %s = %s(%s, %s, %s, %s);", result.c_str(),
+                              outline->helperName.c_str(), program->model.CPacketName.str(),
+                              parser->headers->name.name.c_str(),
+                              parser->user_metadata->name.name.c_str(), entry.c_str());
+    }
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s = (%s >> 16) & 0x7fff;", program->errorVar.c_str(), result.c_str());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s = %s + (%s & 0xffff);", program->offsetVar.c_str(), entry.c_str(),
+                          result.c_str());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("if (%s & 0x80000000u) goto %s;", result.c_str(),
+                          IR::ParserState::reject.c_str());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s = (u8 *)%s + BYTES(%s);", program->headerStartVar.c_str(),
+                          program->packetStartVar.c_str(), program->offsetVar.c_str());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", outline->endState.c_str());
+    builder->newline();
+    builder->decreaseIndent();
+    builder->emitIndent();
+    builder->append("}");
+    builder->newline();
+    return false;
+}
+
 EBPFPnaParser::EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                              const P4::TypeMap *typeMap)
     : EBPFPsaParser(program, block, typeMap) {
@@ -1028,6 +1648,17 @@ bool PnaStateTranslationVisitor::preorder(const IR::Member *m) {
                 if (m->member.name == "input_port") {
                     builder->append("skb->ifindex");
                     return false;
+                } else if (m->member.name == "vlan_present") {
+                    builder->append("skb->vlan_present");
+                    return false;
+                } else if (m->member.name == "vlan_tci") {
+                    builder->append("skb->vlan_tci");
+                    return false;
+                } else if (m->member.name == "vlan_proto") {
+                    // skb->vlan_proto is a __be16; the P4 value is the
+                    // tag protocol in host byte order.
+                    builder->append("bpf_ntohs(skb->vlan_proto)");
+                    return false;
                 } else {
                     ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                 "%1%: this metadata field is not supported", m);
@@ -1410,7 +2041,43 @@ void PnaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
             builder->append(state->parser->program->lengthVar);
             return;
         } else if (ext->method->name.name == p4lib.packetIn.advance.name) {
-            compileAdvance(ext);
+            auto program = state->parser->program;
+            auto argument = expression->arguments->at(0)->expression;
+            auto advance = program->refMap->newName("advance_bits");
+            builder->emitIndent();
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("u32 %s = ", advance.c_str());
+            visit(argument);
+            builder->endOfStatement(true);
+            builder->emitIndent();
+            builder->appendFormat("if ((%s & 7) || %s > (0xffffffffU - %s)) ", advance.c_str(),
+                                  advance.c_str(), program->offsetVar.c_str());
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("%s = ParserInvalidArgument;", program->errorVar.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("goto reject;");
+            builder->blockEnd(true);
+            builder->emitIndent();
+            builder->appendFormat("if ((%s >> 3) > (u32)((u8 *)%s - %s)) ", advance.c_str(),
+                                  program->packetEndVar.c_str(), program->headerStartVar.c_str());
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendFormat("%s = PacketTooShort;", program->errorVar.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("goto reject;");
+            builder->blockEnd(true);
+            builder->emitIndent();
+            builder->appendFormat("%s += %s;", program->offsetVar.c_str(), advance.c_str());
+            builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("%s = (u8 *)%s + BYTES(%s);", program->headerStartVar.c_str(),
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str());
+            builder->newline();
+            builder->blockEnd(true);
             return;
         }
         BUG("Unhandled packet method %1%", expression->method);
@@ -1805,6 +2472,119 @@ void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
+void IngressDeparserPNA::outlineDeparserHeaders(EBPF::CodeBuilder *builder) {
+    if (headersOutlined || !tcOptions.outlineDeparser) return;
+    headersOutlined = true;
+
+    auto headerType = program->typeMap->getType(headers, true);
+    auto headerStruct = headerType == nullptr ? nullptr : headerType->to<IR::Type_StructLike>();
+    BUG_CHECK(headerStruct != nullptr, "Deparser header type is not a struct");
+    std::map<cstring, const IR::Type *> fieldTypes;
+    for (auto field : headerStruct->fields) fieldTypes[field->name.name] = field->type;
+
+    auto temp = new EBPF::CodeBuilder(builder->target);
+    auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
+    hdrEmitTranslator->setBuilder(temp);
+    hdrEmitTranslator->copyPointerVariables(codeGen);
+    hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
+    controlBlock->container->body->apply(*hdrEmitTranslator);
+    std::string code = temp->toString();
+
+    static const std::regex blockRe(R"((^[ \t]*)if \(hdr->([A-Za-z_]\w*)\.ebpf_valid\) \{)",
+                                    std::regex::multiline);
+    struct Block {
+        size_t start;
+        size_t open;
+        size_t close;
+        std::string indent;
+        cstring field;
+    };
+    std::vector<Block> blocks;
+    for (std::sregex_iterator it(code.begin(), code.end(), blockRe), end; it != end; ++it) {
+        Block b;
+        b.start = it->position();
+        b.indent = (*it)[1].str();
+        b.field = cstring((*it)[2].str());
+        b.open = code.find('{', b.start + it->length() - 1);
+        BUG_CHECK(b.open != std::string::npos, "No opening brace in deparser block");
+        int depth = 0;
+        b.close = std::string::npos;
+        for (size_t i = b.open; i < code.size(); i++) {
+            if (code[i] == '{')
+                depth++;
+            else if (code[i] == '}') {
+                depth--;
+                if (depth == 0) {
+                    b.close = i;
+                    break;
+                }
+            }
+        }
+        BUG_CHECK(b.close != std::string::npos, "Unterminated deparser block");
+        blocks.push_back(b);
+    }
+
+    std::vector<std::string> helpers;
+    for (auto it = blocks.rbegin(); it != blocks.rend(); ++it) {
+        auto &b = *it;
+        auto typeIt = fieldTypes.find(b.field);
+        BUG_CHECK(typeIt != fieldTypes.end(), "Unknown deparser header field %1%", b.field);
+        auto *st = typeIt->second->to<IR::Type_StructLike>();
+        BUG_CHECK(st != nullptr, "Deparser field %1% is not a header", b.field);
+        cstring typeName = st->name.name;
+        cstring helperName = outlinedHelperNames.count(typeName)
+                                 ? outlinedHelperNames[typeName]
+                                 : cstring(std::string("__p4tc_deparser_emit_") + typeName.c_str());
+        if (!outlinedHelperNames.count(typeName)) {
+            outlinedHelperNames[typeName] = helperName;
+            std::string body = code.substr(b.open + 1, b.close - b.open - 1);
+            std::string fieldRef = "hdr->" + std::string(b.field.c_str());
+            size_t p = 0;
+            while ((p = body.find(fieldRef, p)) != std::string::npos) {
+                body.replace(p, fieldRef.size(), "header");
+                p += strlen("header");
+            }
+            p = 0;
+            while ((p = body.find("header.", p)) != std::string::npos) {
+                body.replace(p, strlen("header."), "header->");
+                p += strlen("header->");
+            }
+            p = 0;
+            while ((p = body.find("return TC_ACT_SHOT;", p)) != std::string::npos) {
+                body.replace(p, strlen("return TC_ACT_SHOT;"), "return -1;");
+                p += strlen("return -1;");
+            }
+            std::string helper;
+            helper += "__attribute__((noinline)) int " + std::string(helperName.c_str()) +
+                      "(struct __sk_buff *skb, struct " + std::string(typeName.c_str()) +
+                      " *header, unsigned offset_bits)\n{\n";
+            helper += "    if (!header || offset_bits > " +
+                      std::to_string(tcOptions.outlineDeparserMax) +
+                      " * 8 || (offset_bits & 7)) return -1;\n";
+            helper += "    if (!header->ebpf_valid) return offset_bits;\n";
+            helper += "    void *pkt = (void *)(long)skb->data + (offset_bits >> 3);\n";
+            helper += "    void *ebpf_packetEnd = (void *)(long)skb->data_end;\n";
+            helper += "    unsigned ebpf_packetOffsetInBits = 0;\n";
+            helper += "    unsigned char ebpf_byte;\n";
+            helper += body;
+            helper += "    return offset_bits + ebpf_packetOffsetInBits;\n}\n\n";
+            helpers.push_back(helper);
+        }
+        std::string call;
+        call += b.indent + "{\n";
+        call += b.indent + "    int next = " + std::string(helperName.c_str()) + "(skb, &hdr->" +
+                std::string(b.field.c_str()) + ", ebpf_packetOffsetInBits);\n";
+        call += b.indent + "    if (next < 0 || (unsigned)next > " +
+                std::to_string(tcOptions.outlineDeparserMax) + " * 8) return TC_ACT_SHOT;\n";
+        call += b.indent + "    ebpf_packetOffsetInBits = (unsigned)next;\n";
+        call += b.indent + "}";
+        code.replace(b.start, b.close - b.start + 1, call);
+    }
+
+    for (auto &helper : helpers) builder->append(helper);
+    outlinedHeaderCode = code;
+}
+
 void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
     emitExternDefinition(builder);
@@ -1895,11 +2675,15 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 
     // emit headers
-    auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
-    hdrEmitTranslator->setBuilder(builder);
-    hdrEmitTranslator->copyPointerVariables(codeGen);
-    hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
-    controlBlock->container->body->apply(*hdrEmitTranslator);
+    if (headersOutlined) {
+        builder->append(outlinedHeaderCode);
+    } else {
+        auto hdrEmitTranslator = new DeparserHdrEmitTranslatorPNA(this);
+        hdrEmitTranslator->setBuilder(builder);
+        hdrEmitTranslator->copyPointerVariables(codeGen);
+        hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
+        controlBlock->container->body->apply(*hdrEmitTranslator);
+    }
 
     builder->newline();
 }
@@ -2022,10 +2806,16 @@ static bool is_skb_meta_func(const P4::cstring fname) {
            (fname == "skb_set_meta");
 }
 
+static bool is_skb_vlan_func(const P4::cstring fname) {
+    return (fname == "skb_get_vlan_present") || (fname == "skb_get_vlan_tci") ||
+           (fname == "skb_get_vlan_proto") || (fname == "skb_vlan_push") ||
+           (fname == "skb_vlan_pop");
+}
+
 void DeparserBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
     auto fname = function->expr->method->toString();
 
-    if (is_skb_meta_func(fname)) {
+    if (is_skb_meta_func(fname) || is_skb_vlan_func(fname)) {
         ::P4::error(ErrorType::ERR_UNEXPECTED,
                     "Unexpected call to extern function %s in the deparser", fname);
     }
@@ -2078,7 +2868,8 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     auto xdp = new EBPF::XDPHelpProgram(options);
 
     auto pipeline_converter = new ConvertToEbpfPipelineTC(
-        "tc-ingress"_cs, EBPF::TC_INGRESS, options, pipelineParser->checkedTo<IR::ParserBlock>(),
+        "tc-ingress"_cs, EBPF::TC_INGRESS, options, tcOptions,
+        pipelineParser->checkedTo<IR::ParserBlock>(),
         pipelineControl->checkedTo<IR::ControlBlock>(),
         pipelineDeparser->checkedTo<IR::ControlBlock>(), refmap, typemap, tcIR, ebpfTypes);
     pipeline->apply(*pipeline_converter);
@@ -2098,7 +2889,7 @@ const IR::Node *ConvertToEbpfPNA::preorder(IR::ToplevelBlock *tlb) {
 bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     (void)block;
 
-    pipeline = new TCIngressPipelinePNA(name, options, refmap, typemap);
+    pipeline = new TCIngressPipelinePNA(name, options, tcOptions, refmap, typemap);
     pipeline->sectionName = "p4tc/main"_cs;
     auto parser_converter = new ConvertToEBPFParserPNA(pipeline, typemap);
     parserBlock->apply(*parser_converter);
@@ -2111,9 +2902,9 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
 
-    auto deparser_converter =
-        new ConvertToEBPFDeparserPNA(pipeline, pipeline->parser->headers,
-                                     pipeline->control->outputStandardMetadata, tcIR, ebpfTypes);
+    auto deparser_converter = new ConvertToEBPFDeparserPNA(
+        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, tcIR,
+        ebpfTypes, tcOptions);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -2302,7 +3093,7 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
 
 // =====================ConvertToEBPFDeparserPNA=============================
 bool ConvertToEBPFDeparserPNA::preorder(const IR::ControlBlock *ctrl) {
-    deparser = new IngressDeparserPNA(program, ctrl, parserHeaders, istd);
+    deparser = new IngressDeparserPNA(program, ctrl, parserHeaders, istd, tcOptions);
     if (!deparser->build()) {
         BUG("failed to build deparser");
     }
@@ -2482,7 +3273,8 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine("};");
             builder->emitIndent();
             builder->append(
-                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key))");
+                "bpf_p4tc_entry_update(skb, &update_params, sizeof(update_params), &key, "
+                "sizeof(key))");
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
@@ -2602,6 +3394,66 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
     }
 
     auto fname = function->expr->method->toString();
+
+    if (fname == "skb_vlan_push" || fname == "skb_vlan_pop") {
+        auto program = control->program;
+        builder->emitIndent();
+        builder->blockStart();
+        // A tag that is still in the bytes moves the frame, and the frame
+        // length tells how much of the parsed region moved with it.
+        builder->emitIndent();
+        builder->appendFormat("u32 ebpf_vlan_parsed = %s - (u8 *)%s",
+                              program->headerStartVar.c_str(), program->packetStartVar.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->append("u32 ebpf_vlan_len = skb->len");
+        builder->endOfStatement(true);
+        if (fname == "skb_vlan_push") {
+            if (function->expr->arguments->size() != 2) {
+                ::P4::error("%1% takes exactly two arguments", fname);
+                return;
+            }
+            builder->emitIndent();
+            builder->append("long ebpf_vlan_ret = bpf_p4tc_skb_vlan_push(skb, (__u16)(");
+            visit(function->expr->arguments->at(0));
+            builder->append("), (__u16)(");
+            visit(function->expr->arguments->at(1));
+            builder->append("))");
+            builder->endOfStatement(true);
+        } else {
+            if (function->expr->arguments->size() != 0) {
+                ::P4::error("%1% takes no arguments", fname);
+                return;
+            }
+            builder->emitIndent();
+            builder->append("long ebpf_vlan_ret = bpf_p4tc_skb_vlan_pop(skb)");
+            builder->endOfStatement(true);
+        }
+        builder->emitIndent();
+        builder->append("if (ebpf_vlan_ret) ");
+        builder->blockStart();
+        builder->target->emitTraceMessage(builder, "Control: VLAN tag operation failed");
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->abortReturnCode().c_str());
+        builder->blockEnd(true);
+        // The helper invalidates every packet pointer, so reload them from the
+        // context. The tag bytes it inserted or removed belong to the region the
+        // parser consumed.
+        builder->emitIndent();
+        builder->appendFormat("%v = %v", program->packetStartVar,
+                              builder->target->dataOffset(program->model.CPacketName.toString()));
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("%v = %v", program->packetEndVar,
+                              builder->target->dataEnd(program->model.CPacketName.toString()));
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("%v = (u8 *)%v + ebpf_vlan_parsed + (skb->len - ebpf_vlan_len)",
+                              program->headerStartVar, program->packetStartVar);
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
+        return;
+    }
 
     if (is_skb_meta_func(fname)) {
         if (fname == "skb_get_meta") {
@@ -2886,7 +3738,9 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
         } else if ((mname == "skb_get_tstamp") || (mname == "skb_get_mark") ||
                    (mname == "skb_get_tc_classid") || (mname == "skb_get_tc_index") ||
                    (mname == "skb_get_queue_mapping") || (mname == "skb_get_protocol") ||
-                   (mname == "skb_get_tc_at_ingress") || (mname == "skb_get_from_ingress")) {
+                   (mname == "skb_get_tc_at_ingress") || (mname == "skb_get_from_ingress") ||
+                   (mname == "skb_get_vlan_present") || (mname == "skb_get_vlan_tci") ||
+                   (mname == "skb_get_vlan_proto")) {
             if (methodCallExpr->arguments->size() != 0) {
                 ::P4::error("%1% takes no arguments", mname);
                 return (false);
@@ -3154,7 +4008,8 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
             builder->emitIndent();
             builder->newline();
             unsigned alignment = 0;
-            for (auto f : headerToEmit->fields) {
+            for (size_t fieldIndex = 0; fieldIndex < headerToEmit->fields.size(); ++fieldIndex) {
+                auto f = headerToEmit->fields.at(fieldIndex);
                 auto ftype = deparser->program->typeMap->getType(f);
                 auto etype = EBPF::EBPFTypeFactory::instance->create(ftype);
                 auto et = etype->to<EBPF::IHasWidth>();
@@ -3295,11 +4150,13 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         builder->blockStart();
     }
 
-    unsigned bitsInFirstByte = widthToEmit % 8;
-    if (bitsInFirstByte == 0) bitsInFirstByte = 8;
-    unsigned bitsInCurrentByte = bitsInFirstByte;
-    unsigned left = widthToEmit;
-    for (int i = (widthToEmit - 1) / 8; i >= 0; i--) {
+    // The last byte holds only the bits left over after the whole bytes. They sit
+    // at the top of that byte if the conversion above left-justified the field,
+    // and at the bottom otherwise.
+    unsigned lastByte = (widthToEmit - 1) / 8;
+    unsigned bitsInLastByte = widthToEmit - lastByte * 8;
+    bool leftJustified = !swap.isNullOrEmpty() && !noEndiannessConversion;
+    for (int i = lastByte; i >= 0; i--) {
         builder->emitIndent();
         if (type->type->variable()) {
             builder->appendFormat("case %d: WRITE(%d);\n", i + 1, i);
@@ -3308,50 +4165,36 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
             visit(hdrExpr);
             builder->appendFormat(".%v))[%d]", field, i);
             builder->endOfStatement(true);
-            unsigned freeBits = alignment != 0 ? (8 - alignment) : 8;
-            bitsInCurrentByte = left >= 8 ? 8 : left;
-            unsigned bitsToWrite = bitsInCurrentByte > freeBits ? freeBits : bitsInCurrentByte;
-            BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8), "invalid bitsToWrite %d",
-                      bitsToWrite);
+            bool isLastByte = static_cast<unsigned>(i) == lastByte;
+            unsigned bitsInByte = isLastByte ? bitsInLastByte : 8;
+            unsigned topBit = isLastByte && !leftJustified ? bitsInLastByte : 8;
+            unsigned freeBits = 8 - alignment;
+            unsigned bitsHere = bitsInByte > freeBits ? freeBits : bitsInByte;
+            unsigned bitsInNext = bitsInByte - bitsHere;
             builder->emitIndent();
-            if (alignment == 0 && bitsToWrite == 8) {  // write whole byte
+            if (alignment == 0 && bitsHere == 8) {  // write whole byte
                 builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s))",
                                       program->packetStartVar.c_str(), program->offsetVar.c_str(),
                                       i,  // do not reverse byte order
                                       program->byteVar.c_str());
             } else {  // write partial
-                shift = (8 - alignment - bitsToWrite);
-                builder->appendFormat(
-                    "write_partial(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
-                    program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                    i,  // do not reverse byte order
-                    bitsToWrite, shift, program->byteVar.c_str(),
-                    widthToEmit > freeBits ? alignment == 0 ? shift : alignment : 0);
+                builder->appendFormat("write_partial_ex(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
+                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                      i,  // do not reverse byte order
+                                      bitsHere, 8 - alignment - bitsHere, program->byteVar.c_str(),
+                                      topBit - bitsHere);
             }
             builder->endOfStatement(true);
-            left -= bitsToWrite;
-            bitsInCurrentByte -= bitsToWrite;
-            alignment = (alignment + bitsToWrite) % 8;
-            bitsToWrite = (8 - bitsToWrite);
-            if (bitsInCurrentByte > 0) {
+            if (bitsInNext > 0) {
                 builder->emitIndent();
-                if (bitsToWrite == 8) {
-                    builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                                          program->packetStartVar.c_str(),
-                                          program->offsetVar.c_str(),
-                                          i,  // do not reverse byte order
-                                          program->byteVar.c_str(), 8 - alignment % 8);
-                } else {
-                    builder->appendFormat(
-                        "write_partial(%s + BYTES(%s) + %d + 1, %d, %d, (%s))",
-                        program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                        i,  // do not reverse byte order
-                        bitsToWrite, 8 + alignment - bitsToWrite, program->byteVar.c_str());
-                }
+                builder->appendFormat(
+                    "write_partial_ex(%s + BYTES(%s) + %d + 1, %d, %d, (%s >> %d))",
+                    program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                    i,  // do not reverse byte order
+                    bitsInNext, 8 - bitsInNext, program->byteVar.c_str(),
+                    topBit - bitsHere - bitsInNext);
                 builder->endOfStatement(true);
-                left -= bitsToWrite;
             }
-            alignment = (alignment + bitsToWrite) % 8;
         }
     }
     if (type->type->variable()) {
@@ -3440,6 +4283,7 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Constant *expression) {
 
 bool ControlBodyTranslatorPNA::arithCommon(const IR::Operation_Binary *e, const char *smallop,
                                            const char *bigop) {
+    if (emitTCUnsignedArithmetic(e)) return false;
     auto lt = e->left->type->to<IR::Type_Bits>();
     if (lt) {
         auto rt = e->right->type->to<IR::Type_Bits>();
@@ -3631,85 +4475,62 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Shr *e) {
     return (false);
 }
 
+// Left-justifies a signed operand narrower than its C type, so that the P4 sign
+// bit becomes the C sign bit. The shift is done unsigned to stay defined for
+// negative constants, and the signed cast follows it so that integer promotion
+// cannot keep bits above the C width.
+static void emitSignedCmpOperand(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
+                                 const IR::Expression *operand, unsigned width) {
+    unsigned cw = width <= 8 ? 8 : width <= 16 ? 16 : width <= 32 ? 32 : 64;
+    if (width == cw) {
+        bld->appendFormat("((s%u)(", cw);
+        cbt->visitHostOrder(operand);
+        bld->append("))");
+    } else {
+        bld->appendFormat("((s%u)((u%u)(", cw, cw);
+        cbt->visitHostOrder(operand);
+        bld->appendFormat(")<<%u))", cw - width);
+    }
+}
+
 static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
                     const IR::Operation_Binary *e, const char *small, const char *large) {
     auto lt = e->left->type->to<IR::Type_Bits>();
-    assert(lt);
+    if (lt == nullptr) {
+        bld->append("(");
+        cbt->visit(e->left);
+        bld->appendFormat(") %s (", small);
+        cbt->visit(e->right);
+        bld->append(")");
+        return;
+    }
     assert(e->right->type->to<IR::Type_Bits>());
     auto w = lt->width_bits();
     assert(w == e->right->type->to<IR::Type_Bits>()->width_bits());
     assert(lt->isSigned == e->right->type->to<IR::Type_Bits>()->isSigned);
-    if (w <= 64) {
-        switch (small[0]) {
-            case '=':
-            case '!':
-                cbt->visit(e->left);
-                bld->appendFormat("%s", small);
-                cbt->visit(e->right);
-                break;
-            case '<':
-            case '>':
-                if (lt->isSigned) {
-                    bool exact = false;
-                    int cw = 0;
-
-                    if (w < 8) {
-                        cw = 8;
-                        exact = false;
-                    } else if (w == 8) {
-                        cw = 8;
-                        exact = true;
-                    } else if (w < 16) {
-                        cw = 16;
-                        exact = false;
-                    } else if (w == 16) {
-                        cw = 16;
-                        exact = true;
-                    } else if (w < 32) {
-                        cw = 32;
-                        exact = false;
-                    } else if (w == 32) {
-                        cw = 32;
-                        exact = true;
-                    } else if (w < 64) {
-                        cw = 64;
-                        exact = false;
-                    } else if (w == 64) {
-                        cw = 64;
-                        exact = true;
-                    } else
-                        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                    "Impossible width %u in gen_cmp", w);
-
-                    bld->appendFormat("((i%d)(", cw);
-                    cbt->visit(e->left);
-                    if (exact)
-                        bld->append("))");
-                    else
-                        bld->appendFormat(")<<%u)", cw - w);
-                    bld->appendFormat("%s", small);
-                    bld->appendFormat("((i%d)(", cw);
-                    cbt->visit(e->right);
-                    if (exact)
-                        bld->append("))");
-                    else
-                        bld->appendFormat(")<<%u)", cw - w);
-                } else {
-                    cbt->visit(e->left);
-                    bld->appendFormat("%s", small);
-                    cbt->visit(e->right);
-                }
-                break;
-            default:
-                assert(!"Invalid call to gen_cmp");
-                break;
-        }
-    } else {
+    if (w > 64) {
         bld->appendFormat("cmp_%s_%u_%s(", lt->isSigned ? "s" : "u", w, large);
         cbt->visit(e->left);
         bld->append(',');
         cbt->visit(e->right);
         bld->append(')');
+        return;
+    }
+    bool isEquality = small[0] == '=' || small[0] == '!';
+    bool isByteWidth = w == 8 || w == 16 || w == 32 || w == 64;
+    if (lt->isSigned && (!isEquality || !isByteWidth)) {
+        emitSignedCmpOperand(cbt, bld, e->left, w);
+        bld->appendFormat("%s", small);
+        emitSignedCmpOperand(cbt, bld, e->right, w);
+    } else if (isEquality && cbt->isNetworkOrder(e->left) && cbt->isNetworkOrder(e->right)) {
+        // Equal network-order values have equal bytes, so no conversion is needed.
+        cbt->getBitAlignment(e->left);
+        bld->appendFormat("%s", small);
+        cbt->getBitAlignment(e->right);
+    } else {
+        cbt->visitHostOrder(e->left);
+        bld->appendFormat("%s", small);
+        cbt->visitHostOrder(e->right);
     }
 }
 
@@ -3757,10 +4578,13 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AddSat *e) { return (sarithCom
 
 bool ControlBodyTranslatorPNA::preorder(const IR::SubSat *e) { return (sarithCommon(e, "subsat")); }
 
+bool ControlBodyTranslatorPNA::isNetworkOrder(const IR::Expression *e) {
+    return dynamic_cast<const EBPF::P4TCTarget *>(builder->target)
+               ->getByteOrder(typeMap, findContext<IR::P4Action>(), e) == "NETWORK";
+}
+
 void ControlBodyTranslatorPNA::visitHostOrder(const IR::Expression *e) {
-    auto bo = dynamic_cast<const EBPF::P4TCTarget *>(builder->target)
-                  ->getByteOrder(typeMap, findContext<IR::P4Action>(), e);
-    if (bo == "NETWORK") {
+    if (isNetworkOrder(e)) {
         emitAndConvertByteOrder(e, "HOST"_cs);
     } else {
         getBitAlignment(e);

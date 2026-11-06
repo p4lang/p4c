@@ -156,7 +156,7 @@ struct p4tc_ext_csum_params chk_csum = {};
                                 hdr_1->outer.dstAddr = bpf_htonl(meta_1->dst);
                                 hdr_1->outer.ttl = 64;
                                 hdr_1->outer.protocol = 4;
-                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + 20);
+                                hdr_1->outer.totalLen = (((u64)(hdr_1->outer.totalLen) + (u64)(20ULL)) & 65535ULL);
                                 hdr_1->outer.hdrChecksum = 0;
                                 hdr = hdr_1;
                                 ip = hdr->outer;
@@ -207,7 +207,7 @@ struct p4tc_ext_csum_params chk_csum = {};
                     bpf_p4tc_ext_csum_16bit_complement_sub(&chk_csum, sizeof(chk_csum), &chk_tmp_0, sizeof(chk_tmp_0));
                 }
 ;
-                                ip_2.ttl = (ip_2.ttl + 255);
+                                ip_2.ttl = (((u64)(ip_2.ttl) + (u64)(255ULL)) & 255ULL);
                 /* chk.add({ip_2.ttl, ip_2.protocol}) */
                 {
                     u16 chk_tmp_1 = 0;
@@ -310,11 +310,11 @@ struct p4tc_ext_csum_params chk_csum = {};
             }
             
             ebpf_byte = ((char*)(&hdr->outer.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->outer.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->outer.diffserv))[0];
@@ -336,15 +336,15 @@ struct p4tc_ext_csum_params chk_csum = {};
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->outer.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
             hdr->outer.fragOffset = bpf_htons(hdr->outer.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->outer.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
             ebpf_byte = ((char*)(&hdr->outer.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&hdr->outer.ttl))[0];
@@ -390,11 +390,11 @@ struct p4tc_ext_csum_params chk_csum = {};
             }
             
             ebpf_byte = ((char*)(&hdr->inner.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->inner.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->inner.diffserv))[0];
@@ -416,15 +416,15 @@ struct p4tc_ext_csum_params chk_csum = {};
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->inner.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
             hdr->inner.fragOffset = bpf_htons(hdr->inner.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->inner.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
             ebpf_byte = ((char*)(&hdr->inner.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&hdr->inner.ttl))[0];
