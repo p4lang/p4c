@@ -40,6 +40,10 @@ class EBPFPipeline : public EBPFProgram {
     /// A variable to store ifindex after mapping (e.g. due to recirculation).
     cstring inputPortVar;
 
+    /// Fields of struct hdr_md that hold this pipeline's headers and user metadata.
+    cstring cpumapHeadersField = "cpumap_hdr"_cs;
+    cstring cpumapUserMetadataField = "cpumap_usermeta"_cs;
+
     EBPFControlPSA *control;
     EBPFDeparserPSA *deparser;
 
