@@ -1,0 +1,69 @@
+shadowing1.p4(25): [--Wwarn=shadow] warning: 'i' shadows 'i'
+bit<8> foofunc(in bit<8> i, // line 2 - shadows line 1 i, p4c warns
+                         ^
+shadowing1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+shadowing1.p4(30): [--Wwarn=shadow] warning: 'i' shadows 'i'
+    bit<8> i = i + 1; // line 3 - shadows line 2 i, p4c warns
+           ^
+shadowing1.p4(25)
+bit<8> foofunc(in bit<8> i, // line 2 - shadows line 1 i, p4c warns
+                         ^
+shadowing1.p4(33): [--Wwarn=shadow] warning: 'i' shadows 'i'
+        bit<8> i = i + 2; // line 5 - shadows line 3 i, p4c warns
+               ^
+shadowing1.p4(30)
+    bit<8> i = i + 1; // line 3 - shadows line 2 i, p4c warns
+           ^
+shadowing1.p4(39): [--Wwarn=shadow] warning: 'i' shadows 'i'
+parser fooparser(inout bit<8> i, // line 10 - shadows line 1 i, p4c warns
+                              ^
+shadowing1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+shadowing1.p4(46): [--Wwarn=shadow] warning: 'i' shadows 'i'
+    bit<8> i = i + 1; // line 12 - shadows line 10 i, p4c warns
+           ^
+shadowing1.p4(39)
+parser fooparser(inout bit<8> i, // line 10 - shadows line 1 i, p4c warns
+                              ^
+shadowing1.p4(51): [--Wwarn=shadow] warning: 'i' shadows 'i'
+            bit<8> i = i + 2; // line 15 - shadows line 12 i, p4c warns
+                   ^
+shadowing1.p4(46)
+    bit<8> i = i + 1; // line 12 - shadows line 10 i, p4c warns
+           ^
+shadowing1.p4(64): [--Wwarn=shadow] warning: 'i' shadows 'i'
+    bit<8> i; // line 20 - shadows line 1 i, p4c warns
+           ^
+shadowing1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+shadowing1.p4(79): [--Wwarn=shadow] warning: 'i' shadows 'i'
+control fooctrl(inout bit<8> i, // line 30 - shadows line 1 i, p4c warns
+                             ^
+shadowing1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+shadowing1.p4(86): [--Wwarn=shadow] warning: 'i' shadows 'i'
+    bit<8> i = i + 1; // line 32 - shadows line 30 i, p4c warns
+           ^
+shadowing1.p4(79)
+control fooctrl(inout bit<8> i, // line 30 - shadows line 1 i, p4c warns
+                             ^
+shadowing1.p4(91): [--Wwarn=shadow] warning: 'i' shadows 'i'
+            bit<8> i = i + 2; // line 35 - shadows line 32 i, p4c warns
+                   ^
+shadowing1.p4(86)
+    bit<8> i = i + 1; // line 32 - shadows line 30 i, p4c warns
+           ^
+shadowing1.p4(102): [--Wwarn=shadow] warning: 'i' shadows 'i'
+    bit<8> i; // line 40 - shadows line 1 i, p4c warns
+           ^
+shadowing1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+shadowing1.p4(23): [--Wwarn=unused] warning: 'i' is unused
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
