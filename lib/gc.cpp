@@ -270,7 +270,12 @@ size_t gc_allocation_size(void *ptr) {
         if (auto *base = GC_base(ptr)) {
             // Aligned allocations can start after the base. Report only the
             // bytes available from the returned pointer to the end.
-            return GC_size(base) - (static_cast<char *>(ptr) - static_cast<char *>(base));
+            auto size = GC_size(base) - (static_cast<char *>(ptr) - static_cast<char *>(base));
+            // Boehm reserves a trailing byte so one-past-the-end pointers keep
+            // an object alive. Z3 may grow into the reported usable space without
+            // reallocating, so that byte must not be exposed as usable storage.
+            if (GC_get_all_interior_pointers()) --size;
+            return size;
         }
     }
     // malloc uses mmap while GC_INIT is running. Those allocations store their
