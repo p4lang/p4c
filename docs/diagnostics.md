@@ -184,7 +184,7 @@ External validation needs `jsonschema[format]`; the validator rejects missing
 URI/date-time validators rather than silently skipping their format checks.
 For a host whose default preprocessor lacks GCC JSON, the acceptance suite accepts
 `P4C_TEST_GCC=/absolute/path/to/gcc`. It uses that driver only for its child
-`cc`/`cpp` invocations. The macOS and Fedora workflows install GCC 14 for this
-purpose while retaining their native compilers and the other tests' default
+`cc`/`cpp` invocations. The macOS and Fedora workflows install GCC 14 and GCC 15,
+respectively, while retaining their native compilers and the other tests' default
 preprocessors. GCC 16 removed the JSON diagnostic format; it is currently an
 unsupported preprocessor for structured reporting and produces a visible error.
