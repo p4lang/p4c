@@ -236,11 +236,21 @@ class DiagnosticReport:
         decoded = []
         decoding_error = None
         try:
-            records = json.loads(text, parse_constant=_invalid_constant)
+            document = text.lstrip(" \t\r\n")
+            records, end = json.JSONDecoder(parse_constant=_invalid_constant).raw_decode(document)
             if not isinstance(records, list):
                 raise ValueError("expected a GCC JSON diagnostic array")
             for record in records:
                 _decode_gcc_group(record, decoded)
+            trailing = document[end:].strip(" \t\r\n")
+            # GCC 11's driver appends this redundant footer after fatal JSON
+            # diagnostics. Decode the records first so unexpected trailing text
+            # also cannot erase warnings that were already reported.
+            if trailing and not (
+                trailing == "compilation terminated."
+                and any(diagnostic.severity == "error" for diagnostic in decoded)
+            ):
+                raise ValueError("unexpected text after GCC JSON diagnostics")
         except (ValueError, KeyError, TypeError, AttributeError) as error:
             decoding_error = f"Cannot decode GCC preprocessor diagnostics: {error}\n{text}"
         for diagnostic in decoded:

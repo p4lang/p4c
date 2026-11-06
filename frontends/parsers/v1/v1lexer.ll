@@ -1,4 +1,7 @@
 %{
+// SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+// SPDX-License-Identifier: Apache-2.0
+
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/parsers/v1/v1lexer_internal.hpp"

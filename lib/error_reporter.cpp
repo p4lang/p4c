@@ -35,7 +35,10 @@ ErrorReporter &ErrorReporter::operator=(const ErrorReporter &other) {
     errorCount = other.errorCount;
     maxErrorCount = other.maxErrorCount;
     outputstream = other.outputstream;
-    errorTracker = other.errorTracker;
+    // libc++ may assign existing set elements when copying a set. The tracker's
+    // pair contains a const SourceInfo, so copy-construct its nodes instead.
+    auto tracker = other.errorTracker;
+    errorTracker.swap(tracker);
     defaultInfoDiagnosticAction = other.defaultInfoDiagnosticAction;
     defaultWarningDiagnosticAction = other.defaultWarningDiagnosticAction;
     diagnosticActions = other.diagnosticActions;

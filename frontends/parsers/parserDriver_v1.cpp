@@ -1,4 +1,6 @@
 /*
+SPDX-License-Identifier: Apache-2.0
+
 Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");

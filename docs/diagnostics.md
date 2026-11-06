@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Structured compiler diagnostics
 
 Language servers and other tools need diagnostic data without interpreting terminal
@@ -129,6 +135,9 @@ output. The driver uses the same
 fields and coordinates, converts them to SARIF, and combines them with the child
 compiler's SARIF results in process order. Its temporary stderr file is separate
 from preprocessor stdout. Earlier warnings survive a later compiler failure.
+The driver accepts GCC 11's redundant `compilation terminated.` footer after an
+error record. Other trailing text remains a visible decoding error without
+erasing valid diagnostics that precede it.
 Subprocess failures retain their nonzero status; a reporting failure turns an
 otherwise successful invocation into failure. Driver input errors after report
 initialization also produce a report.
@@ -173,3 +182,9 @@ using JSON Schema Draft 4 and a format checker; no schema download is required
 to run the compiler or the configured tests.
 External validation needs `jsonschema[format]`; the validator rejects missing
 URI/date-time validators rather than silently skipping their format checks.
+For a host whose default preprocessor lacks GCC JSON, the acceptance suite accepts
+`P4C_TEST_GCC=/absolute/path/to/gcc`. It uses that driver only for its child
+`cc`/`cpp` invocations. The macOS and Fedora workflows install GCC 14 for this
+purpose while retaining their native compilers and the other tests' default
+preprocessors. GCC 16 removed the JSON diagnostic format; it is currently an
+unsupported preprocessor for structured reporting and produces a visible error.

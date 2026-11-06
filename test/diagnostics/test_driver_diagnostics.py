@@ -151,6 +151,47 @@ class DriverDiagnostics(unittest.TestCase):
         self.assertEqual(self.report.results[0]["message"]["text"], "valid parent")
         self.assertEqual(self.report.results[1]["level"], "error")
 
+    def test_gcc11_fatal_footer_preserves_warning_order_and_failure_status(self):
+        payload = (
+            json.dumps(
+                [
+                    {
+                        "kind": "warning",
+                        "message": "earlier",
+                        "locations": [],
+                        "children": [
+                            {"kind": "fatal error", "message": "missing include", "locations": []}
+                        ],
+                    }
+                ]
+            )
+            + "\ncompilation terminated.\n"
+        )
+
+        def preprocessor(args, stderr=None):
+            stderr.write(payload.encode("utf-8"))
+            return 7
+
+        self.assertEqual(self.report.run("preprocessor", ["cc", "-E"], preprocessor), 7)
+        self.assertEqual([r["level"] for r in self.report.results], ["warning", "error"])
+        self.assertEqual(
+            [r["message"]["text"] for r in self.report.results], ["earlier", "missing include"]
+        )
+
+    def test_unexpected_gcc_trailer_is_visible_without_erasing_warning(self):
+        payload = '[{"kind":"warning","message":"earlier","locations":[]}]\nunknown trailer'
+        self.assertFalse(self.report.gcc(payload))
+        self.assertEqual(self.report.results[0]["level"], "warning")
+        self.assertEqual(self.report.results[0]["message"]["text"], "earlier")
+        self.assertEqual(self.report.results[1]["ruleId"], "driver-diagnostics")
+        self.assertIn("unknown trailer", self.report.results[1]["message"]["text"])
+
+    def test_gcc_fatal_footer_requires_an_error_record(self):
+        payload = '[{"kind":"warning","message":"earlier","locations":[]}]\ncompilation terminated.'
+        self.assertFalse(self.report.gcc(payload))
+        self.assertEqual(self.report.results[0]["level"], "warning")
+        self.assertEqual(self.report.results[1]["ruleId"], "driver-diagnostics")
+
     def test_failed_compiler_preserves_exit_status_and_earlier_warning(self):
         self.report.gcc('[{"kind":"warning","message":"earlier","locations":[]}]')
         self.assertEqual(self.report.run("compiler", ["missing"], lambda args: 7), 7)

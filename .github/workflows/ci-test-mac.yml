@@ -31,6 +31,8 @@ jobs:
       - name: Install dependencies (MacOS)
         run: |
           tools/install_mac_deps.sh
+          # The structured diagnostic acceptance suite consumes GCC JSON.
+          brew install gcc@14
 
       # Replaces the manual ccache boilerplate and runs the custom macOS bootstrap pipeline securely
       - name: Setup and baseline build
@@ -46,5 +48,10 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
+          gcc_candidates=("$(brew --prefix gcc@14)"/bin/gcc-[0-9]*)
+          test "${#gcc_candidates[@]}" -eq 1
+          export P4C_TEST_GCC="${gcc_candidates[0]}"
+          test -x "$P4C_TEST_GCC"
+          "$P4C_TEST_GCC" --version
           uv run ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
         working-directory: ./build

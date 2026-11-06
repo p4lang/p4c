@@ -41,6 +41,8 @@ jobs:
       - name: Install dependencies (Fedora Linux)
         run: |
           tools/install_fedora_deps.sh
+          # GCC 16 removed JSON diagnostics; use GCC 14 only for this suite.
+          dnf install -y -q gcc14
 
       # Custom integration to maintain specific bootstrap/cmake parameters for the Fedora target container environment
       - name: Setup and baseline build
@@ -52,6 +54,9 @@ jobs:
             cmake --build build -- -j $(nproc)
 
       - name: Run p4c tests (Fedora Linux)
+        env:
+          P4C_TEST_GCC: /usr/bin/gcc-14
         run: |
+          "$P4C_TEST_GCC" --version
           uv run ctest --output-on-failure --schedule-random
         working-directory: ./build

@@ -5,6 +5,7 @@
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 BUILD = SOURCE = EVIDENCE = None
+PREPROCESSOR_BIN = None
 
 
 class DiagnosticsAcceptance(unittest.TestCase):
@@ -36,6 +38,8 @@ class DiagnosticsAcceptance(unittest.TestCase):
         command += [str(a) for a in args]
         env = os.environ.copy()
         env.pop("P4TEST_REPLACE", None)
+        if PREPROCESSOR_BIN is not None:
+            env["PATH"] = str(PREPROCESSOR_BIN) + os.pathsep + env["PATH"]
         run = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=120
         )
@@ -314,6 +318,19 @@ if __name__ == '__main__':
     BUILD, SOURCE = options.build_dir.resolve(), options.source_dir.resolve()
     options.evidence_dir.mkdir(parents=True, exist_ok=True)
     EVIDENCE = Path(tempfile.mkdtemp(prefix='run-', dir=options.evidence_dir))
+    # These tests exercise GCC JSON, independently of the compiler's toolchain.
+    # Scope aliases to child invocations so other tests retain their normal cc.
+    if gcc := os.environ.get('P4C_TEST_GCC'):
+        compiler = Path(gcc).resolve()
+        if not compiler.is_file() or not os.access(compiler, os.X_OK):
+            parser.error('P4C_TEST_GCC must name an executable GCC driver')
+        PREPROCESSOR_BIN = EVIDENCE / 'preprocessor-bin'
+        PREPROCESSOR_BIN.mkdir()
+        (PREPROCESSOR_BIN / 'cc').symlink_to(compiler)
+        cpp = PREPROCESSOR_BIN / 'cpp'
+        cpp.write_text('#!/bin/sh\nexec ' + shlex.quote(str(compiler)) + ' -E "$@"\n')
+        cpp.chmod(0o755)
+        (EVIDENCE / 'preprocessor.json').write_text(json.dumps(dict(gcc=str(compiler))) + '\n')
     print(f'Evidence: {EVIDENCE}', flush=True)
     result = unittest.TextTestRunner(verbosity=2).run(
         unittest.TestSuite([DiagnosticsAcceptance(options.test)])

@@ -146,6 +146,33 @@ TEST(StructuredDiagnostics, ReporterCopiesDoNotShareConsumersOrCollections) {
 
 class StructuredParserDiagnostics : public P4CTest {};
 
+TEST(StructuredDiagnostics, ReporterAssignmentReplacesDeduplicationState) {
+    std::ostringstream terminal;
+    Util::InputSources sources;
+    sources.mapLine("copy.p4", 1);
+    sources.appendText("\n");
+    sources.appendText("xy");
+    Located first{Util::SourceInfo(&sources, {2, 0}, {2, 1})};
+    Located second{Util::SourceInfo(&sources, {2, 1}, {2, 2})};
+    ErrorReporter original, assigned;
+    original.setOutputStream(&terminal);
+    assigned.setOutputStream(&terminal);
+    original.enableDiagnosticCollection();
+    unsigned observations = 0;
+    assigned.setDiagnosticConsumer([&](const Diagnostic &) { ++observations; });
+    original.diagnose(DiagnosticAction::Warn, ErrorType::WARN_UNUSED, "%s", "", &first);
+    assigned.diagnose(DiagnosticAction::Warn, ErrorType::WARN_UNUSED, "%s", "", &second);
+    assigned = original;
+    // The copied first location is still deduplicated; the destination's old
+    // second location must have been replaced, and its observer detached.
+    assigned.diagnose(DiagnosticAction::Warn, ErrorType::WARN_UNUSED, "%s", "", &first);
+    assigned.diagnose(DiagnosticAction::Warn, ErrorType::WARN_UNUSED, "%s", "", &second);
+    EXPECT_EQ(assigned.getDiagnostics().size(), 2u);
+    EXPECT_EQ(assigned.getWarningCount(), 2u);
+    EXPECT_EQ(original.getDiagnostics().size(), 1u);
+    EXPECT_EQ(observations, 1u);
+}
+
 TEST_F(StructuredParserDiagnostics, UnsignedLineMarkersPreserveWrappedSourceMapping) {
     auto &reporter = BaseCompileContext::get().errorReporter();
     reporter.enableDiagnosticCollection();
