@@ -460,6 +460,10 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             constraints->add(constraint->create(dstack->elementType, sstack->elementType));
             return true;
         } else if (auto list = src->to<IR::Type_List>()) {
+            if (!dstack->sizeKnown())
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "%1%: Size of header stack type should be a constant", dstack);
             bool hasDots = containsDots(list);
             size_t listSize = list->components.size();
             if (dstack->getSize() != listSize && !hasDots)

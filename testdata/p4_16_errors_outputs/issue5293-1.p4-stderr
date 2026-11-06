@@ -1,0 +1,6 @@
+issue5293-1.p4(8): [--Wwarn=unused] warning: control 'C' is unused
+control C(out bit<32> x)() {
+        ^
+issue5293-1.p4(9): [--Werror=type-error] error: header H[?]: Size of header stack type should be a constant
+  H[{ }] stack;
+  ^^^^^^
