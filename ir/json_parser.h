@@ -34,6 +34,7 @@ class JsonData : public ICastable {
     static bool strict;  // enforce strict syntax checking of json on input, default false.
 
     friend std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
+    friend std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict);
     struct error : public std::runtime_error {
         const JsonData *data = nullptr;  // object/item with error if parsed
         std::streamoff loc = -1;         // location of the error if no object
@@ -122,6 +123,8 @@ std::string getIndent(int l);
 
 std::ostream &operator<<(std::ostream &out, const JsonData *json);
 inline std::ostream &operator<<(std::ostream &out, const JsonData &json) { return out << &json; }
+/// Parse with per-call syntax checking, without changing the legacy global mode.
+std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict);
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
 
 }  // namespace P4

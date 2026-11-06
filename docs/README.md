@@ -28,6 +28,9 @@ The code and documentation are hosted in the [p4c repository](https://github.com
 
 # Compiler source code organization
 
+See [Structured compiler diagnostics](diagnostics.md) for SARIF output and the
+owned C++ diagnostic API, including future LSP integration considerations.
+
 ```
 p4c
 ├── build                          -- recommended place to build binary
