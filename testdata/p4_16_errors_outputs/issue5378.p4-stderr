@@ -1,0 +1,6 @@
+issue5378.p4(8): [--Werror=type-error] error: E1<bit<32>>: Type E1 is not generic and thus it cannot be specialized using type arguments
+enum E1<bit<32>> E2 { foo = 42 }
+     ^^^^^^^^^^^
+issue5378.p4(7)
+enum E1 { one, two, three }
+     ^^
