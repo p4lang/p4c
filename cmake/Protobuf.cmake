@@ -79,6 +79,10 @@ macro(p4c_obtain_protobuf)
     set_target_properties(libprotobuf PROPERTIES COMPILE_FLAGS "-Wno-error -w")
     set_target_properties(libprotoc PROPERTIES COMPILE_FLAGS "-Wno-error -w")
 
+    message(STATUS "jafdbg protobuf_BINARY_DIR=${protobuf_BINARY_DIR}")
+    message(STATUS "jafdbg protobuf_SOURCE_DIR=${protobuf_SOURCE_DIR}")
+    message(STATUS "jafdbg protobuf_INCLUDE_DIRS=${protobuf_INCLUDE_DIRS}")
+
     # Set some Protobuf variables manually until we are able to call FindPackage directly. This
     # should be possible with CMake 3.24. Protobuf sets the protoc binary to a generator expression
     # "$<TARGET_FILE:protoc>", but we many not be able to use this generator expression in some
