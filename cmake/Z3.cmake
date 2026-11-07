@@ -72,6 +72,17 @@ macro(obtain_z3)
         "Patch does not apply because the patch was already applied."
     )
     fetchcontent_makeavailable_but_exclude_install(z3)
+    # The Z3 commit is listed by --version. Only read it from a git checkout, otherwise git
+    # reports the commit of an enclosing repository, such as p4c itself.
+    if(EXISTS "${z3_SOURCE_DIR}/.git")
+      execute_process(
+        COMMAND git rev-parse --short HEAD
+        OUTPUT_VARIABLE P4C_Z3_GIT_SHA
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE rc
+        WORKING_DIRECTORY ${z3_SOURCE_DIR}
+      )
+    endif()
 
     # Suppress warnings for all Z3 targets.
     get_all_targets(Z3_BUILD_TARGETS ${z3_SOURCE_DIR})

@@ -82,4 +82,10 @@ target_link_libraries(controlplane
   PRIVATE absl::strings
 )
 
+# The P4Runtime version and commit are listed by --version.
+target_compile_definitions(controlplane PRIVATE
+  P4C_P4RUNTIME_VERSION="${P4C_P4RUNTIME_VERSION}"
+  P4C_P4RUNTIME_GIT_SHA="${P4C_P4RUNTIME_GIT_SHA}"
+)
+
 add_dependencies(controlplane mkP4configdir)

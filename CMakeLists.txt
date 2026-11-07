@@ -427,7 +427,8 @@ if (ENABLE_CONTROL_PLANE)
 # Print download state while setting up P4Runtime.
 set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
 set(FETCHCONTENT_QUIET OFF)
-# Fetch and declare the P4Runtime library.
+# Fetch and declare the P4Runtime library. Keep P4C_P4RUNTIME_VERSION in sync with GIT_TAG.
+set(P4C_P4RUNTIME_VERSION 1.6.0)
 FetchContent_Declare(
   p4runtime
   GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
@@ -435,6 +436,15 @@ FetchContent_Declare(
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)
+# The P4Runtime commit is listed by --version. Only read it from a git checkout, otherwise git
+# reports the commit of an enclosing repository, such as p4c itself.
+if (EXISTS "${p4runtime_SOURCE_DIR}/.git")
+  execute_process (COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE P4C_P4RUNTIME_GIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${p4runtime_SOURCE_DIR})
+endif()
 set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
 message(STATUS "Done with setting up P4Runtime for P4C.")
 # The standard P4Runtime protocol buffers message definitions live in the PI

@@ -45,6 +45,9 @@ set(
 
 add_library(p4tools-common OBJECT ${P4C_TOOLS_COMMON_SOURCES})
 
+# The Z3 commit is listed by --version.
+target_compile_definitions(p4tools-common PRIVATE P4C_Z3_GIT_SHA="${P4C_Z3_GIT_SHA}")
+
 target_link_libraries(
   p4tools-common
   # We export Z3 with the common library.

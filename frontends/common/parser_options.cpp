@@ -16,10 +16,12 @@
 #include <cerrno>
 #include <filesystem>
 #include <limits>
+#include <map>
 #include <memory>
 #include <regex>
 #include <unordered_set>
 
+#include "absl/base/config.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_format.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -80,6 +82,22 @@ void ParserOptions::closeFile(FILE *file) {
     }
 }
 
+/// The libraries that this binary was built with, ordered by name.
+static std::map<std::string, std::string> &linkedLibraries() {
+    static std::map<std::string, std::string> libraries;
+    return libraries;
+}
+
+void ParserOptions::addLinkedLibrary(const std::string &name, const std::string &version,
+                                     const std::string &gitSha) {
+    std::string description = version;
+    if (!gitSha.empty()) {
+        if (!description.empty()) description += " ";
+        description += "(SHA: " + gitSha + ")";
+    }
+    linkedLibraries().emplace(name, description);
+}
+
 ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(defaultMessage) {
     registerOption(
         "--help", nullptr,
@@ -94,6 +112,13 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [this](const char *) {
             std::cerr << binaryName << std::endl;
             std::cerr << "Version " << compilerVersion << std::endl;
+#ifdef ABSL_LTS_RELEASE_VERSION
+            std::cerr << "Abseil " << ABSL_LTS_RELEASE_VERSION << "."
+                      << ABSL_LTS_RELEASE_PATCH_LEVEL << std::endl;
+#endif
+            for (const auto &[name, description] : linkedLibraries()) {
+                std::cerr << name << " " << description << std::endl;
+            }
             exit(0);
             return false;
         },
