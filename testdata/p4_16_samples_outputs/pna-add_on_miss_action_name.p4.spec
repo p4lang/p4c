@@ -61,7 +61,7 @@ action ct_add_on_miss_action_0 args none {
 	return
 }
 
-learner ipv4_da_0 {
+learner ipv4_da {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -114,7 +114,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	table ipv4_da_0
+	table ipv4_da
 	LABEL_END :	table ct_ipv4_da
 	emit h.ethernet
 	emit h.ipv4

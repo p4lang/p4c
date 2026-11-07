@@ -178,7 +178,7 @@ action drop_1 args none {
 	return
 }
 
-table vxlan_0 {
+table vxlan {
 	key {
 		h.ethernet.dst_addr exact
 	}
@@ -198,7 +198,7 @@ apply {
 	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
 	extract h.ethernet
 	extract h.ipv4
-	table vxlan_0
+	table vxlan
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.outer_ethernet
 	emit h.outer_ipv4
