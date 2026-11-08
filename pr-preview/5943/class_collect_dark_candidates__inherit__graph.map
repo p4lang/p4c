@@ -1,0 +1,10 @@
+<map id="CollectDarkCandidates" name="CollectDarkCandidates">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,176,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="25,157,156,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,198,93,233,88,231,89,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="47,5,134,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,45,73,81,73,108,87,156,82,156,68,109,68,81,79,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="82,81,192,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="107,43,132,80,126,81,107,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="122,120,101,158,97,155,119,124"/>
+</map>

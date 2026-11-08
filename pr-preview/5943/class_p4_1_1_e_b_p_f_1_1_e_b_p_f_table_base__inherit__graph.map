@@ -1,0 +1,37 @@
+<map id="P4::EBPF::EBPFTableBase" name="P4::EBPF::EBPFTableBase">
+<area shape="rect" id="Node000001" title="Also used to represent counters." alt="" coords="529,136,713,164"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_counter_table.html" title=" " alt="" coords="761,5,964,33"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="647,123,697,82,759,43,790,35,795,33,762,48,700,87,650,128"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_meter_p_s_a.html" title=" " alt="" coords="771,57,954,85"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="671,127,760,95,800,86,805,85,761,100,673,132"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html" title=" " alt="" coords="763,109,962,137"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="728,135,765,134,760,135,729,141"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html" title=" " alt="" coords="787,161,938,189"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="728,158,789,167,784,167,728,164"/>
+<area shape="rect" id="Node000017" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_value_set.html" title=" " alt="" coords="775,213,950,241"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="673,167,761,198,806,213,800,213,760,203,673,172"/>
+<area shape="rect" id="Node000018" href="$class_p4_1_1_t_c_1_1_e_b_p_f_register_p_n_a.html" title=" " alt="" coords="771,265,954,293"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="650,172,700,212,762,250,795,265,790,264,759,255,697,217,648,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="321,136,481,164"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="496,147,532,149,526,150,497,152"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="167,136,273,164"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,147,323,149,318,151,289,152"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,136,119,164"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="133,147,169,149,164,151,135,152"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_counter_p_s_a.html" title=" " alt="" coords="1012,5,1207,33"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="979,17,1014,19,1009,20,980,22"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_t_c_1_1_e_b_p_f_counter_p_n_a.html" title=" " alt="" coords="1306,5,1486,33"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1223,17,1308,19,1303,19,1223,22"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html" title=" " alt="" coords="1026,57,1193,85"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="969,69,1028,71,1023,71,969,74"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html" title=" " alt="" coords="1021,161,1198,189"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="953,173,1023,175,1018,175,953,178"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_implementation_p_s_a.html" title="Base class for ActionProfile and ActionSelector." alt="" coords="1255,135,1537,162"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1214,163,1258,161,1252,162,1214,168"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a.html" title=" " alt="" coords="1315,187,1477,214"/>
+<area shape="poly" id="edge15_Node000012_Node000016" title=" " alt="" coords="1214,182,1317,193,1312,193,1214,187"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_profile_p_s_a.html" title=" " alt="" coords="1591,109,1815,137"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1552,133,1593,132,1587,133,1552,138"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_selector_p_s_a.html" title=" " alt="" coords="1585,161,1821,189"/>
+<area shape="poly" id="edge14_Node000013_Node000015" title=" " alt="" coords="1552,159,1587,165,1581,165,1552,165"/>
+</map>

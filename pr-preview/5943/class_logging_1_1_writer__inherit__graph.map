@@ -1,0 +1,7 @@
+<map id="Logging::Writer" name="Logging::Writer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="162,5,282,33"/>
+<area shape="rect" id="Node000002" href="$class_logging_1_1_plain_writer_adapter.html" title=" " alt="" coords="5,81,209,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,41,129,83,126,78,186,42"/>
+<area shape="rect" id="Node000003" href="$class_logging_1_1_pretty_writer_adapter.html" title=" " alt="" coords="232,81,443,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,39,320,81,314,80,255,44"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="BaseParser" name="BaseParser">
+<area shape="rect" id="Node000001" title="Base class of Tofino parser in assembler." alt="" coords="10,81,104,109"/>
+<area shape="rect" id="Node000003" href="$group__parde.html#class_parser" title="Representation of the Tofino 1/2 parser in assembler." alt="" coords="26,157,88,184"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="59,123,60,157,54,156,55,126"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,109,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="58,46,60,81,54,80,56,51"/>
+</map>
