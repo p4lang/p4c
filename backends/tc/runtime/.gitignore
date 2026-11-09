@@ -1,0 +1,10 @@
+# Fixture artifacts installed and rebuilt by runtime/setup; never commit.
+/tmp*/
+/pcap*
+/id_rsa*
+/extracted_deb/
+/iproute2-p4tc-pub/
+/libbpf/
+/virtme-ng/
+/include/*
+!/include/pna.h
