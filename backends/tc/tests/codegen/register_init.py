@@ -68,7 +68,7 @@ def wide_form(spelling, value):
 
 
 def variants(compiler, root):
-    source = (run.ROOT / 'testdata/p4_16_samples/pna-register-init.p4').read_text()
+    source = (run.ROOT / 'testdata/p4_16_samples/tc-register-init.p4').read_text()
     variants = [
         ('scalar-zero', '(10, 13)', '(10, 0)', 'Ingress.scalar', {'a_value': 0}),
         ('scalar-max', '(10, 13)', '(10, 0xffffffff)', 'Ingress.scalar', {'a_value': 0xffffffff}),
@@ -152,7 +152,7 @@ def main():
                 'Ingress.zero': {'a_value': 0},
                 'Ingress.unspecified': {'a_value': None}}
     packets, wanted = [], []
-    for line in (run.ROOT / 'testdata/p4_16_samples/pna-register-init.stf').read_text().splitlines():
+    for line in (run.ROOT / 'testdata/p4_16_samples/tc-register-init.stf').read_text().splitlines():
         tokens = line.split()
         if tokens and tokens[0] in ('packet', 'expect'):
             (packets if tokens[0] == 'packet' else wanted).append(bytes.fromhex(tokens[2]))

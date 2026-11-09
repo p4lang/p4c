@@ -1,7 +1,0 @@
-#!/bin/bash -x
-
-set -e
-
-: "${TC:="tc"}"
-$TC p4template create pipeline/pna-parser-advance numtables 0
-$TC p4template update pipeline/pna-parser-advance state ready
