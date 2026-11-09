@@ -235,6 +235,7 @@ sudo dpkg -i /path/to/package.deb
      - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
      - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.
      - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_P4RUNTIME=ON|OFF`. Use an installed P4Runtime CMake package with C++ bindings instead of fetching it. Default is OFF.
      - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
        Only has an effect when `P4C_USE_PREINSTALLED_PROTOBUF` is enabled.
@@ -350,6 +351,19 @@ P4C itself, you may run into trouble with Abseil, some extensions and other p4la
 projects unless you install version 3.25.3.
 
 P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240722.1 at the moment).
+
+#### P4Runtime
+
+P4C fetches P4Runtime and links its `p4runtime::cpp` target by default. The bindings are built with P4C's Protobuf library and `protoc`.
+
+To instead use an installed package (requires P4runtime 1.6 or newer) configure P4C with:
+
+```sh
+cmake -S . -B build \
+  -DP4C_USE_PREINSTALLED_P4RUNTIME=ON \
+  -DCMAKE_PREFIX_PATH=/path/to/p4runtime/install
+```
+
 
 #### CMake
 P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`, but there is no guarantee that this will lead to a successful build.

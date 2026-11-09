@@ -3,21 +3,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set(P4RUNTIME_INFO_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4info.proto)
-set(P4RUNTIME_TYPES_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4types.proto)
-set(P4RUNTIME_RT_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4runtime.proto)
-set(P4RUNTIME_DATA_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4data.proto)
-# google/rpc/status.proto is provided by P4Runtime (since v1.6.0).
-set(P4RUNTIME_DEPS_PROTO ${P4RUNTIME_STD_DIR}/google/rpc/status.proto)
-
-set(P4RUNTIME_PROTO ${P4RUNTIME_DEPS_PROTO} ${P4RUNTIME_INFO_PROTO} ${P4RUNTIME_TYPES_PROTO}
-                    ${P4RUNTIME_RT_PROTO} ${P4RUNTIME_DATA_PROTO}
+set(P4RUNTIME_PROTO
+  "${P4RUNTIME_STD_DIR}/google/rpc/status.proto"
+  "${P4RUNTIME_STD_DIR}/p4/config/v1/p4info.proto"
+  "${P4RUNTIME_STD_DIR}/p4/config/v1/p4types.proto"
+  "${P4RUNTIME_STD_DIR}/p4/v1/p4data.proto"
+  "${P4RUNTIME_STD_DIR}/p4/v1/p4runtime.proto"
 )
 
-# Generate source code from the .proto definitions using protoc. The output is placed in the build
-# directory inside `control-plane`. For example, p4info.proto produces:
-# control-plane/p4/config/p4info.pb.h control-plane/p4/config/p4info.pb.cc
-add_custom_target(mkP4configdir ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4/config)
+# C++ bindings come from p4runtime::cpp. Keep Python bindings in the build's
+# control-plane directory for the existing test drivers and tools.
+protobuf_generate(
+  LANGUAGE python
+  PROTOS ${P4RUNTIME_PROTO}
+  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${Protobuf_INCLUDE_DIRS}
+  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  OUT_VAR P4RUNTIME_GEN_PY_SRCS
+  DEPENDENCIES "${P4RUNTIME_PROTO};protobuf::protoc"
+)
+add_custom_target(controlplane-python ALL DEPENDS ${P4RUNTIME_GEN_PY_SRCS})
 
 set(CONTROLPLANE_SRCS
   addMissingIds.cpp
@@ -46,40 +50,12 @@ set(CONTROLPLANE_HDRS
   bfruntime.h
 )
 
-add_library(controlplane-gen OBJECT ${P4RUNTIME_PROTO})
-target_include_directories(controlplane-gen PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(controlplane-gen PUBLIC protobuf::libprotobuf PRIVATE absl::log)
-# Ideally we use DEPENDENCIES, but it only works in later versions (3.28).
-add_dependencies(controlplane-gen mkP4configdir)
-protobuf_generate(
-  TARGET controlplane-gen
-  LANGUAGE cpp
-  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${CMAKE_CURRENT_LIST_DIR} ${Protobuf_INCLUDE_DIRS}
-  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
-  OUT_VAR P4RUNTIME_GEN_CPP_SRCS
-  DEPENDENCIES ${P4RUNTIME_PROTO} controlplane-gen mkP4configdir
-)
-protobuf_generate(
-  TARGET controlplane-gen
-  LANGUAGE python
-  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${CMAKE_CURRENT_LIST_DIR} ${Protobuf_INCLUDE_DIRS}
-  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
-  OUT_VAR P4RUNTIME_GEN_PY_SRCS
-  DEPENDENCIES ${P4RUNTIME_PROTO} controlplane-gen mkP4configdir
-)
-
-# Silence various warnings as the root issue is out of our control, example
-# https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties(${P4RUNTIME_GEN_CPP_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error"
-)
-
 add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
 target_link_libraries(controlplane
-  # Export Protobuf includes with controlplane-gen.
-  PUBLIC controlplane-gen
+  PUBLIC p4runtime::cpp
   # Required for the generated parser and the Abseil includes.
   PRIVATE frontend
   PRIVATE absl::strings
 )
 
-add_dependencies(controlplane mkP4configdir)
+add_dependencies(controlplane controlplane-python)
