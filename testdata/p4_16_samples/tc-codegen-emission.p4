@@ -48,7 +48,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta,
     apply {
         if (istd.parser_error != error.NoError) { drop_packet(); return; }
         if (meta.leftover == 0) { drop_packet(); return; }
-        send_to_port((PortId_t)1);
+        send_to_port(istd.input_port);
     }
 }
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta,

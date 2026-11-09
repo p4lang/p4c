@@ -35,7 +35,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
                 counters_0.count((bit<32>)hdr.ethernet.kind & 32w7);
                 counters_0.count((bit<32>)hdr.ethernet.kind >> 1);
             }
-            send_to_port((PortId_t)32w1);
+            send_to_port(istd.input_port);
         }
     }
 }

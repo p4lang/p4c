@@ -66,7 +66,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
             drop_packet();
             return;
         }
-        send_to_port((PortId_t)1);
+        send_to_port(istd.input_port);
     }
 }
 

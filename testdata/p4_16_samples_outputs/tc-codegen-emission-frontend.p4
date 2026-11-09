@@ -63,7 +63,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         } else if (meta.leftover == 32w0) {
             drop_packet();
         } else {
-            send_to_port((PortId_t)32w1);
+            send_to_port(istd.input_port);
         }
     }
 }

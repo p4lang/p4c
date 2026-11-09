@@ -37,7 +37,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         counters_0.count((bit<32>)(hdr.ethernet.kind & 16w7));
     }
     @hidden action tccodegencounter30() {
-        send_to_port(32w1);
+        send_to_port(istd.input_port);
     }
     @hidden table tbl_tccodegencounter22 {
         actions = {

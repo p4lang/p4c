@@ -27,7 +27,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta,
             counters.count((bit<32>)hdr.ethernet.kind & 7);
             counters.count((bit<32>)hdr.ethernet.kind >> 1);
         }
-        send_to_port((PortId_t)1);
+        send_to_port(istd.input_port);
     }
 }
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta,

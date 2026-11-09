@@ -47,9 +47,9 @@ if (meta->leftover==0) {
                     drop_packet();                }
 
                 else {
-/* send_to_port(1) */
+/* send_to_port(skb->ifindex) */
                     compiler_meta__->drop = false;
-                    send_to_port(1);                }
+                    send_to_port(skb->ifindex);                }
             }
 
         }

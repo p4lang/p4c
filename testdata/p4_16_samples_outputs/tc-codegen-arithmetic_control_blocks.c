@@ -86,9 +86,9 @@ if ((((u64)((u64)(hdr->values.x & 4294967295u)) + (u64)(4294967276ULL)) & 429496
                     result_0 = (u64)((((u64)((u64)(hdr->values.x & 4294967295u)) + (u64)(4294967295ULL)) & 4294967295ULL));                }
 
                                 hdr->values.result = result_0;
-                /* send_to_port(1) */
+                /* send_to_port(skb->ifindex) */
                 compiler_meta__->drop = false;
-                send_to_port(1);
+                send_to_port(skb->ifindex);
             }
         }
     }

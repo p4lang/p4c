@@ -74,7 +74,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
             return;
         }
         hdr.values.result = calculate((word_t)hdr.values.x, (word_t)hdr.values.y, hdr.values.op);
-        send_to_port((PortId_t)1);
+        send_to_port(istd.input_port);
     }
 }
 
