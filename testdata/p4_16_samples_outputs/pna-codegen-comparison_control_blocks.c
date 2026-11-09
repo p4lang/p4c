@@ -77,6 +77,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     {
 {
 ;
+            ;
         }
 
         if (compiler_meta__->drop) {
@@ -84,6 +85,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         }
         int outHeaderLength = 0;
         if (hdr->ethernet.ebpf_valid) outHeaderLength += 112;
+        if (hdr->values.ebpf_valid) outHeaderLength += 96;
 
         __u16 saved_proto = 0;
         bool have_saved_proto = false;
@@ -156,6 +158,51 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             ebpf_byte = ((char*)(&hdr->ethernet.kind))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
+
+        }
+;// emitting header values_t
+        if (hdr->values.ebpf_valid) {
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 96)) {
+                return TC_ACT_SHOT;
+            }
+            
+            ebpf_byte = ((char*)(&hdr->values.op))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_packetOffsetInBits += 8;
+
+            hdr->values.n12 = bpf_htons(hdr->values.n12 << 4);
+            ebpf_byte = ((char*)(&hdr->values.n12))[1];
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 4, 4, (ebpf_byte >> 4));
+            ebpf_byte = ((char*)(&hdr->values.n12))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_packetOffsetInBits += 12;
+
+            ebpf_byte = ((char*)(&hdr->values.n4))[0];
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            ebpf_packetOffsetInBits += 4;
+
+            storePrimitive32((u8 *)&hdr->values.n24, 24, (htonl(getPrimitive32(hdr->values.n24, 24) << 8)));
+            ebpf_byte = ((char*)(&hdr->values.n24))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.n24))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.n24))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_packetOffsetInBits += 24;
+
+            ebpf_byte = ((char*)(&hdr->values.mac))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.mac))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.mac))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.mac))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.mac))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->values.mac))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_packetOffsetInBits += 48;
 
         }
 ;
