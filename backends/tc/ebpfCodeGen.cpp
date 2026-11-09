@@ -85,6 +85,14 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     builder->appendFormat("unsigned %s", pipeline->offsetVar.c_str());
     builder->endOfStatement(true);
 
+    // The parser publishes its error in the same per-CPU entry as the headers;
+    // the control block reads it from there.  Keeping it out of skb->cb lets
+    // the parser store it through the map pointer instead of the packet
+    // context, which the kernel verifier accepts only for constant offsets.
+    builder->emitIndent();
+    builder->append("ParserError_t parser_error");
+    builder->endOfStatement(true);
+
     // additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
     builder->append("__u8 __hook");
@@ -1295,7 +1303,7 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->emitIndent();
-    builder->appendFormat("compiler_meta__->parser_error = %s", program->errorVar.c_str());
+    builder->appendFormat("hdrMd->parser_error = %s", program->errorVar.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("goto %s", IR::ParserState::accept.c_str());
@@ -2070,8 +2078,8 @@ void PnaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
             builder->appendLine("goto reject;");
             builder->blockEnd(true);
             builder->emitIndent();
-            builder->appendFormat("if ((%s >> 3) > (u32)((u8 *)%s - %s)) ", advance.c_str(),
-                                  program->packetEndVar.c_str(), program->headerStartVar.c_str());
+            builder->appendFormat("if ((u8 *)%s < %s + BYTES(%s)) ", program->packetEndVar.c_str(),
+                                  program->headerStartVar.c_str(), advance.c_str());
             builder->blockStart();
             builder->emitIndent();
             builder->appendFormat("%s = PacketTooShort;", program->errorVar.c_str());
@@ -3166,7 +3174,7 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
                     builder->append("skb->ifindex");
                     return false;
                 } else if (m->member.name == "parser_error") {
-                    builder->append("compiler_meta__->parser_error");
+                    builder->append("hdrMd->parser_error");
                     return false;
                 } else {
                     ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,

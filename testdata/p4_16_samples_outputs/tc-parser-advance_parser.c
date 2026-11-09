@@ -84,7 +84,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                     ebpf_errorCode = ParserInvalidArgument;
                     goto reject;
                 }
-                if ((advance_bits >> 3) > (u32)((u8 *)ebpf_packetEnd - hdr_start)) {
+                if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(advance_bits)) {
                     ebpf_errorCode = PacketTooShort;
                     goto reject;
                 }
@@ -99,7 +99,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                     ebpf_errorCode = ParserInvalidArgument;
                     goto reject;
                 }
-                if ((advance_bits_0 >> 3) > (u32)((u8 *)ebpf_packetEnd - hdr_start)) {
+                if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(advance_bits_0)) {
                     ebpf_errorCode = PacketTooShort;
                     goto reject;
                 }
@@ -128,7 +128,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
-            compiler_meta__->parser_error = ebpf_errorCode;
+            hdrMd->parser_error = ebpf_errorCode;
             goto accept;
         }
 

@@ -38,7 +38,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         u8 hit;
         u8 matches_0;
         {
-if ((compiler_meta__->parser_error) != (NoError)) {
+if ((hdrMd->parser_error) != (NoError)) {
 /* drop_packet() */
                 drop_packet();            }
 

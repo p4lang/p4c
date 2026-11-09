@@ -102,7 +102,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct array_header
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
-            compiler_meta__->parser_error = ebpf_errorCode;
+            hdrMd->parser_error = ebpf_errorCode;
             goto accept;
         }
 
