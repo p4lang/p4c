@@ -106,7 +106,7 @@ storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(valu
                                 ext_params.pipe_id = p4tc_filter_fields.pipeid;
                                 ext_params.ext_id = 0x19000000;
                                 ext_params.inst_id = 1;
-                                ext_params.index = 3;
+                                ext_params.index = (3) + 1;
 
                                 ext_params.flags = P4TC_EXT_CNT_INDIRECT;
                                 bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), NULL, 0);

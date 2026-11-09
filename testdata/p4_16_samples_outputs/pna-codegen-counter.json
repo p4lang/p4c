@@ -1,0 +1,35 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "pna-codegen-counter",
+  "externs" : [
+    {
+      "name" : "Counter",
+      "id" : "0x19000000",
+      "permissions" : "0x1136",
+      "instances" : [
+        {
+          "inst_name" : "Ingress.counters",
+          "inst_id" : 1,
+          "inst_type" : "PACKETS",
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "pkts",
+              "type" : "bit64",
+              "attr" : "param",
+              "bitwidth" : 64
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tables" : []
+}
