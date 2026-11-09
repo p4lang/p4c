@@ -152,7 +152,7 @@ int main(void)
         skb.vlan_tci = input[2];
         skb.vlan_proto = bpf_htons(input[3]);
         result[0] = tc_parse_func(&skb);
-        result[2] = ((struct pna_global_metadata *)skb.cb)->parser_error;
+        result[2] = storage.parser_error;
         result[3] = storage.ebpf_packetOffsetInBits;
         if (result[0] == TC_ACT_PIPE && result[2] == 0) {
             unsigned char tag[4];

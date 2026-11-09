@@ -43,7 +43,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         struct p4tc_ext_bpf_val *ext_val_ptr;
         u8 hit;
         {
-if ((compiler_meta__->parser_error) != (NoError)) {
+if ((hdrMd->parser_error) != (NoError)) {
 /* drop_packet() */
                 drop_packet();            }
 

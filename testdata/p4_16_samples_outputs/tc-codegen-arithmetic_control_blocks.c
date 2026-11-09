@@ -40,7 +40,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
         u64 tmp_0 = 0;
         u64 result_0 = 0;
         {
-if ((compiler_meta__->parser_error) != (NoError)) {
+if ((hdrMd->parser_error) != (NoError)) {
 /* drop_packet() */
                 drop_packet();            }
 

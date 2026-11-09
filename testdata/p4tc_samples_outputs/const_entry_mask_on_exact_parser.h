@@ -29,6 +29,7 @@ struct hdr_md {
     struct Header_t cpumap_hdr;
     struct Meta_t cpumap_usermeta;
     unsigned ebpf_packetOffsetInBits;
+    ParserError_t parser_error;
     __u8 __hook;
 };
 
