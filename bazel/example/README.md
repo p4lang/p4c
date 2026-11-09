@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Bazel example ![bazel build](https://github.com/p4lang/p4c/workflows/bazel/badge.svg)
 
 This folder contains a toy Bazel project depending on P4C. This is to
