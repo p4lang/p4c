@@ -9,10 +9,12 @@
 
 #include <filesystem>
 
+#include "absl/strings/str_cat.h"
 #include "backend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
 #include "ebpfCodeGen.h"
+#include "midend/replaceSelectRange.h"
 
 namespace P4::TC {
 
@@ -2072,14 +2074,111 @@ void ConvertToBackendIR::updateTimerProfiles(IR::TCTable *tabledef) {
         tabledef->addTimerProfiles(options.timerProfiles);
     }
 }
+// Masked IPv4 keys and IPv6 keys need address syntax in iproute2. Use it for
+// unmasked IPv4 keys too, although that parser also accepts numbers.
+static cstring constKeyType(const IR::KeyElement *keyElement) {
+    auto anno = keyElement->getAnnotation(ParseTCAnnotations::tcType);
+    if (anno == nullptr) return cstring::empty;
+    return anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
+}
+
+// iproute2 splices a value wider than 64 bits out of the text: the first
+// sixteen digits are the high half and the rest the low half, and a shorter
+// string is shifted left instead of being right-aligned. A value with leading
+// zero nibbles therefore has to be written at its full width, or the runtime
+// reads a different number than the program declared.
+static cstring formatWideHex(const big_int &value, unsigned width) {
+    std::string text = Util::toString(value, 0, false, 16).c_str();
+    size_t digits = text.size() - 2;  // the count after the "0x" prefix
+    size_t wanted = (width + 3) / 4;
+    if (digits < wanted) text.insert(2, wanted - digits, '0');
+    return cstring(text);
+}
+
+// iproute2 reads a value in the lexical form its declared tc type asks for:
+// an address for the address types, and hexadecimal for an integer too wide
+// for its 64-bit parsers. Everything narrower takes decimal or hexadecimal;
+// keys keep hexadecimal so that a value and the mask after it read as a pair.
+static cstring formatTcValue(cstring tcType, unsigned width, bool isSigned, const big_int &value,
+                             bool narrowHex) {
+    if (tcType == "ipv4") {
+        auto byte = [&](int shift) { return static_cast<unsigned>((value >> shift) & 0xff); };
+        return cstring(absl::StrCat(byte(24), ".", byte(16), ".", byte(8), ".", byte(0)));
+    }
+    if (tcType == "ipv6") {
+        std::string address;
+        for (int shift = 112; shift >= 0; shift -= 16) {
+            absl::StrAppend(&address, shift == 112 ? "" : ":",
+                            absl::Hex(static_cast<unsigned>((value >> shift) & 0xffff)));
+        }
+        return cstring(address);
+    }
+    if (tcType == "macaddr") {
+        std::string address;
+        for (int shift = static_cast<int>(width) - 8; shift >= 0; shift -= 8) {
+            absl::StrAppend(&address, address.empty() ? "" : ":",
+                            absl::Hex(static_cast<unsigned>((value >> shift) & 0xff)));
+        }
+        return cstring(address);
+    }
+    if (width > 64) return formatWideHex(value, width);
+    if (narrowHex) return Util::toString(value, 0, false, 16);
+    return Util::toString(value, 0, isSigned, 10);
+}
+
+static cstring formatConstKey(const IR::KeyElement *keyElement, const big_int &value,
+                              unsigned width) {
+    return formatTcValue(constKeyType(keyElement), width, false, value, true);
+}
+
+// iproute2 reads an ipv6 mask as exactly sixteen hex bytes.
+static cstring formatConstMask(const IR::KeyElement *keyElement, const big_int &mask) {
+    if (constKeyType(keyElement) != "ipv6") return Util::toString(mask, 0, false, 16);
+    std::string digits;
+    for (int shift = 120; shift >= 0; shift -= 8) {
+        absl::StrAppend(&digits,
+                        absl::Hex(static_cast<unsigned>((mask >> shift) & 0xff), absl::kZeroPad2));
+    }
+    return cstring("0x" + digits);
+}
+
+// Number of key values the ternary block (value, mask) denotes over `width`
+// bits: one for every combination of the bits the mask leaves free.
+static big_int blockValueCount(const big_int &mask, unsigned width) {
+    unsigned freeBits = 0;
+    for (unsigned bit = 0; bit < width; ++bit) {
+        if ((mask & (big_int(1) << bit)) == 0) ++freeBits;
+    }
+    return big_int(1) << freeBits;
+}
+
+// An exact key is compared in full, so each value of the block becomes an
+// entry of its own and the entry carries the implicit full mask.
+static void appendBlockValues(const big_int &value, const big_int &mask, unsigned width,
+                              const big_int &fullMask,
+                              std::vector<std::pair<big_int, big_int>> *alternatives) {
+    big_int count = blockValueCount(mask, width);
+    for (big_int index = 0; index < count; ++index) {
+        big_int expanded = value & mask;
+        size_t freeBit = 0;
+        for (unsigned bit = 0; bit < width; ++bit) {
+            if ((mask & (big_int(1) << bit)) != 0) continue;
+            if (((index >> freeBit) & 1) != 0) expanded |= big_int(1) << bit;
+            ++freeBit;
+        }
+        alternatives->emplace_back(expanded & fullMask, fullMask);
+    }
+}
+
 void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
-    // Check if there are const entries.
     auto entriesList = t->getEntries();
     if (entriesList == nullptr) return;
     auto keys = t->getKey();
     if (keys == nullptr) {
         return;
     }
+    P4::ReplaceSelectRange rangeConverter;
+    std::set<std::vector<big_int>> tableMasks;
     for (auto e : entriesList->entries) {
         auto keyset = e->getKeys();
         if (keyset->components.size() != keys->keyElements.size()) {
@@ -2087,7 +2186,8 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                         "No of keys in const_entries should be same as no of keys in the table.");
             return;
         }
-        ordered_map<cstring, cstring> keyList;
+        std::vector<ordered_map<cstring, cstring>> keyLists(1);
+        std::vector<std::vector<big_int>> masks(1);
         for (size_t itr = 0; itr < keyset->components.size(); itr++) {
             auto keyElement = keys->keyElements.at(itr);
             auto keyString = keyElement->expression->toString();
@@ -2095,58 +2195,142 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 keyString = anno->getExpr(0)->to<IR::StringLiteral>()->value;
             }
             auto keySetElement = keyset->components.at(itr);
-            auto key = keySetElement->toString();
+            auto width = typeMap->getType(keyElement->expression, true)->width_bits();
+            big_int fullMask = (big_int(1) << width) - 1;
+            auto mtdecl = refMap->getDeclaration(keyElement->matchType->path, true);
+            auto matchTypeInfo = mtdecl->getNode()->to<IR::Declaration_ID>();
+            bool exactKey = matchTypeInfo->name.name ==
+                            P4::P4CoreLibrary::instance().exactMatch.name;
+            std::vector<std::pair<big_int, big_int>> alternatives;
             if (keySetElement->is<IR::DefaultExpression>()) {
-                key = "default"_cs;
-            } else if (keySetElement->is<IR::Constant>()) {
-                big_int kValue = keySetElement->to<IR::Constant>()->value;
-                int kBase = keySetElement->to<IR::Constant>()->base;
-                std::stringstream value;
-                switch (kBase) {
-                    case 2:
-                        value << "0b";
-                        break;
-                    case 8:
-                        value << "0o";
-                        break;
-                    case 16:
-                        value << "0x";
-                        break;
-                    case 10:
-                        break;
-                    default:
-                        BUG("Unexpected base %1%", kBase);
+                alternatives.emplace_back(0, 0);
+            } else if (auto constant = keySetElement->to<IR::Constant>()) {
+                alternatives.emplace_back(constant->value & fullMask, fullMask);
+            } else if (auto boolean = keySetElement->to<IR::BoolLiteral>()) {
+                alternatives.emplace_back(boolean->value ? 1 : 0, fullMask);
+            } else if (auto range = keySetElement->to<IR::Range>()) {
+                // An exact key is compared in full, so a range in its entry
+                // cannot be matched: the expansion below carries a mask that
+                // the entry drops, which would keep only the first value of
+                // each block.
+                if (exactKey) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "%1%: a range does not fit an exact match key", range);
+                    return;
                 }
-                std::deque<char> buf;
-                do {
-                    const int digit = static_cast<int>(static_cast<big_int>(kValue % kBase));
-                    kValue = kValue / kBase;
-                    buf.push_front(Util::DigitToChar(digit));
-                } while (kValue > 0);
-                for (auto ch : buf) value << ch;
-                key = value.str();
-            } else if (keySetElement->is<IR::Range>()) {
-                auto left = keySetElement->to<IR::Range>()->left;
-                auto right = keySetElement->to<IR::Range>()->right;
-                auto operand = keySetElement->to<IR::Range>()->getStringOp();
-                key = left->toString() + operand + right->toString();
-            } else if (keySetElement->is<IR::Mask>()) {
-                auto left = keySetElement->to<IR::Mask>()->left;
-                auto right = keySetElement->to<IR::Mask>()->right;
-                auto operand = keySetElement->to<IR::Mask>()->getStringOp();
-                key = left->toString() + operand + right->toString();
+                auto blocks = rangeConverter.rangeToMasks(range, itr);
+                if (blocks == nullptr) return;
+                for (auto block : *blocks) {
+                    alternatives.emplace_back(block->left->checkedTo<IR::Constant>()->value,
+                                              block->right->checkedTo<IR::Constant>()->value);
+                }
+                delete blocks;
+            } else if (auto mask = keySetElement->to<IR::Mask>()) {
+                auto value = mask->left->to<IR::Constant>();
+                auto maskValue = mask->right->to<IR::Constant>();
+                if (value == nullptr || maskValue == nullptr) {
+                    ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "%1%: Constant entry masks must be compile-time constants", mask);
+                    return;
+                }
+                big_int bits = maskValue->value & fullMask;
+                alternatives.emplace_back(value->value & bits, bits);
+            } else {
+                ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: Unsupported constant entry key", keySetElement);
+                return;
             }
-            keyList.emplace(keyString, key);
+            auto remaining = tabledef->tableEntriesCount - tabledef->const_entries.size();
+            if (exactKey) {
+                big_int expandedCount = 0;
+                for (const auto &[value, mask] : alternatives) {
+                    expandedCount += blockValueCount(mask, width);
+                }
+                if (expandedCount * keyLists.size() > remaining) {
+                    ::P4::error(ErrorType::ERR_OVERLIMIT,
+                                "%1%: Expanded constant entries exceed table capacity %2%", t,
+                                tabledef->tableEntriesCount);
+                    return;
+                }
+                std::vector<std::pair<big_int, big_int>> exactValues;
+                for (const auto &[value, mask] : alternatives) {
+                    appendBlockValues(value, mask, width, fullMask, &exactValues);
+                }
+                alternatives = std::move(exactValues);
+            } else if (!alternatives.empty() && keyLists.size() > remaining / alternatives.size()) {
+                ::P4::error(ErrorType::ERR_OVERLIMIT,
+                            "%1%: Expanded constant entries exceed table capacity %2%", t,
+                            tabledef->tableEntriesCount);
+                return;
+            }
+            std::vector<ordered_map<cstring, cstring>> expandedKeys;
+            std::vector<std::vector<big_int>> expandedMasks;
+            for (size_t index = 0; index < keyLists.size(); ++index) {
+                for (const auto &[value, mask] : alternatives) {
+                    auto keyList = keyLists[index];
+                    auto keyMasks = masks[index];
+                    cstring key = formatConstKey(keyElement, value, width);
+                    if (mask != fullMask) key += "/" + formatConstMask(keyElement, mask);
+                    keyList.emplace(keyString, key);
+                    keyMasks.push_back(mask);
+                    expandedKeys.push_back(std::move(keyList));
+                    expandedMasks.push_back(std::move(keyMasks));
+                }
+            }
+            keyLists = std::move(expandedKeys);
+            masks = std::move(expandedMasks);
         }
         cstring actionName;
-        if (const auto *path = e->action->to<IR::PathExpression>())
-            actionName = path->toString();
-        else if (const auto *mce = e->action->to<IR::MethodCallExpression>())
-            actionName = mce->method->toString();
-        else
+        ordered_map<cstring, cstring> actionParams;
+        if (const auto *path = e->action->to<IR::PathExpression>()) {
+            actionName = externalName(refMap->getDeclaration(path->path, true));
+        } else if (const auto *mce = e->action->to<IR::MethodCallExpression>()) {
+            auto call = P4::MethodInstance::resolve(mce, refMap, typeMap)->to<P4::ActionCall>();
+            BUG_CHECK(call != nullptr, "Unexpected constant entry action %1%", mce);
+            actionName = externalName(call->action);
+            for (auto param : call->action->getParameters()->parameters) {
+                auto arg = call->substitution.lookup(param);
+                if (param->direction != IR::Direction::None) continue;
+                auto value = arg ? arg->expression->to<IR::Constant>() : nullptr;
+                if (value == nullptr) {
+                    ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "%1%: Constant entry action argument must be a constant", param);
+                    return;
+                }
+                cstring paramType;
+                if (auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
+                    if (auto *literal = anno->getExpr(0)->to<IR::StringLiteral>())
+                        paramType = literal->value;
+                }
+                // The parameter's type may be written as a type name; only its
+                // canonical form carries the width and the sign.
+                auto *canonical = typeMap->getTypeType(param->type, true);
+                auto *paramBits = canonical ? canonical->to<IR::Type_Bits>() : nullptr;
+                unsigned paramWidth = paramBits ? paramBits->width_bits() : 0;
+                bool paramSigned = paramBits != nullptr && paramBits->isSigned;
+                actionParams.emplace(
+                    param->name.originalName,
+                    formatTcValue(paramType, paramWidth, paramSigned, value->value, false));
+            }
+        } else {
             BUG("Unexpected entry action type.");
-        IR::TCEntry *constEntry = new IR::TCEntry(actionName, keyList);
-        tabledef->addConstEntries(constEntry);
+        }
+        if (actionName != P4::P4CoreLibrary::instance().noAction.name)
+            actionName = pipelineName + "/" + actionName;
+        for (size_t index = 0; index < keyLists.size(); ++index) {
+            auto constEntry = new IR::TCEntry(actionName, keyLists[index], actionParams);
+            tabledef->addConstEntries(constEntry);
+            tableMasks.insert(masks[index]);
+        }
+    }
+    if (tableMasks.size() > tabledef->numMask) {
+        if (t->getAnnotation(ParseTCAnnotations::numMask)) {
+            ::P4::error(ErrorType::ERR_OVERLIMIT,
+                        "%1%: Expanded constant entries need %2% masks, exceeding nummask %3%", t,
+                        tableMasks.size(), tabledef->numMask);
+            return;
+        }
+        tabledef->setNumMask(tableMasks.size());
     }
 }
 
