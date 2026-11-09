@@ -1,0 +1,7 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/pna-codegen-vlan numtables 0
+$TC p4template update pipeline/pna-codegen-vlan state ready
