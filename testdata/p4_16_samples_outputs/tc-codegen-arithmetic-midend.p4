@@ -36,60 +36,108 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
     @name("Ingress.tmp") bit<64> tmp;
     @name("Ingress.tmp_0") bit<64> tmp_0;
     @name("Ingress.result") bit<64> result_0;
-    @hidden action tccodegenarithmetic112() {
+    @hidden action tccodegenarithmetic108() {
         drop_packet();
     }
-    @hidden action tccodegenarithmetic30() {
+    @hidden action tccodegenarithmetic26() {
         tmp = 64w1;
     }
-    @hidden action tccodegenarithmetic30_0() {
+    @hidden action tccodegenarithmetic26_0() {
         tmp = 64w0;
     }
-    @hidden action tccodegenarithmetic30_1() {
+    @hidden action tccodegenarithmetic26_1() {
         result_0 = tmp;
     }
-    @hidden action tccodegenarithmetic29() {
+    @hidden action tccodegenarithmetic25() {
         result_0 = 64w0;
     }
-    @hidden action tccodegenarithmetic31() {
+    @hidden action tccodegenarithmetic27() {
         tmp_0 = 64w1;
     }
-    @hidden action tccodegenarithmetic31_0() {
+    @hidden action tccodegenarithmetic27_0() {
         tmp_0 = 64w0;
     }
-    @hidden action tccodegenarithmetic31_1() {
+    @hidden action tccodegenarithmetic27_1() {
         result_0 = tmp_0;
     }
-    @hidden action tccodegenarithmetic32() {
+    @hidden action tccodegenarithmetic28() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x + 32w4294967293);
     }
-    @hidden action tccodegenarithmetic33() {
+    @hidden action tccodegenarithmetic29() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x - (bit<32>)hdr.values.y);
     }
-    @hidden action tccodegenarithmetic34() {
+    @hidden action tccodegenarithmetic30() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x + 32w3);
     }
-    @hidden action tccodegenarithmetic35() {
+    @hidden action tccodegenarithmetic31() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x + (bit<32>)hdr.values.y);
     }
-    @hidden action tccodegenarithmetic36() {
+    @hidden action tccodegenarithmetic32() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x * (bit<32>)hdr.values.y);
     }
-    @hidden action tccodegenarithmetic37() {
+    @hidden action tccodegenarithmetic33() {
         result_0 = (bit<64>)(((bit<32>)hdr.values.x + 32w4294967293) * (bit<32>)hdr.values.y + 32w1);
     }
-    @hidden action tccodegenarithmetic38() {
+    @hidden action tccodegenarithmetic34() {
         result_0 = (bit<64>)((bit<32>)hdr.values.x + 32w4294967295);
     }
-    @hidden action tccodegenarithmetic114() {
+    @hidden action tccodegenarithmetic110() {
         hdr.values.result = result_0;
-        send_to_port(32w1);
+        send_to_port(istd.input_port);
     }
-    @hidden table tbl_tccodegenarithmetic112 {
+    @hidden table tbl_tccodegenarithmetic108 {
         actions = {
-            tccodegenarithmetic112();
+            tccodegenarithmetic108();
         }
-        const default_action = tccodegenarithmetic112();
+        const default_action = tccodegenarithmetic108();
+    }
+    @hidden table tbl_tccodegenarithmetic25 {
+        actions = {
+            tccodegenarithmetic25();
+        }
+        const default_action = tccodegenarithmetic25();
+    }
+    @hidden table tbl_tccodegenarithmetic26 {
+        actions = {
+            tccodegenarithmetic26();
+        }
+        const default_action = tccodegenarithmetic26();
+    }
+    @hidden table tbl_tccodegenarithmetic26_0 {
+        actions = {
+            tccodegenarithmetic26_0();
+        }
+        const default_action = tccodegenarithmetic26_0();
+    }
+    @hidden table tbl_tccodegenarithmetic26_1 {
+        actions = {
+            tccodegenarithmetic26_1();
+        }
+        const default_action = tccodegenarithmetic26_1();
+    }
+    @hidden table tbl_tccodegenarithmetic27 {
+        actions = {
+            tccodegenarithmetic27();
+        }
+        const default_action = tccodegenarithmetic27();
+    }
+    @hidden table tbl_tccodegenarithmetic27_0 {
+        actions = {
+            tccodegenarithmetic27_0();
+        }
+        const default_action = tccodegenarithmetic27_0();
+    }
+    @hidden table tbl_tccodegenarithmetic27_1 {
+        actions = {
+            tccodegenarithmetic27_1();
+        }
+        const default_action = tccodegenarithmetic27_1();
+    }
+    @hidden table tbl_tccodegenarithmetic28 {
+        actions = {
+            tccodegenarithmetic28();
+        }
+        const default_action = tccodegenarithmetic28();
     }
     @hidden table tbl_tccodegenarithmetic29 {
         actions = {
@@ -103,35 +151,11 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         }
         const default_action = tccodegenarithmetic30();
     }
-    @hidden table tbl_tccodegenarithmetic30_0 {
-        actions = {
-            tccodegenarithmetic30_0();
-        }
-        const default_action = tccodegenarithmetic30_0();
-    }
-    @hidden table tbl_tccodegenarithmetic30_1 {
-        actions = {
-            tccodegenarithmetic30_1();
-        }
-        const default_action = tccodegenarithmetic30_1();
-    }
     @hidden table tbl_tccodegenarithmetic31 {
         actions = {
             tccodegenarithmetic31();
         }
         const default_action = tccodegenarithmetic31();
-    }
-    @hidden table tbl_tccodegenarithmetic31_0 {
-        actions = {
-            tccodegenarithmetic31_0();
-        }
-        const default_action = tccodegenarithmetic31_0();
-    }
-    @hidden table tbl_tccodegenarithmetic31_1 {
-        actions = {
-            tccodegenarithmetic31_1();
-        }
-        const default_action = tccodegenarithmetic31_1();
     }
     @hidden table tbl_tccodegenarithmetic32 {
         actions = {
@@ -151,96 +175,72 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         }
         const default_action = tccodegenarithmetic34();
     }
-    @hidden table tbl_tccodegenarithmetic35 {
+    @hidden table tbl_tccodegenarithmetic110 {
         actions = {
-            tccodegenarithmetic35();
+            tccodegenarithmetic110();
         }
-        const default_action = tccodegenarithmetic35();
-    }
-    @hidden table tbl_tccodegenarithmetic36 {
-        actions = {
-            tccodegenarithmetic36();
-        }
-        const default_action = tccodegenarithmetic36();
-    }
-    @hidden table tbl_tccodegenarithmetic37 {
-        actions = {
-            tccodegenarithmetic37();
-        }
-        const default_action = tccodegenarithmetic37();
-    }
-    @hidden table tbl_tccodegenarithmetic38 {
-        actions = {
-            tccodegenarithmetic38();
-        }
-        const default_action = tccodegenarithmetic38();
-    }
-    @hidden table tbl_tccodegenarithmetic114 {
-        actions = {
-            tccodegenarithmetic114();
-        }
-        const default_action = tccodegenarithmetic114();
+        const default_action = tccodegenarithmetic110();
     }
     apply {
         if (istd.parser_error != error.NoError) {
-            tbl_tccodegenarithmetic112.apply();
+            tbl_tccodegenarithmetic108.apply();
         } else {
-            tbl_tccodegenarithmetic29.apply();
+            tbl_tccodegenarithmetic25.apply();
             if (hdr.values.op == 8w0) {
                 if ((bit<32>)hdr.values.x > (bit<32>)hdr.values.y + 32w4294967282) {
-                    tbl_tccodegenarithmetic30.apply();
+                    tbl_tccodegenarithmetic26.apply();
                 } else {
-                    tbl_tccodegenarithmetic30_0.apply();
+                    tbl_tccodegenarithmetic26_0.apply();
                 }
-                tbl_tccodegenarithmetic30_1.apply();
+                tbl_tccodegenarithmetic26_1.apply();
             }
             if (hdr.values.op == 8w1) {
                 if ((bit<32>)hdr.values.x + 32w4294967276 != (bit<32>)hdr.values.y) {
-                    tbl_tccodegenarithmetic31.apply();
+                    tbl_tccodegenarithmetic27.apply();
                 } else {
-                    tbl_tccodegenarithmetic31_0.apply();
+                    tbl_tccodegenarithmetic27_0.apply();
                 }
-                tbl_tccodegenarithmetic31_1.apply();
+                tbl_tccodegenarithmetic27_1.apply();
             }
             if (hdr.values.op == 8w2) {
-                tbl_tccodegenarithmetic32.apply();
+                tbl_tccodegenarithmetic28.apply();
             }
             if (hdr.values.op == 8w3) {
-                tbl_tccodegenarithmetic33.apply();
+                tbl_tccodegenarithmetic29.apply();
             }
             if (hdr.values.op == 8w4) {
-                tbl_tccodegenarithmetic34.apply();
+                tbl_tccodegenarithmetic30.apply();
             }
             if (hdr.values.op == 8w5) {
-                tbl_tccodegenarithmetic35.apply();
+                tbl_tccodegenarithmetic31.apply();
             }
             if (hdr.values.op == 8w6) {
-                tbl_tccodegenarithmetic36.apply();
+                tbl_tccodegenarithmetic32.apply();
             }
             if (hdr.values.op == 8w7) {
-                tbl_tccodegenarithmetic37.apply();
+                tbl_tccodegenarithmetic33.apply();
             }
             if (hdr.values.op == 8w8) {
-                tbl_tccodegenarithmetic38.apply();
+                tbl_tccodegenarithmetic34.apply();
             }
-            tbl_tccodegenarithmetic114.apply();
+            tbl_tccodegenarithmetic110.apply();
         }
     }
 }
 
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action tccodegenarithmetic129() {
+    @hidden action tccodegenarithmetic125() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<values_t>(hdr.values);
     }
-    @hidden table tbl_tccodegenarithmetic129 {
+    @hidden table tbl_tccodegenarithmetic125 {
         actions = {
-            tccodegenarithmetic129();
+            tccodegenarithmetic125();
         }
-        const default_action = tccodegenarithmetic129();
+        const default_action = tccodegenarithmetic125();
     }
     apply {
-        tbl_tccodegenarithmetic129.apply();
+        tbl_tccodegenarithmetic125.apply();
     }
 }
 

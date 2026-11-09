@@ -12,10 +12,6 @@
 #ifndef ARITH_STAGE
 #define ARITH_STAGE 1
 #endif
-#ifndef ARITH_PORT
-#define ARITH_PORT 1
-#endif
-
 typedef bit<ARITH_WIDTH> word_t;
 header ethernet_t { bit<48> dst; bit<48> src; bit<16> kind; }
 header values_t { bit<8> op; bit<64> x; bit<64> y; bit<64> result; }
@@ -116,7 +112,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta,
 #elif ARITH_STAGE == 3
         calculate_value();
 #endif
-        send_to_port((PortId_t)ARITH_PORT);
+        send_to_port(istd.input_port);
     }
 }
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta,

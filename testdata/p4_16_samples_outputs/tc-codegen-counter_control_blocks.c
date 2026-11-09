@@ -95,9 +95,9 @@ if ((hdrMd->parser_error) != (NoError)) {
                     ext_params.flags = P4TC_EXT_CNT_INDIRECT;
                     bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), NULL, 0);
                 }
-                /* send_to_port(1) */
+                /* send_to_port(skb->ifindex) */
                 compiler_meta__->drop = false;
-                send_to_port(1);
+                send_to_port(skb->ifindex);
             }
         }
     }

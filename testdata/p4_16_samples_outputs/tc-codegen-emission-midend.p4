@@ -64,7 +64,7 @@ control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
         drop_packet();
     }
     @hidden action tccodegenemission51() {
-        send_to_port(32w1);
+        send_to_port(istd.input_port);
     }
     @hidden table tbl_tccodegenemission49 {
         actions = {
