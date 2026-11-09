@@ -66,7 +66,5 @@ execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py
 set(
   TESTGEN_LIBS ${TESTGEN_LIBS}
   PRIVATE p4tools-control-plane
-  # For Protobuf includes.
-  PRIVATE controlplane
   PARENT_SCOPE
 )
