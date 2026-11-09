@@ -22,7 +22,7 @@ static __always_inline struct internal_bit_128 loadfrom_128(u8 *in)
 #define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)
 #define BYTES(w) ((w) / 8)
 #define BYTES_ROUND_UP(w) (((w) + (8) - 1) / (8))
-#define write_partial_ex(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) & ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)
+#define write_partial_ex(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) & ~(EBPF_MASK(u8, w) << s)) | ((EBPF_MASK(u8, w) & (v)) << s) ; } while (0)
 #define write_byte(base, offset, v) do { *(u8*)((base) + (offset)) = (v); } while (0)
 #define bpf_trace_message(fmt, ...)
 

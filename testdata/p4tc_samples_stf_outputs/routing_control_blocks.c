@@ -202,7 +202,7 @@ struct p4tc_ext_csum_params chk_csum = {};
                 bpf_p4tc_ext_csum_16bit_complement_sub(&chk_csum, sizeof(chk_csum), &chk_tmp, sizeof(chk_tmp));
             }
 ;
-                        ip_1.ttl = (ip_1.ttl + 255);
+                        ip_1.ttl = (((u64)(ip_1.ttl) + (u64)(255ULL)) & 255ULL);
             /* chk.add({ip_1.ttl, ip_1.protocol}) */
             {
                 u16 chk_tmp_0 = 0;

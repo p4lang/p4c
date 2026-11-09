@@ -370,10 +370,10 @@ class ConvertToBackendIR : public Inspector {
                                                             const IR::Declaration_Instance *decl,
                                                             struct ExternInstance *instance);
     safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_Extern *extn,
-                                                             const IR::Declaration_Instance *decl,
-                                                             cstring eName);
+                                                            const IR::Declaration_Instance *decl,
+                                                            cstring eName);
     void initializeExternControlPath(safe_vector<const IR::TCKey *> &keys,
-                                    const IR::Expression *initialValue);
+                                     const IR::Expression *initialValue);
     cstring getControlPathKeyAnnotation(const IR::StructField *field);
     unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);

@@ -79,7 +79,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr_start += BYTES(8);
 
 ;
-            seen_0 = (seen_0 + hdr->tail.value);            u8 select_1;
+            seen_0 = (((u64)(seen_0) + (u64)(hdr->tail.value)) & 255ULL);            u8 select_1;
             select_1 = hdr->tail.value;
             if (select_1 == 0xff)goto reject;
             if ((select_1 & 0x0) == (0x0 & 0x0))goto finish;

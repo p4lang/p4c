@@ -1,0 +1,3 @@
+p4tc_samples/const_entry_mask_on_exact_overlimit_errors.p4(34): [--Werror=overlimit] error: MainControlImpl.t_exact: Expanded constant entries exceed table capacity 1024
+    table t_exact {
+          ^^^^^^^
