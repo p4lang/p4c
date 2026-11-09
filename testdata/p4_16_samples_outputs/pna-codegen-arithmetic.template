@@ -1,7 +1,0 @@
-#!/bin/bash -x
-
-set -e
-
-: "${TC:="tc"}"
-$TC p4template create pipeline/pna-codegen-arithmetic numtables 0
-$TC p4template update pipeline/pna-codegen-arithmetic state ready
