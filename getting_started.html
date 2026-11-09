@@ -166,6 +166,9 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
             <a href="#ubuntu-dependencies">Ubuntu dependencies</a>
             <ul>
               <li class="level4">
+                <a href="#p4runtime">P4Runtime</a>
+              </li>
+              <li class="level4">
                 <a href="#cmake">CMake</a>
               </li>
             </ul>
@@ -372,6 +375,7 @@ Installing P4C from source</h3>
 <li><code>-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF</code>. Try to find a system version of Abseil instead of a fetched one. Default is OFF.</li>
 <li><code>-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF</code>. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.</li>
 <li><code>-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF</code>. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.</li>
+<li><code>-DP4C_USE_PREINSTALLED_P4RUNTIME=ON|OFF</code>. Use an installed P4Runtime CMake package with C++ bindings instead of fetching it. Default is OFF.</li>
 <li><code>-DENABLE_ABSEIL_STATIC=ON|OFF</code>. Enable the use of static abseil libraries. Default is ON. Only has an effect when <code>P4C_USE_PREINSTALLED_ABSEIL</code> is enabled.</li>
 <li><code>-DENABLE_PROTOBUF_STATIC=ON|OFF</code>. Enable the use of static protobuf libraries. Default is ON. Only has an effect when <code>P4C_USE_PREINSTALLED_PROTOBUF</code> is enabled.</li>
 <li><code>-DENABLE_MULTITHREAD=ON|OFF</code>. Use multithreading. Default is OFF.</li>
@@ -432,7 +436,14 @@ Ubuntu dependencies</h3>
 <p><code>git checkout v3.25.3</code></p>
 <p>Please note that while all Protobuf versions newer than 3.0 should work for P4C itself, you may run into trouble with Abseil, some extensions and other p4lang projects unless you install version 3.25.3.</p>
 <p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240722.1 at the moment).</p>
-<h4><a class="anchor" id="cmake"></a>
+<h4><a class="anchor" id="p4runtime"></a>
+P4Runtime</h4>
+<p>P4C fetches P4Runtime and links its <code>p4runtime::cpp</code> target by default. The bindings are built with P4C's Protobuf library and <code>protoc</code>.</p>
+<p>To instead use an installed package (requires P4runtime 1.6 or newer) configure P4C with:</p>
+<div class="fragment"><div class="line">cmake -S . -B build \</div>
+<div class="line">  -DP4C_USE_PREINSTALLED_P4RUNTIME=ON \</div>
+<div class="line">  -DCMAKE_PREFIX_PATH=/path/to/p4runtime/install</div>
+</div><!-- fragment --><h4><a class="anchor" id="cmake"></a>
 CMake</h4>
 <p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>, but there is no guarantee that this will lead to a successful build.</p>
 <h3><a class="anchor" id="fedora-dependencies"></a>
