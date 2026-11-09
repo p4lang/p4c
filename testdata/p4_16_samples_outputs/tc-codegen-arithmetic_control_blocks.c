@@ -117,7 +117,7 @@ if ((((u64)((u64)(hdr->values.x & 4294967295u)) + (u64)(4294967276ULL)) & 429496
         }
         ;
 
-        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        long outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);

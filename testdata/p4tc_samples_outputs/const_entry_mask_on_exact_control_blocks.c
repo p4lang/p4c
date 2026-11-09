@@ -13,7 +13,7 @@ struct skb_aggregate {
 struct __attribute__((__packed__)) MainControlImpl_t_exact_key {
     u32 keysz;
     u32 maskid;
-    u16 field0; /* h.h.e */
+    u8 field0; /* h.h.e */
 } __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_T_EXACT_ACT_MAINCONTROLIMPL_A_WITH_CONTROL_PARAMS 1
 #define MAINCONTROLIMPL_T_EXACT_ACT_NOACTION 0
@@ -26,7 +26,7 @@ struct __attribute__((__packed__)) MainControlImpl_t_exact_value {
         struct {
         } _NoAction;
         struct __attribute__((__packed__)) {
-            u16 x;
+            u8 x;
         } MainControlImpl_a_with_control_params;
     } u;
 };
@@ -66,7 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
                 };
                 struct MainControlImpl_t_exact_key key;
                 __builtin_memset(&key, 0, sizeof(key));
-                key.keysz = 16;
+                key.keysz = 8;
                 key.field0 = h->h.e;
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
@@ -120,7 +120,7 @@ static __always_inline int process(struct __sk_buff *skb, struct Header_t *h, st
         }
         ;
 
-        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
+        long outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);

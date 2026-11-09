@@ -9,14 +9,14 @@
       "tentries" : 1024,
       "permissions" : "0x3da4",
       "nummask" : 8,
-      "keysize" : 16,
+      "keysize" : 8,
       "keyfields" : [
         {
           "id" : 1,
           "name" : "h.h.e",
-          "type" : "bit16",
+          "type" : "bit8",
           "match_type" : "exact",
-          "bitwidth" : 16
+          "bitwidth" : 8
         }
       ],
       "actions" : [
@@ -29,8 +29,8 @@
             {
               "id" : 1,
               "name" : "x",
-              "type" : "bit16",
-              "bitwidth" : 16
+              "type" : "bit8",
+              "bitwidth" : 8
             }
           ],
           "default_hit_action" : false,

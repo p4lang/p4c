@@ -111,7 +111,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 ;
-            meta->leftover = (meta->leftover + 1);             goto finish;
+            meta->leftover = (((u64)(meta->leftover) + (u64)(1ULL)) & 4294967295ULL);             goto finish;
         }
 
         reject: {

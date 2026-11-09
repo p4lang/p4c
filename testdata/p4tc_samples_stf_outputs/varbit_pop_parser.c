@@ -130,7 +130,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             else goto reject;
         }
         parse_v4_opts: {
-/* extract(hdr->opts, (u32)(((u16)((hdr->ipv4.ihl + 11) & ((1ULL << 4) - 1)) << 5) & ((1ULL << 9) - 1))) */
+/* extract(hdr->opts, (u32)(((u16)(((u64)(hdr->ipv4.ihl) + (u64)(11ULL)) & 15ULL) << 5) & ((1ULL << 9) - 1))) */
 
             hdr_start += BYTES(0);
             {

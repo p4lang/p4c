@@ -38,17 +38,17 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h,
         goto start;
         start: {
 /* extract(h->h) */
-            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(16)) {
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(8)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
 
-            h->h.e = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
+            h->h.e = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
+            ebpf_packetOffsetInBits += 8;
 
 
             h->h.ebpf_valid = 1;
-            hdr_start += BYTES(16);
+            hdr_start += BYTES(8);
 
 ;
              goto accept;
