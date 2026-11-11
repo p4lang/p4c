@@ -13,6 +13,7 @@
 #include "./frontends/p4/unusedDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
+#include "midend/copyStructures.h"
 namespace P4 {
 
 /**
@@ -107,15 +108,12 @@ class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
  *       u.h1 = my_h1;                |     // all other elements set to Invalid
  *                                    |     u_h1 = my_h1;
  *                                    | } else {
- *                                    |     u_h1.setInvalid()
+ *                                    |     // all elements set to Invalid
  *                                    | }
- *   b) u.h1 = {16W1}                 | This is already transformed into individual element copy
- *                                    | by earlier passes and individual assignment is translated
- *                                    | as same as (a)
+ *   b) Assigning a field of u.h1     | Does not change validity
  *   c) u1.h1 = u2.h1                 | same as a) with my_h1 replaced with u2_h1
- *   d) u1 = u2                       | This is already transformed into individual element copy
- *                                    | by earlier passes and individual assignment is translated
- *                                    | same as (c)
+ *   d) u1 = u2                       | CopyStructures selects the valid source member to copy,
+ *                                    | or invalidates the destination if the source is invalid
  *   e) a = u.isValid()               | tmp = 0;
  *   Only one element should be valid | for elements in union
  *                                    |     if (element.isvalid)
@@ -128,8 +126,9 @@ class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
  *   b) if(u.isValid())               | if (tmp == 1)
  * 3) When setValid method is called on a header element, it is translated to setValid for the
  *    given element and setInvalid for rest of the elements
- * 4) Extracting into a header element is followed by setInvalid for rest of the elements
- * 5) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
+ * 4) When setInvalid is called on a header element, all elements are set to Invalid
+ * 5) Extracting into a header element is followed by setInvalid for rest of the elements
+ * 6) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
  *    earlier passes and hence no-action required here.
  */
 class HandleValidityHeaderUnion : public Transform {
@@ -162,8 +161,8 @@ class HandleValidityHeaderUnion : public Transform {
                                   IR::IndexedVector<IR::StatOrDecl> &code_block);
 };
 
-/** Lower push_front/pop_front on a header union stack into member-wise element
- * copies plus setInvalid on the vacated elements. Runs before
+/** Lower push_front/pop_front on a header union stack into whole-union element
+ * copies plus setInvalid on the vacated elements. Runs before DoExpandHeaderUnionCopies and
  * HandleValidityHeaderUnion (so the copies get validity handling) and before
  * DoFlattenHeaderUnionStack (which only rewrites [] index accesses).
  */
@@ -175,6 +174,17 @@ class DoExpandHeaderUnionStackPushPop : public Transform {
         setName("DoExpandHeaderUnionStackPushPop");
     }
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
+};
+
+/// Expand whole-union copies, including copies introduced by stack shifts.
+class DoExpandHeaderUnionCopies : public Transform {
+    P4::TypeMap *typeMap;
+
+ public:
+    explicit DoExpandHeaderUnionCopies(P4::TypeMap *typeMap) : typeMap(typeMap) {
+        setName("DoExpandHeaderUnionCopies");
+    }
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
@@ -221,7 +231,12 @@ class FlattenHeaderUnion : public PassManager {
             passes.push_back(new P4::TypeInference(typeMap, false));
             passes.push_back(new P4::TypeChecking(refMap, typeMap));
         }
+        passes.push_back(new P4::RemoveAliases(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(new DoExpandHeaderUnionCopies(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap, loopsUnroll));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         // Stack flattening is only applicable if parser loops are unrolled and
         // header union stack elements are accessed using [] notation. This pass does not handle
         // .next .last etc accessors for stack elements.

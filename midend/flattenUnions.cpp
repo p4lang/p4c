@@ -71,7 +71,7 @@ const IR::Node *HandleValidityHeaderUnion::expandIsValid(
 }
 
 // u.h1 = {elem1, elem2....} => Already simplified to elementwise initialization
-// u = u1 => Already simplified to elementwise copy
+// u = u1 => Already simplified to a conditional copy of the valid member
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a) {
     IR::IndexedVector<IR::StatOrDecl> code_block;
     auto left = a->left;
@@ -86,6 +86,7 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a)
         }
     } else if (auto lhs = left->to<IR::Member>()) {
         if (auto huType = lhs->expr->type->to<IR::Type_HeaderUnion>()) {
+            if (!isFlattened(lhs->expr)) return a;
             auto rhs = right->to<IR::Member>();
             if (right->type->is<IR::Type_Header>() ||
                 (rhs && rhs->expr->type->is<IR::Type_HeaderUnion>())) {
@@ -99,19 +100,12 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a)
                     new IR::Member(left->srcInfo, left, IR::ID(IR::Type_Header::setInvalid));
                 auto mc1 = new IR::MethodCallExpression(left->srcInfo, method1,
                                                         new IR::Vector<IR::Argument>());
-                auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
+                auto ifFalse = setInvalidforRest(new IR::MethodCallStatement(mc1->srcInfo, mc1),
+                                                 lhs, huType, lhs->member.name, false)
+                                   ->checkedTo<IR::Statement>();
                 auto ifStatement = new IR::IfStatement(
                     a->srcInfo, result, trueBlock->to<IR::BlockStatement>(), ifFalse);
                 return ifStatement;
-            }
-        } else if (auto leftMem = lhs->expr->to<IR::Member>()) {  // hdr.u1.h1 or u1.h1
-            // Handling hdr.u1.h1.data = <constant>
-            if (auto huType = leftMem->expr->type->to<IR::Type_HeaderUnion>()) {
-                // hdr.u1 or u1
-                if (leftMem->type->is<IR::Type_Header>() && right->is<IR::Constant>()) {
-                    // h1.data = constant
-                    return setInvalidforRest(a, leftMem, huType, leftMem->member.name, true);
-                }
             }
         }
     }
@@ -157,10 +151,12 @@ bool HandleValidityHeaderUnion::isFlattened(const IR::Expression *u) const {
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
     if (auto a = mi->to<P4::BuiltInMethod>()) {
-        if (a->name == "setValid") {  // hdr.u.h1.setValid() or u.h1.setValid
+        if (a->name == "setValid" || a->name == "setInvalid") {
             if (auto m = a->appliedTo->to<IR::Member>()) {
-                if (auto huType = m->expr->type->to<IR::Type_HeaderUnion>())  // u.h1  or hdr.u.h1
-                    return setInvalidforRest(mcs, m, huType, m->member.name, false);
+                if (auto huType = m->expr->type->to<IR::Type_HeaderUnion>()) {
+                    if (isFlattened(m->expr))
+                        return setInvalidforRest(mcs, m, huType, m->member.name, false);
+                }
             }
         }
     } else if (auto em = mi->to<P4::ExternMethod>()) {
@@ -222,13 +218,10 @@ const IR::Node *DoExpandHeaderUnionStackPushPop::postorder(IR::MethodCallStateme
     auto elem = [&](int i) {
         return new IR::ArrayIndex(srcInfo, mem->expr->clone(), new IR::Constant(i));
     };
-    // Copy element by element. A whole-union assignment would need CopyStructures, which
-    // has already run; HandleValidityHeaderUnion lowers each copy and keeps validity right.
+    // Copy whole unions so that DoExpandHeaderUnionCopies can select the valid source member before
+    // HandleValidityHeaderUnion lowers the copies to independent headers.
     auto copy = [&](int dst, int src) {
-        for (auto f : hu->fields)
-            block.push_back(
-                new IR::AssignmentStatement(srcInfo, new IR::Member(srcInfo, elem(dst), f->name),
-                                            new IR::Member(srcInfo, elem(src), f->name)));
+        block.push_back(new IR::AssignmentStatement(srcInfo, elem(dst), elem(src)));
     };
     auto invalidate = [&](int i) {
         for (auto f : hu->fields) {
@@ -248,6 +241,12 @@ const IR::Node *DoExpandHeaderUnionStackPushPop::postorder(IR::MethodCallStateme
         for (int i = (size - n > 0 ? size - n : 0); i < size; i++) invalidate(i);
     }
     return new IR::BlockStatement(srcInfo, std::move(block));
+}
+
+const IR::Node *DoExpandHeaderUnionCopies::postorder(IR::AssignmentStatement *statement) {
+    const auto *type = typeMap->getType(statement->left, true)->to<IR::Type_HeaderUnion>();
+    if (!type || statement->right->is<IR::MethodCallExpression>()) return statement;
+    return DoCopyStructures::expandHeaderUnion(statement, type);
 }
 
 bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {

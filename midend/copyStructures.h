@@ -8,6 +8,7 @@
 #ifndef MIDEND_COPYSTRUCTURES_H_
 #define MIDEND_COPYSTRUCTURES_H_
 
+#include "frontends/p4/parserControlFlow.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -22,11 +23,9 @@ struct CopyStructuresConfig {
 
     /// Do not only copy normal structures but also perform copy assignments for headers.
     bool copyHeaders = false;
-    /// Expand header union assignments into member assignments. This expansion has a known
-    /// correctness bug: copying an invalid member can invalidate a previously copied member.
-    /// Expansion is disabled by default to preserve union validity. Pipelines that require
-    /// member assignments must explicitly enable it.
-    /// See https://github.com/p4lang/p4c/issues/3842.
+    /// Expand header union assignments into conditional copies of the valid member, or
+    /// invalidate the destination if the source is invalid. Disabled by default so that
+    /// targets can implement whole-union assignments directly.
     bool expandUnions = false;
     /// Also split up assignments of tuples.
     bool copyTuples = false;
@@ -69,10 +68,12 @@ class DoCopyStructures : public Transform {
 
     /// Configuration options.
     CopyStructuresConfig config;
+    bool *expandedUnionInParser;
 
  public:
-    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config)
-        : typeMap(typeMap), config(config) {
+    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config,
+                              bool *expandedUnionInParser = nullptr)
+        : typeMap(typeMap), config(config), expandedUnionInParser(expandedUnionInParser) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
@@ -85,6 +86,9 @@ class DoCopyStructures : public Transform {
     // but that fails because we depend on the typeMap which will be out of date after
     // expanding outer copies.  So we need to repeat this pass in a loop
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    /// The caller must remove aliases before expanding a whole-union assignment.
+    static const IR::Statement *expandHeaderUnion(const IR::AssignmentStatement *statement,
+                                                  const IR::Type_HeaderUnion *headerUnion);
 };
 
 /**
@@ -129,15 +133,24 @@ class RemoveAliases : public Transform {
     const IR::Node *postorder(IR::P4Control *control) override;
 };
 
-class CopyStructures : public PassRepeated {
+class CopyStructures : public PassManager {
+    bool expandedUnionInParser = false;
+
  public:
     explicit CopyStructures(TypeMap *typeMap, CopyStructuresConfig config,
                             TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
         setName("CopyStructures");
         if (typeChecking == nullptr) typeChecking = new TypeChecking(nullptr, typeMap);
-        addPasses({typeChecking, new RemoveAliases(typeMap), typeChecking,
-                   new DoCopyStructures(typeMap, config)});
+        addPasses(
+            {[this] { expandedUnionInParser = false; },
+             new PassRepeated({typeChecking, new RemoveAliases(typeMap), typeChecking,
+                               new DoCopyStructures(typeMap, config, &expandedUnionInParser)})});
+        // Union copies introduce conditionals. Lower those in parsers before a later pass
+        // such as ParsersUnroll requires states with straight-line bodies.
+        if (config.expandUnions)
+            addPasses({new PassIf([this] { return expandedUnionInParser; },
+                                  {new RemoveParserIfs(typeMap)})});
     }
     explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
                             bool copyHeaders = false, bool copyTuples = false,

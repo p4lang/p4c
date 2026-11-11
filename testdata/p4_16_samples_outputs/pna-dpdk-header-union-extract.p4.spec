@@ -21,6 +21,8 @@ apply {
 	rx m.pna_main_input_metadata_input_port
 	invalidate h.MainParserT_parser_l_0_a
 	invalidate h.MainParserT_parser_l_0_b
+	invalidate h.MainParserT_parser_l_0_b
+	invalidate h.MainParserT_parser_l_0_a
 	extract h.MainParserT_parser_l_0_b
 	invalidate h.MainParserT_parser_l_0_a
 	extract h.MainParserT_parser_l_0_a

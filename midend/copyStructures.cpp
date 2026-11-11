@@ -19,7 +19,14 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     // FIXME: This recreates ReadWrites() over and over again, loosing all
     // declaration lookup caching
     ReadsWrites rw;
-    if (!rw.mayAlias(statement->left, statement->right, getContext())) {
+    const auto *written = statement->left;
+    if (const auto *member = written->to<IR::Member>()) {
+        // A header assignment can invalidate every member of its containing union.
+        // Preserve a source in that union before expanding the assignment.
+        if (typeMap->getType(member->expr, true)->is<IR::Type_HeaderUnion>())
+            written = member->expr;
+    }
+    if (!rw.mayAlias(written, statement->right, getContext())) {
         return statement;
     }
     auto tmp = nameGen.newName("tmp");
@@ -52,6 +59,32 @@ const IR::Node *RemoveAliases::postorder(IR::P4Control *control) {
     return control;
 }
 
+const IR::Statement *DoCopyStructures::expandHeaderUnion(const IR::AssignmentStatement *statement,
+                                                         const IR::Type_HeaderUnion *headerUnion) {
+    const auto &srcInfo = statement->srcInfo;
+    IR::IndexedVector<IR::StatOrDecl> invalid;
+    // Invalidating any member invalidates the entire union.
+    if (!headerUnion->fields.empty()) {
+        const auto *field = headerUnion->fields.at(0);
+        auto *member = new IR::Member(srcInfo, statement->left, field->name);
+        invalid.push_back(new IR::MethodCallStatement(
+            srcInfo, new IR::MethodCallExpression(
+                         srcInfo, new IR::Member(srcInfo, member, IR::Type_Header::setInvalid))));
+    }
+    const IR::Statement *copy = new IR::BlockStatement(srcInfo, std::move(invalid));
+    // Copy only the valid source member. Copying an invalid member afterwards would
+    // invalidate the destination union, including the member that was just copied.
+    for (auto field = headerUnion->fields.rbegin(); field != headerUnion->fields.rend(); ++field) {
+        auto *left = new IR::Member(srcInfo, statement->left, (*field)->name);
+        auto *right = new IR::Member(srcInfo, statement->right, (*field)->name);
+        auto *valid = new IR::MethodCallExpression(
+            srcInfo, new IR::Member(srcInfo, right, IR::Type_Header::isValid));
+        copy = new IR::IfStatement(srcInfo, valid,
+                                   new IR::AssignmentStatement(srcInfo, left, right), copy);
+    }
+    return copy;
+}
+
 const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) {
     const auto *ltype = typeMap->getType(statement->left, true);
 
@@ -60,7 +93,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         !ltype->is<IR::Type_Tuple>()) {
         return statement;
     }
-    // Copying union members separately can invalidate a previously copied member.
+    // Preserve whole-union assignments unless the pipeline requests expansion.
     if (!config.expandUnions && ltype->is<IR::Type_HeaderUnion>()) {
         return statement;
     }
@@ -86,6 +119,9 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
+    } else if (const auto *headerUnion = ltype->to<IR::Type_HeaderUnion>()) {
+        if (expandedUnionInParser && isInContext<IR::P4Parser>()) *expandedUnionInParser = true;
+        return expandHeaderUnion(statement, headerUnion);
     } else if (config.copyHeaders && ltype->is<IR::Type_Header>()) {
         const auto *header = ltype->checkedTo<IR::Type_Header>();
         // Build a "src.isValid()" call.

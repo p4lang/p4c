@@ -69,6 +69,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h2.setValid();
         h.h2.b = h.u_h2.b;
         h.u_h2.setInvalid();
+        h.u_h1.setInvalid();
     }
     @hidden table tbl_union3bmv2l68 {
         actions = {

@@ -25,6 +25,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, i
     state start {
         l_0_a.setInvalid();
         l_0_b.setInvalid();
+        l_0_b.setInvalid();
+        l_0_a.setInvalid();
         pkt.extract<H>(l_0_b);
         l_0_a.setInvalid();
         pkt.extract<H>(l_0_a);

@@ -24,81 +24,127 @@ package top(C c);
 control c(inout headers_t hdrs) {
     @hidden action issue5706_header_union_stack24() {
         if (hdrs.hus2_x.isValid()) {
-            hdrs.hus3_x.setValid();
-            hdrs.hus3_x = hdrs.hus2_x;
-            hdrs.hus3_y.setInvalid();
+            if (hdrs.hus2_x.isValid()) {
+                hdrs.hus3_x.setValid();
+                hdrs.hus3_x = hdrs.hus2_x;
+                hdrs.hus3_y.setInvalid();
+            } else {
+                hdrs.hus3_x.setInvalid();
+                hdrs.hus3_y.setInvalid();
+            }
+        } else if (hdrs.hus2_y.isValid()) {
+            if (hdrs.hus2_y.isValid()) {
+                hdrs.hus3_y.setValid();
+                hdrs.hus3_y = hdrs.hus2_y;
+                hdrs.hus3_x.setInvalid();
+            } else {
+                hdrs.hus3_y.setInvalid();
+                hdrs.hus3_x.setInvalid();
+            }
         } else {
             hdrs.hus3_x.setInvalid();
-        }
-        if (hdrs.hus2_y.isValid()) {
-            hdrs.hus3_y.setValid();
-            hdrs.hus3_y = hdrs.hus2_y;
-            hdrs.hus3_x.setInvalid();
-        } else {
             hdrs.hus3_y.setInvalid();
         }
         if (hdrs.hus1_x.isValid()) {
-            hdrs.hus2_x.setValid();
-            hdrs.hus2_x = hdrs.hus1_x;
-            hdrs.hus2_y.setInvalid();
+            if (hdrs.hus1_x.isValid()) {
+                hdrs.hus2_x.setValid();
+                hdrs.hus2_x = hdrs.hus1_x;
+                hdrs.hus2_y.setInvalid();
+            } else {
+                hdrs.hus2_x.setInvalid();
+                hdrs.hus2_y.setInvalid();
+            }
+        } else if (hdrs.hus1_y.isValid()) {
+            if (hdrs.hus1_y.isValid()) {
+                hdrs.hus2_y.setValid();
+                hdrs.hus2_y = hdrs.hus1_y;
+                hdrs.hus2_x.setInvalid();
+            } else {
+                hdrs.hus2_y.setInvalid();
+                hdrs.hus2_x.setInvalid();
+            }
         } else {
             hdrs.hus2_x.setInvalid();
-        }
-        if (hdrs.hus1_y.isValid()) {
-            hdrs.hus2_y.setValid();
-            hdrs.hus2_y = hdrs.hus1_y;
-            hdrs.hus2_x.setInvalid();
-        } else {
             hdrs.hus2_y.setInvalid();
         }
         if (hdrs.hus0_x.isValid()) {
-            hdrs.hus1_x.setValid();
-            hdrs.hus1_x = hdrs.hus0_x;
-            hdrs.hus1_y.setInvalid();
+            if (hdrs.hus0_x.isValid()) {
+                hdrs.hus1_x.setValid();
+                hdrs.hus1_x = hdrs.hus0_x;
+                hdrs.hus1_y.setInvalid();
+            } else {
+                hdrs.hus1_x.setInvalid();
+                hdrs.hus1_y.setInvalid();
+            }
+        } else if (hdrs.hus0_y.isValid()) {
+            if (hdrs.hus0_y.isValid()) {
+                hdrs.hus1_y.setValid();
+                hdrs.hus1_y = hdrs.hus0_y;
+                hdrs.hus1_x.setInvalid();
+            } else {
+                hdrs.hus1_y.setInvalid();
+                hdrs.hus1_x.setInvalid();
+            }
         } else {
             hdrs.hus1_x.setInvalid();
-        }
-        if (hdrs.hus0_y.isValid()) {
-            hdrs.hus1_y.setValid();
-            hdrs.hus1_y = hdrs.hus0_y;
-            hdrs.hus1_x.setInvalid();
-        } else {
             hdrs.hus1_y.setInvalid();
         }
         hdrs.hus0_x.setInvalid();
         hdrs.hus0_y.setInvalid();
+        hdrs.hus0_y.setInvalid();
+        hdrs.hus0_x.setInvalid();
         if (hdrs.hus2_x.isValid()) {
-            hdrs.hus0_x.setValid();
-            hdrs.hus0_x = hdrs.hus2_x;
-            hdrs.hus0_y.setInvalid();
+            if (hdrs.hus2_x.isValid()) {
+                hdrs.hus0_x.setValid();
+                hdrs.hus0_x = hdrs.hus2_x;
+                hdrs.hus0_y.setInvalid();
+            } else {
+                hdrs.hus0_x.setInvalid();
+                hdrs.hus0_y.setInvalid();
+            }
+        } else if (hdrs.hus2_y.isValid()) {
+            if (hdrs.hus2_y.isValid()) {
+                hdrs.hus0_y.setValid();
+                hdrs.hus0_y = hdrs.hus2_y;
+                hdrs.hus0_x.setInvalid();
+            } else {
+                hdrs.hus0_y.setInvalid();
+                hdrs.hus0_x.setInvalid();
+            }
         } else {
             hdrs.hus0_x.setInvalid();
-        }
-        if (hdrs.hus2_y.isValid()) {
-            hdrs.hus0_y.setValid();
-            hdrs.hus0_y = hdrs.hus2_y;
-            hdrs.hus0_x.setInvalid();
-        } else {
             hdrs.hus0_y.setInvalid();
         }
         if (hdrs.hus3_x.isValid()) {
-            hdrs.hus1_x.setValid();
-            hdrs.hus1_x = hdrs.hus3_x;
-            hdrs.hus1_y.setInvalid();
+            if (hdrs.hus3_x.isValid()) {
+                hdrs.hus1_x.setValid();
+                hdrs.hus1_x = hdrs.hus3_x;
+                hdrs.hus1_y.setInvalid();
+            } else {
+                hdrs.hus1_x.setInvalid();
+                hdrs.hus1_y.setInvalid();
+            }
+        } else if (hdrs.hus3_y.isValid()) {
+            if (hdrs.hus3_y.isValid()) {
+                hdrs.hus1_y.setValid();
+                hdrs.hus1_y = hdrs.hus3_y;
+                hdrs.hus1_x.setInvalid();
+            } else {
+                hdrs.hus1_y.setInvalid();
+                hdrs.hus1_x.setInvalid();
+            }
         } else {
             hdrs.hus1_x.setInvalid();
-        }
-        if (hdrs.hus3_y.isValid()) {
-            hdrs.hus1_y.setValid();
-            hdrs.hus1_y = hdrs.hus3_y;
-            hdrs.hus1_x.setInvalid();
-        } else {
             hdrs.hus1_y.setInvalid();
         }
         hdrs.hus2_x.setInvalid();
         hdrs.hus2_y.setInvalid();
+        hdrs.hus2_y.setInvalid();
+        hdrs.hus2_x.setInvalid();
         hdrs.hus3_x.setInvalid();
         hdrs.hus3_y.setInvalid();
+        hdrs.hus3_y.setInvalid();
+        hdrs.hus3_x.setInvalid();
     }
     @hidden table tbl_issue5706_header_union_stack24 {
         actions = {

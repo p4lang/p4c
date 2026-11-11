@@ -369,30 +369,40 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     clone_0_t clone_md_0_data_h0;
     clone_1_t clone_md_0_data_h1;
     @hidden action issue982l411() {
-        ostd.clone_metadata.type = 3w0;
         if (clone_md_0_data_h0.isValid()) {
             ostd.clone_metadata.data_h0.setValid();
             ostd.clone_metadata.data_h0 = clone_md_0_data_h0;
             ostd.clone_metadata.data_h1.setInvalid();
         } else {
             ostd.clone_metadata.data_h0.setInvalid();
+            ostd.clone_metadata.data_h1.setInvalid();
         }
+    }
+    @hidden action issue982l411_0() {
         if (clone_md_0_data_h1.isValid()) {
             ostd.clone_metadata.data_h1.setValid();
             ostd.clone_metadata.data_h1 = clone_md_0_data_h1;
             ostd.clone_metadata.data_h0.setInvalid();
         } else {
             ostd.clone_metadata.data_h1.setInvalid();
+            ostd.clone_metadata.data_h0.setInvalid();
         }
+    }
+    @hidden action issue982l411_1() {
+        ostd.clone_metadata.data_h0.setInvalid();
+        ostd.clone_metadata.data_h1.setInvalid();
+    }
+    @hidden action issue982l411_2() {
+        ostd.clone_metadata.type = 3w0;
     }
     @hidden action issue982l407() {
         clone_md_0_data_h0.setInvalid();
         clone_md_0_data_h1.setInvalid();
-        clone_md_0_data_h1.setValid();
+        clone_md_0_data_h1.setInvalid();
         clone_md_0_data_h0.setInvalid();
         clone_md_0_data_h1.setValid();
+        clone_md_0_data_h0.setInvalid();
         clone_md_0_data_h1.data = 32w0;
-        clone_md_0_data_h0.setInvalid();
     }
     @hidden action issue982l413() {
         packet.emit<ethernet_t>(hdr.ethernet);
@@ -406,9 +416,27 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     }
     @hidden table tbl_issue982l411 {
         actions = {
+            issue982l411_2();
+        }
+        const default_action = issue982l411_2();
+    }
+    @hidden table tbl_issue982l411_0 {
+        actions = {
             issue982l411();
         }
         const default_action = issue982l411();
+    }
+    @hidden table tbl_issue982l411_1 {
+        actions = {
+            issue982l411_0();
+        }
+        const default_action = issue982l411_0();
+    }
+    @hidden table tbl_issue982l411_2 {
+        actions = {
+            issue982l411_1();
+        }
+        const default_action = issue982l411_1();
     }
     @hidden table tbl_issue982l413 {
         actions = {
@@ -420,6 +448,13 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         tbl_issue982l407.apply();
         if (meta._custom_clone_id1 == 3w1) {
             tbl_issue982l411.apply();
+            if (clone_md_0_data_h0.isValid()) {
+                tbl_issue982l411_0.apply();
+            } else if (clone_md_0_data_h1.isValid()) {
+                tbl_issue982l411_1.apply();
+            } else {
+                tbl_issue982l411_2.apply();
+            }
         }
         tbl_issue982l413.apply();
     }

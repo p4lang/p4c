@@ -34,51 +34,31 @@ apply {
 	extract h.u0_h3
 	invalidate h.u0_h1
 	invalidate h.u0_h2
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	mov m.MainParserT_parser_tmp 1
 	jmpv LABEL_END h.u0_h3
 	mov m.MainParserT_parser_tmp 0
 	LABEL_END :	jmpeq PARSERIMPL_START_TRUE m.MainParserT_parser_tmp 1
 	invalidate h.u0_h1
+	invalidate h.u0_h2
+	invalidate h.u0_h3
 	jmp PARSERIMPL_START_JOIN
 	PARSERIMPL_START_TRUE :	validate h.u0_h1
-	jmpnv LABEL_FALSE h.u0_h3
-	validate h.u0_h1
-	jmp LABEL_END_0
-	LABEL_FALSE :	invalidate h.u0_h1
-	LABEL_END_0 :	mov h.u0_h1.data h.u0_h3.data
 	invalidate h.u0_h2
 	invalidate h.u0_h3
-	PARSERIMPL_START_JOIN :	validate h.u0_h1
-	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
+	PARSERIMPL_START_JOIN :	mov h.u0_h1.data 0x1
 	mov h.h2_0.data 0x1
-	validate h.u0_h1
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
-	validate h.u0_h2
 	mov h.u0_h2.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h3
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	validate h.u0_h1
 	invalidate h.u0_h2
 	invalidate h.u0_h3
-	validate h.u0_h1
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
 	validate h.u0_h2
 	invalidate h.u0_h1
 	invalidate h.u0_h3
+	jmpnv LABEL_FALSE h.u0_h1
 	jmpnv LABEL_FALSE_0 h.u0_h1
 	validate h.u1_h1
 	jmpnv LABEL_FALSE_1 h.u0_h1
@@ -88,54 +68,55 @@ apply {
 	LABEL_END_2 :	mov h.u1_h1.data h.u0_h1.data
 	invalidate h.u1_h2
 	invalidate h.u1_h3
-	jmp LABEL_END_1
+	jmp LABEL_END_0
 	LABEL_FALSE_0 :	invalidate h.u1_h1
-	LABEL_END_1 :	jmpnv LABEL_FALSE_2 h.u0_h2
-	validate h.u1_h2
+	invalidate h.u1_h2
+	invalidate h.u1_h3
+	jmp LABEL_END_0
+	LABEL_FALSE :	jmpnv LABEL_FALSE_2 h.u0_h2
 	jmpnv LABEL_FALSE_3 h.u0_h2
 	validate h.u1_h2
-	jmp LABEL_END_4
-	LABEL_FALSE_3 :	invalidate h.u1_h2
-	LABEL_END_4 :	mov h.u1_h2.data h.u0_h2.data
-	invalidate h.u1_h1
-	invalidate h.u1_h3
-	jmp LABEL_END_3
-	LABEL_FALSE_2 :	invalidate h.u1_h2
-	LABEL_END_3 :	jmpnv LABEL_FALSE_4 h.u0_h3
-	validate h.u1_h3
-	jmpnv LABEL_FALSE_5 h.u0_h3
-	validate h.u1_h3
-	jmp LABEL_END_6
-	LABEL_FALSE_5 :	invalidate h.u1_h3
-	LABEL_END_6 :	mov h.u1_h3.data h.u0_h3.data
-	invalidate h.u1_h1
-	invalidate h.u1_h2
-	jmp LABEL_END_5
-	LABEL_FALSE_4 :	invalidate h.u1_h3
-	LABEL_END_5 :	validate h.u1_h1
-	mov h.u1_h1.data 0x1
-	invalidate h.u1_h2
-	invalidate h.u1_h3
+	jmpnv LABEL_FALSE_4 h.u0_h2
 	validate h.u1_h2
-	mov h.u1_h2.data 0x1
+	jmp LABEL_END_5
+	LABEL_FALSE_4 :	invalidate h.u1_h2
+	LABEL_END_5 :	mov h.u1_h2.data h.u0_h2.data
 	invalidate h.u1_h1
 	invalidate h.u1_h3
+	jmp LABEL_END_0
+	LABEL_FALSE_3 :	invalidate h.u1_h2
+	invalidate h.u1_h1
+	invalidate h.u1_h3
+	jmp LABEL_END_0
+	LABEL_FALSE_2 :	jmpnv LABEL_FALSE_5 h.u0_h3
+	jmpnv LABEL_FALSE_6 h.u0_h3
+	validate h.u1_h3
+	jmpnv LABEL_FALSE_7 h.u0_h3
+	validate h.u1_h3
+	jmp LABEL_END_8
+	LABEL_FALSE_7 :	invalidate h.u1_h3
+	LABEL_END_8 :	mov h.u1_h3.data h.u0_h3.data
+	invalidate h.u1_h1
+	invalidate h.u1_h2
+	jmp LABEL_END_0
+	LABEL_FALSE_6 :	invalidate h.u1_h3
+	invalidate h.u1_h1
+	invalidate h.u1_h2
+	jmp LABEL_END_0
+	LABEL_FALSE_5 :	invalidate h.u1_h1
+	invalidate h.u1_h2
+	invalidate h.u1_h3
+	LABEL_END_0 :	mov h.u1_h1.data 0x1
+	mov h.u1_h2.data 0x1
 	validate h.u0_h2
 	invalidate h.u0_h1
 	invalidate h.u0_h3
 	invalidate h.u0_h3
-	validate h.u0_h1
+	invalidate h.u0_h1
+	invalidate h.u0_h2
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
-	validate h.u0_h2
 	mov h.u0_h2.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h3
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	tx m.pna_main_output_metadata_output_port
 }
 

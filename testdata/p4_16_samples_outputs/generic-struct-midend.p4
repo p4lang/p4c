@@ -88,6 +88,8 @@ control c(out bit<1> x) {
         s_0[2].setInvalid();
         z_0_xu.setInvalid();
         z_0_h3u.setInvalid();
+        z_0_h3u.setInvalid();
+        z_0_xu.setInvalid();
         x = 1w0;
     }
     @hidden table tbl_genericstruct96 {
