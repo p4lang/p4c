@@ -80,6 +80,7 @@ control DeparserImpl(packet_out b, in Headers h, in Meta m, in pna_main_output_m
 control ingress(inout Headers h, inout Meta m, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @hidden action pnadpdkbvec_union77() {
         h.u_h2.setInvalid();
+        h.u_h1.setInvalid();
     }
     @hidden table tbl_pnadpdkbvec_union77 {
         actions = {

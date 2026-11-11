@@ -63,14 +63,10 @@ apply {
 	mov m.ingress_debug_hdr_u_byte_isValid 0
 	LABEL_END_0 :	table debug_hdr
 	jmpnv LABEL_FALSE h.u_short
-	validate h.u_short
 	mov h.u_short.data 0xFFFF
-	invalidate h.u_byte
 	jmp LABEL_END_1
 	LABEL_FALSE :	jmpnv LABEL_END_1 h.u_byte
-	validate h.u_byte
 	mov h.u_byte.data 0xFF
-	invalidate h.u_short
 	LABEL_END_1 :	emit h.base
 	emit h.u_byte
 	emit h.u_short

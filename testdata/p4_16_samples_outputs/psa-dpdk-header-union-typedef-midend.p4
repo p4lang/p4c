@@ -52,16 +52,16 @@ parser MyIP(packet_in buffer, out ethernet_t h, inout metadata b, in psa_ingress
 }
 
 parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_parser_input_metadata_t c, in EMPTY_BRIDGE d, in clone_metadata_t e, in clone_metadata_t f) {
-    @name("clone_md_data_h0") clone_0_t clone_md_data_h0_0;
-    @name("clone_md_data_h1") clone_1_t clone_md_data_h1_0;
+    @name("clone_md_0_data_h0") clone_0_t clone_md_0_data_h0_0;
+    @name("clone_md_0_data_h1") clone_1_t clone_md_0_data_h1_0;
     state start {
-        clone_md_data_h0_0.setInvalid();
-        clone_md_data_h1_0.setInvalid();
-        clone_md_data_h1_0.setValid();
-        clone_md_data_h0_0.setInvalid();
-        clone_md_data_h1_0.setValid();
-        clone_md_data_h1_0.data = 32w0;
-        clone_md_data_h0_0.setInvalid();
+        clone_md_0_data_h0_0.setInvalid();
+        clone_md_0_data_h1_0.setInvalid();
+        clone_md_0_data_h1_0.setInvalid();
+        clone_md_0_data_h0_0.setInvalid();
+        clone_md_0_data_h1_0.setValid();
+        clone_md_0_data_h0_0.setInvalid();
+        clone_md_0_data_h1_0.data = 32w0;
         transition select((bit<1>)(b.meta == 32w1)) {
             1w1: start_true;
             1w0: start_join;
@@ -69,42 +69,70 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         }
     }
     state start_true {
-        transition select(e.data_h0.isValid()) {
-            true: start_true_true;
-            false: start_true_false;
+        transition select((bit<1>)e.data_h0.isValid()) {
+            1w1: start_true_true;
+            1w0: start_true_false;
         }
     }
     state start_true_true {
-        clone_md_data_h0_0.setValid();
-        clone_md_data_h0_0 = e.data_h0;
-        clone_md_data_h1_0.setInvalid();
+        transition select(e.data_h0.isValid()) {
+            true: start_true_true_true;
+            false: start_true_true_false;
+        }
+    }
+    state start_true_true_true {
+        clone_md_0_data_h0_0.setValid();
+        clone_md_0_data_h0_0 = e.data_h0;
+        clone_md_0_data_h1_0.setInvalid();
+        transition start_true_true_join;
+    }
+    state start_true_true_false {
+        clone_md_0_data_h0_0.setInvalid();
+        clone_md_0_data_h1_0.setInvalid();
+        transition start_true_true_join;
+    }
+    state start_true_true_join {
         transition start_true_join;
     }
     state start_true_false {
-        clone_md_data_h0_0.setInvalid();
+        transition select((bit<1>)e.data_h1.isValid()) {
+            1w1: start_true_false_true;
+            1w0: start_true_false_false;
+        }
+    }
+    state start_true_false_true {
+        transition select(e.data_h1.isValid()) {
+            true: start_true_false_true_true;
+            false: start_true_false_true_false;
+        }
+    }
+    state start_true_false_true_true {
+        clone_md_0_data_h1_0.setValid();
+        clone_md_0_data_h1_0 = e.data_h1;
+        clone_md_0_data_h0_0.setInvalid();
+        transition start_true_false_true_join;
+    }
+    state start_true_false_true_false {
+        clone_md_0_data_h1_0.setInvalid();
+        clone_md_0_data_h0_0.setInvalid();
+        transition start_true_false_true_join;
+    }
+    state start_true_false_true_join {
+        transition start_true_false_join;
+    }
+    state start_true_false_false {
+        clone_md_0_data_h0_0.setInvalid();
+        clone_md_0_data_h1_0.setInvalid();
+        transition start_true_false_join;
+    }
+    state start_true_false_join {
         transition start_true_join;
     }
     state start_true_join {
-        transition select(e.data_h1.isValid()) {
-            true: start_true_true_0;
-            false: start_true_false_0;
-        }
-    }
-    state start_true_true_0 {
-        clone_md_data_h1_0.setValid();
-        clone_md_data_h1_0 = e.data_h1;
-        clone_md_data_h0_0.setInvalid();
-        transition start_true_join_0;
-    }
-    state start_true_false_0 {
-        clone_md_data_h1_0.setInvalid();
-        transition start_true_join_0;
-    }
-    state start_true_join_0 {
         transition start_join;
     }
     state start_join {
-        b.meta1 = clone_md_data_h1_0.data;
+        b.meta1 = clone_md_0_data_h1_0.data;
         transition accept;
     }
     state noMatch {
@@ -114,23 +142,23 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 }
 
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("MyIC.forward") action forward() {
+    @name("MyIC.forward") action forward_0() {
         b.meta = 32w0x1 << (bit<32>)c.ingress_port;
     }
-    @name("MyIC.tbl") table tbl_0 {
+    @name("MyIC.tbl") table tbl {
         key = {
             a.srcAddr: exact @name("a.srcAddr");
         }
         actions = {
-            NoAction_0();
-            forward();
+            NoAction_1();
+            forward_0();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        tbl_0.apply();
+        tbl.apply();
     }
 }
 

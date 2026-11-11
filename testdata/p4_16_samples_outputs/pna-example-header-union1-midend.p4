@@ -61,47 +61,71 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         }
         const default_action = NoAction_1();
     }
-    @hidden action pnaexampleheaderunion1l57() {
-        retval = true;
-    }
-    @hidden action pnaexampleheaderunion1l58() {
-        retval = false;
-    }
     @hidden action pnaexampleheaderunion1l78() {
-        hdr_1_base = hdr.base;
         if (hdr.u_byte.isValid()) {
             hdr_1_u_byte.setValid();
             hdr_1_u_byte = hdr.u_byte;
             hdr_1_u_short.setInvalid();
         } else {
             hdr_1_u_byte.setInvalid();
+            hdr_1_u_short.setInvalid();
         }
+    }
+    @hidden action pnaexampleheaderunion1l78_0() {
         if (hdr.u_short.isValid()) {
             hdr_1_u_short.setValid();
             hdr_1_u_short = hdr.u_short;
             hdr_1_u_byte.setInvalid();
         } else {
             hdr_1_u_short.setInvalid();
+            hdr_1_u_byte.setInvalid();
         }
+    }
+    @hidden action pnaexampleheaderunion1l78_1() {
+        hdr_1_u_byte.setInvalid();
+        hdr_1_u_short.setInvalid();
+    }
+    @hidden action pnaexampleheaderunion1l78_2() {
+        hdr_1_base = hdr.base;
+    }
+    @hidden action pnaexampleheaderunion1l57() {
+        retval = true;
+    }
+    @hidden action pnaexampleheaderunion1l58() {
+        retval = false;
     }
     @hidden action pnaexampleheaderunion1l79() {
         hdr.base.t = 8w3;
     }
     @hidden action pnaexampleheaderunion1l81() {
-        hdr.u_short.setValid();
         hdr.u_short.data = 16w0xffff;
-        hdr.u_byte.setInvalid();
     }
     @hidden action pnaexampleheaderunion1l83() {
-        hdr.u_byte.setValid();
         hdr.u_byte.data = 8w0xff;
-        hdr.u_short.setInvalid();
     }
     @hidden table tbl_pnaexampleheaderunion1l78 {
+        actions = {
+            pnaexampleheaderunion1l78_2();
+        }
+        const default_action = pnaexampleheaderunion1l78_2();
+    }
+    @hidden table tbl_pnaexampleheaderunion1l78_0 {
         actions = {
             pnaexampleheaderunion1l78();
         }
         const default_action = pnaexampleheaderunion1l78();
+    }
+    @hidden table tbl_pnaexampleheaderunion1l78_1 {
+        actions = {
+            pnaexampleheaderunion1l78_0();
+        }
+        const default_action = pnaexampleheaderunion1l78_0();
+    }
+    @hidden table tbl_pnaexampleheaderunion1l78_2 {
+        actions = {
+            pnaexampleheaderunion1l78_1();
+        }
+        const default_action = pnaexampleheaderunion1l78_1();
     }
     @hidden table tbl_pnaexampleheaderunion1l57 {
         actions = {
@@ -136,6 +160,13 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     apply {
         debug_hdr_0.apply();
         tbl_pnaexampleheaderunion1l78.apply();
+        if (hdr.u_byte.isValid()) {
+            tbl_pnaexampleheaderunion1l78_0.apply();
+        } else if (hdr.u_short.isValid()) {
+            tbl_pnaexampleheaderunion1l78_1.apply();
+        } else {
+            tbl_pnaexampleheaderunion1l78_2.apply();
+        }
         if (hdr_1_base.isValid() && hdr_1_u_short.isValid()) {
             tbl_pnaexampleheaderunion1l57.apply();
         } else {

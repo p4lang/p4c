@@ -41,6 +41,7 @@ apply {
 	invalidate h.u_h2
 	PARSERIMPL_ACCEPT :	jmpnv LABEL_END h.u_h2
 	invalidate h.u_h2
+	invalidate h.u_h1
 	LABEL_END :	emit h.h1
 	emit h.u_h1
 	emit h.u_h2

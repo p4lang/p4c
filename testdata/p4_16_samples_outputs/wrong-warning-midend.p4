@@ -54,8 +54,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @hidden action wrongwarning63() {
         hu1_0_h1.setInvalid();
         hu1_0_h2.setInvalid();
+        hu1_0_h2.setInvalid();
+        hu1_0_h1.setInvalid();
         hu1b_0_h1.setInvalid();
         hu1b_0_h2.setInvalid();
+        hu1b_0_h2.setInvalid();
+        hu1b_0_h1.setInvalid();
         a1_0[0].setInvalid();
         a1_0[1].setInvalid();
         a1b_0[0].setInvalid();

@@ -24,115 +24,102 @@ struct M {
 }
 
 parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_input_metadata_t istd) {
+    Header1 tmp;
     state start {
         hdr.u[0].h1.setValid();
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
-        transition select(hdr.u[0].h3.isValid()) {
-            true: start_true;
-            false: start_false;
-        }
-    }
-    state start_true {
-        hdr.u[0].h1.setValid();
-        hdr.u[0].h1 = hdr.u[0].h3;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        transition start_join;
-    }
-    state start_false {
-        hdr.u[0].h1.setInvalid();
-        transition start_join;
-    }
-    state start_join {
-        hdr.u[0].h1.setValid();
+        tmp = hdr.u[0].h3;
+        hdr.u[0].h1 = tmp;
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h2.setValid();
         hdr.u[0].h2.data = 16w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition accept;
     }
 }
 
 control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("ingress.u") Union[2] u_1;
-    @hidden @name("pnadpdkheaderunionstack2l65") action pnadpdkheaderunionstack2l65_0() {
-        u_1[0].h1.setInvalid();
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[1].h1.setInvalid();
-        u_1[1].h2.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[0].h1.setValid();
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[0].h1.setValid();
-        u_1[0].h1.data = 32w1;
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[0].h2.setValid();
-        u_1[0].h1.setInvalid();
-        u_1[0].h3.setInvalid();
-        if (u_1[0].h1.isValid()) {
-            u_1[1].h1.setValid();
-            u_1[1].h1 = u_1[0].h1;
-            u_1[1].h2.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h1.setInvalid();
-        }
-        if (u_1[0].h2.isValid()) {
-            u_1[1].h2.setValid();
-            u_1[1].h2 = u_1[0].h2;
-            u_1[1].h1.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h2.setInvalid();
-        }
-        if (u_1[0].h3.isValid()) {
-            u_1[1].h3.setValid();
-            u_1[1].h3 = u_1[0].h3;
-            u_1[1].h1.setInvalid();
-            u_1[1].h2.setInvalid();
-        } else {
-            u_1[1].h3.setInvalid();
-        }
-        u_1[1].h2.setValid();
-        u_1[1].h2.data = 16w1;
-        u_1[1].h1.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[0].h2.setValid();
-        u_1[0].h1.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[0].h3.setInvalid();
+    @name("ingress.u") Union[2] u_0;
+    @hidden action pnadpdkheaderunionstack2l73() {
+        u_0[1].h1 = u_0[0].h1;
     }
-    @hidden @name("tbl_pnadpdkheaderunionstack2l65") table tbl_pnadpdkheaderunionstack2l65_0 {
+    @hidden action pnadpdkheaderunionstack2l73_0() {
+        u_0[1].h2 = u_0[0].h2;
+    }
+    @hidden action pnadpdkheaderunionstack2l73_1() {
+        u_0[1].h3 = u_0[0].h3;
+    }
+    @hidden action pnadpdkheaderunionstack2l73_2() {
+        u_0[1].h1.setInvalid();
+    }
+    @hidden action pnadpdkheaderunionstack2l65() {
+        u_0[0].h1.setInvalid();
+        u_0[0].h2.setInvalid();
+        u_0[0].h3.setInvalid();
+        u_0[1].h1.setInvalid();
+        u_0[1].h2.setInvalid();
+        u_0[1].h3.setInvalid();
+        u_0[0].h1.setValid();
+        u_0[0].h1.data = 32w1;
+        u_0[0].h2.setValid();
+    }
+    @hidden action pnadpdkheaderunionstack2l75() {
+        u_0[1].h2.data = 16w1;
+        u_0[0].h2.setValid();
+        u_0[0].h3.setInvalid();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l65 {
         actions = {
-            pnadpdkheaderunionstack2l65_0();
+            pnadpdkheaderunionstack2l65();
         }
-        const default_action = pnadpdkheaderunionstack2l65_0();
+        const default_action = pnadpdkheaderunionstack2l65();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l73 {
+        actions = {
+            pnadpdkheaderunionstack2l73();
+        }
+        const default_action = pnadpdkheaderunionstack2l73();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l73_0 {
+        actions = {
+            pnadpdkheaderunionstack2l73_0();
+        }
+        const default_action = pnadpdkheaderunionstack2l73_0();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l73_1 {
+        actions = {
+            pnadpdkheaderunionstack2l73_1();
+        }
+        const default_action = pnadpdkheaderunionstack2l73_1();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l73_2 {
+        actions = {
+            pnadpdkheaderunionstack2l73_2();
+        }
+        const default_action = pnadpdkheaderunionstack2l73_2();
+    }
+    @hidden table tbl_pnadpdkheaderunionstack2l75 {
+        actions = {
+            pnadpdkheaderunionstack2l75();
+        }
+        const default_action = pnadpdkheaderunionstack2l75();
     }
     apply {
-        tbl_pnadpdkheaderunionstack2l65_0.apply();
+        tbl_pnadpdkheaderunionstack2l65.apply();
+        if (u_0[0].h1.isValid()) {
+            tbl_pnadpdkheaderunionstack2l73.apply();
+        } else if (u_0[0].h2.isValid()) {
+            tbl_pnadpdkheaderunionstack2l73_0.apply();
+        } else if (u_0[0].h3.isValid()) {
+            tbl_pnadpdkheaderunionstack2l73_1.apply();
+        } else {
+            tbl_pnadpdkheaderunionstack2l73_2.apply();
+        }
+        tbl_pnadpdkheaderunionstack2l75.apply();
     }
 }
 

@@ -23,6 +23,7 @@ struct M {
 }
 
 parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_input_metadata_t istd) {
+    @name("tmp") Header1 tmp_0;
     state start {
         hdr.u1_h1.setValid();
         hdr.u1_h2.setInvalid();
@@ -30,46 +31,34 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         pkt.extract<Header1>(hdr.u1_h3);
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h2.setInvalid();
-        transition select(hdr.u1_h3.isValid()) {
+        tmp_0 = hdr.u1_h3;
+        transition select(tmp_0.isValid()) {
             true: start_true;
             false: start_false;
         }
     }
     state start_true {
         hdr.u1_h1.setValid();
-        hdr.u1_h1 = hdr.u1_h3;
+        hdr.u1_h1 = tmp_0;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
         transition start_join;
     }
     state start_false {
         hdr.u1_h1.setInvalid();
+        hdr.u1_h2.setInvalid();
+        hdr.u1_h3.setInvalid();
         transition start_join;
     }
     state start_join {
-        hdr.u1_h1.setValid();
         hdr.u1_h1.data = 32w1;
-        hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u1_h1.setValid();
         hdr.u1_h1.data = 32w1;
-        hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setInvalid();
-        hdr.u1_h2.setValid();
         hdr.u1_h2.data = 16w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h3.setInvalid();
-        hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h2.setInvalid();
         transition accept;
     }
 }
@@ -81,23 +70,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
     @name("u2_0_h1") Header1 u2_0_h1_0;
     @name("u2_0_h2") Header2 u2_0_h2_0;
     @name("u2_0_h3") Header1 u2_0_h3_0;
-    @hidden @name("pnadpdkinvalidhdrwarnings5l66") action pnadpdkinvalidhdrwarnings5l66_0() {
-        u1_0_h1_0.setInvalid();
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
-        u2_0_h1_0.setInvalid();
-        u2_0_h2_0.setInvalid();
-        u2_0_h3_0.setInvalid();
-        u1_0_h1_0.setValid();
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
-        u1_0_h1_0.setValid();
-        u1_0_h1_0.data = 32w1;
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
-        u1_0_h2_0.setValid();
-        u1_0_h1_0.setInvalid();
-        u1_0_h3_0.setInvalid();
+    @hidden @name("pnadpdkinvalidhdrwarnings5l75") action pnadpdkinvalidhdrwarnings5l75_3() {
         if (u1_0_h1_0.isValid()) {
             u2_0_h1_0.setValid();
             u2_0_h1_0 = u1_0_h1_0;
@@ -105,7 +78,11 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
             u2_0_h3_0.setInvalid();
         } else {
             u2_0_h1_0.setInvalid();
+            u2_0_h2_0.setInvalid();
+            u2_0_h3_0.setInvalid();
         }
+    }
+    @hidden @name("pnadpdkinvalidhdrwarnings5l75_0") action pnadpdkinvalidhdrwarnings5l75_4() {
         if (u1_0_h2_0.isValid()) {
             u2_0_h2_0.setValid();
             u2_0_h2_0 = u1_0_h2_0;
@@ -113,7 +90,11 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
             u2_0_h3_0.setInvalid();
         } else {
             u2_0_h2_0.setInvalid();
+            u2_0_h1_0.setInvalid();
+            u2_0_h3_0.setInvalid();
         }
+    }
+    @hidden @name("pnadpdkinvalidhdrwarnings5l75_1") action pnadpdkinvalidhdrwarnings5l75_5() {
         if (u1_0_h3_0.isValid()) {
             u2_0_h3_0.setValid();
             u2_0_h3_0 = u1_0_h3_0;
@@ -121,15 +102,50 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
             u2_0_h2_0.setInvalid();
         } else {
             u2_0_h3_0.setInvalid();
+            u2_0_h1_0.setInvalid();
+            u2_0_h2_0.setInvalid();
         }
-        u2_0_h2_0.setValid();
-        u2_0_h2_0.data = 16w1;
+    }
+    @hidden @name("pnadpdkinvalidhdrwarnings5l75_2") action pnadpdkinvalidhdrwarnings5l75_6() {
+        u2_0_h1_0.setInvalid();
+        u2_0_h2_0.setInvalid();
+        u2_0_h3_0.setInvalid();
+    }
+    @hidden @name("pnadpdkinvalidhdrwarnings5l66") action pnadpdkinvalidhdrwarnings5l66_0() {
+        u1_0_h1_0.setInvalid();
+        u1_0_h2_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h2_0.setInvalid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h2_0.setInvalid();
+        u2_0_h1_0.setInvalid();
+        u2_0_h2_0.setInvalid();
+        u2_0_h3_0.setInvalid();
+        u2_0_h2_0.setInvalid();
         u2_0_h1_0.setInvalid();
         u2_0_h3_0.setInvalid();
+        u2_0_h3_0.setInvalid();
+        u2_0_h1_0.setInvalid();
+        u2_0_h2_0.setInvalid();
+        u1_0_h1_0.setValid();
+        u1_0_h2_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h1_0.data = 32w1;
+        u1_0_h2_0.setValid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+    }
+    @hidden @name("pnadpdkinvalidhdrwarnings5l77") action pnadpdkinvalidhdrwarnings5l77_0() {
+        u2_0_h2_0.data = 16w1;
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
         u1_0_h3_0.setInvalid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h2_0.setInvalid();
     }
     @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l66") table tbl_pnadpdkinvalidhdrwarnings5l66_0 {
         actions = {
@@ -137,8 +153,48 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         }
         const default_action = pnadpdkinvalidhdrwarnings5l66_0();
     }
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l75") table tbl_pnadpdkinvalidhdrwarnings5l75_3 {
+        actions = {
+            pnadpdkinvalidhdrwarnings5l75_3();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings5l75_3();
+    }
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l75_0") table tbl_pnadpdkinvalidhdrwarnings5l75_4 {
+        actions = {
+            pnadpdkinvalidhdrwarnings5l75_4();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings5l75_4();
+    }
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l75_1") table tbl_pnadpdkinvalidhdrwarnings5l75_5 {
+        actions = {
+            pnadpdkinvalidhdrwarnings5l75_5();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings5l75_5();
+    }
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l75_2") table tbl_pnadpdkinvalidhdrwarnings5l75_6 {
+        actions = {
+            pnadpdkinvalidhdrwarnings5l75_6();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings5l75_6();
+    }
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l77") table tbl_pnadpdkinvalidhdrwarnings5l77_0 {
+        actions = {
+            pnadpdkinvalidhdrwarnings5l77_0();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings5l77_0();
+    }
     apply {
         tbl_pnadpdkinvalidhdrwarnings5l66_0.apply();
+        if (u1_0_h1_0.isValid()) {
+            tbl_pnadpdkinvalidhdrwarnings5l75_3.apply();
+        } else if (u1_0_h2_0.isValid()) {
+            tbl_pnadpdkinvalidhdrwarnings5l75_4.apply();
+        } else if (u1_0_h3_0.isValid()) {
+            tbl_pnadpdkinvalidhdrwarnings5l75_5.apply();
+        } else {
+            tbl_pnadpdkinvalidhdrwarnings5l75_6.apply();
+        }
+        tbl_pnadpdkinvalidhdrwarnings5l77_0.apply();
     }
 }
 

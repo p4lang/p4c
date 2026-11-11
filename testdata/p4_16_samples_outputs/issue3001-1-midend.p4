@@ -38,7 +38,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     H tmp_1_h;
     @name("ingressImpl.tmp_3") H[1] tmp_3;
     @name("ingressImpl.h") H h_0;
+    H retval_0_h;
     H u_0_h;
+    H inlinedRetval_3_h;
     @name("ingressImpl.s") H[1] s_0;
     @hidden action issue30011l75() {
         log_msg("hdr.ethernet is valid");
@@ -56,20 +58,47 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         h_0.setInvalid();
         tmp = h_0;
     }
+    @hidden action issue30011l37() {
+        if (u_0_h.isValid()) {
+            retval_0_h.setValid();
+            retval_0_h = u_0_h;
+        } else {
+            retval_0_h.setInvalid();
+        }
+    }
+    @hidden action issue30011l37_0() {
+        retval_0_h.setInvalid();
+    }
+    @hidden action issue30011l36() {
+        u_0_h.setInvalid();
+    }
+    @hidden action issue30011l94() {
+        if (retval_0_h.isValid()) {
+            inlinedRetval_3_h.setValid();
+            inlinedRetval_3_h = retval_0_h;
+        } else {
+            inlinedRetval_3_h.setInvalid();
+        }
+    }
+    @hidden action issue30011l94_0() {
+        inlinedRetval_3_h.setInvalid();
+    }
+    @hidden action issue30011l94_1() {
+        if (inlinedRetval_3_h.isValid()) {
+            tmp_1_h.setValid();
+            tmp_1_h = inlinedRetval_3_h;
+        } else {
+            tmp_1_h.setInvalid();
+        }
+    }
+    @hidden action issue30011l94_2() {
+        tmp_1_h.setInvalid();
+    }
     @hidden action issue30011l95() {
         log_msg("g() returned a header_union with valid member h");
     }
     @hidden action issue30011l97() {
         log_msg("g() returned a header_union with invalid member h");
-    }
-    @hidden action issue30011l36() {
-        u_0_h.setInvalid();
-        if (u_0_h.isValid()) {
-            tmp_1_h.setValid();
-            tmp_1_h = u_0_h;
-        } else {
-            tmp_1_h.setInvalid();
-        }
     }
     @hidden action issue30011l100() {
         log_msg("h() returned a header stack with valid element 0");
@@ -117,6 +146,42 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = issue30011l36();
     }
+    @hidden table tbl_issue30011l37 {
+        actions = {
+            issue30011l37();
+        }
+        const default_action = issue30011l37();
+    }
+    @hidden table tbl_issue30011l37_0 {
+        actions = {
+            issue30011l37_0();
+        }
+        const default_action = issue30011l37_0();
+    }
+    @hidden table tbl_issue30011l94 {
+        actions = {
+            issue30011l94();
+        }
+        const default_action = issue30011l94();
+    }
+    @hidden table tbl_issue30011l94_0 {
+        actions = {
+            issue30011l94_0();
+        }
+        const default_action = issue30011l94_0();
+    }
+    @hidden table tbl_issue30011l94_1 {
+        actions = {
+            issue30011l94_1();
+        }
+        const default_action = issue30011l94_1();
+    }
+    @hidden table tbl_issue30011l94_2 {
+        actions = {
+            issue30011l94_2();
+        }
+        const default_action = issue30011l94_2();
+    }
     @hidden table tbl_issue30011l95 {
         actions = {
             issue30011l95();
@@ -160,6 +225,21 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             tbl_issue30011l92.apply();
         }
         tbl_issue30011l36.apply();
+        if (u_0_h.isValid()) {
+            tbl_issue30011l37.apply();
+        } else {
+            tbl_issue30011l37_0.apply();
+        }
+        if (retval_0_h.isValid()) {
+            tbl_issue30011l94.apply();
+        } else {
+            tbl_issue30011l94_0.apply();
+        }
+        if (inlinedRetval_3_h.isValid()) {
+            tbl_issue30011l94_1.apply();
+        } else {
+            tbl_issue30011l94_2.apply();
+        }
         if (tmp_1_h.isValid()) {
             tbl_issue30011l95.apply();
         } else {

@@ -1,0 +1,12 @@
+header-union-midend.p4(36): [--Wwarn=uninitialized-use] warning: hdr.src.first may be uninitialized
+        hdr.dst = hdr.src;
+                  ^^^^^^^
+header-union-midend.p4(59): [--Wwarn=invalid-header] warning: accessing a field of an invalid header hdr.dst.second
+        hdr.dst.second.value = 0x33;
+        ^^^^^^^^^^^^^^
+header-union-midend.p4(62): [--Wwarn=invalid-header] warning: accessing a field of an invalid header hdr.dst.second
+        hdr.dst.second.value = 0x44;
+        ^^^^^^^^^^^^^^
+header-union-midend.p4(75): [--Wwarn=uninitialized-use] warning: hdr.src.first may be uninitialized
+        hdr.stack[0] = hdr.src;
+                       ^^^^^^^

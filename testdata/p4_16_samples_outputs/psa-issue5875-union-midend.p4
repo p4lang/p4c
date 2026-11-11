@@ -14,43 +14,71 @@ struct headers_t {
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    @name("ih_h") h_t ih_h_0;
-    @name("ih_other") h_t ih_other_0;
+    @name("ih_0_h") h_t ih_0_h_0;
+    @name("ih_0_other") h_t ih_0_other_0;
     state start {
         hdr.u_h.setValid();
         hdr.u_other.setInvalid();
-        transition select(ih_h_0.isValid()) {
-            true: start_true;
-            false: start_false;
+        transition select((bit<1>)ih_0_h_0.isValid()) {
+            1w1: start_true;
+            1w0: start_false;
         }
     }
     state start_true {
+        transition select(ih_0_h_0.isValid()) {
+            true: start_true_true;
+            false: start_true_false;
+        }
+    }
+    state start_true_true {
         hdr.u_h.setValid();
-        hdr.u_h = ih_h_0;
+        hdr.u_h = ih_0_h_0;
         hdr.u_other.setInvalid();
+        transition start_true_join;
+    }
+    state start_true_false {
+        hdr.u_h.setInvalid();
+        hdr.u_other.setInvalid();
+        transition start_true_join;
+    }
+    state start_true_join {
         transition start_join;
     }
     state start_false {
+        transition select((bit<1>)ih_0_other_0.isValid()) {
+            1w1: start_false_true;
+            1w0: start_false_false;
+        }
+    }
+    state start_false_true {
+        transition select(ih_0_other_0.isValid()) {
+            true: start_false_true_true;
+            false: start_false_true_false;
+        }
+    }
+    state start_false_true_true {
+        hdr.u_other.setValid();
+        hdr.u_other = ih_0_other_0;
         hdr.u_h.setInvalid();
+        transition start_false_true_join;
+    }
+    state start_false_true_false {
+        hdr.u_other.setInvalid();
+        hdr.u_h.setInvalid();
+        transition start_false_true_join;
+    }
+    state start_false_true_join {
+        transition start_false_join;
+    }
+    state start_false_false {
+        hdr.u_h.setInvalid();
+        hdr.u_other.setInvalid();
+        transition start_false_join;
+    }
+    state start_false_join {
         transition start_join;
     }
     state start_join {
-        transition select(ih_other_0.isValid()) {
-            true: start_true_0;
-            false: start_false_0;
-        }
-    }
-    state start_true_0 {
-        hdr.u_other.setValid();
-        hdr.u_other = ih_other_0;
-        hdr.u_h.setInvalid();
-        transition start_join_0;
-    }
-    state start_false_0 {
-        hdr.u_other.setInvalid();
-        transition start_join_0;
-    }
-    state start_join_0 {
         transition accept;
     }
 }

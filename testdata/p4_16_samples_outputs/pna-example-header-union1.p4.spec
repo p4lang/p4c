@@ -65,28 +65,29 @@ apply {
 	jmpv LABEL_END_0 h.u_byte
 	mov m.ingress_debug_hdr_u_byte_isValid 0
 	LABEL_END_0 :	table debug_hdr
-	jmpnv LABEL_END_1 h.u_byte
+	jmpnv LABEL_FALSE h.u_byte
+	jmpnv LABEL_FALSE_0 h.u_byte
 	validate h.MainControlT_hdr_1_u_byte
 	invalidate h.MainControlT_hdr_1_u_short
-	LABEL_END_1 :	jmpnv LABEL_END_2 h.u_short
+	jmp LABEL_END_1
+	LABEL_FALSE_0 :	invalidate h.MainControlT_hdr_1_u_short
+	jmp LABEL_END_1
+	LABEL_FALSE :	jmpnv LABEL_END_1 h.u_short
+	jmpnv LABEL_END_1 h.u_short
 	validate h.MainControlT_hdr_1_u_short
-	LABEL_END_2 :	jmpnv LABEL_FALSE_1 h.base
-	jmpnv LABEL_FALSE_1 h.u_short
+	LABEL_END_1 :	jmpnv LABEL_FALSE_3 h.base
+	jmpnv LABEL_FALSE_3 h.u_short
 	mov m.MainControlT_retval 1
-	jmp LABEL_END_3
-	LABEL_FALSE_1 :	mov m.MainControlT_retval 0
-	LABEL_END_3 :	jmpneq LABEL_END_4 m.MainControlT_retval 0x1
-	mov h.base.t 0x3
-	LABEL_END_4 :	jmpnv LABEL_FALSE_3 h.u_short
-	validate h.u_short
-	mov h.u_short.data 0xFFFF
-	invalidate h.u_byte
 	jmp LABEL_END_5
-	LABEL_FALSE_3 :	jmpnv LABEL_END_5 h.u_byte
-	validate h.u_byte
+	LABEL_FALSE_3 :	mov m.MainControlT_retval 0
+	LABEL_END_5 :	jmpneq LABEL_END_6 m.MainControlT_retval 0x1
+	mov h.base.t 0x3
+	LABEL_END_6 :	jmpnv LABEL_FALSE_5 h.u_short
+	mov h.u_short.data 0xFFFF
+	jmp LABEL_END_7
+	LABEL_FALSE_5 :	jmpnv LABEL_END_7 h.u_byte
 	mov h.u_byte.data 0xFF
-	invalidate h.u_short
-	LABEL_END_5 :	emit h.base
+	LABEL_END_7 :	emit h.base
 	emit h.u_byte
 	emit h.u_short
 	tx m.pna_main_output_metadata_output_port

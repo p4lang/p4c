@@ -25,131 +25,183 @@ struct M {
 }
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
+    Header1 tmp;
     state start {
         hdr.u[0].h1.setValid();
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
-        transition select(hdr.u[0].h3.isValid()) {
-            true: start_true;
-            false: start_false;
-        }
-    }
-    state start_true {
-        hdr.u[0].h1.setValid();
-        hdr.u[0].h1 = hdr.u[0].h3;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        transition start_join;
-    }
-    state start_false {
-        hdr.u[0].h1.setInvalid();
-        transition start_join;
-    }
-    state start_join {
-        hdr.u[0].h1.setValid();
+        tmp = hdr.u[0].h3;
+        hdr.u[0].h1 = tmp;
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h2.setValid();
         hdr.u[0].h2.data = 16w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition accept;
     }
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("IngressI.u") Union[2] u_1;
-    @hidden @name("invalidhdrwarnings6l57") action invalidhdrwarnings6l57_0() {
-        u_1[0].h1.setInvalid();
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[1].h1.setInvalid();
-        u_1[1].h2.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[0].h1.setValid();
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        u_1[0].h1.setValid();
-        u_1[0].h1.data = 32w1;
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
-        if (u_1[0].h1.isValid()) {
-            u_1[1].h1.setValid();
-            u_1[1].h1 = u_1[0].h1;
-            u_1[1].h2.setInvalid();
-            u_1[1].h3.setInvalid();
+    Header1 tmp_0_h1;
+    Header2 tmp_0_h2;
+    Header1 tmp_0_h3;
+    @name("IngressI.u") Union[2] u_0;
+    @hidden action invalidhdrwarnings6l66() {
+        if (u_0[1w0].h1.isValid()) {
+            tmp_0_h1.setValid();
+            tmp_0_h1 = u_0[1w0].h1;
+            tmp_0_h2.setInvalid();
+            tmp_0_h3.setInvalid();
         } else {
-            u_1[1].h1.setInvalid();
+            tmp_0_h1.setInvalid();
+            tmp_0_h2.setInvalid();
+            tmp_0_h3.setInvalid();
         }
-        u_1[1].h1.setValid();
-        u_1[1].h1.data = 32w1;
-        u_1[1].h2.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[0].h2.setValid();
-        u_1[0].h1.setInvalid();
-        u_1[0].h3.setInvalid();
-        if (u_1[1w0].h1.isValid()) {
-            u_1[1].h1.setValid();
-            u_1[1].h1 = u_1[1w0].h1;
-            u_1[1].h2.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h1.setInvalid();
-        }
-        if (u_1[1w0].h2.isValid()) {
-            u_1[1].h2.setValid();
-            u_1[1].h2 = u_1[1w0].h2;
-            u_1[1].h1.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h2.setInvalid();
-        }
-        if (u_1[1w0].h3.isValid()) {
-            u_1[1].h3.setValid();
-            u_1[1].h3 = u_1[1w0].h3;
-            u_1[1].h1.setInvalid();
-            u_1[1].h2.setInvalid();
-        } else {
-            u_1[1].h3.setInvalid();
-        }
-        u_1[1].h2.setValid();
-        u_1[1].h2.data = 16w1;
-        u_1[1].h1.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[1w0].h2.setValid();
-        u_1[1w0].h1.setInvalid();
-        u_1[1w0].h3.setInvalid();
-        u_1[1].h1.setInvalid();
-        u_1[1w0].h1.setInvalid();
-        u_1[1w0].h1.setValid();
-        u_1[1w0].h2.setInvalid();
-        u_1[1w0].h3.setInvalid();
     }
-    @hidden @name("tbl_invalidhdrwarnings6l57") table tbl_invalidhdrwarnings6l57_0 {
-        actions = {
-            invalidhdrwarnings6l57_0();
+    @hidden action invalidhdrwarnings6l66_0() {
+        if (u_0[1w0].h2.isValid()) {
+            tmp_0_h2.setValid();
+            tmp_0_h2 = u_0[1w0].h2;
+            tmp_0_h1.setInvalid();
+            tmp_0_h3.setInvalid();
+        } else {
+            tmp_0_h2.setInvalid();
+            tmp_0_h1.setInvalid();
+            tmp_0_h3.setInvalid();
         }
-        const default_action = invalidhdrwarnings6l57_0();
+    }
+    @hidden action invalidhdrwarnings6l66_1() {
+        if (u_0[1w0].h3.isValid()) {
+            tmp_0_h3.setValid();
+            tmp_0_h3 = u_0[1w0].h3;
+            tmp_0_h1.setInvalid();
+            tmp_0_h2.setInvalid();
+        } else {
+            tmp_0_h3.setInvalid();
+            tmp_0_h1.setInvalid();
+            tmp_0_h2.setInvalid();
+        }
+    }
+    @hidden action invalidhdrwarnings6l66_2() {
+        tmp_0_h1.setInvalid();
+        tmp_0_h2.setInvalid();
+        tmp_0_h3.setInvalid();
+    }
+    @hidden action invalidhdrwarnings6l57() {
+        u_0[0].h1.setInvalid();
+        u_0[0].h2.setInvalid();
+        u_0[0].h3.setInvalid();
+        u_0[1].h1.setInvalid();
+        u_0[1].h2.setInvalid();
+        u_0[1].h3.setInvalid();
+        u_0[0].h1.setValid();
+        u_0[0].h1.data = 32w1;
+        u_0[1].h1 = u_0[0].h1;
+        u_0[1].h1.data = 32w1;
+        u_0[0].h2.setValid();
+    }
+    @hidden action invalidhdrwarnings6l66_3() {
+        u_0[1].h1 = tmp_0_h1;
+    }
+    @hidden action invalidhdrwarnings6l66_4() {
+        u_0[1].h2 = tmp_0_h2;
+    }
+    @hidden action invalidhdrwarnings6l66_5() {
+        u_0[1].h3 = tmp_0_h3;
+    }
+    @hidden action invalidhdrwarnings6l66_6() {
+        u_0[1].h1.setInvalid();
+    }
+    @hidden action invalidhdrwarnings6l68() {
+        u_0[1].h2.data = 16w1;
+        u_0[1w0].h2.setValid();
+        u_0[1].h1.setInvalid();
+        u_0[1w0].h1.setInvalid();
+        u_0[1w0].h1.setValid();
+    }
+    @hidden table tbl_invalidhdrwarnings6l57 {
+        actions = {
+            invalidhdrwarnings6l57();
+        }
+        const default_action = invalidhdrwarnings6l57();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66 {
+        actions = {
+            invalidhdrwarnings6l66();
+        }
+        const default_action = invalidhdrwarnings6l66();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_0 {
+        actions = {
+            invalidhdrwarnings6l66_0();
+        }
+        const default_action = invalidhdrwarnings6l66_0();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_1 {
+        actions = {
+            invalidhdrwarnings6l66_1();
+        }
+        const default_action = invalidhdrwarnings6l66_1();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_2 {
+        actions = {
+            invalidhdrwarnings6l66_2();
+        }
+        const default_action = invalidhdrwarnings6l66_2();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_3 {
+        actions = {
+            invalidhdrwarnings6l66_3();
+        }
+        const default_action = invalidhdrwarnings6l66_3();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_4 {
+        actions = {
+            invalidhdrwarnings6l66_4();
+        }
+        const default_action = invalidhdrwarnings6l66_4();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_5 {
+        actions = {
+            invalidhdrwarnings6l66_5();
+        }
+        const default_action = invalidhdrwarnings6l66_5();
+    }
+    @hidden table tbl_invalidhdrwarnings6l66_6 {
+        actions = {
+            invalidhdrwarnings6l66_6();
+        }
+        const default_action = invalidhdrwarnings6l66_6();
+    }
+    @hidden table tbl_invalidhdrwarnings6l68 {
+        actions = {
+            invalidhdrwarnings6l68();
+        }
+        const default_action = invalidhdrwarnings6l68();
     }
     apply {
-        tbl_invalidhdrwarnings6l57_0.apply();
+        tbl_invalidhdrwarnings6l57.apply();
+        if (u_0[1w0].h1.isValid()) {
+            tbl_invalidhdrwarnings6l66.apply();
+        } else if (u_0[1w0].h2.isValid()) {
+            tbl_invalidhdrwarnings6l66_0.apply();
+        } else if (u_0[1w0].h3.isValid()) {
+            tbl_invalidhdrwarnings6l66_1.apply();
+        } else {
+            tbl_invalidhdrwarnings6l66_2.apply();
+        }
+        if (tmp_0_h1.isValid()) {
+            tbl_invalidhdrwarnings6l66_3.apply();
+        } else if (tmp_0_h2.isValid()) {
+            tbl_invalidhdrwarnings6l66_4.apply();
+        } else if (tmp_0_h3.isValid()) {
+            tbl_invalidhdrwarnings6l66_5.apply();
+        } else {
+            tbl_invalidhdrwarnings6l66_6.apply();
+        }
+        tbl_invalidhdrwarnings6l68.apply();
     }
 }
 
