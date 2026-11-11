@@ -114,7 +114,7 @@ action execute_1 args none {
 	LABEL_END_3 :	return
 }
 
-table stub_0 {
+table stub {
 	key {
 		m.MainControlT_key exact
 	}
@@ -159,7 +159,7 @@ apply {
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	jmplt LABEL_END_0 m.local_metadata_depth 0x1
 	mov m.MainControlT_key m.MainControlT_hsVar
-	LABEL_END_0 :	table stub_0
+	LABEL_END_0 :	table stub
 	emit h.ethernet
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1

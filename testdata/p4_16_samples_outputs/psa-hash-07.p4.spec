@@ -61,7 +61,7 @@ action a1 args none {
 	return
 }
 
-table tbl_0 {
+table tbl {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -78,7 +78,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
-	table tbl_0
+	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
