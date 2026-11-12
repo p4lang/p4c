@@ -85,6 +85,29 @@ add_test(NAME "p4tc-codegen/register-init"
 set_tests_properties("p4tc-codegen/register-init" PROPERTIES
   SKIP_RETURN_CODE 77 TIMEOUT 180 LABELS "p4tc-codegen")
 
+# The grammar test reads the emitted constants with iproute2's own parser, so it
+# needs a built iproute2 tree. The P4TC CI job builds one for the stf tests, so
+# take that tree when it is there; otherwise the test skips, and P4TC_IPROUTE2
+# names a tree from the environment instead. The negative half of the test needs
+# the bit<128>/IPv6-mask grammar fix in that tree: a parser that predates it is
+# reported and only fails when the test is asked to expect the fix.
+set(P4TC_IPROUTE2_DIR "${P4C_SOURCE_DIR}/backends/tc/runtime/iproute2-p4tc-pub"
+  CACHE PATH "A built iproute2 tree, used by p4tc-codegen/grammar")
+option(P4TC_GRAMMAR_EXPECT_FIXED
+  "Require the iproute2 parser to refuse malformed bit<128>/IPv6-mask text" OFF)
+set(__p4tc_grammar_args --compiler $<TARGET_FILE:p4c-pna-p4tc>)
+if (P4TC_IPROUTE2_DIR)
+  list(APPEND __p4tc_grammar_args --iproute2 "${P4TC_IPROUTE2_DIR}")
+endif()
+if (P4TC_GRAMMAR_EXPECT_FIXED)
+  list(APPEND __p4tc_grammar_args --expect-fixed)
+endif()
+add_test(NAME "p4tc-codegen/grammar"
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/codegen/grammar.py
+    ${__p4tc_grammar_args})
+set_tests_properties("p4tc-codegen/grammar" PROPERTIES
+  SKIP_RETURN_CODE 77 TIMEOUT 300 LABELS "p4tc-codegen")
+
 p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
   "testdata/p4_16_samples/tc-register-init.p4"
   "testdata/p4_16_samples/tc-register-init.p4" "" "")
