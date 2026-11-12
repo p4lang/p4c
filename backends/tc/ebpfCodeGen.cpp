@@ -520,7 +520,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             auto *fieldType = metadataField(region.localField);
             BUG_CHECK(fieldType != nullptr, "outline local field was validated");
             fieldType->declare(&helper, region.localName, false);
-            helper.append(" = __P4TC_LOCAL_SOURCE__;");
+            helper.append(" = p4tc_outline_local_source;");
             helper.newline();
         }
         if (region.offsetMaxSet) {
@@ -585,7 +585,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         parser->visitor->setBuilder(builder);
 
         helper.emitIndent();
-        helper.append("__p4tc_outline_done:");
+        helper.append("p4tc_outline_done:");
         helper.newline();
         // The result carries the consumed bits in sixteen bits; anything larger
         // would corrupt the error field, so such a region rejects instead.
@@ -610,7 +610,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
                             errorVar.c_str(), offsetVar.c_str());
         helper.newline();
         helper.emitIndent();
-        helper.append("__p4tc_outline_no_match:");
+        helper.append("p4tc_outline_no_match:");
         helper.newline();
         helper.emitIndent();
         helper.appendFormat("%s = NoMatch;", errorVar.c_str());
@@ -626,7 +626,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         if (region.localField) {
             std::string fieldRef = std::string(parser->user_metadata->name.name.c_str()) + "->" +
                                    region.localField.c_str();
-            size_t localInit = code.find("__P4TC_LOCAL_SOURCE__");
+            size_t localInit = code.find("p4tc_outline_local_source");
             size_t pos = 0;
             while ((pos = code.find(fieldRef, pos)) != std::string::npos) {
                 size_t end = pos + fieldRef.size();
@@ -638,7 +638,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
                 code.replace(pos, fieldRef.size(), region.localName.c_str());
                 pos += region.localName.size();
             }
-            cstring token = cstring("__P4TC_LOCAL_SOURCE__");
+            cstring token = cstring("p4tc_outline_local_source");
             pos = 0;
             while ((pos = code.find(token.c_str(), pos)) != std::string::npos) {
                 code.replace(pos, token.size(), fieldRef);
@@ -692,14 +692,14 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             code = std::move(rewritten);
         }
         std::string endGoto = "goto " + std::string(region.endState.c_str()) + ";";
-        cstring doneGoto = cstring("goto __p4tc_outline_done;");
+        cstring doneGoto = cstring("goto p4tc_outline_done;");
         size_t pos = 0;
         while ((pos = code.find(endGoto.c_str(), pos)) != std::string::npos) {
             code.replace(pos, endGoto.size(), doneGoto.c_str());
             pos += doneGoto.size();
         }
         std::string noMatchGoto = "goto noMatch;";
-        cstring noMatchLabel = cstring("goto __p4tc_outline_no_match;");
+        cstring noMatchLabel = cstring("goto p4tc_outline_no_match;");
         pos = 0;
         while ((pos = code.find(noMatchGoto.c_str(), pos)) != std::string::npos) {
             code.replace(pos, noMatchGoto.size(), noMatchLabel.c_str());
@@ -765,13 +765,14 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
     if (name == "tc-parse" && !tcOptions.outlineParserStart.empty()) {
         auto *parser = this->parser->checkedTo<EBPFPnaParser>();
-        if (!parser->setOutlineRange(cstring("__p4tc_parser_outline"),
-                                     cstring(tcOptions.outlineParserStart.c_str()),
+        cstring firstHelper = refMap->newName("p4tc_parser_outline");
+        if (!parser->setOutlineRange(firstHelper, cstring(tcOptions.outlineParserStart.c_str()),
                                      cstring(tcOptions.outlineParserEnd.c_str()))) {
             return;
         }
         if (!tcOptions.outlineParserStart2.empty()) {
-            if (!parser->setOutlineRange(cstring("__p4tc_parser_outline_2"),
+            cstring secondHelper = refMap->newName("p4tc_parser_outline_2");
+            if (!parser->setOutlineRange(secondHelper,
                                          cstring(tcOptions.outlineParserStart2.c_str()),
                                          cstring(tcOptions.outlineParserEnd2.c_str()))) {
                 return;
@@ -2555,7 +2556,8 @@ void IngressDeparserPNA::outlineDeparserHeaders(EBPF::CodeBuilder *builder) {
         cstring typeName = st->name.name;
         cstring helperName = outlinedHelperNames.count(typeName)
                                  ? outlinedHelperNames[typeName]
-                                 : cstring(std::string("__p4tc_deparser_emit_") + typeName.c_str());
+                                 : program->refMap->newName(cstring(
+                                       std::string("p4tc_deparser_emit_") + typeName.c_str()));
         if (!outlinedHelperNames.count(typeName)) {
             outlinedHelperNames[typeName] = helperName;
             std::string body = code.substr(b.open + 1, b.close - b.open - 1);

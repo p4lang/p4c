@@ -509,7 +509,7 @@ def main():
     if args.mode == "deparser-bits":
         code = (output / "outlined/case_control_blocks.c").read_text()
         assert (
-            "__p4tc_deparser_emit_nibbles_t(skb, &pkt_hdrs->nibbles" in code
+            "p4tc_deparser_emit_nibbles_t(skb, &pkt_hdrs->nibbles" in code
         ), "the outlined deparser did not name the header argument"
         assert "&hdr->nibbles" not in code, "the outlined deparser kept a hard-coded name"
     if args.mode == "parser":
