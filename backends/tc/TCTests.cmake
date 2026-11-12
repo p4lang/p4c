@@ -193,4 +193,15 @@ if (ENABLE_P4TC_STF_TESTS)
       ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-arithmetic.p4
       -tf ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tc-codegen-arithmetic.stf)
   p4tc_set_test_properties("p4tc/testdata/p4_16_samples/tc-codegen-arithmetic-stf" ${P4C_BINARY_DIR})
+
+  # Some fixtures have constants in their template and no stf file, so nothing
+  # ever hands that template to tc. Load it in the guest and stop: the check is
+  # that tc accepts every constant the compiler wrote.
+  foreach(load_test p4_16_samples/tc-register-init p4tc_samples/const_typed_keys
+                     p4tc_samples/test_ipv6_example)
+    add_test(NAME "p4tc-load/${load_test}"
+      COMMAND ${P4TC_COMPILER_DRIVER} ${P4C_SOURCE_DIR}
+        ${P4C_SOURCE_DIR}/testdata/${load_test}.p4 -P)
+    p4tc_set_test_properties("p4tc-load/${load_test}" ${P4C_BINARY_DIR})
+  endforeach()
 endif()
