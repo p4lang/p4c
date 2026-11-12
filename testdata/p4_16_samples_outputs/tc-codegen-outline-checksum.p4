@@ -38,7 +38,7 @@ parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_ma
     state parse_checksum {
         pkt.extract(hdr.tail);
         ck.clear();
-        ck.add({ hdr.tail.value });
+        ck.add({ hdr.ethernet.kind });
         meta.seen = (bit<8>)ck.get();
         transition parse_last;
     }

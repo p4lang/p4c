@@ -99,8 +99,14 @@ result carries rejection, parser error and a 16-bit consumed-bit count. Regions
 must therefore consume at most 65535 bits; a helper that consumes more rejects
 with `ParserInvalidArgument`. The qualified use is byte-aligned, fixed-width
 extraction. A parser-local variable used both inside a region and outside it is
-rejected with a diagnostic, because each helper has a private copy. This is an
-opt-in mechanism, not an automatic partitioner.
+rejected with a diagnostic, because each helper has a private copy. A
+parser-local extern instance (the checksum externs) is outlined when every use
+of it is inside one region: the helper registers and declares its own instance
+and the caller keeps the program-level one, so a region that only uses the
+instance has the same lifetime per call as a fresh instance. An instance used
+outside every region, or used by more than one region, is rejected because its
+state would not cross the boundary. This is an opt-in mechanism, not an
+automatic partitioner.
 
 Two boundary conditions are load-bearing for the helper to verify:
 

@@ -12,9 +12,10 @@ header last_t { bit<8> mark; }
 struct headers_t { ethernet_t ethernet; tail_t tail; last_t last; }
 struct metadata_t { bit<8> seen; }
 
-// The checksum is a parser-local extern instance and the outlined region uses
-// it. The instance is registered while the normal parser body is emitted, which
-// happens after the helper has been built, so the helper cannot reach it.
+// The checksum is a parser-local extern instance used only inside the outlined
+// region. An instance whose whole lifetime fits in the region can be outlined:
+// the helper gets its own copy and the caller keeps the original one for code
+// outside the region.
 parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta,
               in pna_main_parser_input_metadata_t istd) {
     InternetChecksum() ck;
@@ -30,7 +31,7 @@ parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta,
     state parse_checksum {
         pkt.extract(hdr.tail);
         ck.clear();
-        ck.add({hdr.tail.value});
+        ck.add({hdr.ethernet.kind});
         meta.seen = (bit<8>)ck.get();
         transition parse_last;
     }

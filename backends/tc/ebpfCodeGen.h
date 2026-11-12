@@ -160,9 +160,17 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
         bool offsetMaxSet = false;
         bool noHdr = false;
         std::set<cstring> states;
+        // Parser-local extern instances used only inside this region. The
+        // helper gets its own instance, so their names are registered for the
+        // duration of the region's emission.
+        std::vector<cstring> instances;
     };
     std::vector<OutlineRegion> outlineRegions;
     std::set<cstring> outlinedStates;
+    // Instances listed in a region's helper. Every use of them is inside that
+    // helper, so the parser body must not declare a second copy.
+    std::set<cstring> outlinedInstances;
+    bool emittingHelperInstance = false;
 
     bool setOutlineRange(cstring helper, cstring start, cstring end);
     void setOutlineBound(cstring field, unsigned value) {

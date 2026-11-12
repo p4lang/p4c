@@ -573,10 +573,19 @@ def main():
                 "crosses the boundary",
             ),
             (
-                "parser-instance",
+                "instance-crosses",
                 ["--tc-outline-parser-range=parse_checksum:parse_last"],
-                "outline-checksum",
-                "is an extern instance",
+                "outline-checksum-cross",
+                "extern instance whose state would not cross the boundary",
+            ),
+            (
+                "instance-two-regions",
+                [
+                    "--tc-outline-parser-range=start:parse_flags",
+                    "--tc-outline-parser-range=parse_flags:finish",
+                ],
+                "outline-checksum-two",
+                "extern instance whose state would not cross the boundary",
             ),
         ]:
             directory = output / ("negative-" + name)
@@ -702,6 +711,66 @@ def main():
             )
             record.setdefault("negative", []).append(name)
     if args.mode == "parser":
+        # A parser-local extern instance whose whole lifetime fits in one
+        # region is outlined with the region: the helper registers its own
+        # copy while its states are emitted, and the parser body keeps a
+        # second copy for everything outside the region.
+        directory = output / "outline-checksum"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=parse_checksum:parse_last",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-checksum.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-checksum_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        instance_of = r"struct p4tc_ext_csum_params (\w+)"
+        helper_instances = set(re.findall(instance_of, helper))
+        body_instances = set(re.findall(instance_of, body))
+        assert len(helper_instances) == 1, helper_instances
+        # Every use of the instance is in the helper, so the caller owns no copy.
+        assert body_instances == set(), body_instances
+        helper_name = next(iter(helper_instances))
+        for method in ("clear", "get"):
+            assert f"bpf_p4tc_ext_csum_16bit_complement_{method}(&{helper_name}" in helper, (
+                method,
+                helper_name,
+            )
+        # Every checksum call the helper makes goes to its own copy.
+        called = set(re.findall(r"bpf_p4tc_ext_csum_16bit_complement_\w+\(&(\w+)", helper))
+        assert called == {helper_name}, (called, helper_name)
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-checksum_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
         bounds = {"invalid": [], "valid": []}
         malformed = [
             "-1",

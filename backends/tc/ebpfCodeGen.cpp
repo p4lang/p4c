@@ -388,36 +388,56 @@ class ParserLocalUses : public Inspector {
 
 // Outlined states get a private copy of each parser local, so a local shared
 // with code outside the region would not carry its value across the helper.
-// Extern instances are not copied at all: they are registered while the normal
-// parser body is emitted, after the helper has been built, so a helper that
-// uses one would look up an instance it does not have.
-static bool checkOutlineLocals(const EBPFPnaParser *parser) {
+// An extern instance has the same problem in a sharper form: the helper
+// registers its own copy, whose state starts fresh on every call, so an
+// instance whose state is written in one place and read in another would
+// silently lose the update. An instance used only inside one region is
+// supported, because the helper's copy then lives exactly as long as the whole
+// parse of that region.
+static bool checkOutlineLocals(EBPFPnaParser *parser) {
     std::set<cstring> locals;
-    std::set<cstring> instances;
+    std::set<cstring> instanceNames;
+    std::map<cstring, const IR::Declaration_Instance *> instances;
     for (auto *local : parser->parserBlock->container->parserLocals) {
         if (local->is<IR::Declaration_Variable>()) {
             locals.insert(local->getName().name);
         } else if (local->is<IR::Declaration_Instance>()) {
-            instances.insert(local->getName().name);
+            instanceNames.insert(local->getName().name);
+            instances.emplace(local->getName().name, local->to<IR::Declaration_Instance>());
         }
     }
-    for (const auto &region : parser->outlineRegions) {
-        std::set<cstring> inside, outside, instancesInside;
+    // Which regions use each instance, and whether any state outside every
+    // region uses it. A state is classified once, so a use in one region is
+    // never counted as a use outside another region.
+    std::map<cstring, std::set<size_t>> stateRegions;
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index)
+        for (auto &name : parser->outlineRegions[index].states) stateRegions[name].insert(index);
+
+    std::map<cstring, std::set<size_t>> instanceRegions;
+    std::set<cstring> instanceOutside;
+    for (auto *state : parser->states) {
+        std::set<cstring> instancesUsed;
+        ParserLocalUses instanceUses(instanceNames, instancesUsed);
+        state->state->apply(instanceUses);
+        if (instancesUsed.empty()) continue;
+        auto found = stateRegions.find(state->state->name.name);
+        if (found == stateRegions.end()) {
+            instanceOutside.insert(instancesUsed.begin(), instancesUsed.end());
+            continue;
+        }
+        for (auto index : found->second)
+            for (auto &name : instancesUsed) instanceRegions[name].insert(index);
+    }
+    // A parser local variable crosses the region when it is read or written on
+    // both sides of the helper boundary: the helper's copy would not carry the
+    // value back out.
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index) {
+        const auto &region = parser->outlineRegions[index];
+        std::set<cstring> inside, outside;
         for (auto *state : parser->states) {
             bool isInside = region.states.count(state->state->name.name) != 0;
             ParserLocalUses uses(locals, isInside ? inside : outside);
             state->state->apply(uses);
-            if (isInside) {
-                ParserLocalUses instanceUses(instances, instancesInside);
-                state->state->apply(instanceUses);
-            }
-        }
-        for (auto name : instancesInside) {
-            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Parser local '%1%' is an extern instance, which the outlined region "
-                        "starting at state '%2%' cannot use",
-                        name, region.startState);
-            return false;
         }
         for (auto name : inside) {
             if (!outside.count(name)) continue;
@@ -426,6 +446,21 @@ static bool checkOutlineLocals(const EBPFPnaParser *parser) {
                         "at state '%2%'",
                         name, region.startState);
             return false;
+        }
+    }
+    for (auto &entry : instanceRegions) {
+        if (entry.second.size() == 1 && !instanceOutside.count(entry.first)) continue;
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Parser local '%1%' is an extern instance whose state would not cross the "
+                    "boundary of the outlined region starting at state '%2%'; an outlined region "
+                    "can use an extern instance only if every use of it is inside that region",
+                    entry.first, parser->outlineRegions[*entry.second.begin()].startState);
+        return false;
+    }
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index) {
+        for (auto &entry : instanceRegions) {
+            if (entry.second.count(index) != 0)
+                parser->outlineRegions[index].instances.push_back(entry.first);
         }
     }
     return true;
@@ -483,6 +518,14 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
     for (auto &region : parser->outlineRegions) {
         if (region.localField) region.localName = refMap->newName("p4tc_cache_" + region.localName);
     }
+
+    std::map<cstring, const IR::Declaration *> instanceDecls;
+    for (auto *local : parser->parserBlock->container->parserLocals) {
+        if (local->is<IR::Declaration_Instance>())
+            instanceDecls.emplace(local->getName().name, local);
+    }
+    for (const auto &region : parser->outlineRegions)
+        for (auto &name : region.instances) parser->outlinedInstances.insert(name);
 
     for (const auto &region : parser->outlineRegions) {
         EBPF::CodeBuilder helper(builder->target);
@@ -569,6 +612,20 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             if (l->is<IR::Declaration_Variable>()) parser->emitDeclaration(&helper, l);
         }
 
+        // Register this region's extern instances against the helper while its
+        // states are emitted: the visitor resolves a checksum call through the
+        // parser's instance map, and the variables the instance emits belong in
+        // this function. The map entry is dropped afterwards so the normal
+        // parser body registers its own copy instead of emitting calls against
+        // a name this helper declares.
+        for (auto &name : region.instances) {
+            auto found = instanceDecls.find(name);
+            if (found == instanceDecls.end()) continue;
+            parser->emittingHelperInstance = true;
+            parser->emitDeclaration(&helper, found->second);
+            parser->emittingHelperInstance = false;
+        }
+
         helper.emitIndent();
         helper.appendFormat("goto %s;", region.startState.c_str());
         helper.newline();
@@ -583,6 +640,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         }
         visitor->emittingOutlineRegion = false;
         parser->visitor->setBuilder(builder);
+        for (auto &name : region.instances) parser->checksums.erase(name);
 
         helper.emitIndent();
         helper.append("p4tc_outline_done:");
@@ -1314,6 +1372,8 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
 void EBPFPnaParser::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
+        // An instance whose every use was outlined lives in the helper only.
+        if (!emittingHelperInstance && outlinedInstances.count(name)) return;
         if (EBPFObject::getTypeName(di) == "InternetChecksum") {
             auto instance = new EBPFInternetChecksumPNA(program, di, name);
             checksums.emplace(name, instance);
