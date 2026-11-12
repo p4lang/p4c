@@ -878,6 +878,61 @@ def main():
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
+        # The helper names its arguments after the program, so an outlined
+        # parser whose header and metadata parameters are renamed must not
+        # acquire the fixture's names.
+        directory = output / "outline-renamed"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:parse_flags",
+                "--tc-outline-parser-range=parse_flags:finish",
+                "--tc-outline-parser-bound=left:8191",
+                "--tc-outline-parser-local=left:cached_left:8191",
+                "--tc-outline-parser-offset-max=1522",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-renamed.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-renamed_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        assert "struct headers_t *pkts, struct metadata_t *md" in helper, helper
+        assert "hdr->" not in code and "meta->" not in code, code
+        assert "u32 p4tc_cache_cached_left = md->left;" in helper, helper
+        assert "md->left = p4tc_cache_cached_left; return" in helper, helper
+        assert "load_half(hdr_start, 0)" in helper, helper
+        assert "p4tc_cache_cached_left" not in body, body
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-renamed_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        record.setdefault("renamed", []).append("outline-renamed")
     if args.mode == "deparser":
         bounds = {"invalid": [], "valid": []}
         for number, value in enumerate(
