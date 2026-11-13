@@ -223,6 +223,11 @@ const IR::Expression *DoGlobalCopyPropagation::copyprop_name(cstring name) {
     return (*vars)[name];
 }
 
+IR::Expression *DoGlobalCopyPropagation::preorder(IR::Expression *exp) {
+    visitAgain();
+    return exp;
+}
+
 const IR::Expression *DoGlobalCopyPropagation::postorder(IR::PathExpression *path) {
     // For the following IR:
     //   e0 = path;
