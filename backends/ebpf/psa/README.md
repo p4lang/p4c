@@ -2,7 +2,7 @@
 SPDX-FileCopyrightText: 2022 Open Networking Foundation
 SPDX-FileCopyrightText: 2022 Orange
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 <!-- 
