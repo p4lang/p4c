@@ -2536,6 +2536,9 @@ tables {
     name: "meta.direction"
     bitwidth: 16
     match_type: EXACT
+    type_name {
+      name: "dash_direction_t"
+    }
   }
   match_fields {
     id: 3
@@ -2730,6 +2733,9 @@ actions {
     id: 13
     name: "dash_encapsulation"
     bitwidth: 16
+    type_name {
+      name: "dash_encapsulation_t"
+    }
     structured_annotations {
       name: "SaiVal"
       kv_pair_list {
@@ -2850,6 +2856,9 @@ actions {
     id: 4
     name: "dash_encapsulation"
     bitwidth: 16
+    type_name {
+      name: "dash_encapsulation_t"
+    }
     structured_annotations {
       name: "SaiVal"
       kv_pair_list {
@@ -3066,6 +3075,9 @@ actions {
     id: 13
     name: "dash_tunnel_dscp_mode"
     bitwidth: 16
+    type_name {
+      name: "dash_tunnel_dscp_mode_t"
+    }
     structured_annotations {
       name: "SaiVal"
       kv_pair_list {

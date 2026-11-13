@@ -15,6 +15,9 @@ tables {
     name: "h.eth_hdr.eth_type"
     bitwidth: 16
     match_type: EXACT
+    type_name {
+      name: "EthTypes"
+    }
   }
   action_refs {
     id: 22708368

@@ -684,6 +684,59 @@ TEST_F(P4Runtime, P416MatchFields) {
     }
 }
 
+TEST_F(P4Runtime, SerEnumTypeName) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        enum bit<16> EthTypes { IPv4 = 0x0800, IPv6 = 0x86dd }
+        header Header { EthTypes etherType; }
+        struct Headers { Header h; }
+        struct Metadata { bit<8> f; }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action setEtherType(EthTypes etherType, bit<8> plain) {
+                h.h.etherType = etherType;
+                m.f = plain;
+            }
+            table t {
+                key = { h.h.etherType : exact; }
+                actions = { setEtherType; }
+            }
+            apply { t.apply(); }
+        }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::P4::diagnosticCount());
+
+    // The serializable enum is described in the type info, and every element of
+    // that type refers to it via `type_name`.
+    const auto &serEnums = test->p4Info->type_info().serializable_enums();
+    ASSERT_TRUE(serEnums.find("EthTypes") != serEnums.end());
+
+    const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t"_cs);
+    ASSERT_TRUE(table != nullptr);
+    ASSERT_EQ(1, table->match_fields_size());
+    EXPECT_EQ("EthTypes", table->match_fields(0).type_name().name());
+
+    const auto *action = findP4RuntimeAction(*test->p4Info, "ingress.setEtherType"_cs);
+    ASSERT_TRUE(action != nullptr);
+    ASSERT_EQ(2, action->params_size());
+    EXPECT_EQ("etherType", action->params(0).name());
+    EXPECT_EQ("EthTypes", action->params(0).type_name().name());
+    // Parameters of plain `bit<W>` type have no type name.
+    EXPECT_EQ("plain", action->params(1).name());
+    EXPECT_FALSE(action->params(1).has_type_name());
+}
+
 TEST_F(P4Runtime, DISABLED_P414MatchFields) {
     using MatchField = p4configv1::MatchField;
 
@@ -1927,6 +1980,8 @@ TEST_F(P4RuntimeDataTypeSpec, SerEnum) {
     EXPECT_EQ("\x01", it->second.members(0).value());
     EXPECT_EQ("MBR_2", it->second.members(1).name());
     EXPECT_EQ("\x02", it->second.members(1).value());
+
+    EXPECT_EQ("my_enum"_cs, P4::ControlPlaneAPI::getTypeName(type, &typeMap));
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Error) {
