@@ -101,7 +101,7 @@ TEST(IR, SourceInfoJsonQuotedLine) {
     Util::SourceInfo si(&sources, Util::SourcePosition(1, 4), Util::SourcePosition(1, 7));
     ASSERT_TRUE(si.isValid());
     auto *c = new IR::Constant(si, big_int(2));
-    const cstring raw = "\"a\"_cs";
+    const cstring raw = cstring::literal("\"a\"");
 
     std::unique_ptr<Util::JsonObject> obj(c->sourceInfoJsonObj());
     ASSERT_NE(obj, nullptr);
