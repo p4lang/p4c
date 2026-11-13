@@ -322,6 +322,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_copy_structures.html">CopyStructures</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:struct_p4_1_1_copy_structures_config" id="r_struct_p4_1_1_copy_structures_config"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_p4_1_1_copy_structures_config">CopyStructuresConfig</a></td></tr>
+<tr class="separator:struct_p4_1_1_copy_structures_config"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_create_builtins.html">CreateBuiltins</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_create_specialized_types.html">CreateSpecializedTypes</a></td></tr>
@@ -2493,6 +2495,49 @@ const <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td cl
 <p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
 <p>SPDX-License-Identifier: Apache-2.0 Helper functions and classes for making the creation of gtest easier and their running faster. See test-bf_getst_helper.cpp for example usage. </p>
 </div><hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="struct_p4_1_1_copy_structures_config" id="struct_p4_1_1_copy_structures_config"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#struct_p4_1_1_copy_structures_config">&#9670;&#160;</a></span>P4::CopyStructuresConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct P4::CopyStructuresConfig</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a699994f389ff589ff70cf8c1b46f5092" name="a699994f389ff589ff70cf8c1b46f5092"></a>bool</td>
+<td class="fieldname">
+copyHeaders = false</td>
+<td class="fielddoc">
+Do not only copy normal structures but also perform copy assignments for headers. </td></tr>
+<tr><td class="fieldtype">
+<a id="a91fc14543c2774eb6186232c20ea2b84" name="a91fc14543c2774eb6186232c20ea2b84"></a>bool</td>
+<td class="fieldname">
+copyTuples = false</td>
+<td class="fielddoc">
+Also split up assignments of tuples. </td></tr>
+<tr><td class="fieldtype">
+<a id="a81324fa34e8dc9fb737a67550ac4dc9b" name="a81324fa34e8dc9fb737a67550ac4dc9b"></a>bool</td>
+<td class="fieldname">
+errorOnMethodCall = true</td>
+<td class="fielddoc">
+<p>Specific targets may allow functions or methods to return structs. Such methods will not be converted in this pass. Setting the errorOnMethodCall flag will produce an error message if such a method is encountered. </p>
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a8b138ad8687eb7f051738032ab01c8c5" name="a8b138ad8687eb7f051738032ab01c8c5"></a>bool</td>
+<td class="fieldname">
+expandUnions = false</td>
+<td class="fielddoc">
+<p>Expand header union assignments into member assignments. This expansion has a known correctness bug: copying an invalid member can invalidate a previously copied member. Expansion is disabled by default to preserve union validity. Pipelines that require member assignments must explicitly enable it. See <a href="https://github.com/p4lang/p4c/issues/3842">https://github.com/p4lang/p4c/issues/3842</a>. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="struct_p4_1_1_extern_metrics" id="struct_p4_1_1_extern_metrics"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#struct_p4_1_1_extern_metrics">&#9670;&#160;</a></span>P4::ExternMetrics</h2>
 

@@ -1,23 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,144,150,189"/>
-<area shape="rect" id="Node000001" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="198,83,388,111"/>
-<area shape="poly" id="edge2678_Node000000_Node000001" title=" " alt="" coords="153,136,197,121,240,110,236,113,198,126,156,141"/>
-<area shape="rect" id="Node000004" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="209,136,377,197"/>
-<area shape="poly" id="edge2681_Node000000_Node000004" title=" " alt="" coords="164,164,210,165,206,168,166,169"/>
-<area shape="rect" id="Node000006" href="$class_p4_1_1_util_1_1_enumerator.html" title="Type&#45;erased Enumerator interface." alt="" coords="198,264,388,292"/>
-<area shape="poly" id="edge2683_Node000000_Node000006" title=" " alt="" coords="136,194,266,263,262,265,136,199"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_as_enumerator.html" title="Casts each element, preserving ownership when S is a smart pointer." alt="" coords="470,5,638,50"/>
-<area shape="poly" id="edge2679_Node000001_Node000002" title=" " alt="" coords="361,76,471,49,467,52,363,81"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_util_1_1_map_enumerator.html" title="Transforms all elements from type T to type S." alt="" coords="464,75,644,119"/>
-<area shape="poly" id="edge2680_Node000001_Node000003" title=" " alt="" coords="403,94,465,96,461,98,404,100"/>
-<area shape="rect" id="Node000005" href="$class_p4_1_1_util_1_1_iterator_enumerator.html" title="A generic iterator returning elements of type T." alt="" coords="454,144,654,189"/>
-<area shape="poly" id="edge2682_Node000004_Node000005" title=" " alt="" coords="392,164,455,165,450,167,393,169"/>
-<area shape="rect" id="Node000007" href="$class_p4_1_1_util_1_1_concat_enumerator.html" title="Concatenation." alt="" coords="436,212,671,240"/>
-<area shape="poly" id="edge2684_Node000006_Node000007" title=" " alt="" coords="380,258,483,240,478,242,382,263"/>
-<area shape="rect" id="Node000008" href="$class_p4_1_1_util_1_1_empty_enumerator.html" title="Always empty iterator (equivalent to end())" alt="" coords="438,264,670,292"/>
-<area shape="poly" id="edge2685_Node000006_Node000008" title=" " alt="" coords="403,276,440,278,435,279,404,281"/>
-<area shape="rect" id="Node000009" href="$class_p4_1_1_util_1_1_filter_enumerator.html" title=" " alt="" coords="461,316,646,361"/>
-<area shape="poly" id="edge2686_Node000006_Node000009" title=" " alt="" coords="371,293,463,317,458,317,371,299"/>
-<area shape="rect" id="Node000010" href="$class_p4_1_1_util_1_1_single_enumerator.html" title=" " alt="" coords="438,384,669,412"/>
-<area shape="poly" id="edge2687_Node000006_Node000010" title=" " alt="" coords="323,299,375,337,437,371,471,384,465,384,435,375,372,341,322,305"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,14,115,42"/>
+<area shape="rect" id="Node000001" href="$struct_p4_1_1_r_t_t_i_1_1enable__if__has__rtti.html" title=" " alt="" coords="163,5,304,50"/>
+<area shape="poly" id="edge2677_Node000000_Node000001" title=" " alt="" coords="130,25,165,27,159,28,130,30"/>
 </map>

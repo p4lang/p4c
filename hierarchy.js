@@ -1091,6 +1091,7 @@ var hierarchy =
     [ "P4::ControlPlaneAPI::Standard::RegisterTraits< Arch::V1MODEL >", "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html", null ],
     [ "P4::ControlPlaneAPI::Standard::RegisterTraits< Arch::V1MODEL2020 >", "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html", null ],
     [ "P4::ControlPlaneAPI::TranslationAnnotation", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_translation_annotation", null ],
+    [ "P4::CopyStructuresConfig", "namespace_p4.html#struct_p4_1_1_copy_structures_config", null ],
     [ "P4::Coverage::CoverageOptions", "namespace_p4_1_1_coverage.html#struct_p4_1_1_coverage_1_1_coverage_options", null ],
     [ "P4::Coverage::SourceIdCmp", "struct_p4_1_1_coverage_1_1_source_id_cmp.html", null ],
     [ "P4::cstring", "class_p4_1_1cstring.html", null ],

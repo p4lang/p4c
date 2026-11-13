@@ -1662,6 +1662,7 @@ var annotated_dup =
       [ "ConvertErrors", "class_p4_1_1_convert_errors.html", null ],
       [ "CopySrcInfo", "class_p4_1_1_copy_src_info.html", "class_p4_1_1_copy_src_info" ],
       [ "CopyStructures", "class_p4_1_1_copy_structures.html", null ],
+      [ "CopyStructuresConfig", "namespace_p4.html#struct_p4_1_1_copy_structures_config", "namespace_p4_struct_p4_1_1_copy_structures_config_dup" ],
       [ "CreateBuiltins", "class_p4_1_1_create_builtins.html", null ],
       [ "CreateSpecializedTypes", "class_p4_1_1_create_specialized_types.html", null ],
       [ "CreateStructInitializers", "class_p4_1_1_create_struct_initializers.html", null ],
