@@ -845,6 +845,10 @@ def main():
                 ["--tc-outline-parser-local=left:cached_left:8191"],
                 ["0", "1", "8191", "0008191", "4294967295"],
                 "if (p4tc_cache_cached_left > {v})",
+                # The option's rejection happens at the helper entry, before
+                # the region runs, and reports PacketTooShort.
+                "meta->left = p4tc_cache_cached_left; return 0x80000000u | ((unsigned)"
+                "PacketTooShort << 16);",
             ),
             (
                 "--tc-outline-parser-local",
@@ -854,7 +858,9 @@ def main():
                 "p4tc_cache_cached_left = meta->left;",
             ),
         ]
-        for name, template, extra, values, expected in valid:
+        for case in valid:
+            name, template, extra, values, expected = case[:5]
+            also = case[5] if len(case) > 5 else None
             for number, value in enumerate(values):
                 directory = output / f"valid-{name.strip('-')}-{number}"
                 directory.mkdir()
@@ -876,6 +882,8 @@ def main():
                 )
                 code = (directory / "tc-codegen-emission_parser.c").read_text()
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
+                if also is not None:
+                    assert also in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
         # The helper names its arguments after the program, so an outlined
@@ -933,6 +941,96 @@ def main():
                 "bpf-" + unit,
             )
         record.setdefault("renamed", []).append("outline-renamed")
+        # A region can state its own metadata bound: a verify() as the entry
+        # state's first statement narrows the cache the helper proves the packet
+        # access with, so --tc-outline-parser-bound is not needed. The verify
+        # must run before the access it bounds and against the cached scalar,
+        # which is what the metadata-driven advance reads.
+        directory = output / "outline-bound"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:walk",
+                "--tc-outline-parser-range=walk:finish",
+                "--tc-outline-parser-offset-max=1522",
+                "--tc-outline-parser-local=skip:cached_skip:64",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-bound.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-bound_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        assert "u32 p4tc_cache_cached_skip = meta->skip;" in helper, helper
+        check = "if (!((p4tc_cache_cached_skip <= 64)))"
+        advance = "u32 advance_bits = p4tc_cache_cached_skip;"
+        assert check in helper, helper
+        assert advance in helper, helper
+        assert helper.index(check) < helper.index(advance), helper
+        # The bound is the program's verify, not the helper's entry check: the
+        # refusal is the parser error the program names, not PacketTooShort.
+        assert "p4tc_cache_cached_skip > 64" not in helper, helper
+        assert "return 0x80000000u | ((unsigned)ParserInvalidArgument << 16);" in helper, helper
+        assert "p4tc_cache_cached_skip" not in body, body
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-bound_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        record["outline_bound"] = "p4-verify"
+        # Stating the bound both ways is refused: the option's entry check would
+        # reject first, with its own error and no P4 source location.
+        directory = output / "outline-bound-both"
+        directory.mkdir()
+        result = execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:walk",
+                "--tc-outline-parser-range=walk:finish",
+                "--tc-outline-parser-offset-max=1522",
+                "--tc-outline-parser-local=skip:cached_skip:64",
+                "--tc-outline-parser-bound=skip:64",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-bound.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+            success=False,
+        )
+        assert result.returncode != 0, result.returncode
+        assert b"would reject first with its own error" in result.stderr, result.stderr
+        # The diagnostic points at the verify(), not at a helper entry.
+        assert re.search(
+            rb"tc-codegen-outline-bound\.p4\(\d+\):.*bounds 'skip'", result.stderr
+        ), result.stderr
+        record.setdefault("negative", []).append("bound-both")
     if args.mode == "deparser":
         bounds = {"invalid": [], "valid": []}
         for number, value in enumerate(

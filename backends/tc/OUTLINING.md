@@ -123,14 +123,27 @@ Additional options support bounded metadata-driven regions:
 
 | Option | Meaning |
 |---|---|
-| `--tc-outline-parser-bound=FIELD:MAX` | Check a metadata field at entry to the second region. MAX is a decimal uint32. |
-| `--tc-outline-parser-local=FIELD:LOCAL:MAX` | Cache that metadata field in a scalar local of the field's own C type in the second region and write it back on return, so assignments keep the field's truncation and wrapping semantics. Only boolean and scalar integer fields can be cached; fields the target represents as a byte array are rejected with a diagnostic. MAX is a decimal uint32 and is retained in the option record; use the explicit bound option to enforce it. |
+| `--tc-outline-parser-bound=FIELD:MAX` | Check a metadata field at entry to the second region. MAX is a decimal uint32. Needed only for a program that does not state the bound itself; stating both is an error. |
+| `--tc-outline-parser-local=FIELD:LOCAL:MAX` | Cache that metadata field in a scalar local of the field's own C type in the second region and write it back on return, so assignments keep the field's truncation and wrapping semantics. Only boolean and scalar integer fields can be cached; fields the target represents as a byte array are rejected with a diagnostic. MAX is a decimal uint32 and is retained in the option record; enforce it with the bound option or with a `verify()` in the region. |
 | `--tc-outline-parser-offset-max=BYTES` | Reject unaligned or larger entry offsets for both regions. BYTES is decimal 0–268435455, so the bit bound stays inside the helper's signed 32-bit return type; 0 permits only an entry offset of zero. It is required for the helpers' own verification. |
 | `--tc-outline-parser-no-hdr2` | Omit the second helper's header pointer; select this only for a region that does not access headers. |
 
 Every numeric bound is parsed strictly: decimal digits only, the whole argument
 consumed, no sign or whitespace, and a value inside the stated range; malformed,
 prefixed or overflowing input is an error.
+
+A region can state its own metadata bound in the program instead of in the
+option. A `verify()` on the field as the entry state's first statement
+narrows the value the region caches that field in, and the metadata-driven
+packet access reads that same cached scalar, so the helper's bounds proof sees
+the narrowed range and `--tc-outline-parser-bound` is not needed. The verify has
+to come before the packet access it bounds; a verify after an access is not an
+entry precondition and states nothing about the helper's entry. Stating the
+bound both ways is an error, because the option's entry check runs first and
+would replace the program's own error and its source location with its own.
+Only the offset bound has no P4 form: the entry offset is the caller's value and
+no statement in the outlined region can constrain it, so
+`--tc-outline-parser-offset-max` stays an option.
 
 The field argument must be a metadata member and the local argument a
 spelling-only identifier stem. The compiler prefixes the stem and passes it

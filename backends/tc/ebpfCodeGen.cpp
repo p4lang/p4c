@@ -405,6 +405,41 @@ class PacketLengthUses : public Inspector {
     }
 };
 
+/// Records whether the visited expression states a bound on a metadata member:
+/// a relation (other than inequality) comparing the member directly with a
+/// constant. A verify that merely mentions the member, for example one that
+/// tests its low bits, does not bound it.
+class MetadataBoundUses : public Inspector {
+    const P4::ReferenceMap *refMap;
+    const IR::Parameter *metadata;
+    cstring field;
+
+    bool isField(const IR::Expression *expression) const {
+        auto *member = expression->to<IR::Member>();
+        if (member == nullptr || member->member.name != field) return false;
+        auto *path = member->expr->to<IR::PathExpression>();
+        return path != nullptr && refMap->getDeclaration(path->path, true) == metadata;
+    }
+
+ public:
+    bool used = false;
+
+    MetadataBoundUses(const P4::ReferenceMap *refMap, const IR::Parameter *metadata, cstring field)
+        : refMap(refMap), metadata(metadata), field(field) {}
+
+    bool preorder(const IR::Operation_Relation *relation) override {
+        if (relation->is<IR::Neq>()) return true;
+        bool leftField = isField(relation->left);
+        bool rightField = isField(relation->right);
+        if ((leftField && relation->right->is<IR::Constant>()) ||
+            (rightField && relation->left->is<IR::Constant>())) {
+            used = true;
+            return false;
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 // Outlined states get a private copy of each parser local, so a local shared
@@ -499,6 +534,36 @@ static bool regionUsesPacketLength(EBPFPnaParser *parser, const ParserOutlineReg
     return uses.used;
 }
 
+// A region's metadata bound can be stated in the program: a verify() on the
+// field as the entry state's first statement narrows the scalar the region
+// caches the field in, and that narrowing is what the helper's bounds proof
+// needs. A verify after a packet access is not an entry precondition, so only
+// the statements before the first packet access are considered.
+static const IR::MethodCallExpression *entryVerifyOf(EBPFPnaParser *parser, cstring stateName,
+                                                     cstring field) {
+    auto *refMap = parser->program->refMap;
+    for (auto *state : parser->states) {
+        if (state->state->name.name != stateName) continue;
+        for (auto *component : state->state->components) {
+            auto *statement = component->to<IR::MethodCallStatement>();
+            if (statement == nullptr) continue;
+            auto *call = statement->methodCall;
+            if (auto *method = call->method->to<IR::Member>()) {
+                auto *path = method->expr->to<IR::PathExpression>();
+                if (path != nullptr && refMap->getDeclaration(path->path, true) == parser->packet)
+                    return nullptr;
+            }
+            auto *name = call->method->to<IR::PathExpression>();
+            if (name == nullptr || name->path->name.name != IR::ParserState::verify) continue;
+            MetadataBoundUses uses(refMap, parser->user_metadata, field);
+            call->apply(uses);
+            if (uses.used) return call;
+        }
+        return nullptr;
+    }
+    return nullptr;
+}
+
 void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
     BUG_CHECK(parser != nullptr, "Parser is missing");
     auto *parser = this->parser->checkedTo<EBPFPnaParser>();
@@ -542,6 +607,19 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
     for (const auto &region : parser->outlineRegions) {
         if (region.localField && !scalarMetadataField(region.localField, "local")) return;
         if (region.boundField && !scalarMetadataField(region.boundField, "bound")) return;
+    }
+    // The entry check rejects before the program's own verify can run, so the
+    // two cannot both state the bound: the option would replace the program's
+    // error with its own and its source location with none.
+    for (const auto &region : parser->outlineRegions) {
+        if (!region.boundField) continue;
+        if (auto *verify = entryVerifyOf(parser, region.startState, region.boundField)) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "%1% bounds '%2%' at the outlined region's entry, so "
+                        "--tc-outline-parser-bound=%2% would reject first with its own error",
+                        verify, region.boundField);
+            return;
+        }
     }
     if (!checkOutlineLocals(parser)) return;
 
