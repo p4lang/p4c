@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 Google Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Taken from https://p4.org/p4/getting-started-with-p4.html.
 #include <core.p4>
 #include <v1model.p4>

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Google Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/pna/backend/stf/stf.h"
 
 #include <fstream>

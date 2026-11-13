@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Google Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Module extension to load dependencies that are not yet in BCR."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
