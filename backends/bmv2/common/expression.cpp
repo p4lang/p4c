@@ -176,6 +176,7 @@ void ExpressionConverter::postorder(const IR::Constant *expression) {
 
 void ExpressionConverter::postorder(const IR::ArrayIndex *expression) {
     auto result = new Util::JsonObject();
+    const bool isUnion = typeMap->getType(expression, true)->is<IR::Type_HeaderUnion>();
     cstring elementAccess;
 
     LOG2("left: " << expression->left << " right: " << expression->right);
@@ -207,15 +208,15 @@ void ExpressionConverter::postorder(const IR::ArrayIndex *expression) {
         result->emplace("type", "expression");
 
         auto e = new Util::JsonObject();
-        e->emplace("op", "dereference_header_stack");
+        e->emplace("op", isUnion ? "dereference_union_stack" : "dereference_header_stack");
         auto l = new Util::JsonObject();
-        l->emplace("type", "header_stack");
+        l->emplace("type", isUnion ? "header_union_stack" : "header_stack");
         l->emplace("value", elementAccess);
         e->emplace("left", l);
         e->emplace("right", fres);
         result->emplace("value", e);
     } else {
-        result->emplace("type", "header");
+        result->emplace("type", isUnion ? "header_union" : "header");
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
         result->emplace("value", elementAccess);
@@ -637,7 +638,8 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
                 auto result = convertParam(param, cstring::empty);
                 if (result == nullptr) {
                     auto r = new Util::JsonObject();
-                    r->emplace("type", "header");
+                    r->emplace("type",
+                               type->is<IR::Type_HeaderUnion>() ? "header_union" : "header");
                     r->emplace("value", param->name.name);
                     result = r;
                 }
@@ -657,7 +659,7 @@ void ExpressionConverter::postorder(const IR::PathExpression *expression) {
         auto result = new Util::JsonObject();
         auto type = typeMap->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
-            result->emplace("type", "header");
+            result->emplace("type", type->is<IR::Type_HeaderUnion>() ? "header_union" : "header");
             result->emplace("value", var->name);
         } else if (type->is<IR::Type_Bits>() ||
                    (type->is<IR::Type_Boolean>() && (leftValue || simpleExpressionsOnly))) {
@@ -743,12 +745,10 @@ void ExpressionConverter::postorder(const IR::Expression *expression) {
 
 bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression *e) {
     if (auto mem = e->to<IR::Member>()) {
-        if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
-            auto right = ai->right;
-            if (!right->is<IR::Constant>()) {
-                return true;
-            }
-        }
+        e = mem->expr;
+    }
+    if (auto ai = e->to<IR::ArrayIndex>()) {
+        return !ai->right->is<IR::Constant>();
     }
     return false;
 }

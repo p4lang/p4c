@@ -80,6 +80,11 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
     auto v1controls = new std::set<cstring>();
     auto defUse = new P4::ComputeDefUse;
     ParserConfig config;
+    P4::CopyStructuresConfig copyConfig;
+    copyConfig.errorOnMethodCall = false;
+    // FlattenHeaderUnion requires union copies to be expanded into member assignments.
+    copyConfig.expandUnions = true;
+    copyConfig.copyTuples = options.keepTuples;
 
     addPasses(
         {new P4::DumpPipe("MidEnd start"),
@@ -102,7 +107,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          options.keepTuples ? nullptr : new P4::EliminateTuples(&typeMap),
          new P4::FlattenLogMsg(&typeMap),
          new P4::SimplifyComparisons(&typeMap),
-         new P4::CopyStructures(&typeMap, false, false, options.keepTuples),
+         new P4::CopyStructures(&typeMap, copyConfig),
          new P4::NestedStructs(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::SimplifySelectList(&typeMap),

@@ -184,7 +184,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
-            new P4::CopyStructures(&typeMap, false /* errorOnMethodCall */),
+            // FlattenHeaderUnion requires union copies to be expanded into member assignments.
+            new P4::CopyStructures(&typeMap, {.errorOnMethodCall = false, .expandUnions = true}),
             new P4::NestedStructs(&typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),

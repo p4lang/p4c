@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# First member, second member, and invalid source union.
+packet 0 00aa112233445566778899aabbccddeeff
+expect 1 00aa112233445566778899aabbccddeeff
+packet 0 01bb112233445566778899aabbccddeeff
+expect 1 01bb112233445566778899aabbccddeeff
+packet 0 02cc112233445566778899aabbccddeeff
+expect 1 02cc112233445566778899aabbccddeeff
