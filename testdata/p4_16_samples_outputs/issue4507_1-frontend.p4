@@ -1,7 +1,20 @@
 extern void __e(in bit<28> arg);
 extern void __e2(in bit<28> arg);
 control C() {
+    @name("C.x") bit<28> x_0;
+    @name("C.y") bit<28> y_0;
+    @name("C.a") bool a;
+    @name("C.b") bool b;
     @name("C.foo") action foo() {
+        a = true;
+        b = false;
+        if (a) {
+            if (b) {
+                __e(x_0);
+            }
+        } else if (b) {
+            __e2(y_0);
+        }
     }
     @name("C.t") table t_0 {
         actions = {
