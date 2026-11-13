@@ -771,6 +771,83 @@ def main():
                 directory,
                 "bpf-" + unit,
             )
+        # A checksum add whose fields do not total a multiple of 16 bits cannot
+        # be added as a u16 word. The extern requires a multiple of 16 bits and
+        # the emission used to leave the accumulated word unterminated and drop
+        # the add, which clang then rejected.
+        directory = output / "checksum-bits"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                ROOT / "testdata/p4_16_samples/tc-codegen-checksum-bits.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-checksum-bits_parser.c").read_text()
+        # A three-bit and a thirteen-bit field fill one word between them, and
+        # so do two eight-bit fields; the wide field is added a word at a time.
+        for expression in (
+            "= (hdr->ipv4.flags << 13) | hdr->ipv4.fragment_offset;",
+            "= (hdr->pair.high << 8) | hdr->pair.low;",
+            "= htons(((u16 *)(hdr->wide.value))[7]);",
+        ):
+            assert expression in code, (expression, code)
+        # One add per word: three two-field/single-field words and eight for the
+        # 128-bit field.
+        assert code.count("bpf_p4tc_ext_csum_16bit_complement_add(") == 11, code
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-checksum-bits_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        # A list that stops mid-word is refused, at the field it starts with.
+        directory = output / "checksum-short"
+        directory.mkdir()
+        result = execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-checksum-cross.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+            success=False,
+        )
+        assert result.returncode != 0, result.returncode
+        assert b"must be a multiple of 16 bits" in result.stderr, result.stderr
+        assert re.search(
+            rb"tc-codegen-outline-checksum-cross\.p4\(\d+\):.*must be a multiple of 16 bits",
+            result.stderr,
+        ), result.stderr
+        record.setdefault("negative", []).append("checksum-short")
         bounds = {"invalid": [], "valid": []}
         malformed = [
             "-1",

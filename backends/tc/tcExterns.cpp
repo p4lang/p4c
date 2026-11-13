@@ -262,6 +262,48 @@ void InternetChecksumAlgorithmPNA::emitSetInternalState(EBPF::CodeBuilder *build
 
 void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
                                                   const ArgumentsList &arguments, bool addData) {
+    // The extern's contract is that the added data is a multiple of 16 bits
+    // long. A list that ends mid-word cannot be added as a u16 word, and
+    // emitting it would leave the accumulated word unterminated and drop the
+    // add. Check the whole list first, because a field that is refused here
+    // would otherwise be left out of the word the next field continues.
+    int wordBits = 0;
+    for (auto field : arguments) {
+        auto fieldType = field->type->to<IR::Type_Bits>();
+        if (fieldType == nullptr) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unsupported field type: %1%", field->type);
+            return;
+        }
+        const int width = fieldType->width_bits();
+        if (width > 64) {
+            // A wide field is added a word at a time from its own array, so it
+            // cannot continue a word and cannot be split.
+            if (wordBits != 0) {
+                ::P4::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
+                    field);
+                return;
+            }
+            if (width % 16 != 0) {
+                ::P4::error(
+                    ErrorType::ERR_UNSUPPORTED,
+                    "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
+                    field);
+                return;
+            }
+        } else {
+            wordBits = (wordBits + width) % 16;
+        }
+    }
+    if (wordBits != 0) {
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "%1%: the checksum input must be a multiple of 16 bits, but these fields do "
+                    "not fill the last word",
+                    arguments.front());
+        return;
+    }
+
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
     builder->emitIndent();
@@ -273,12 +315,8 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
 
     int remainingBits = 16, bitsToRead;
     for (auto field : arguments) {
-        auto fieldType = field->type->to<IR::Type_Bits>();
-        if (fieldType == nullptr) {
-            ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unsupported field type: %1%", field->type);
-            return;
-        }
-        const int width = fieldType->width_bits();
+        // The list was validated above, so every field is a bit type here.
+        const int width = field->type->checkedTo<IR::Type_Bits>()->width_bits();
         bitsToRead = width;
 
         cstring field_temp = "_temp"_cs;
@@ -293,21 +331,6 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
             }
         }
         if (width > 64) {
-            if (remainingBits != 16) {
-                ::P4::error(
-                    ErrorType::ERR_UNSUPPORTED,
-                    "%1%: field wider than 64 bits must be aligned to 16 bits in input data",
-                    field);
-                continue;
-            }
-            if (width % 16 != 0) {
-                ::P4::error(
-                    ErrorType::ERR_UNSUPPORTED,
-                    "%1%: field wider than 64 bits must have size in bits multiply of 16 bits",
-                    field);
-                continue;
-            }
-
             // Let's convert internal array into an array of u16 and calc csum for such entries.
             // Byte order conversion is required, because csum is calculated in host byte order
             // but data is preserved in network byte order.

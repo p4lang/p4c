@@ -35,7 +35,7 @@ parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta,
         pkt.extract(hdr.ipv4);
         meta.left = (bit<32>)hdr.ipv4.fragment_offset;
         ck.clear();
-        ck.add({hdr.ipv4.flags});
+        ck.add({hdr.ipv4.flags, hdr.ipv4.fragment_offset});
         meta.mark = (bit<8>)ck.get();
         transition select(hdr.ipv4.flags) {
             0: finish;
