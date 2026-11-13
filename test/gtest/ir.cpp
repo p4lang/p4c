@@ -7,12 +7,34 @@
 
 #include <gtest/gtest.h>
 
+#include <unordered_set>
+
 #include "helpers.h"
+#include "ir/compare.h"
 
 namespace P4::Test {
 
 struct IrTest : P4CTest {};
 struct ConstantTest : IrTest {};
+
+TEST_F(IrTest, SymbolicVariableHashIgnoresType) {
+    const IR::SymbolicVariable first(IR::Type_Bits::get(8), "value"_cs);
+    const IR::SymbolicVariable alias(IR::Type_Boolean::get(), "value"_cs);
+    const IR::SymbolicVariable other(IR::Type_Bits::get(8), "other"_cs);
+    const IR::SymbolicVariableHash hash;
+    EXPECT_TRUE(IR::SymbolicVariableEqual{}(first, alias));
+    EXPECT_EQ(hash(first), hash(alias));
+    EXPECT_EQ(hash(first), hash(&first));
+
+    std::unordered_set<IR::SymbolicVariable, IR::SymbolicVariableHash, IR::SymbolicVariableEqual>
+        values{first, alias, other};
+    EXPECT_EQ(values.size(), 2U);
+    EXPECT_EQ(values.count(alias), 1U);
+    std::unordered_set<const IR::SymbolicVariable *, IR::SymbolicVariableHash,
+                       IR::SymbolicVariableEqual>
+        pointers{&first, &other};
+    EXPECT_EQ(pointers.count(&alias), 1U);
+}
 
 TEST_F(ConstantTest, ConstantInt0) {
     RedirectStderr errors;
