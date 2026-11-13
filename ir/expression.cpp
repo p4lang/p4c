@@ -17,6 +17,8 @@
 
 namespace P4 {
 
+const cstring IR::Dots::name = "..."_cs;
+
 const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi - lo + 1)) - 1)).clone();

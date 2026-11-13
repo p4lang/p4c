@@ -254,18 +254,20 @@ class LOr : Operation_Binary {
 
 /// Represents the ... default initializer expression
 class Dots : Expression {
-    dbprint { out << "..."; }
-    toString { return "..."_cs; }
+    /// Name of the synthetic struct field representing this expression.
+    static const cstring name;
+    dbprint { out << name; }
+    toString { return name; }
 }
 
 /// Represents the ... default initializer expression
 /// when used in a StructExpression.
 class NamedDots : NamedExpression {
-    inline NamedDots() : NamedExpression("...", new Dots()) {}
-    inline NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "..."_cs, dots) { CHECK_NULL(dots); }
-    inline NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
-    dbprint { out << "..."; }
-    toString { return "..."_cs; }
+    inline NamedDots() : NamedExpression(Dots::name, new Dots()) {}
+    inline NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, Dots::name, dots) { CHECK_NULL(dots); }
+    inline NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, Dots::name, new Dots()) {}
+    dbprint { out << Dots::name; }
+    toString { return Dots::name; }
 }
 
 abstract Literal : Expression, CompileTimeValue {}
