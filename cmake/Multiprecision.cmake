@@ -3,61 +3,36 @@
 # SPDX-License-Identifier: Apache-2.0
 
 macro(p4c_obtain_multiprecision)
-  option(
-    P4C_USE_PREINSTALLED_MULTIPRECISION
-    "Look for preinstalled Multiprecision and Boost.Config headers instead of fetching them using FetchContent."
-    OFF
+  p4c_dependency_compat(P4C_USE_PREINSTALLED_MULTIPRECISION multiprecision)
+  set(P4C_MULTIPRECISION_VERSION "1.90.0")
+  # Standalone mode uses headers directly, so skip Boost's CMake targets.
+  p4c_find_package(
+    NAME multiprecision
+    URL https://github.com/boostorg/multiprecision/archive/refs/tags/boost-${P4C_MULTIPRECISION_VERSION}.tar.gz
+    URL_HASH SHA256=b28a20f95712e596b3eb8aa4ae2264363016a609a63ebc3d84ee8cb49831de67
+    FIND_PACKAGE_ARGUMENTS "MODULE ${P4C_multiprecision_FIND_ARGUMENTS}"
+    DOWNLOAD_ONLY YES
   )
-
-  if(P4C_USE_PREINSTALLED_MULTIPRECISION)
-    find_path(P4C_MULTIPRECISION_INCLUDE_DIR boost/multiprecision/cpp_int.hpp
-      HINTS ${Boost_INCLUDE_DIRS} ${BOOST_ROOT}/include)
-    find_path(P4C_BOOST_CONFIG_INCLUDE_DIR boost/config.hpp
-      HINTS ${P4C_MULTIPRECISION_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${BOOST_ROOT}/include)
-    if(NOT P4C_MULTIPRECISION_INCLUDE_DIR OR NOT P4C_BOOST_CONFIG_INCLUDE_DIR)
-      message(FATAL_ERROR "Boost.Multiprecision and Boost.Config headers are required")
-    endif()
-    # Use the installed release's dependencies; older versions do not support
-    # standalone mode and must use the matching Boost headers.
-  else()
-    set(P4C_MULTIPRECISION_VERSION "1.90.0")
-    message(STATUS "Fetching Multiprecision version ${P4C_MULTIPRECISION_VERSION} for P4C...")
-
-    set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-    set(FETCHCONTENT_QUIET OFF)
-    set(BUILD_TESTING_PREV ${BUILD_TESTING})
-    set(BUILD_TESTING OFF)
-    set(BOOST_MP_STANDALONE ON)
-    add_compile_definitions(BOOST_MP_STANDALONE)
-
-    # DOWNLOAD_EXTRACT_TIMESTAMP was introduced in CMake 3.24.
-    set(P4C_MULTIPRECISION_DOWNLOAD_OPTIONS)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
-      set(P4C_MULTIPRECISION_DOWNLOAD_OPTIONS DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
-    endif()
-
-    # Standalone Multiprecision needs only Boost.Config, not the full Boost distribution.
-    FetchContent_Declare(
-      boost_config
+  if(multiprecision_SOURCE_DIR)
+    # Standalone Multiprecision still needs Boost.Config from the same release.
+    # FORCE keeps this header-only source dependency out of installed-package discovery.
+    CPMAddPackage(
+      NAME boost_config
       URL https://github.com/boostorg/config/archive/refs/tags/boost-${P4C_MULTIPRECISION_VERSION}.tar.gz
       URL_HASH SHA256=1390bd79fbf270e40cfe5ac6b899f4a9c4e47139b6e17b4c1f7f78822adaa9fc
-      ${P4C_MULTIPRECISION_DOWNLOAD_OPTIONS}
+      DOWNLOAD_ONLY YES
+      FORCE YES
     )
-    FetchContent_Declare(
-      multiprecision
-      URL https://github.com/boostorg/multiprecision/archive/refs/tags/boost-${P4C_MULTIPRECISION_VERSION}.tar.gz
-      URL_HASH SHA256=b28a20f95712e596b3eb8aa4ae2264363016a609a63ebc3d84ee8cb49831de67
-      ${P4C_MULTIPRECISION_DOWNLOAD_OPTIONS}
-    )
-    fetchcontent_makeavailable_but_exclude_install(boost_config)
-    fetchcontent_makeavailable_but_exclude_install(multiprecision)
-
     set(P4C_MULTIPRECISION_INCLUDE_DIR ${multiprecision_SOURCE_DIR}/include)
     set(P4C_BOOST_CONFIG_INCLUDE_DIR ${boost_config_SOURCE_DIR}/include)
-    set(BUILD_TESTING ${BUILD_TESTING_PREV})
-    set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+    set(P4C_MULTIPRECISION_STANDALONE ON)
+    add_compile_definitions(BOOST_MP_STANDALONE)
+  else()
+    # Older installed releases need their matching Boost dependencies and do
+    # not support BOOST_MP_STANDALONE. Reload the paths found by the find module.
+    find_package(multiprecision REQUIRED)
+    set(P4C_MULTIPRECISION_STANDALONE OFF)
   endif()
-
   include_directories(SYSTEM ${P4C_MULTIPRECISION_INCLUDE_DIR} ${P4C_BOOST_CONFIG_INCLUDE_DIR})
   message(STATUS "Done with setting up Multiprecision for P4C.")
-endmacro(p4c_obtain_multiprecision)
+endmacro()

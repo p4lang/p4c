@@ -232,13 +232,12 @@ sudo dpkg -i /path/to/package.deb
        library. Default is ON.
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
-     - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
-     - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.
-     - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
-     - `-DP4C_USE_PREINSTALLED_P4RUNTIME=ON|OFF`. Use an installed P4Runtime CMake package with C++ bindings instead of fetching it. Default is OFF.
-     - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
-     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
-       Only has an effect when `P4C_USE_PREINSTALLED_PROTOBUF` is enabled.
+     - `-DCPM_DOWNLOAD_<name>=OFF`. Prefer an installed dependency, falling back to the pinned source if unavailable. See [Managing dependencies with CPM](docs/CPM.md) for package names and examples.
+     - `-DCPM_USE_LOCAL_PACKAGES=ON`. Prefer installed versions of all library dependencies.
+     - `-DCPM_LOCAL_PACKAGES_ONLY=ON`. Require installed versions of all library dependencies.
+     - `-DCPM_SOURCE_CACHE=<path>`. Reuse downloaded dependency sources across build directories (also available as an environment variable).
+     - `-DCPM_<name>_SOURCE=<path>`. Build a library dependency from a local source checkout.
+     - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable static installed Abseil libraries. Default is ON.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
@@ -246,6 +245,9 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
      - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
      - `-DCMAKE_UNITY_BUILD=ON|OFF `. Enable [unity builds](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) for faster compilation.  Default is OFF.
+
+    See [Managing dependencies with CPM](docs/CPM.md) for installed packages,
+    local checkouts, and source caching.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
@@ -339,7 +341,7 @@ git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 22.04 **should**
-work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
+work. However, P4C typically installs its own version of Protobuf using CPM.cmake
 (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
 [here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
 After cloning Protobuf and before you build, check-out version 3.25.3:
@@ -350,17 +352,17 @@ Please note that while all Protobuf versions newer than 3.0 should work for
 P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
-P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240722.1 at the moment).
+P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CPM.cmake (Abseil LTS 20240722.1 at the moment).
 
 #### P4Runtime
 
 P4C fetches P4Runtime and links its `p4runtime::cpp` target by default. The bindings are built with P4C's Protobuf library and `protoc`.
 
-To instead use an installed package (requires P4runtime 1.6 or newer) configure P4C with:
+To prefer an installed package (requires P4Runtime 1.6 or newer with C++ bindings), configure P4C with:
 
 ```sh
 cmake -S . -B build \
-  -DP4C_USE_PREINSTALLED_P4RUNTIME=ON \
+  -DCPM_DOWNLOAD_p4runtime=OFF \
   -DCMAKE_PREFIX_PATH=/path/to/p4runtime/install
 ```
 
@@ -450,20 +452,14 @@ Installing on macOS:
   git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
   ```
 
-  Homebrew offers a `protobuf` formula. It installs version 3.2, which should
-  work for P4C itself but may cause problems with some extensions. It's
-  preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.25.3).
-
-  The `protobuf` formula requires the following CMake variables to be set,
-  otherwise CMake does not find the libraries or fails in linking. It is likely
-  that manually installed Protobuf will require similar treatment.
+  P4C builds its pinned Protobuf release by default. To use Homebrew's installed
+  `protobuf` package, point CMake to its installation prefix:
 
   ```
   PB_PREFIX="$(brew --prefix --installed protobuf)"
-  ./bootstrap.sh \
-    -DProtobuf_INCLUDE_DIR="${PB_PREFIX}/include/" \
-    -DProtobuf_LIBRARY="${PB_PREFIX}/lib/libprotobuf.dylib" \
-    -DENABLE_PROTOBUF_STATIC=OFF
+  cmake -S . -B build \
+    -DCPM_DOWNLOAD_Protobuf=OFF \
+    -DCMAKE_PREFIX_PATH="${PB_PREFIX}"
   ```
 
 ### Garbage collector

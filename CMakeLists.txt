@@ -18,13 +18,21 @@ cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
 project (P4C)
 
+# CMake 3.21+ sets P4C_IS_TOP_LEVEL in project(P4C).
+if(CMAKE_VERSION VERSION_LESS 3.21)
+  set(P4C_IS_TOP_LEVEL OFF)
+  if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(P4C_IS_TOP_LEVEL ON)
+  endif()
+endif()
+
 include(CMakeDependentOption)
 
 # set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++20 rather than -std=gnu++20
 set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(ccache)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -113,8 +121,6 @@ set (P4C_VERSION_RC ${CMAKE_MATCH_4})
 
 # P4 General Utilities
 include(P4CUtils)
-# CMake Utilities to fetch dependencies.
-include(FetchContent)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 # More utilities.
 include(CheckIncludeFile)
@@ -203,6 +209,9 @@ endif ()
 # clang-format, cpplint, black, and isort without installing flex,
 # bison, Boost, Protobuf, or any other compile-time dependency.
 if (NOT FORMATTING_ONLY)
+
+include(P4CDependencies)
+include(${P4C_SOURCE_DIR}/cmake/CPM.cmake)
 
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
@@ -422,7 +431,6 @@ set(EXTENSION_P4_14_CONV_SOURCES)
 add_subdirectory (frontends)
 add_subdirectory (midend)
 if (ENABLE_CONTROL_PLANE)
-    OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
     include(Protobuf)
     p4c_obtain_protobuf()
 
@@ -564,12 +572,15 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
 endif (NOT FORMATTING_ONLY)
 
 ########################################## Linters Begin ##########################################
+if(P4C_IS_TOP_LEVEL OR FORMATTING_ONLY)
 include(Linters)
+endif()
 ########################################### Linters End ###########################################
 
 if (NOT FORMATTING_ONLY)
 
 # tags, etags
+if(P4C_IS_TOP_LEVEL)
 set (CTAGS_DIRS_ALL backends extensions frontends ir lib tools midend)
 set (CTAGS_DIRS "")
 foreach(_dir IN LISTS CTAGS_DIRS_ALL)
@@ -615,6 +626,7 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 # docs
 if (ENABLE_DOCS AND DOXYGEN_FOUND)
@@ -640,6 +652,7 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
 endif()
 
 ######################################## Packaging BEGIN ########################################
+if(P4C_IS_TOP_LEVEL)
 SET(CPACK_SOURCE_GENERATOR "TXZ")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME
    "p4c-${P4C_SEM_VERSION_STRING}")
@@ -678,5 +691,6 @@ set (CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 set (CPACK_STRIP_FILES TRUE)
 
 include (CPack)
+endif()
 ######################################## Packaging End ########################################
 endif (NOT FORMATTING_ONLY)

@@ -68,7 +68,7 @@ P4Testgen is available as part of the [official P4C docker image](https://hub.do
 In addition to [P4Tools'](../../README.md#dependencies) own dependencies P4Testgen depends on the following external software:
   * [inja](https://github.com/pantor/inja) template engine for testcase generation.
 
-These dependencies are automatically installed via CMakelist's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
+These dependencies are automatically installed via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake).
 
 ## Extensions
 P4Testgen extensions are instantiations of a particular combination of P4 architecture and the target that executes the P4 code. For example, the `v1model.p4` architecture can be executed on the behavioral model. P4Testgen extension make use of the core P4Testgen framework to generate tests. Several open-source extensions are available.

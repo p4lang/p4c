@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if (P4C_USE_PREINSTALLED_MULTIPRECISION)
+if (NOT P4C_MULTIPRECISION_STANDALONE)
   set(BOOST_MIN_VERSION 1.58)
 else ()
   # Older Boost.Graph headers conflict with standalone Multiprecision.
@@ -11,12 +11,12 @@ else ()
 endif ()
 find_package(Boost ${BOOST_MIN_VERSION} QUIET)
 if (NOT Boost_FOUND)
-  if (NOT P4C_USE_PREINSTALLED_MULTIPRECISION)
+  if (P4C_MULTIPRECISION_STANDALONE)
     message(FATAL_ERROR
       "The graphs backend requires Boost ${BOOST_MIN_VERSION} or newer headers. "
       "Older Boost.Graph headers conflict with fetched standalone Multiprecision. "
       "Install a compatible Boost version (set BOOST_ROOT for a custom installation), "
-      "or configure with -DP4C_USE_PREINSTALLED_MULTIPRECISION=ON to use matching "
+      "or configure with -DCPM_DOWNLOAD_multiprecision=OFF to use matching "
       "installed Multiprecision and Boost headers. To disable this backend, set "
       "-DENABLE_P4C_GRAPHS=OFF.")
   else ()
