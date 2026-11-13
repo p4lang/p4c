@@ -43,7 +43,7 @@ class TypeInference : public P4::TypeInference {
     TypeInference *clone() const override;
 
  protected:
-    const IR::Type *setTypeType(const IR::Type *type, bool learn = true) override;
+    IR::Ptr<IR::Type> setTypeType(IR::Ptr<IR::Type> type, bool learn = true) override;
 };
 
 /**

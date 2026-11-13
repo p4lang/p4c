@@ -249,7 +249,7 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser *deparser) {
         BUG("%s", out.str());
     }
     LOG4("Rewriting complete. Deparser emits for " << deparser->gress << " are now:");
-    for (const auto *emit : newEmits) LOG4("  " << emit);
+    for (auto emit : newEmits) LOG4("  " << emit);
 
     deparser->emits = newEmits;
     return false;

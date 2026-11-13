@@ -18,9 +18,9 @@ class TypeMap;
 
 template <typename Node>
 struct SplitResult {
-    const Node *before = nullptr;
-    const Node *after = nullptr;
-    std::vector<const IR::Declaration *> hoistedDeclarations;
+    IR::Ptr<Node> before = nullptr;
+    IR::Ptr<Node> after = nullptr;
+    std::vector<IR::Ptr<IR::Declaration>> hoistedDeclarations;
 
     /// @brief Returns true if any splitting occured and false otherwise.
     explicit operator bool() const { return after; }

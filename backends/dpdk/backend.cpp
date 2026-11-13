@@ -36,7 +36,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     auto hook = options.getDebugHook();
     auto program = tlb->getProgram();
 
-    std::set<const IR::P4Table *> invokedInKey;
+    std::set<IR::Ptr<IR::P4Table>> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, &structure, p4info, options);
     bool is_all_args_header_fields = true;
@@ -145,7 +145,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new ShortenTokenLength(newNameMap),
         new EmitDpdkTableConfig(refMap, typeMap, newNameMap),
     });
-    const auto *optimizedProgram = dpdk_program->apply(postCodeGen);
+    auto optimizedProgram = dpdk_program->apply(postCodeGen);
     if (errorCount() > 0) {
         return;
     }

@@ -30,7 +30,7 @@ namespace BFN {
 bool CheckPadAssignment::preorder(const IR::BaseAssignmentStatement *statement) {
     auto member = statement->left->to<IR::Member>();
     if (!member) return false;
-    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
+    auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
     if (field && field->hasAnnotation("padding"_cs)) {

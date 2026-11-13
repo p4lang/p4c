@@ -16,7 +16,7 @@
 namespace P4 {
 
 IR::ID DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type) {
-    type = type->getP4Type();
+    auto type = type->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
     auto tmp = IR::ID(srcInfo, nameGen.newName("tmp"), nullptr);
     auto decl = new IR::Declaration_Variable(srcInfo, tmp, type);

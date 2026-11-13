@@ -1109,7 +1109,7 @@ class PhvInfo {
 
         explicit DumpPhvFields(const PhvInfo &phv, const PhvUse &uses) : phv(phv), uses(uses) {}
 
-        const IR::Node *apply_visitor(const IR::Node *n, const char *) override;
+        IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *) override;
         /** Prints a histogram of all field sizes (number of fields of a particular size) in a
          * particular gress. Also prints number of fields and total number of bits to be allocated
          */

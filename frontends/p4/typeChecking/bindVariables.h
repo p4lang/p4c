@@ -16,8 +16,9 @@ namespace P4 {
 // Insert explicit type specializations where they are missing
 class DoBindTypeVariables : public Transform {
     TypeMap *typeMap;
-    const IR::Type *getVarValue(const IR::Type_Var *var, const IR::Node *errorPosition) const;
-    const IR::Node *insertTypes(const IR::Node *node);
+    IR::Ptr<IR::Type> getVarValue(const IR::Type_Var *var, const IR::Node *errorPosition) const;
+    // CTD -- not used or defined?
+    // const IR::Node *insertTypes(const IR::Node *node);
 
  public:
     explicit DoBindTypeVariables(TypeMap *typeMap) : typeMap(typeMap) {

@@ -35,7 +35,7 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
                   bool &);
     bool findLoopBounds(IR::ForStatement *, loop_bounds_t &);
     bool findLoopBounds(IR::ForInStatement *, loop_bounds_t &);
-    const IR::Statement *doUnroll(const loop_bounds_t &, const IR::Statement *,
+    const IR::Statement *doUnroll(const loop_bounds_t &, IR::Ptr<IR::Statement>,
                                   const IR::IndexedVector<IR::StatOrDecl> * = nullptr);
 
     const IR::Statement *preorder(IR::ForStatement *) override;

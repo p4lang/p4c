@@ -49,7 +49,7 @@ bool Clustering::FindComplexValidityBits::preorder(const IR::MAU::Instruction *i
     bool has_non_val = false;
     const PHV::Field *dst_validity_bit = nullptr;
     const PHV::Field *src_validity_bit = nullptr;
-    for (auto *op : inst->operands) {
+    for (auto op : inst->operands) {
         auto *f = phv_i.field(op);
         if (op == inst->operands[0] && f && f->pov) {
             dst_validity_bit = f;
@@ -200,7 +200,7 @@ void Clustering::MakeSlices::postorder(const IR::MAU::Instruction *inst) {
     LOG5("Clustering::MakeSlices: visiting instruction " << inst);
     // Find relative combined slice positions.
     ordered_set<PHV::FieldSlice> equivalence;
-    for (auto *op : inst->operands) {
+    for (auto op : inst->operands) {
         le_bitrange range;
         PHV::Field *f = phv_i.field(op, &range);
         if (!f) continue;
@@ -296,7 +296,7 @@ bool Clustering::MakeAlignedClusters::preorder(const IR::MAU::Instruction *inst)
     // transitive, start with the first operand (`dst`) and union it with all
     // operands.
     std::vector<PHV::FieldSlice> dst_slices;
-    for (auto *operand : inst->operands) {
+    for (auto operand : inst->operands) {
         le_bitrange range;
         PHV::Field *f = phv_i.field(operand, &range);
         LOG5("UNION over instruction " << inst);
@@ -441,7 +441,7 @@ void Clustering::MakeRotationalClusters::end_apply() {
 bool Clustering::CollectInconsistentFlexibleFieldExtract::preorder(
     const IR::BFN::ParserState *state) {
     ExtractVec extracts;
-    for (const auto *primitive : state->statements) {
+    for (auto primitive : state->statements) {
         const auto *extract = primitive->to<IR::BFN::Extract>();
         if (!extract) {
             continue;
@@ -452,7 +452,7 @@ bool Clustering::CollectInconsistentFlexibleFieldExtract::preorder(
         }
         le_bitrange f_bits;
         auto *field = phv_i.field(extract->dest->field, &f_bits);
-        extracts.insert({buf->range, field});
+        extracts.emplace(buf->range, field);
     }
     if (extracts.size() > 0) {
         LOG3("extract of state " << state->name);
@@ -797,7 +797,7 @@ bool Clustering::CollectPlaceTogetherConstraints::preorder(const IR::BFN::Parser
 
     // sort fields by extract source.
     std::map<nw_bitrange, const PHV::Field *> sorted;
-    for (const auto *prim : state->statements) {
+    for (auto prim : state->statements) {
         if (const auto *extract = prim->to<IR::BFN::Extract>()) {
             auto *bufferSource = extract->source->to<IR::BFN::InputBufferRVal>();
             if (!bufferSource) continue;
@@ -809,7 +809,7 @@ bool Clustering::CollectPlaceTogetherConstraints::preorder(const IR::BFN::Parser
             if (!field) {
                 continue;
             }
-            sorted.insert({bufferSource->range, field});
+            sorted.emplace(bufferSource->range, field);
         }
     }
 

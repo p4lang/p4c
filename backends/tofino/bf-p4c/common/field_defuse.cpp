@@ -319,7 +319,7 @@ bool FieldDefUse::preorder(const IR::BFN::Parser *p) {
 
         if (write_by_parser.count(f.name)) {
             LOG2("Adding parser error write expr for " << f.name);
-            auto *parser_begin = p->start;
+            const IR::BFN::ParserState *parser_begin = p->start;
             const PHV::Field *f_p = phv.field(f.id);
             BUG_CHECK(f_p != nullptr, "Dereferencing an invalid field id");
             IR::Expression *parser_err_expr = new WriteParserError(f_p);
@@ -330,7 +330,7 @@ bool FieldDefUse::preorder(const IR::BFN::Parser *p) {
             located_defs[f.id].emplace(parser_begin, parser_err_expr);
         } else {
             LOG2("Adding implicit parser initialization expr for " << f.name);
-            auto *parser_begin = p->start;
+            const IR::BFN::ParserState *parser_begin = p->start;
             const PHV::Field *f_p = phv.field(f.id);
             BUG_CHECK(f_p != nullptr, "Dereferencing an invalid field id");
             IR::Expression *dummy_expr = new ImplicitParserInit(f_p);
