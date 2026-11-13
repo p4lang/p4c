@@ -435,11 +435,20 @@ interface IAnnotated {
     inline void addAnnotation(cstring name, Expression expr, bool structured = false) {
         addAnnotation(new Annotation(name, { expr }, structured));
     }
+    /// An empty list creates an annotation with no arguments.
+    inline void addAnnotation(cstring name, std::initializer_list<const Expression *> exprs,
+                              bool structured = false) {
+        addAnnotation(new Annotation(name, exprs, structured));
+    }
 
     /// Add annotation if another annotation with the same name is not
     /// already present.
     inline void addAnnotationIfNew(cstring name, Expression expr, bool structured = false) {
         Annotations::addIfNew(getAnnotations(), name, expr, structured);
+    }
+    inline void addAnnotationIfNew(cstring name, std::initializer_list<const Expression *> exprs,
+                                   bool structured = false) {
+        Annotations::addIfNew(getAnnotations(), name, exprs, structured);
     }
 
     inline void addAnnotationIfNew(Annotation ann) {
@@ -450,6 +459,10 @@ interface IAnnotated {
     /// add this annotation.
     inline void addOrReplaceAnnotation(cstring name, Expression expr, bool structured = false) {
         Annotations::addOrReplace(getAnnotations(), name, expr, structured);
+    }
+    inline void addOrReplaceAnnotation(cstring name, std::initializer_list<const Expression *> exprs,
+                                      bool structured = false) {
+        Annotations::addOrReplace(getAnnotations(), name, exprs, structured);
     }
 
     inline void addOrReplaceAnnotation(Annotation ann) {

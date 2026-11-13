@@ -348,6 +348,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     if (isStatic) out << "static ";
     if (isVirtual) out << "virtual ";
     if (isFriend) out << "friend ";
+    if (isExplicit) out << "explicit ";
     generate_proto(out, false, isUser);
     if (isOverride) out << " override";
     if (inImpl || !body)
@@ -546,6 +547,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     body << "}";
     auto ctor = new IrMethod(name, body.str());
     ctor->clss = this;
+    ctor->isExplicit = user && user->isExplicit;
     optargs = 0;
     for (auto a : arglist) {
         if (a.first->optional && (skip_opt & (1U << optargs++))) continue;
