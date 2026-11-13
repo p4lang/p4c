@@ -224,6 +224,14 @@ const IR::Expression *DoGlobalCopyPropagation::copyprop_name(cstring name) {
 }
 
 const IR::Expression *DoGlobalCopyPropagation::postorder(IR::PathExpression *path) {
+    // For the following IR:
+    //   e0 = path;
+    //   path = e1;
+    // path can be replaced in the first assignment, but not the second.
+    // Visit every occurrence of the original path node so that only the occurrence
+    // in the first assignment gets replaced.
+    visitAgain();
+
     if (!performRewrite) return path;
 
     auto ret = copyprop_name(path->path->name);
@@ -231,6 +239,14 @@ const IR::Expression *DoGlobalCopyPropagation::postorder(IR::PathExpression *pat
 }
 
 const IR::Expression *DoGlobalCopyPropagation::preorder(IR::Member *member) {
+    // For the following IR:
+    //   e0 = member;
+    //   member = e1;
+    // member can be replaced in the first assignment, but not the second.
+    // Visit every occurrence of the original member node so that only the occurrence
+    // in the first assignment gets replaced.
+    visitAgain();
+
     if (!performRewrite) return member;
 
     if (auto name = GlobalCopyProp::lValueName(member)) {
@@ -241,6 +257,14 @@ const IR::Expression *DoGlobalCopyPropagation::preorder(IR::Member *member) {
 }
 
 const IR::Expression *DoGlobalCopyPropagation::preorder(IR::ArrayIndex *arr) {
+    // For the following IR:
+    //   e0 = arr;
+    //   arr = e1;
+    // arr can be replaced in the first assignment, but not the second.
+    // Visit every occurrence of the original arr node so that only the occurrence
+    // in the first assignment gets replaced.
+    visitAgain();
+
     if (!performRewrite) return arr;
 
     if (auto name = GlobalCopyProp::lValueName(arr)) {
