@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 packet 0 80 01 02 03 04 05 06 07 08
 expect 0 80 01 02 03 04 05 06 07 08
 # A packet one byte short must still report a parser error.

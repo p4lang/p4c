@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Port 0: NoError; 1: ParserInvalidArgument; 2: PacketTooShort;
 # 3: HeaderTooShort; 4: unexpected error or header validity.
 # Every packet must be preserved byte for byte, including unparsed payload.
