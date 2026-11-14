@@ -123,6 +123,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         return new IR::ListExpression(srcInfo, *vec);
     }
     if (const auto *ta = type->to<IR::Type_Array>()) {
+        if (!ta->sizeKnown()) return nullptr;
         auto *vec = new IR::Vector<IR::Expression>();
         const auto *elementType = ta->elementType;
         for (size_t i = 0; i < ta->getSize(); i++) {
