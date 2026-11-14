@@ -13,6 +13,7 @@ set (MIDEND_SRCS
   coverage.cpp
   checkTableEntries.cpp
   def_use.cpp
+  elimDeadSetInvalid.cpp
   eliminateActionRun.cpp
   eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
@@ -69,6 +70,7 @@ set (MIDEND_HDRS
   copyStructures.h
   coverage.h
   def_use.h
+  elimDeadSetInvalid.h
   eliminateActionRun.h
   eliminateInvalidHeaders.h
   eliminateNewtype.h

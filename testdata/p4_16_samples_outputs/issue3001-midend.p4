@@ -5,7 +5,6 @@ header H {
 control c() {
     @name("c.h") H h_0;
     @hidden action issue3001l13() {
-        h_0.setInvalid();
     }
     @hidden table tbl_issue3001l13 {
         actions = {

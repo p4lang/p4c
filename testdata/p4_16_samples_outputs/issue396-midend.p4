@@ -15,13 +15,8 @@ control d(out bool b) {
     H s1_0_h;
     @name("d.tmp") H tmp;
     @hidden action issue396l27() {
-        h_0.setInvalid();
-        h3_0[0].setInvalid();
-        h3_0[1].setInvalid();
         h_0.setValid();
         h_0.x = 32w0;
-        s_0_h.setInvalid();
-        s1_0_h.setInvalid();
         s1_0_h.setValid();
         s1_0_h.x = 32w0;
         h3_0[1].setValid();

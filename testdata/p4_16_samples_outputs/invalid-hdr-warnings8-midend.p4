@@ -232,16 +232,10 @@ control c(inout bit<32> x) {
         if (u_0_h1.isValid()) {
             u1_6_h1.setValid();
             u1_6_h1 = u_0_h1;
-            u1_6_h2.setInvalid();
-        } else {
-            u1_6_h1.setInvalid();
         }
         if (u_0_h2.isValid()) {
             u1_6_h2.setValid();
             u1_6_h2 = u_0_h2;
-            u1_6_h1.setInvalid();
-        } else {
-            u1_6_h2.setInvalid();
         }
         hs1_6[0] = hs_0[0];
         hs1_6[1] = hs_0[1];

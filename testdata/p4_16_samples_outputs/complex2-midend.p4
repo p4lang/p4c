@@ -13,8 +13,6 @@ control c(inout bit<32> r) {
         h_0[32w1].setValid();
     }
     @hidden action complex2l15() {
-        h_0[0].setInvalid();
-        h_0[1].setInvalid();
         tmp = f(32w2);
     }
     @hidden table tbl_complex2l15 {
