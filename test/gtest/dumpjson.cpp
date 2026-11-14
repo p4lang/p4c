@@ -12,6 +12,7 @@
 
 #include "ir/ir.h"
 #include "ir/json_loader.h"
+#include "ir/json_parser.h"
 #include "ir/visitor.h"
 #include "lib/json.h"
 #include "lib/source_file.h"
@@ -125,4 +126,132 @@ TEST(JSON, IntegralRoundTrip) {
     std::vector<unsigned long long> result;
     JSONLoader(ss) >> result;
     EXPECT_EQ(values, result);
+}
+
+// Extracted from the structured diagnostics tests in PR #5940.
+// Test the JSON parser directly, without the preprocessor dependency.
+TEST(JSON, StrictParserUnicodeAndLegacyModeIsolation) {
+    const bool previous = JsonData::strict;
+    std::istringstream input(
+        R"([{"kind":"note","message":"\uD83D\uDE00\/\u00E9","locations":[]}])");
+    std::unique_ptr<JsonData> result;
+    parseJson(input, result, true);
+
+    ASSERT_NE(result, nullptr);
+    auto *records = result->to<JsonVector>();
+    ASSERT_NE(records, nullptr);
+    ASSERT_EQ(records->size(), 1U);
+
+    auto *record = records->at(0)->to<JsonObject>();
+    ASSERT_NE(record, nullptr);
+    auto *message = record->at("message")->to<JsonString>();
+    ASSERT_NE(message, nullptr);
+    EXPECT_EQ(*message, "😀/é");
+    EXPECT_EQ(JsonData::strict, previous);
+}
+
+TEST(JSON, StrictParserRejectsMalformedInput) {
+    // Reuse malformed cases from PR #5940's preprocessor regression test.
+    for (const char *invalid : {
+             "[{},]",
+             "[1 2]",
+             R"([{"kind":"note","message":"bad\v","locations":[]}])",
+         }) {
+        std::istringstream input(invalid);
+        std::unique_ptr<JsonData> result;
+        EXPECT_THROW(parseJson(input, result, true), JsonData::error) << invalid;
+    }
+}
+
+TEST(JSON, StrictParserScalarsAtEofAndDecimalIntegers) {
+    for (const char *valid : {"0", "-0", "-12", "12345678901234567890", "true", "false", "null"}) {
+        std::istringstream input(valid);
+        std::unique_ptr<JsonData> result;
+        EXPECT_NO_THROW(parseJson(input, result, true)) << valid;
+        EXPECT_NE(result, nullptr) << valid;
+        EXPECT_FALSE(input.fail()) << valid;
+    }
+    std::istringstream input("[12, -34, 0]");
+    std::unique_ptr<JsonData> result;
+    parseJson(input, result, true);
+    ASSERT_TRUE(result->is<JsonVector>());
+    const auto &numbers = *result->to<JsonVector>();
+    ASSERT_EQ(numbers.size(), 3u);
+    EXPECT_EQ(numbers[0]->to<JsonNumber>()->val, 12);
+    EXPECT_EQ(numbers[1]->to<JsonNumber>()->val, -34);
+}
+
+TEST(JSON, StrictParserRejectsIncompleteValuesAndInvalidTokens) {
+    for (const char *invalid : {"",
+                                " ",
+                                "[",
+                                "{",
+                                "[1",
+                                "{\"a\":1",
+                                "[1,",
+                                "{\"a\":",
+                                "[1,]",
+                                "{\"a\":1,}",
+                                "[1 2]",
+                                "{\"a\" 1}",
+                                "{1:2}",
+                                "[true false]",
+                                "-",
+                                "01",
+                                "-01",
+                                "1.5",
+                                "1e2",
+                                "1e+",
+                                "1x",
+                                "True",
+                                "NULL",
+                                "tru",
+                                "\"unterminated",
+                                "\"bad\\\"",
+                                "\"\\uD800\"",
+                                "\"\\uDC00\"",
+                                "\"\\uD800\\u0041\"",
+                                "\"\\uD800\\uDBFF\"",
+                                "\"\\u12\"",
+                                "\"\\uZZZZ\"",
+                                "\"\\x41\"",
+                                "\"\\v\"",
+                                "\"\n\""}) {
+        std::istringstream input(invalid);
+        std::unique_ptr<JsonData> result;
+        EXPECT_THROW(parseJson(input, result, true), JsonData::error) << invalid;
+    }
+    for (auto state : {std::ios::failbit, std::ios::badbit, std::ios::eofbit}) {
+        std::istringstream input("[]");
+        input.setstate(state);
+        std::unique_ptr<JsonData> result;
+        EXPECT_THROW(parseJson(input, result, true), JsonData::error);
+    }
+}
+
+TEST(JSON, StrictParserUnicodeBoundariesAndSingleValueContract) {
+    std::istringstream input(R"("\u0000\uD7FF\uE000\uFFFF\uDBFF\uDFFF" trailing)");
+    std::unique_ptr<JsonData> result;
+    parseJson(input, result, true);
+    ASSERT_TRUE(result->is<JsonString>());
+    EXPECT_EQ(*result->to<JsonString>(),
+              std::string("\0", 1) + "\xed\x9f\xbf\xee\x80\x80\xef\xbf\xbf\xf4\x8f\xbf\xbf");
+    // Like operator>>, parseJson extracts one value. Document consumers must
+    // check the remaining stream; the trailing text is left for that check.
+    std::string trailing;
+    input >> trailing;
+    EXPECT_EQ(trailing, "trailing");
+    std::istringstream legacy("[1,]");
+    parseJson(legacy, result, false);
+    ASSERT_TRUE(result->is<JsonVector>());
+    EXPECT_EQ(result->to<JsonVector>()->size(), 1u);
+}
+
+TEST(JSON, LegacyIntegerAtEofTerminates) {
+    std::istringstream input("12");
+    std::unique_ptr<JsonData> result;
+    parseJson(input, result, false);
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->is<JsonNumber>());
+    EXPECT_EQ(result->to<JsonNumber>()->val, 12);
 }
