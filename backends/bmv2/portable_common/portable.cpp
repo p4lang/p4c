@@ -17,6 +17,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
     CHECK_NULL(st);
     cstring name = st->controlPlaneName();
     unsigned max_length = 0;  // for variable-sized headers
+    unsigned varbit_width = 0;
     bool varbitFound = false;
     auto fields = new Util::JsonArray();
     LOG5("In createStructLike with struct " << st->toString());
@@ -42,6 +43,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
             field->append(type->isSigned);
             max_length += type->size;
         } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            varbit_width = type->size;
             field->append(f->name.name);
             max_length += type->size;
             field->append("*");
@@ -61,18 +63,44 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
         }
         fields->append(field);
     }
-    // must add padding
+    // Only metadata can be padded without changing packet layout.
     unsigned padding = max_length % 8;
     if (padding != 0) {
-        cstring name = structure->refMap->newName("_padding");
-        auto field = new Util::JsonArray();
-        field->append(name);
-        field->append(8 - padding);
-        field->append(false);
-        fields->append(field);
+        if (st->is<IR::Type_Header>()) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Found header with fields totaling %2% bits."
+                        "  BMv2 target only supports headers with fields"
+                        " totaling a multiple of 8 bits.",
+                        st, max_length);
+        } else if (st->is<IR::Type_Struct>()) {
+            cstring name = structure->refMap->newName("_padding");
+            auto field = new Util::JsonArray();
+            field->append(name);
+            field->append(8 - padding);
+            field->append(false);
+            fields->append(field);
+        } else {
+            BUG("%1%: Found struct-like object with fields totaling %2% bits."
+                "  This type is not expected here.  Add a case to handle it."
+                "  BMv2 target only supports headers with fields"
+                " totaling a multiple of 8 bits.",
+                st, max_length);
+        }
     }
 
-    unsigned max_length_bytes = (max_length + padding) / 8;
+    // BMv2 constructs headers with an empty varbit field. The fixed fields must
+    // therefore also be byte-aligned, independently of the declared maximum.
+    // Its parser rejects non-byte-aligned runtime lengths with ParserInvalidArgument.
+    unsigned fixed_width = max_length - varbit_width;
+    if (st->is<IR::Type_Header>() && padding == 0 && fixed_width % 8 != 0) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Found header with fixed fields totaling %2% bits."
+                    "  BMv2 target only supports headers with fixed fields"
+                    " totaling a multiple of 8 bits.",
+                    st, fixed_width);
+    }
+
+    unsigned max_length_bytes = max_length / 8 + (padding != 0);
     if (!varbitFound) {
         // ignore
         max_length = 0;

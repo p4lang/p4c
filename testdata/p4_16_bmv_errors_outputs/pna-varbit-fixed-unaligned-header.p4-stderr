@@ -1,0 +1,3 @@
+pna-varbit-fixed-unaligned-header.p4(8): [--Werror=target-error] error: header variable_t: Found header with fixed fields totaling 1 bits.  BMv2 target only supports headers with fixed fields totaling a multiple of 8 bits.
+header variable_t {
+       ^^^^^^^^^^
