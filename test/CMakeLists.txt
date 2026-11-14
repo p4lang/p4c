@@ -33,6 +33,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
+  gtest/interpreter.cpp
   gtest/ir.cpp
   gtest/ir-splitter.cpp
   gtest/ir-traversal.cpp
