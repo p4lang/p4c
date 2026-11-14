@@ -72,14 +72,67 @@ static inline std::streamoff lastpos(std::istream &in) {
 static std::string token(std::istream &in) {
     std::string rv;
     char ch;
-    while (in && (isalnum((ch = in.get())) || ch == '_')) rv += ch;
+    while (in && (isalnum(static_cast<unsigned char>(ch = in.get())) || ch == '_')) rv += ch;
     if (in) in.unget();
     return rv;
 }
 
-std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
+// Validate JSON escapes before using the existing C escape decoder. JSON has
+// fewer escape forms, and represents supplementary characters as surrogate pairs.
+static std::string jsonStringEscapes(std::string_view raw, std::streamoff position) {
+    std::string result;
+    auto invalid = [&]() { throw JsonData::error("invalid JSON string escape", position); };
+    auto hex4 = [&](size_t offset) {
+        unsigned value = 0;
+        if (offset + 4 > raw.size()) invalid();
+        for (size_t i = offset; i < offset + 4; ++i) {
+            char c = raw[i];
+            unsigned digit = c >= '0' && c <= '9'   ? c - '0'
+                             : c >= 'a' && c <= 'f' ? c - 'a' + 10
+                             : c >= 'A' && c <= 'F' ? c - 'A' + 10
+                                                    : 16;
+            if (digit == 16) invalid();
+            value = value * 16 + digit;
+        }
+        return value;
+    };
+    for (size_t i = 0; i < raw.size(); ++i) {
+        if (static_cast<unsigned char>(raw[i]) < 0x20) invalid();
+        if (raw[i] != '\\') {
+            result += raw[i];
+            continue;
+        }
+        if (++i == raw.size()) invalid();
+        if (raw[i] == '/') {
+            result += '/';
+        } else if (raw[i] == 'u') {
+            auto codepoint = hex4(i + 1);
+            i += 4;
+            if (codepoint >= 0xd800 && codepoint <= 0xdbff) {
+                if (i + 6 >= raw.size() || raw.substr(i + 1, 2) != "\\u") invalid();
+                auto low = hex4(i + 3);
+                if (low < 0xdc00 || low > 0xdfff) invalid();
+                codepoint = 0x10000 + (codepoint - 0xd800) * 0x400 + low - 0xdc00;
+                i += 6;
+            } else if (codepoint >= 0xdc00 && codepoint <= 0xdfff) {
+                invalid();
+            }
+            // CUnescape accepts a scalar through its eight-digit Unicode form.
+            constexpr char hex[] = "0123456789abcdef";
+            result += "\\U";
+            for (int shift = 28; shift >= 0; shift -= 4) result += hex[(codepoint >> shift) & 15];
+        } else {
+            if (std::string_view("\"\\bfnrt").find(raw[i]) == std::string_view::npos) invalid();
+            result += '\\';
+            result += raw[i];
+        }
+    }
+    return result;
+}
+
+std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict) {
     while (in) {
-        char ch;
+        char ch = 0;
         in >> std::ws >> ch;
         std::streamoff start = lastpos(in);
         switch (ch) {
@@ -88,21 +141,23 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 do {
                     in >> std::ws >> ch;
                     if (ch == '}') {
-                        if (JsonData::strict && !obj.empty())
+                        if (strict && !obj.empty())
                             throw JsonData::error("extra ',' at end of object", lastpos(in));
                         break;
                     }
                     in.unget();
 
                     std::unique_ptr<JsonData> key, val;
-                    in >> key >> std::ws >> ch;
-                    if (JsonData::strict && (!in || ch != ':'))
+                    parseJson(in, key, strict) >> std::ws >> ch;
+                    if (strict && (!in || ch != ':'))
                         throw JsonData::error("missing ':' in object", lastpos(in));
-                    in >> val;
+                    parseJson(in, val, strict);
+                    if (strict && (!key || !key->is<JsonString>() || !val))
+                        throw JsonData::error("invalid object member", lastpos(in));
                     obj[key->as<JsonString>()] = std::move(val);
 
                     in >> std::ws >> ch;
-                    if (JsonData::strict && (!in || (ch != ',' && ch != '}')))
+                    if (strict && (!in || (ch != ',' && ch != '}')))
                         throw JsonData::error("missing ',' in object", lastpos(in));
                 } while (in && ch != '}');
 
@@ -116,18 +171,18 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 do {
                     in >> std::ws >> ch;
                     if (ch == ']') {
-                        if (JsonData::strict && !vec.empty())
+                        if (strict && !vec.empty())
                             throw JsonData::error("extra ',' at end of vector", lastpos(in));
                         break;
                     }
                     in.unget();
 
                     std::unique_ptr<JsonData> elem;
-                    in >> elem;
+                    parseJson(in, elem, strict);
                     vec.emplace_back(std::move(elem));
 
                     in >> std::ws >> ch;
-                    if (JsonData::strict && (!in || (ch != ',' && ch != ']')))
+                    if (strict && (!in || (ch != ',' && ch != ']')))
                         throw JsonData::error("missing ',' in vector", lastpos(in));
                 } while (in && ch != ']');
 
@@ -148,7 +203,10 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                     getline(in, more, '"');
                     s += more;
                 }
-                absl::CUnescape(s, &s);
+                if (strict && !in) throw JsonData::error("unterminated string", start);
+                if (strict) s = jsonStringEscapes(s, start);
+                if (!absl::CUnescape(s, &s) && strict)
+                    throw JsonData::error("invalid string escape", start);
                 json = std::make_unique<JsonString>(s);
                 json->start = start;
                 json->finish = lastpos(in);
@@ -169,11 +227,20 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 // number is not followed by whitespace, so we need to manually extract all
                 // the digits into a buffer and convert that to big_int
                 std::string num;
-                do {
+                if (strict) {
                     num += ch;
-                    in >> ch;
-                } while (isdigit(ch));
-                in.unget();
+                    while (in && std::isdigit(in.peek())) num += static_cast<char>(in.get());
+                    auto digits = std::string_view(num);
+                    if (digits.starts_with('-')) digits.remove_prefix(1);
+                    if (digits.empty() || (digits.size() > 1 && digits.front() == '0'))
+                        throw JsonData::error("invalid JSON integer", start);
+                } else {
+                    do {
+                        num += ch;
+                        in >> ch;
+                    } while (isdigit(static_cast<unsigned char>(ch)));
+                    in.unget();
+                }
                 json = std::make_unique<JsonNumber>(big_int(num));
                 json->start = start;
                 json->finish = lastpos(in);
@@ -181,9 +248,9 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
             }
             case 't':
             case 'T':
-                if (JsonData::strict) {
+                if (strict) {
                     auto tok = token(in);
-                    if (tok != "rue") {
+                    if (ch != 't' || tok != "rue") {
                         tok = "Unexpected token " + (ch + tok);
                         throw JsonData::error(tok, start);
                     }
@@ -196,9 +263,9 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 return in;
             case 'f':
             case 'F':
-                if (JsonData::strict) {
+                if (strict) {
                     auto tok = token(in);
-                    if (tok != "alse") {
+                    if (ch != 'f' || tok != "alse") {
                         tok = "Unexpected token " + (ch + tok);
                         throw JsonData::error(tok, start);
                     }
@@ -211,9 +278,9 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 return in;
             case 'n':
             case 'N':
-                if (JsonData::strict) {
+                if (strict) {
                     auto tok = token(in);
-                    if (tok != "ull") {
+                    if (ch != 'n' || tok != "ull") {
                         tok = "Unexpected token " + (ch + tok);
                         throw JsonData::error(tok, start);
                     }
@@ -225,23 +292,27 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 json->finish = lastpos(in);
                 return in;
             default:
-                if (JsonData::strict) {
-                    if (isalpha(ch) || ch == '_') {
+                if (strict) {
+                    if (isalpha(static_cast<unsigned char>(ch)) || ch == '_') {
                         auto tok = token(in);
                         tok = "Unexpected token " + (ch + tok);
                         throw JsonData::error(tok, start);
-                    } else if (!isspace(ch)) {
+                    } else if (!isspace(static_cast<unsigned char>(ch))) {
                         std::string msg = "Unexpected character '";
                         msg += ch;
                         msg += '\'';
                         throw JsonData::error(msg, start);
                     }
                 }
-                if (in && !isspace(ch)) in.unget();
+                if (in && !isspace(static_cast<unsigned char>(ch))) in.unget();
                 return in;
         }
     }
     return in;
+}
+
+std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
+    return parseJson(in, json, JsonData::strict);
 }
 
 std::pair<int, int> JsonData::LocationInfo::loc(std::streamoff l) {

@@ -20,8 +20,10 @@
 #include <regex>
 #include <unordered_set>
 
-#include "absl/strings/escaping.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_replace.h"
+#include "frontends/common/preprocessorDiagnostics.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
@@ -81,6 +83,12 @@ void ParserOptions::closeFile(FILE *file) {
 }
 
 ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(defaultMessage) {
+    registerOption(
+        "--diagnostics-file", "FILE",
+        [](const char *file) {
+            return BaseCompileContext::get().errorReporter().setDiagnosticsFile(file);
+        },
+        "Write structured diagnostics as SARIF 2.1.0 to FILE");
     registerOption(
         "--help", nullptr,
         [this](const char *) {
@@ -396,6 +404,22 @@ bool ParserOptions::searchForIncludePath(std::filesystem::path &includePathOut,
 }
 
 std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) {
+    // Initialize before normal option parsing, so errors in earlier arguments
+    // and other ordinary early exits still leave a complete report.
+    for (int i = 1; i < argc; ++i) {
+        std::string_view argument(argv[i]);
+        if (argument == "--") break;
+        const char *report = nullptr;
+        if (argument == "--diagnostics-file" && i + 1 < argc)
+            report = argv[i + 1];
+        else if (argument.starts_with("--diagnostics-file="))
+            report = argv[i] + std::string_view("--diagnostics-file=").size();
+        if (report) {
+            if (!BaseCompileContext::get().errorReporter().setDiagnosticsFile(report))
+                return nullptr;
+            break;
+        }
+    }
     auto executablePath = getExecutablePath(argv[0]);
     if (executablePath.empty()) {
         std::cerr << "Could not determine executable path" << std::endl;
@@ -451,8 +475,29 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
         std::string cmd("cpp");
 #endif
 
+        auto quotedFile = file.native();
+        if (quotedFile.find_first_not_of(
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_./-") !=
+            std::string::npos)
+            quotedFile = "'" + absl::StrReplaceAll(quotedFile, {{"'", "'\\''"}}) + "'";
         cmd += " -C -undef -nostdinc -x assembler-with-cpp " + preprocessor_options.string() +
-               getIncludePath() + " " + absl::CEscape(file.native());
+               getIncludePath() + " " + quotedFile;
+
+        auto &reporter = BaseCompileContext::get().errorReporter();
+        if (reporter.isCollectingDiagnostics()) {
+            cmd +=
+                " -fdiagnostics-format=json -fdiagnostics-color=never"
+                " -fdiagnostics-column-unit=byte -fdiagnostics-column-origin=1";
+            auto output = preprocessWithDiagnostics(cmd, reporter);
+            if (!output) return std::nullopt;
+            if (doNotCompile) {
+                char buffer[4096];
+                while (auto count = std::fread(buffer, 1, sizeof(buffer), output.get()))
+                    std::fwrite(buffer, 1, count, stdout);
+                return std::nullopt;
+            }
+            return PreprocessorResult(output.release(), [](FILE *file) { std::fclose(file); });
+        }
 
         if (Log::verbose()) std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");

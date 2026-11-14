@@ -179,6 +179,10 @@ class SourceInfo final {
     SourceFileLine toPosition() const;
     SourceFileLine toPositionEnd() const;
 
+    /// Text used for byte-to-character conversion while these sources live.
+    std::string_view getStartLine() const;
+    std::string_view getEndLine() const;
+
     bool isValid() const { return this->start.isValid(); }
     explicit operator bool() const { return isValid(); }
 

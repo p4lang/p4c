@@ -18,6 +18,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/constant_folding.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
+  gtest/structured_diagnostics.cpp
   gtest/diagnostic_options_test.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
@@ -97,4 +98,16 @@ add_dependencies(gtestp4c copy_gtest_deps)
 
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
+add_executable(diagnostic-api-example ${P4C_SOURCE_DIR}/docs/examples/diagnostics.cpp)
+target_link_libraries(diagnostic-api-example ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+add_test(NAME diagnostic-api-example COMMAND diagnostic-api-example)
+add_test(NAME driver_diagnostics COMMAND ${PYTHON_EXECUTABLE}
+  ${P4C_SOURCE_DIR}/test/diagnostics/test_driver_diagnostics.py)
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
+
+if (ENABLE_P4TEST AND ENABLE_BMV2)
+  add_test(NAME structured-diagnostics COMMAND ${PYTHON_EXECUTABLE}
+    ${P4C_SOURCE_DIR}/test/diagnostics/test_diagnostics.py
+    --build-dir ${P4C_BINARY_DIR} --source-dir ${P4C_SOURCE_DIR}
+    --evidence-dir ${P4C_BINARY_DIR}/Testing/StructuredDiagnostics)
+endif()
