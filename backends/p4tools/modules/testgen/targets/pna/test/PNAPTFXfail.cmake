@@ -106,14 +106,14 @@ p4tools_add_xfail_reason(
 # so the rejected INSERTs are not evidence of a runtime bug. Testgen must
 # respect add_on_miss and track learned state; shared_expr_stepper.cpp currently
 # treats add_entry as a successful no-op.
-# pna-dpdk-add_on_miss0 is not listed: its ten generated cases passed in CI
+# pna-dpdk-add_on_miss1 is not listed: its ten generated cases passed in CI
 # without reaching the unsupported inserts. That does not cover all its paths.
 p4tools_add_xfail_reason(
     "testgen-p4c-pna-ptf"
     "Error adding table entry with table_name: .*table_type: 2048"
     pna-add-on-miss.p4
     pna-add_on_miss_action_name.p4
-    pna-dpdk-add_on_miss1.p4
+    pna-dpdk-add_on_miss0.p4
     pna-dpdk-table-key-consolidation-learner-1.p4
     pna-dpdk-table-key-consolidation-learner-3.p4
     pna-dpdk-table-key-consolidation-learner-4.p4

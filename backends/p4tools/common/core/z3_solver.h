@@ -15,6 +15,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "ir/ir.h"
@@ -69,8 +70,14 @@ class Z3Solver : public AbstractSolver {
     /// Get the actual Z3 solver backing this class.
     [[nodiscard]] const z3::solver &getZ3Solver() const;
 
+    /// Return a version of the solver that is mutable.
+    [[nodiscard]] z3::solver &mutableSolver();
+
     /// Get the actual Z3 context that this class uses.
-    [[nodiscard]] const z3::context &getZ3Ctx() const;
+    [[nodiscard]] const z3::context &context() const;
+
+    /// Get the actual Z3 context that this class uses. This context can be manipulated.
+    [[nodiscard]] z3::context &mutableContext() const;
 
     /// @returns the list of active assertions on this solver.
     [[nodiscard]] safe_vector<const Constraint *> getAssertions() const;
@@ -99,9 +106,6 @@ class Z3Solver : public AbstractSolver {
     /// Converts a P4 type to a Z3 sort.
     z3::sort toSort(const IR::Type *type);
 
-    /// Get the actual Z3 context that this class uses. This context can be manipulated.
-    [[nodiscard]] z3::context &ctx() const;
-
     /// Declares the given symbolic variable to Z3.
     ///
     /// @returns the resulting Z3 variable.
@@ -125,7 +129,7 @@ class Z3Solver : public AbstractSolver {
     static std::optional<bool> interpretSolverResult(z3::check_result result);
 
     // Declared first so all Z3 objects are destroyed before their context.
-    std::unique_ptr<z3::context> context;
+    std::unique_ptr<z3::context> ownedContext;
 
     /// The underlying Z3 instance.
     z3::solver z3solver;
@@ -215,6 +219,14 @@ class Z3Translator : public virtual Inspector {
     z3::expr translate(const IR::Expression *expression);
 
  private:
+    /// Reuse translations of shared IR nodes only within one traversal. The key must be
+    /// pointer identity: structurally equivalent symbolic nodes may have different types.
+    std::unordered_map<const IR::Expression *, z3::expr> translations;
+
+    profile_t init_apply(const IR::Node *root) override;
+    void end_apply() override;
+    z3::expr translateChild(const IR::Expression *expression);
+
     /// Function type for a unary operator.
     using Z3UnaryOp = z3::expr (*)(const z3::expr &);
 
@@ -252,7 +264,10 @@ class Z3Translator : public virtual Inspector {
     z3::expr result;
 
     /// The Z3 solver instance, to which variables will be declared as they are encountered.
-    std::reference_wrapper<Z3Solver> solver;
+    std::reference_wrapper<Z3Solver> _solver;
+
+    /// @returns the mutable reference to Z3 solver instance.
+    [[nodiscard]] Z3Solver &solver();
 };
 
 }  // namespace P4::P4Tools
