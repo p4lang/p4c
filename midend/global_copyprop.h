@@ -133,6 +133,7 @@ class DoGlobalCopyPropagation final : public Transform {
     IR::ForInStatement *preorder(IR::ForInStatement *) override;
     IR::BaseAssignmentStatement *preorder(IR::BaseAssignmentStatement *) override;
     IR::Statement *preorder(IR::AssignmentStatement *) override;
+    IR::Expression *preorder(IR::Expression *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     const IR::Expression *preorder(IR::Member *) override;
