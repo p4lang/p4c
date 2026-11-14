@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Port 0: NoError; 1: ParserInvalidArgument; 2: PacketTooShort;
+# 3: HeaderTooShort; 4: unexpected error or header validity.
+# Every packet must be preserved byte for byte, including unparsed payload.
+packet 0 00 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 00 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 08 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 08 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 10 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 10 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 18 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 18 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 38 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 38 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 40 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 0 40 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 01 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 01 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 07 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 07 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 09 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 09 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 0f a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 0f a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 17 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 17 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 3f a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 3f a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 41 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 1 41 a5 01 23 45 67 89 ab cd ef de ad be ef
+packet 0 48 a5 01 23 45 67 89 ab cd ef de ad be ef
+expect 3 48 a5 01 23 45 67 89 ab cd ef de ad be ef
+# Aligned maximum extraction, one byte short (tag plus eight data bytes).
+packet 0 40 a5 01 23 45 67 89 ab cd
+expect 2 40 a5 01 23 45 67 89 ab cd
+# Even a zero-width varbit still requires the fixed byte.
+packet 0 00
+expect 2 00
+# Alignment is checked before packet availability.
+packet 0 07
+expect 1 07
