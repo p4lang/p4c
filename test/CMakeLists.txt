@@ -18,6 +18,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/constant_folding.cpp
   gtest/cstring.cpp
   gtest/diagnostics.cpp
+  gtest/structured_diagnostics.cpp
   gtest/diagnostic_options_test.cpp
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
@@ -98,3 +99,7 @@ add_dependencies(gtestp4c copy_gtest_deps)
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
+
+add_executable(diagnostic-api-example ${P4C_SOURCE_DIR}/docs/examples/diagnostics.cpp)
+target_link_libraries(diagnostic-api-example ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+add_test(NAME diagnostic-api-example COMMAND diagnostic-api-example)

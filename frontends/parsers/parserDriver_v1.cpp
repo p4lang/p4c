@@ -1,4 +1,6 @@
 /*
+SPDX-License-Identifier: Apache-2.0
+
 Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +46,7 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 #endif
 
     // Provide an initial source location.
-    driver.sources->mapLine(sourceFile, sourceLine);
+    driver.sources->mapLine(sourceFile, sourceLine + 1);
 
     // Parse.
     if (parser.parse() != 0) return nullptr;

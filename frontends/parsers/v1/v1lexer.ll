@@ -1,4 +1,7 @@
 %{
+// SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+// SPDX-License-Identifier: Apache-2.0
+
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/parsers/v1/v1lexer_internal.hpp"
@@ -60,7 +63,7 @@ using Parser = V1::V1Parser;
 <INITIAL>"# "         { BEGIN(LINE1); }
 <INITIAL>[ \t]*"#"    { BEGIN(LINE3); }
 <LINE1>[0-9]+         { BEGIN(LINE2); driver.onReadLineNumber(yytext); }
-<LINE2>\"[^"]*        { BEGIN(LINE3); driver.onReadFileName(yytext+1); }
+<LINE2>\"([^\"\\]|\\.)*\" { BEGIN(LINE3); driver.onReadFileName(yytext); }
 <LINE1,LINE2>[ \t]      ;
 <LINE1,LINE2>.        { BEGIN(LINE3); }
 <LINE3>.                ;

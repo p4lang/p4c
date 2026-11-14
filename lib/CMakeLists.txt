@@ -11,8 +11,10 @@ set(LIBP4CTOOLKIT_SRCS
     compile_context.cpp
     crash.cpp
     cstring.cpp
+    diagnostic.cpp
     error_catalog.cpp
     error_message.cpp
+    error_reporter.cpp
     exename.cpp
     fdstream.cpp
     format.cpp
@@ -43,6 +45,7 @@ set(LIBP4CTOOLKIT_HDRS
     compile_context.h
     crash.h
     cstring.h
+    diagnostic.h
     enumerator.h
     error.h
     error_catalog.h

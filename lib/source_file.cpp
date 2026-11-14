@@ -163,7 +163,7 @@ std::string_view InputSources::getLine(unsigned lineNumber) const {
 void InputSources::mapLine(std::string_view file, unsigned originalSourceLineNo) {
     if (sealed) BUG("Changing mapping to sealed InputSources");
     unsigned lineno = getCurrentLineNumber();
-    line_file_map.emplace(lineno, SourceFileLine(file, originalSourceLineNo));
+    line_file_map.insert_or_assign(lineno, SourceFileLine(file, originalSourceLineNo));
 }
 
 SourceFileLine InputSources::getSourceLine(unsigned line) const {
@@ -348,6 +348,14 @@ SourceFileLine SourceInfo::toPosition() const {
 
 SourceFileLine SourceInfo::toPositionEnd() const {
     return sources->getSourceLine(end.getLineNumber());
+}
+
+std::string_view SourceInfo::getStartLine() const {
+    return isValid() ? sources->getLine(start.getLineNumber()) : std::string_view{};
+}
+
+std::string_view SourceInfo::getEndLine() const {
+    return isValid() ? sources->getLine(end.getLineNumber()) : std::string_view{};
 }
 
 cstring SourceInfo::getSourceFile() const {
