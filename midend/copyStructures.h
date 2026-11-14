@@ -123,10 +123,15 @@ class RemoveAliases : public Transform {
 
         return rv;
     }
+    void end_apply(const IR::Node *) override {
+        BUG_CHECK(declarations.empty(), "left over declarations in RemoveAliases");
+    }
 
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::P4Action *control) override;
+    const IR::Node *preorder(IR::Function *fn) override;
 };
 
 class CopyStructures : public PassRepeated {
