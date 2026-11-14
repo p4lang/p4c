@@ -11,7 +11,6 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
-#include "absl/strings/str_replace.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/stringify.h"
@@ -292,13 +291,6 @@ cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
             --end;
         }
         truncate = true;
-    }
-
-    // Adding escape character in front of '"' character to properly store
-    // quote marks as part of JSON properties, they must be escaped.
-    if (absl::StrContains(result, "\"")) {
-        auto out = absl::StrReplaceAll(result, {{"\"", "\\\""}});
-        return out.substr(0, out.size() - 1);
     }
 
     return absl::StrCat(result.substr(start, end - start), truncate ? " ..." : "");
