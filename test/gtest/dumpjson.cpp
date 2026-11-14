@@ -255,3 +255,16 @@ TEST(JSON, LegacyIntegerAtEofTerminates) {
     ASSERT_TRUE(result->is<JsonNumber>());
     EXPECT_EQ(result->to<JsonNumber>()->val, 12);
 }
+
+TEST(JSON, StrictParserUsesJsonWhitespace) {
+    for (const char *invalid : {"\v[]", "[\f1]", "{\v\"key\":1}", "{\"key\"\f:1}"}) {
+        std::istringstream input(invalid);
+        std::unique_ptr<JsonData> result;
+        EXPECT_THROW(parseJson(input, result, true), JsonData::error);
+    }
+    std::istringstream input(" \t\r\n[1, \t\r\n2]");
+    std::unique_ptr<JsonData> result;
+    EXPECT_NO_THROW(parseJson(input, result, true));
+    ASSERT_TRUE(result);
+    EXPECT_TRUE(result->is<JsonVector>());
+}

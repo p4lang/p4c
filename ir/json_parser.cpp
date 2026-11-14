@@ -138,17 +138,28 @@ static std::string jsonStringEscapes(std::string_view raw, std::streamoff positi
     return result;
 }
 
+// JSON permits only these four whitespace characters, independently of locale.
+static std::istream &jsonCharacter(std::istream &in, char &ch, bool strict) {
+    if (!strict) return in >> std::ws >> ch;
+    while (in.good()) {
+        auto ch = in.peek();
+        if (ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n') break;
+        in.get();
+    }
+    return in.get(ch);
+}
+
 std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict) {
     if (strict && !in.good()) throw JsonData::error("unreadable JSON input", lastpos(in));
     while (in) {
         char ch = 0;
-        in >> std::ws >> ch;
+        jsonCharacter(in, ch, strict);
         std::streamoff start = lastpos(in);
         switch (ch) {
             case '{': {
                 string_map<std::unique_ptr<JsonData>> obj;
                 do {
-                    in >> std::ws >> ch;
+                    jsonCharacter(in, ch, strict);
                     if (ch == '}') {
                         if (strict && !obj.empty())
                             throw JsonData::error("extra ',' at end of object", lastpos(in));
@@ -157,7 +168,8 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     in.unget();
 
                     std::unique_ptr<JsonData> key, val;
-                    parseJson(in, key, strict) >> std::ws >> ch;
+                    parseJson(in, key, strict);
+                    jsonCharacter(in, ch, strict);
                     if (strict && (!in || ch != ':'))
                         throw JsonData::error("missing ':' in object", lastpos(in));
                     parseJson(in, val, strict);
@@ -165,7 +177,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                         throw JsonData::error("invalid object member", lastpos(in));
                     obj[key->as<JsonString>()] = std::move(val);
 
-                    in >> std::ws >> ch;
+                    jsonCharacter(in, ch, strict);
                     if (strict && (!in || (ch != ',' && ch != '}')))
                         throw JsonData::error("missing ',' in object", lastpos(in));
                 } while (in && ch != '}');
@@ -178,7 +190,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
             case '[': {
                 std::vector<std::unique_ptr<JsonData>> vec;
                 do {
-                    in >> std::ws >> ch;
+                    jsonCharacter(in, ch, strict);
                     if (ch == ']') {
                         if (strict && !vec.empty())
                             throw JsonData::error("extra ',' at end of vector", lastpos(in));
@@ -190,7 +202,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     parseJson(in, elem, strict);
                     vec.emplace_back(std::move(elem));
 
-                    in >> std::ws >> ch;
+                    jsonCharacter(in, ch, strict);
                     if (strict && (!in || (ch != ',' && ch != ']')))
                         throw JsonData::error("missing ',' in vector", lastpos(in));
                 } while (in && ch != ']');
@@ -312,7 +324,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                         auto tok = token(in);
                         tok = "Unexpected token " + (ch + tok);
                         throw JsonData::error(tok, start);
-                    } else if (!isspace(static_cast<unsigned char>(ch))) {
+                    } else {
                         std::string msg = "Unexpected character '";
                         msg += ch;
                         msg += '\'';
