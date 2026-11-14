@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
-# SPDX-License-Identifier: Apache-2.0
-
 **/.git
 **/.gitmodules
 **/.travis.yml
@@ -9,7 +6,6 @@
 
 build
 docs
-!docs/examples/diagnostics.cpp
 
 # PR additions are already applied to .ccache before the Docker build.
 .ccache-pr
