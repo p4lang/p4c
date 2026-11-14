@@ -1,5 +1,9 @@
 var NAVTREEINDEX39 =
 {
+"struct_p4_1_1_unroll_loops_1_1_policy.html":[12,0,14,543,1],
+"struct_p4_1_1_unroll_loops_1_1_policy.html":[13,0,12,556,1],
+"struct_p4_1_1_unused_code_instances.html":[12,0,14,545],
+"struct_p4_1_1_unused_code_instances.html":[13,0,12,558],
 "struct_p4_1_1_util_1_1_detail_1_1_float_hasher.html":[13,0,12,25,0,0],
 "struct_p4_1_1_util_1_1_detail_1_1_integer_hasher.html":[13,0,12,25,0,1],
 "struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher.html":[13,0,12,25,0,3],
@@ -245,9 +249,5 @@ var NAVTREEINDEX39 =
 "struct_slice_list_accumulator.html":[13,0,622],
 "struct_sort_extracts.html":[13,0,624],
 "struct_stage_use.html":[13,0,635],
-"struct_stage_use_estimate.html":[13,0,636],
-"struct_stage_use_estimate.html#a61b61ae1fde8cd11d090b5b2b397f015":[13,0,636,2],
-"struct_stage_use_estimate.html#a7dd6ad448e33113a635edba87ed5c277":[13,0,636,5],
-"struct_stage_use_estimate.html#a89c7d9c09f6942f958516a30eb4acb44":[13,0,636,1],
-"struct_stage_use_estimate.html#a8d255017a16a771808568ca0daf63fbd":[13,0,636,4]
+"struct_stage_use_estimate.html":[13,0,636]
 };

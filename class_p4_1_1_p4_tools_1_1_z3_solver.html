@@ -167,20 +167,28 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>asrt</b> (const z3::e
 <tr class="separator:ae838dbf45e9cca850f28760b219b005c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3fd2b4edc12cc0d01c9f2879ff7a83c" id="r_af3fd2b4edc12cc0d01c9f2879ff7a83c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af3fd2b4edc12cc0d01c9f2879ff7a83c">comment</a> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> comment) override</td></tr>
 <tr class="separator:af3fd2b4edc12cc0d01c9f2879ff7a83c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab28f04b78cb7d33bfce4a693f6d2f55d" id="r_ab28f04b78cb7d33bfce4a693f6d2f55d"><td class="memItemLeft" align="right" valign="top"><a id="ab28f04b78cb7d33bfce4a693f6d2f55d" name="ab28f04b78cb7d33bfce4a693f6d2f55d"></a>
+const z3::context &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>context</b> () const</td></tr>
+<tr class="memdesc:ab28f04b78cb7d33bfce4a693f6d2f55d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 context that this class uses. <br /></td></tr>
+<tr class="separator:ab28f04b78cb7d33bfce4a693f6d2f55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af87c4eda2ff852e7615c09aa9dec2761" id="r_af87c4eda2ff852e7615c09aa9dec2761"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1safe__vector.html">safe_vector</a>&lt; const <a class="el" href="namespace_p4.html#a2a8ee4d2f0f9587aa55000967b8882b4">Constraint</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af87c4eda2ff852e7615c09aa9dec2761">getAssertions</a> () const</td></tr>
 <tr class="separator:af87c4eda2ff852e7615c09aa9dec2761"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af13edbd8fbb32eb42e3c6e7302116992" id="r_af13edbd8fbb32eb42e3c6e7302116992"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af13edbd8fbb32eb42e3c6e7302116992">getSymbolicMapping</a> () const override</td></tr>
 <tr class="separator:af13edbd8fbb32eb42e3c6e7302116992"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9600eb5e2ce02995b2678d3dd59598f" id="r_af9600eb5e2ce02995b2678d3dd59598f"><td class="memItemLeft" align="right" valign="top"><a id="af9600eb5e2ce02995b2678d3dd59598f" name="af9600eb5e2ce02995b2678d3dd59598f"></a>
-const z3::context &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getZ3Ctx</b> () const</td></tr>
-<tr class="memdesc:af9600eb5e2ce02995b2678d3dd59598f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 context that this class uses. <br /></td></tr>
-<tr class="separator:af9600eb5e2ce02995b2678d3dd59598f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fe9db6d499a2264550daaeb90a025b5" id="r_a4fe9db6d499a2264550daaeb90a025b5"><td class="memItemLeft" align="right" valign="top"><a id="a4fe9db6d499a2264550daaeb90a025b5" name="a4fe9db6d499a2264550daaeb90a025b5"></a>
 const z3::solver &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getZ3Solver</b> () const</td></tr>
 <tr class="memdesc:a4fe9db6d499a2264550daaeb90a025b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 solver backing this class. <br /></td></tr>
 <tr class="separator:a4fe9db6d499a2264550daaeb90a025b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b37e82ae8c3314a06a646d74087cae9" id="r_a3b37e82ae8c3314a06a646d74087cae9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b37e82ae8c3314a06a646d74087cae9">isInIncrementalMode</a> () const override</td></tr>
 <tr class="separator:a3b37e82ae8c3314a06a646d74087cae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0ffe76d8e8313f2e34662d6ae2877ae" id="r_af0ffe76d8e8313f2e34662d6ae2877ae"><td class="memItemLeft" align="right" valign="top"><a id="af0ffe76d8e8313f2e34662d6ae2877ae" name="af0ffe76d8e8313f2e34662d6ae2877ae"></a>
+z3::context &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mutableContext</b> () const</td></tr>
+<tr class="memdesc:af0ffe76d8e8313f2e34662d6ae2877ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the actual Z3 context that this class uses. This context can be manipulated. <br /></td></tr>
+<tr class="separator:af0ffe76d8e8313f2e34662d6ae2877ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a277e57fafa3cea8da9b3084818135790" id="r_a277e57fafa3cea8da9b3084818135790"><td class="memItemLeft" align="right" valign="top"><a id="a277e57fafa3cea8da9b3084818135790" name="a277e57fafa3cea8da9b3084818135790"></a>
+z3::solver &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mutableSolver</b> ()</td></tr>
+<tr class="memdesc:a277e57fafa3cea8da9b3084818135790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a version of the solver that is mutable. <br /></td></tr>
+<tr class="separator:a277e57fafa3cea8da9b3084818135790"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a617d2dbc74a8e86ea7454f2b692aa0e4" id="r_a617d2dbc74a8e86ea7454f2b692aa0e4"><td class="memItemLeft" align="right" valign="top"><a id="a617d2dbc74a8e86ea7454f2b692aa0e4" name="a617d2dbc74a8e86ea7454f2b692aa0e4"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>pop</b> ()</td></tr>
 <tr class="memdesc:a617d2dbc74a8e86ea7454f2b692aa0e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes the last solver context. <br /></td></tr>

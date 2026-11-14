@@ -335,7 +335,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Convert the input reference into a complex expression such as a HeaderExpression, StructExpression, or ArrayExpression. </p><dl class="section return"><dt>Returns</dt><dd>nullptr if the expression is not complex. </dd></dl>
+<p>Convert the input reference into a complex expression such as a HeaderExpression, StructExpression, ArrayExpression, or ListExpression. Requires an aggregate type. </p>
 
 </div>
 </div>
@@ -542,7 +542,7 @@ Protected Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Takes an input struct type @ts and a prefix @parent and returns a vector of references to members of the struct. The vector contains all the Type_Base (bit and bool) members in canonical representation (e.g., {"prefix.h.ethernet.dst_address", "prefix.h.ethernet.src_address", ...}). If </p><ul>
+<p>Flattens a struct, array, or tuple reference into its scalar state references. Tuple elements use constant indices and retain their individual types. The vector contains all the Type_Base (bit and bool) members in canonical representation (e.g., {"prefix.h.ethernet.dst_address", "prefix.h.ethernet.src_address", ...}). If </p><ul>
 <li>validVector is provided, this function also collects the validity bits of the headers. </li>
 </ul>
 

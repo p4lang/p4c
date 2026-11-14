@@ -1,5 +1,9 @@
 var NAVTREEINDEX23 =
 {
+"class_p4_1_1_specialize.html":[12,0,14,462],
+"class_p4_1_1_specialize.html":[13,0,12,475],
+"class_p4_1_1_specialize_all.html":[12,0,14,463],
+"class_p4_1_1_specialize_all.html":[13,0,12,476],
 "class_p4_1_1_specialize_functions.html":[12,0,14,464],
 "class_p4_1_1_specialize_functions.html":[13,0,12,477],
 "class_p4_1_1_specialize_generic_functions.html":[12,0,14,465],
@@ -245,9 +249,5 @@ var NAVTREEINDEX23 =
 "class_p4_1_1_test_1_1_build_super_cluster.html":[12,0,14,12,6],
 "class_p4_1_1_test_1_1_build_super_cluster.html":[13,0,12,23,7],
 "class_p4_1_1_test_1_1_byte_rotate_merge.html":[12,0,14,12,7],
-"class_p4_1_1_test_1_1_byte_rotate_merge.html":[13,0,12,23,8],
-"class_p4_1_1_test_1_1_clot_test.html":[12,0,14,12,8],
-"class_p4_1_1_test_1_1_clot_test.html":[13,0,12,23,9],
-"class_p4_1_1_test_1_1_constrained_field_map_builder_test.html":[12,0,14,12,9],
-"class_p4_1_1_test_1_1_constrained_field_map_builder_test.html":[13,0,12,23,10]
+"class_p4_1_1_test_1_1_byte_rotate_merge.html":[13,0,12,23,8]
 };
