@@ -1,0 +1,4 @@
+issue5286.p4(8): [--Werror=type-error] error: Field 'f1' of 'struct tuple_0' cannot have type 'int'
+    tuple<T, tuple<match_kind, int>> t;
+                               ^^^
+[--Werror=type-error] error: Error while analyzing struct tuple_0
