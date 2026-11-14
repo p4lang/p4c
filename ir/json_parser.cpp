@@ -268,7 +268,10 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                         num += ch;
                         in >> ch;
                     } while (in && isdigit(static_cast<unsigned char>(ch)));
-                    if (in) in.unget();
+                    if (in)
+                        in.unget();
+                    else if (in.eof() && !in.bad())
+                        in.clear(in.rdstate() & ~std::ios::failbit);
                 }
                 json = std::make_unique<JsonNumber>(big_int(num));
                 json->start = start;

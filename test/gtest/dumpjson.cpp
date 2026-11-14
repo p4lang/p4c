@@ -254,6 +254,8 @@ TEST(JSON, LegacyIntegerAtEofTerminates) {
     ASSERT_TRUE(result);
     ASSERT_TRUE(result->is<JsonNumber>());
     EXPECT_EQ(result->to<JsonNumber>()->val, 12);
+    EXPECT_FALSE(input.fail());
+    EXPECT_TRUE(input.eof());
 }
 
 TEST(JSON, StrictParserUsesJsonWhitespace) {
