@@ -128,14 +128,29 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->blockStart();
     builder->emitIndent();
 
-    ingress->parser->headerType->declare(builder, "cpumap_hdr"_cs, false);
+    ingress->parser->headerType->declare(builder, ingress->cpumapHeadersField, false);
     builder->endOfStatement(true);
     builder->emitIndent();
     auto user_md_type = ingress->typeMap->getType(ingress->control->user_metadata);
     BUG_CHECK(user_md_type != nullptr, "cannot declare user metadata");
     auto userMetadataType = EBPFTypeFactory::instance->create(user_md_type);
-    userMetadataType->declare(builder, "cpumap_usermeta"_cs, false);
+    userMetadataType->declare(builder, ingress->cpumapUserMetadataField, false);
     builder->endOfStatement(true);
+
+    // Fields for an egress pipeline that uses other types than the ingress pipeline
+    if (egress->cpumapHeadersField != ingress->cpumapHeadersField) {
+        builder->emitIndent();
+        egress->parser->headerType->declare(builder, egress->cpumapHeadersField, false);
+        builder->endOfStatement(true);
+    }
+    if (egress->cpumapUserMetadataField != ingress->cpumapUserMetadataField) {
+        builder->emitIndent();
+        auto egress_md_type = egress->typeMap->getType(egress->control->user_metadata);
+        BUG_CHECK(egress_md_type != nullptr, "cannot declare egress user metadata");
+        EBPFTypeFactory::instance->create(egress_md_type)
+            ->declare(builder, egress->cpumapUserMetadataField, false);
+        builder->endOfStatement(true);
+    }
 
     // Additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
@@ -580,6 +595,24 @@ void PSAArchXDP::emitDummyProgram(CodeBuilder *builder) const {
 }
 
 // =====================ConvertToEbpfPSA=============================
+/// PSA allows the egress pipelines to use other header and user metadata types than the ingress
+/// pipeline. Give them their own fields in struct hdr_md in that case.
+static void setEgressCpumapFields(const EBPFPipeline *ingress,
+                                  std::initializer_list<EBPFPipeline *> egressPipelines) {
+    auto typeOf = [](const EBPFPipeline *pipeline, const IR::Parameter *param) {
+        return pipeline->typeMap->getType(param)->toString();
+    };
+    for (auto egress : egressPipelines) {
+        if (typeOf(egress, egress->parser->headers) != typeOf(ingress, ingress->parser->headers)) {
+            egress->cpumapHeadersField = "cpumap_egress_hdr"_cs;
+        }
+        if (typeOf(egress, egress->control->user_metadata) !=
+            typeOf(ingress, ingress->control->user_metadata)) {
+            egress->cpumapUserMetadataField = "cpumap_egress_usermeta"_cs;
+        }
+    }
+}
+
 const PSAEbpfGenerator *ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     /*
      * TYPES
@@ -644,6 +677,7 @@ const PSAEbpfGenerator *ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
         tlb->getProgram()->apply(*egress_pipeline_converter);
         auto tcEgress = egress_pipeline_converter->getEbpfPipeline();
 
+        setEgressCpumapFields(tcIngress, {tcEgress});
         return new PSAArchTC(options, ebpfTypes, xdp, tcIngress, tcEgress);
     } else {
         auto ingress_pipeline_converter = new ConvertToEbpfPipeline(
@@ -681,6 +715,7 @@ const PSAEbpfGenerator *ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
         auto tcEgress = tc_egress_pipeline_converter->getEbpfPipeline();
         BUG_CHECK(tcEgress != nullptr, "Cannot create TC Egress for XDP block.");
 
+        setEgressCpumapFields(xdpIngress, {xdpEgress, tcEgress});
         return new PSAArchXDP(options, ebpfTypes, xdpIngress, xdpEgress, tcTrafficManager,
                               tcEgress);
     }
