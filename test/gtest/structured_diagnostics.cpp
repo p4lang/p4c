@@ -122,6 +122,10 @@ TEST(StructuredDiagnostics, Utf16BoundariesAndUnknownColumns) {
     EXPECT_FALSE(diagnosticUtf16Column("abc", 4));
     EXPECT_FALSE(diagnosticUtf16Column("\xc0\x80", 2));
     EXPECT_FALSE(diagnosticUtf16Column("\xed\xa0\x80", 3));
+    EXPECT_EQ(diagnosticUtf16Column("\xf4\x8f\xbf\xbf", 4), 2u);
+    EXPECT_FALSE(diagnosticUtf16Column("\xf4\x90\x80\x80", 4));
+    EXPECT_FALSE(diagnosticUtf16Column("\xe2\x82", 2));
+    EXPECT_FALSE(diagnosticUtf16Column("\x80", 1));
 }
 
 TEST(StructuredDiagnostics, ReporterCopiesDoNotShareConsumersOrCollections) {
@@ -243,6 +247,25 @@ TEST(StructuredDiagnostics, DeserializedSourceKeepsIdentityWithoutInventingAColu
     ASSERT_TRUE(diagnostic.location->range);
     EXPECT_EQ(diagnostic.location->range->start.line, 7u);
     EXPECT_FALSE(diagnostic.location->range->start.column);
+}
+
+TEST(StructuredDiagnostics, MappedRangeEndsStayInTheirOriginalDocument) {
+    for (const char *endFile : {"second.p4", "first.p4"}) {
+        Util::InputSources sources;
+        sources.mapLine("first.p4", 2);
+        sources.appendText("\nx\n");
+        sources.mapLine(endFile, 1);
+        sources.appendText("\ny\n");
+        ErrorMessage message(ErrorMessage::MessageType::Error, "invalid", "mapped range",
+                             {Util::SourceInfo(&sources, {2, 0}, {4, 1})}, "");
+        auto diagnostic = makeDiagnostic(message);
+        ASSERT_TRUE(diagnostic.location);
+        EXPECT_EQ(diagnostic.location->file, "first.p4");
+        ASSERT_TRUE(diagnostic.location->range);
+        EXPECT_EQ(diagnostic.location->range->start.line, 1u);
+        // Ends in another document, or mapped before the start, are unknown.
+        EXPECT_FALSE(diagnostic.location->range->end);
+    }
 }
 
 TEST(StructuredDiagnostics, UnavailableSourceTextDoesNotInventColumnsOrThrow) {
