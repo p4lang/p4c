@@ -1,5 +1,7 @@
 var NAVTREEINDEX29 =
 {
+"class_p_h_v_1_1_super_cluster.html#aaceb489c97eedad476b397e1ad8a74aa":[12,0,16,44,20],
+"class_p_h_v_1_1_super_cluster.html#aaceb489c97eedad476b397e1ad8a74aa":[13,0,15,47,20],
 "class_p_h_v_1_1_super_cluster.html#ab992252cdbd653a20312c2cc9f5a285d":[12,0,16,44,2],
 "class_p_h_v_1_1_super_cluster.html#ab992252cdbd653a20312c2cc9f5a285d":[13,0,15,47,2],
 "class_p_h_v_1_1_super_cluster.html#abed122a948a2f3a710c9973d0c03bd0e":[12,0,16,44,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX29 =
 "class_phv_info.html#addcff1783b1263013c1aa6845f734e82":[13,0,531,21],
 "class_phv_info.html#ae51f65b459fd72f24f8ea1aaf3c12491":[13,0,531,24],
 "class_phv_info.html#af87f472d448257e83f13857eac88dd8f":[13,0,531,23],
-"class_phv_logging.html":[13,0,532],
-"class_phv_logging_1_1_collect_def_use_info.html":[13,0,532,0],
-"class_phv_logging_1_1_collect_def_use_info.html#a648b917dae03b9443e4323998d8b27da":[13,0,532,0,1]
+"class_phv_logging.html":[13,0,532]
 };

@@ -10,6 +10,7 @@ var class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline =
     [ "shouldEmitTimestamp", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a20efe21ce40a5d78d6e9e1f5a34caf72", null ],
     [ "compilerGlobalMetadata", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#aaaa2f20964d001a4141105a359862f15", null ],
     [ "contextVar", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#aec0292c5eca7829795a03f144e8fbd55", null ],
+    [ "cpumapHeadersField", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a4b71533b566960c53824dae241834063", null ],
     [ "ifindexVar", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a3b8d3f6c4304ba508e5903ffaf8dbcb6", null ],
     [ "inputPortVar", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a1f1298fd777c180e74e3a6cea1eded69", null ],
     [ "name", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a111d0e50b02ee9bd3a3500bbea49942c", null ],

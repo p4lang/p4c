@@ -1,5 +1,7 @@
 var NAVTREEINDEX40 =
 {
+"struct_stage_use.html":[13,0,635],
+"struct_stage_use_estimate.html":[13,0,636],
 "struct_stage_use_estimate.html#a61b61ae1fde8cd11d090b5b2b397f015":[13,0,636,2],
 "struct_stage_use_estimate.html#a7dd6ad448e33113a635edba87ed5c277":[13,0,636,5],
 "struct_stage_use_estimate.html#a89c7d9c09f6942f958516a30eb4acb44":[13,0,636,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX40 =
 "structubits__base.html":[13,0,691],
 "structwidereg.html":[13,0,714],
 "structwidereg__base.html":[13,0,715],
-"structwidereg__base.html#a316afb2b3a61ce025bb05563f6af2619":[13,0,715,0],
-"tc_backend.html":[5,3],
-"ubpf_backend.html":[5,4]
+"structwidereg__base.html#a316afb2b3a61ce025bb05563f6af2619":[13,0,715,0]
 };

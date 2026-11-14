@@ -1,5 +1,7 @@
 var NAVTREEINDEX20 =
 {
+"class_p4_1_1_p4_tools_1_1_test_1_1_node_finder.html":[13,0,12,18,4,4],
+"class_p4_1_1_p4_tools_1_1_test_1_1_p4_asserts_parser_test.html":[13,0,12,18,4,5],
 "class_p4_1_1_p4_tools_1_1_test_1_1_p4_c_reachability.html":[13,0,12,18,4,6],
 "class_p4_1_1_p4_tools_1_1_test_1_1_p4_reachability_options.html":[13,0,12,18,4,7],
 "class_p4_1_1_p4_tools_1_1_test_1_1_p4_runtime_api_test.html":[13,0,12,18,4,8],
@@ -247,7 +249,5 @@ var NAVTREEINDEX20 =
 "class_p4_1_1_p4_v1_1_1_convert_metadata.html":[13,0,12,19,15],
 "class_p4_1_1_p4_v1_1_1_converter.html":[12,0,14,10,14],
 "class_p4_1_1_p4_v1_1_1_converter.html":[13,0,12,19,14],
-"class_p4_1_1_p4_v1_1_1_detect_duplicates.html":[12,0,14,10,20],
-"class_p4_1_1_p4_v1_1_1_detect_duplicates.html":[13,0,12,19,20],
-"class_p4_1_1_p4_v1_1_1_discover_structure.html":[12,0,14,10,24]
+"class_p4_1_1_p4_v1_1_1_detect_duplicates.html":[12,0,14,10,20]
 };

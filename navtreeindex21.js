@@ -1,5 +1,7 @@
 var NAVTREEINDEX21 =
 {
+"class_p4_1_1_p4_v1_1_1_detect_duplicates.html":[13,0,12,19,20],
+"class_p4_1_1_p4_v1_1_1_discover_structure.html":[12,0,14,10,24],
 "class_p4_1_1_p4_v1_1_1_discover_structure.html":[13,0,12,19,24],
 "class_p4_1_1_p4_v1_1_1_expression_converter.html":[12,0,14,10,25],
 "class_p4_1_1_p4_v1_1_1_expression_converter.html":[13,0,12,19,25],
@@ -247,7 +249,5 @@ var NAVTREEINDEX21 =
 "class_p4_1_1_pattern_1_1_assign.html":[12,0,14,374,0],
 "class_p4_1_1_pattern_1_1_assign.html":[13,0,12,387,0],
 "class_p4_1_1_pattern_1_1_match.html":[12,0,14,374,1],
-"class_p4_1_1_pattern_1_1_match.html":[13,0,12,387,1],
-"class_p4_1_1_portable_program_structure.html":[12,0,14,377],
-"class_p4_1_1_portable_program_structure.html":[13,0,12,390]
+"class_p4_1_1_pattern_1_1_match.html":[13,0,12,387,1]
 };

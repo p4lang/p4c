@@ -41,8 +41,9 @@ var searchData=
   ['coverparserstates_38',['coverParserStates',['../namespace_p4_1_1_coverage.html#a114dcea0a6e81725dd798d35165b6dc4',1,'P4::Coverage::CoverageOptions']]],
   ['coverstatements_39',['coverStatements',['../namespace_p4_1_1_coverage.html#a2a3d638920ba9282563d3f4c90b8df3a',1,'P4::Coverage::CoverageOptions']]],
   ['covertableentries_40',['coverTableEntries',['../namespace_p4_1_1_coverage.html#af76b789b10235cedf806d8bdd178394f',1,'P4::Coverage::CoverageOptions']]],
-  ['csum_5funit_41',['csum_unit',['../class_clot.html#a53335034a5f53215e75015505923d7bf',1,'Clot']]],
-  ['ctxtfile_42',['ctxtFile',['../class_p4_1_1_d_p_d_k_1_1_dpdk_options.html#aa67aa215657bf1d2641cb1fdd4b16ec1',1,'P4::DPDK::DpdkOptions']]],
-  ['currentactionlist_43',['currentActionList',['../class_p4_1_1_type_inference_base.html#aeeb4654c1d4a535e2944285252488f41',1,'P4::TypeInferenceBase']]],
-  ['currentdefinitions_44',['currentDefinitions',['../class_p4_1_1_compute_write_set.html#a534487ed7707c490a3fb667e509708dc',1,'P4::ComputeWriteSet']]]
+  ['cpumapheadersfield_41',['cpumapHeadersField',['../class_p4_1_1_e_b_p_f_1_1_e_b_p_f_pipeline.html#a4b71533b566960c53824dae241834063',1,'P4::EBPF::EBPFPipeline']]],
+  ['csum_5funit_42',['csum_unit',['../class_clot.html#a53335034a5f53215e75015505923d7bf',1,'Clot']]],
+  ['ctxtfile_43',['ctxtFile',['../class_p4_1_1_d_p_d_k_1_1_dpdk_options.html#aa67aa215657bf1d2641cb1fdd4b16ec1',1,'P4::DPDK::DpdkOptions']]],
+  ['currentactionlist_44',['currentActionList',['../class_p4_1_1_type_inference_base.html#aeeb4654c1d4a535e2944285252488f41',1,'P4::TypeInferenceBase']]],
+  ['currentdefinitions_45',['currentDefinitions',['../class_p4_1_1_compute_write_set.html#a534487ed7707c490a3fb667e509708dc',1,'P4::ComputeWriteSet']]]
 ];

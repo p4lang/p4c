@@ -1,5 +1,7 @@
 var NAVTREEINDEX31 =
 {
+"class_tofino_parde_spec.html#a34b7195dda9f686c5aaed311a37ab841":[13,0,678,5],
+"class_tofino_parde_spec.html#a421d6eb57d6207edc994ad6e753d58f1":[13,0,678,4],
 "class_tofino_parde_spec.html#a4e9fc7f0052467bdd7bc9bede993f723":[13,0,678,16],
 "class_tofino_parde_spec.html#a4f800a675ad7056a125c0ba8ea64edf9":[13,0,678,3],
 "class_tofino_parde_spec.html#a5c3902a3f6385ea5bc916a237f17350a":[13,0,678,2],
@@ -247,7 +249,5 @@ var NAVTREEINDEX31 =
 "getting_started.html":[1],
 "graphs_backend.html":[5,6],
 "hierarchy.html":[13,2],
-"index.html":[],
-"intermediate_representation_ir.html":[2],
-"midend.html":[4]
+"index.html":[]
 };

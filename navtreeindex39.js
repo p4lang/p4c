@@ -1,5 +1,7 @@
 var NAVTREEINDEX39 =
 {
+"struct_p4_1_1_unparsed_constant.html#ae88fd437c61a1658fc36aad9bba9ab2e":[12,0,14,542,2],
+"struct_p4_1_1_unparsed_constant.html#ae88fd437c61a1658fc36aad9bba9ab2e":[13,0,12,555,2],
 "struct_p4_1_1_unroll_loops_1_1_policy.html":[12,0,14,543,1],
 "struct_p4_1_1_unroll_loops_1_1_policy.html":[13,0,12,556,1],
 "struct_p4_1_1_unused_code_instances.html":[12,0,14,545],
@@ -247,7 +249,5 @@ var NAVTREEINDEX39 =
 "struct_slice_extracts.html#adde90f3bacb46785113ee4b3431e3667":[13,0,621,1],
 "struct_slice_extracts.html#adfbca27c095692fa4f7b41d32adf5bb2":[13,0,621,0],
 "struct_slice_list_accumulator.html":[13,0,622],
-"struct_sort_extracts.html":[13,0,624],
-"struct_stage_use.html":[13,0,635],
-"struct_stage_use_estimate.html":[13,0,636]
+"struct_sort_extracts.html":[13,0,624]
 };

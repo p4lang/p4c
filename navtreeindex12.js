@@ -1,5 +1,7 @@
 var NAVTREEINDEX12 =
 {
+"class_p4_1_1_find_header_types_to_replace.html":[13,0,12,214],
+"class_p4_1_1_find_parameters.html":[12,0,14,202],
 "class_p4_1_1_find_parameters.html":[13,0,12,215],
 "class_p4_1_1_find_redundant_parsers.html":[12,0,14,203],
 "class_p4_1_1_find_redundant_parsers.html":[13,0,12,216],
@@ -247,7 +249,5 @@ var NAVTREEINDEX12 =
 "class_p4_1_1_method_instance.html#a653648c4a516374246d360db27ea8f2b":[13,0,12,326,0],
 "class_p4_1_1_method_instance.html#aa2c67c8591b9d135b4277c6560d725b9":[12,0,14,313,2],
 "class_p4_1_1_method_instance.html#aa2c67c8591b9d135b4277c6560d725b9":[13,0,12,326,2],
-"class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[12,0,14,313,1],
-"class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[13,0,12,326,1],
-"class_p4_1_1_metrics_pass_manager.html":[12,0,14,315]
+"class_p4_1_1_method_instance.html#af69ff9ec3a921b6742f93d5b6039b08c":[12,0,14,313,1]
 };
