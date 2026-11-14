@@ -91,7 +91,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
 storePrimitive64((u8 *)&tmp_mac_0[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
                                 storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
                                 storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_mac_0), 48));
-                                                                hdr->ipv4.totalLen = hdr->ipv4.totalLen - hdr->udp.len;
+                                                                hdr->ipv4.totalLen = (((u64)(hdr->ipv4.totalLen) - (u64)(hdr->udp.len)) & 65535ULL);
                                                                 hdr->ipv4.protocol = 253;
                                 /* hdr->udp.setInvalid() */
                                 hdr->udp.ebpf_valid = false;
@@ -132,10 +132,10 @@ struct p4tc_ext_csum_params chk_csum = {};
             chk_state = ~ip.hdrChecksum;
             bpf_p4tc_ext_csum_16bit_complement_set_state(&chk_csum, sizeof(chk_csum), ~ip.hdrChecksum);
 ;
-            /* chk.subtract({(hdr->ipv4.totalLen + hdr->udp.len)}) */
+            /* chk.subtract({(((u64)(hdr->ipv4.totalLen) + (u64)(hdr->udp.len)) & 65535ULL)}) */
             {
                 u16 chk_tmp = 0;
-                chk_tmp = (hdr->ipv4.totalLen + hdr->udp.len);
+                chk_tmp = (((u64)(hdr->ipv4.totalLen) + (u64)(hdr->udp.len)) & 65535ULL);
                 bpf_p4tc_ext_csum_16bit_complement_sub(&chk_csum, sizeof(chk_csum), &chk_tmp, sizeof(chk_tmp));
             }
 ;
@@ -256,11 +256,11 @@ struct p4tc_ext_csum_params chk_csum = {};
             }
             
             ebpf_byte = ((char*)(&ip.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&ip.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&ip.diffserv))[0];
@@ -282,15 +282,15 @@ struct p4tc_ext_csum_params chk_csum = {};
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&ip.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
             ip.fragOffset = bpf_htons(ip.fragOffset << 3);
             ebpf_byte = ((char*)(&ip.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
             ebpf_byte = ((char*)(&ip.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&ip.ttl))[0];

@@ -8,6 +8,7 @@ set(P4TC_BACKEND_SOURCES
     ebpfCodeGen.cpp
     introspection.cpp
     midend.cpp
+    options.cpp
     pnaProgramStructure.cpp
     tc.cpp
     tcAnnotations.cpp

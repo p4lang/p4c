@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Packet vectors complement the modeled counter-key assertions in tests/codegen/.
+packet 0 00112233445566778899aabb000000010203040506
+expect 0 00112233445566778899aabb000000010203040506
+packet 0 00112233445566778899aabb000700010203040506
+expect 0 00112233445566778899aabb000700010203040506

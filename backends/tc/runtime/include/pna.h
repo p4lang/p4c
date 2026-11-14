@@ -41,6 +41,12 @@ enum MirrorType { NO_MIRROR, PRE_MODIFY, POST_MODIFY };
 struct pna_main_parser_input_metadata_t {
     bool                     recirculated;
     PortId_t                 input_port;    // taken from xdp_md or __sk_buff
+    // Outermost 802.1Q tag when the stack holds it in metadata instead of in
+    // the frame.  The parser reads these directly from the skb context; a
+    // control block uses the skb_get_vlan_* externs instead.
+    __u8                     vlan_present;  // 0 or 1
+    __u16                    vlan_tci;      // PCP, DEI and VID
+    __u16                    vlan_proto;    // 0x8100 or 0x88a8, host order
 } __attribute__((aligned(4)));
 
 struct pna_main_input_metadata_t {
@@ -70,7 +76,6 @@ struct pna_global_metadata {
     PortId_t         egress_port;
     enum MirrorType  mirror_type;
     MirrorSlotId_t   mirror_slot_id;
-    ParserError_t    parser_error;
     MirrorSessionId_t mirror_session_id;
     __u8             mark;
     bool             pass_to_kernel; // internal metadata, forces sending packet up to kernel stack
@@ -94,12 +99,21 @@ struct p4tc_table_entry_act_bpf_params__local {
     u32 tblid;
 };
 
+/*
+ * The kernel lays out the same packed action and sizes its entry-create
+ * parameters from it, rejecting a call whose size differs. Keep this capacity
+ * and the derived size identical to the target kernel's
+ * P4TC_MAX_PARAM_DATA_SIZE / P4TC_ENTRY_CREATE_BPF_PARAMS_SZ.
+ */
+#define P4TC_MAX_PARAM_DATA_SIZE 256
+#define P4TC_ENTRY_CREATE_BPF_PARAMS_SZ 292
+
 struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
         u32 act_id;
         u32 hit:1,
         is_default_miss_act:1,
         is_default_hit_act:1;
-        u8 params[124];
+        u8 params[P4TC_MAX_PARAM_DATA_SIZE];
 };
 
 struct p4tc_table_entry_create_bpf_params__local {
@@ -113,6 +127,18 @@ struct p4tc_table_entry_create_bpf_params__local {
         u16 proto;
         u16 prio;
 };
+
+/* Fail the build instead of the datapath if the ABI drifts from the kernel. */
+_Static_assert(sizeof(struct p4tc_table_entry_create_bpf_params__local) ==
+               P4TC_ENTRY_CREATE_BPF_PARAMS_SZ,
+               "P4TC entry-create parameter size does not match the kernel");
+_Static_assert(__builtin_offsetof(struct p4tc_table_entry_create_bpf_params__local,
+                                  profile_id) == 264,
+               "P4TC entry-create profile_id offset does not match the kernel");
+_Static_assert(__builtin_offsetof(struct p4tc_table_entry_create_bpf_params__local,
+                                  pipeid) == 268,
+               "P4TC entry-create pipeid offset does not match the kernel");
+
 extern struct p4tc_table_entry_act_bpf * 
 bpf_p4tc_tbl_read(struct __sk_buff *skb_ctx,
                   struct p4tc_table_entry_act_bpf_params__local *params,
@@ -588,8 +614,41 @@ bpf_p4tc_skb_get_mark(struct __sk_buff *skb,
        return skb->mark;
 }
 
+static inline __u32
+bpf_p4tc_skb_get_vlan_present(struct __sk_buff *skb,
+                              struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->vlan_present;
+}
+
+static inline __u16
+bpf_p4tc_skb_get_vlan_tci(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->vlan_tci;
+}
+
+static inline __u16
+bpf_p4tc_skb_get_vlan_proto(struct __sk_buff *skb,
+                            struct p4tc_skb_meta_get *meta_get)
+{
+       return bpf_ntohs(skb->vlan_proto);
+}
+
 int bpf_p4tc_skb_meta_get(struct __sk_buff *skb,
                           struct p4tc_skb_meta_get *skb_meta_get,
                           u32 skb_meta_get__sz) __ksym;
+
+static inline long
+bpf_p4tc_skb_vlan_push(struct __sk_buff *skb, __u16 vlan_proto, __u16 vlan_tci)
+{
+       return bpf_skb_vlan_push(skb, bpf_htons(vlan_proto), vlan_tci);
+}
+
+static inline long
+bpf_p4tc_skb_vlan_pop(struct __sk_buff *skb)
+{
+       return bpf_skb_vlan_pop(skb);
+}
 
 #endif /* P4C_PNA_H */

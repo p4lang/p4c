@@ -22,7 +22,14 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
-    __builtin_memset(hdrMd, 0, sizeof(struct hdr_md));
+    if (sizeof(struct hdr_md) <= 256) {
+        __builtin_memset(hdrMd, 0, sizeof(struct hdr_md));
+    } else {
+        #pragma clang loop unroll(disable)
+        for (u32 hdr_md_i = 0; hdr_md_i < sizeof(struct hdr_md); hdr_md_i++) {
+            ((volatile u8 *)hdrMd)[hdr_md_i] = 0;
+        }
+    }
 
     unsigned ebpf_packetOffsetInBits = 0;
     hdr = &(hdrMd->cpumap_hdr);
@@ -123,7 +130,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             else goto reject;
         }
         parse_v4_opts: {
-/* extract(hdr->opts, (u32)(((u16)((hdr->ipv4.ihl + 11) & ((1ULL << 4) - 1)) << 5) & ((1ULL << 9) - 1))) */
+/* extract(hdr->opts, (u32)(((u16)(((u64)(hdr->ipv4.ihl) + (u64)(11ULL)) & 15ULL) << 5) & ((1ULL << 9) - 1))) */
 
             hdr_start += BYTES(0);
             {
@@ -242,7 +249,7 @@ tooshort:;
             if (ebpf_errorCode == 0) {
                 return TC_ACT_SHOT;
             }
-            compiler_meta__->parser_error = ebpf_errorCode;
+            hdrMd->parser_error = ebpf_errorCode;
             goto accept;
         }
 

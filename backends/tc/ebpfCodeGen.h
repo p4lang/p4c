@@ -8,6 +8,8 @@
 #ifndef BACKENDS_TC_EBPFCODEGEN_H_
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
+#include <set>
+
 #include "backend.h"
 #include "tcExterns.h"
 
@@ -100,13 +102,17 @@ class PNAArchTC : public PNAEbpfGenerator {
 };
 
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
+    const TCOptions &tcOptions;
+
  public:
-    TCIngressPipelinePNA(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
-                         P4::TypeMap *typeMap)
-        : EBPF::TCIngressPipeline(name, options, refMap, typeMap) {}
+    TCIngressPipelinePNA(cstring name, const EbpfOptions &options, const TCOptions &tcOptions,
+                         P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : EBPF::TCIngressPipeline(name, options, refMap, typeMap), tcOptions(tcOptions) {}
 
     void emit(EBPF::CodeBuilder *builder) override;
     void emitLocalVariables(EBPF::CodeBuilder *builder) override;
+    void emitParserOutline(EBPF::CodeBuilder *builder);
+    void emitCPUMAPInitializers(EBPF::CodeBuilder *builder) override;
     void emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) override;
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
 
@@ -120,7 +126,9 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
         : EBPF::PsaStateTranslationVisitor(refMap, typeMap, prsr) {}
 
     bool preorder(const IR::Member *expression) override;
+    bool preorder(const IR::ParserState *parserState) override;
     mutable bool extractedVarbit = false;
+    bool emittingOutlineRegion = false;
 
  protected:
     unsigned int compileExtractVarbits(const IR::Expression *, const IR::StructField *,
@@ -138,6 +146,54 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
  public:
+    // Parser regions emitted as separate helpers by the tc backend.
+    struct OutlineRegion {
+        cstring helperName;
+        cstring startState;
+        cstring endState;
+        cstring boundField;
+        unsigned boundValue = 0;
+        cstring localField;
+        cstring localName;
+        unsigned localMax = 0;
+        unsigned offsetMax = 0;
+        bool offsetMaxSet = false;
+        bool noHdr = false;
+        std::set<cstring> states;
+    };
+    std::vector<OutlineRegion> outlineRegions;
+    std::set<cstring> outlinedStates;
+
+    bool setOutlineRange(cstring helper, cstring start, cstring end);
+    void setOutlineBound(cstring field, unsigned value) {
+        if (!outlineRegions.empty()) {
+            outlineRegions.back().boundField = field;
+            outlineRegions.back().boundValue = value;
+        }
+    }
+    void setOutlineLocal(cstring field, cstring name, unsigned max) {
+        if (!outlineRegions.empty()) {
+            outlineRegions.back().localField = field;
+            outlineRegions.back().localName = name;
+            outlineRegions.back().localMax = max;
+        }
+    }
+    void setOutlineOffsetMax(unsigned max) {
+        for (auto &region : outlineRegions) {
+            region.offsetMax = max;
+            region.offsetMaxSet = true;
+        }
+    }
+    void setOutlineNoHdr() {
+        if (!outlineRegions.empty()) outlineRegions.back().noHdr = true;
+    }
+    bool hasOutline() const { return !outlineRegions.empty(); }
+    const OutlineRegion *getOutlineRegion(cstring start) const {
+        for (auto &region : outlineRegions)
+            if (region.startState == start) return &region;
+        return nullptr;
+    }
+
     EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                   const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
@@ -197,19 +253,27 @@ class DeparserBodyTranslatorPNA : public EBPF::DeparserBodyTranslatorPSA {
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
+    const TCOptions &tcOptions;
+
  public:
     mutable bool touched_skb_metadata;
 
     IngressDeparserPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
-                       const IR::Parameter *parserHeaders, const IR::Parameter *istd)
+                       const IR::Parameter *parserHeaders, const IR::Parameter *istd,
+                       const TCOptions &tcOptions)
         : EBPF::EBPFDeparserPSA(program, control, parserHeaders, istd),
+          tcOptions(tcOptions),
           touched_skb_metadata(false) {
         codeGen = new DeparserBodyTranslatorPNA(this);
     }
 
     bool addExternDeclaration = false;
+    bool headersOutlined = false;
+    std::string outlinedHeaderCode;
+    std::map<cstring, cstring> outlinedHelperNames;
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
+    void outlineDeparserHeaders(EBPF::CodeBuilder *builder);
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
     void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) override;
 
@@ -226,15 +290,21 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
 
 class ConvertToEbpfPNA : public Transform {
     const EbpfOptions &options;
+    const TCOptions &tcOptions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     const PNAEbpfGenerator *ebpf_program;
     const ConvertToBackendIR *tcIR;
 
  public:
-    ConvertToEbpfPNA(const EbpfOptions &options, P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                     const ConvertToBackendIR *tcIR)
-        : options(options), typemap(typemap), refmap(refmap), ebpf_program(nullptr), tcIR(tcIR) {}
+    ConvertToEbpfPNA(const EbpfOptions &options, const TCOptions &tcOptions,
+                     P4::ReferenceMap *refmap, P4::TypeMap *typemap, const ConvertToBackendIR *tcIR)
+        : options(options),
+          tcOptions(tcOptions),
+          typemap(typemap),
+          refmap(refmap),
+          ebpf_program(nullptr),
+          tcIR(tcIR) {}
 
     const PNAEbpfGenerator *build(const IR::ToplevelBlock *prog);
     const IR::Node *preorder(IR::ToplevelBlock *p) override;
@@ -247,6 +317,7 @@ class ConvertToEbpfPipelineTC : public Inspector {
     const cstring name;
     const EBPF::pipeline_type type;
     const EbpfOptions &options;
+    const TCOptions &tcOptions;
     const IR::ParserBlock *parserBlock;
     const IR::ControlBlock *controlBlock;
     const IR::ControlBlock *deparserBlock;
@@ -258,7 +329,7 @@ class ConvertToEbpfPipelineTC : public Inspector {
 
  public:
     ConvertToEbpfPipelineTC(cstring name, EBPF::pipeline_type type, const EbpfOptions &options,
-                            const IR::ParserBlock *parserBlock,
+                            const TCOptions &tcOptions, const IR::ParserBlock *parserBlock,
                             const IR::ControlBlock *controlBlock,
                             const IR::ControlBlock *deparserBlock, P4::ReferenceMap *refmap,
                             P4::TypeMap *typemap, const ConvertToBackendIR *tcIR,
@@ -266,6 +337,7 @@ class ConvertToEbpfPipelineTC : public Inspector {
         : name(name),
           type(type),
           options(options),
+          tcOptions(tcOptions),
           parserBlock(parserBlock),
           controlBlock(controlBlock),
           deparserBlock(deparserBlock),
@@ -371,6 +443,7 @@ class ConvertToEBPFControlPNA : public Inspector {
 // Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
 class ConvertToEBPFDeparserPNA : public Inspector {
+    const TCOptions &tcOptions;
     EBPF::EBPFProgram *program;
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
@@ -381,8 +454,9 @@ class ConvertToEBPFDeparserPNA : public Inspector {
  public:
     ConvertToEBPFDeparserPNA(EBPF::EBPFProgram *program, const IR::Parameter *parserHeaders,
                              const IR::Parameter *istd, const ConvertToBackendIR *tcIR,
-                             std::vector<EBPF::EBPFType *> ebpfTypes)
-        : program(program),
+                             std::vector<EBPF::EBPFType *> ebpfTypes, const TCOptions &tcOptions)
+        : tcOptions(tcOptions),
+          program(program),
           parserHeaders(parserHeaders),
           istd(istd),
           tcIR(tcIR),
@@ -438,6 +512,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     bool preorder(const IR::SubSat *) override;
     bool preorder(const IR::Constant *) override;
     bool bigXSmallMul(const IR::Expression *, const IR::Constant *);
+    bool isNetworkOrder(const IR::Expression *);
     void visitHostOrder(const IR::Expression *);
 };
 

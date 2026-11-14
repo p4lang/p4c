@@ -313,7 +313,7 @@ function install_stf_p4tc_test_deps() (
                              python3-scapy \
                              qemu-system-x86"
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
-    git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc8 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
+    git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc11 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
     ${P4C_DIR}/backends/tc/runtime/build-iproute2 ${P4C_DIR}/backends/tc/runtime
     sudo apt-get install -y virtme-ng
 )

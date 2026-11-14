@@ -86,7 +86,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST: 
                             {
 assign_128(&hdr->ipv6.dstAddr[0], loadfrom_128(&value->u.MainControlImpl_set_dst.addr6[0]));
-                                                                hdr->ipv6.hopLimit = hdr->ipv6.hopLimit + 255;
+                                                                hdr->ipv6.hopLimit = (((u64)(hdr->ipv6.hopLimit) + (u64)(255ULL)) & 255ULL);
                             }
                             break;
                         case MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION: 
@@ -191,23 +191,23 @@ assign_128(&hdr->ipv6.dstAddr[0], loadfrom_128(&value->u.MainControlImpl_set_dst
             }
             
             ebpf_byte = ((char*)(&hdr->ipv6.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->ipv6.trafficClass))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 8;
 
             storePrimitive32((u8 *)&hdr->ipv6.flowLabel, 20, (htonl(getPrimitive32(hdr->ipv6.flowLabel, 20) << 12)));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[2];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2 + 1, 4, 4, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 4, 0, (ebpf_byte >> 4));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 4, 4, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 4, 0, (ebpf_byte >> 4));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 4, 4, (ebpf_byte >> 0));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 20;
 
             hdr->ipv6.payloadLength = bpf_htons(hdr->ipv6.payloadLength);
