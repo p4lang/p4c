@@ -175,6 +175,8 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     parseJson(in, val, strict);
                     if (strict && (!key || !key->is<JsonString>() || !val))
                         throw JsonData::error("invalid object member", lastpos(in));
+                    if (strict && key->to<JsonString>()->find('\0') != std::string::npos)
+                        throw JsonData::error("NUL in JSON object key is unsupported", lastpos(in));
                     obj[key->as<JsonString>()] = std::move(val);
 
                     jsonCharacter(in, ch, strict);

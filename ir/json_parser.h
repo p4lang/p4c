@@ -125,6 +125,7 @@ std::ostream &operator<<(std::ostream &out, const JsonData *json);
 inline std::ostream &operator<<(std::ostream &out, const JsonData &json) { return out << &json; }
 /// Extract one JSON value with per-call checking, without changing the global mode.
 /// Numbers are integers only (JsonNumber); fractions and exponents are unsupported.
+/// Strict mode rejects NUL in cstring-backed object keys rather than truncating it.
 /// Document consumers must check for trailing input after extracting the value.
 std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict);
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);

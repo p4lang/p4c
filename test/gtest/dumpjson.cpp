@@ -268,3 +268,11 @@ TEST(JSON, StrictParserUsesJsonWhitespace) {
     ASSERT_TRUE(result);
     EXPECT_TRUE(result->is<JsonVector>());
 }
+
+TEST(JSON, StrictParserRejectsUnrepresentableObjectKeys) {
+    // JsonObject uses cstring keys; accepting NUL here would silently truncate
+    // the key and could overwrite a distinct member. String values retain NULs.
+    std::istringstream input(R"({"a\u0000b":1,"a":2})");
+    std::unique_ptr<JsonData> result;
+    EXPECT_THROW(parseJson(input, result, true), JsonData::error);
+}
