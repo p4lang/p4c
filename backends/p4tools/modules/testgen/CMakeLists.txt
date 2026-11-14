@@ -53,6 +53,7 @@ set(
   ${P4C_SOURCE_DIR}/test/gtest/gtestp4c.cpp
 
   test/gtest_utils.cpp
+  test/lib/exceptions.cpp
   test/lib/format_int.cpp
   test/lib/logging.cpp
   test/lib/taint.cpp
