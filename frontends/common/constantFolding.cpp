@@ -474,6 +474,17 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
         }
 
+        // Fold a single component comparison.
+        auto compareComponents = [&](const IR::Expression *li,
+                                     const IR::Expression *ri) -> const IR::BoolLiteral * {
+            const IR::Operation_Binary *tmp;
+            if (eqTest)
+                tmp = new IR::Equ(IR::Type_Boolean::get(), li, ri);
+            else
+                tmp = new IR::Neq(IR::Type_Boolean::get(), li, ri);
+            return compare(tmp)->to<IR::BoolLiteral>();
+        };
+
         auto llist = eleft->to<IR::ListExpression>();
         auto rlist = eright->to<IR::ListExpression>();
         if (llist != nullptr && rlist != nullptr) {
@@ -483,15 +494,31 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
             }
 
             for (size_t i = 0; i < llist->components.size(); i++) {
-                auto li = llist->components.at(i);
-                auto ri = rlist->components.at(i);
-                const IR::Operation_Binary *tmp;
-                if (eqTest)
-                    tmp = new IR::Equ(IR::Type_Boolean::get(), li, ri);
-                else
-                    tmp = new IR::Neq(IR::Type_Boolean::get(), li, ri);
-                auto cmp = compare(tmp);
-                auto boolLit = cmp->to<IR::BoolLiteral>();
+                auto boolLit = compareComponents(llist->components.at(i), rlist->components.at(i));
+                if (boolLit == nullptr) return e;
+                if (boolLit->value != eqTest) return boolLit;
+            }
+            return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), eqTest);
+        }
+
+        auto lstruct = eleft->to<IR::StructExpression>();
+        auto rstruct = eright->to<IR::StructExpression>();
+        if (lstruct != nullptr && rstruct != nullptr) {
+            if (lstruct->size() != rstruct->size()) {
+                ::P4::error(ErrorType::ERR_INVALID, "%1%: comparing structs with different fields",
+                            e);
+                return e;
+            }
+
+            // Fields may appear in any order.
+            for (const auto *lc : lstruct->components) {
+                const auto *rc = rstruct->getField(lc->name.name);
+                if (rc == nullptr) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "%1%: comparing structs with different fields", e);
+                    return e;
+                }
+                auto boolLit = compareComponents(lc->expression, rc->expression);
                 if (boolLit == nullptr) return e;
                 if (boolLit->value != eqTest) return boolLit;
             }

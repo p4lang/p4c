@@ -252,12 +252,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
         e->left = new IR::Cast(e->left->srcInfo, rtype, e->left, /* implicit */ true);
+        if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
         setType(e->left, rtype);
         ltype = rtype;
         expression = e;
     } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
         e->right = new IR::Cast(e->right->srcInfo, ltype, e->right, /* implicit */ true);
+        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
         setType(e->right, ltype);
         rtype = ltype;
         expression = e;
