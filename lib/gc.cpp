@@ -263,17 +263,17 @@ namespace {
 
 // P4C replaces malloc with garbage-collected allocation. Replace the size query
 // too: system allocators use metadata that GC memory does not have. Libraries
-// such as Z3 call these functions to track memory use.
+// call these functions to track memory use.
 size_t gc_allocation_size(void *ptr) {
     if (ptr == nullptr) return 0;
     if (done_init) {
         if (auto *base = GC_base(ptr)) {
-            // Aligned allocations can start after the base. Report only the
-            // bytes available from the returned pointer to the end.
+            // The returned pointer may follow padding at the start of the block.
             auto size = GC_size(base) - (static_cast<char *>(ptr) - static_cast<char *>(base));
-            // Boehm reserves a trailing byte so one-past-the-end pointers keep
-            // an object alive. Z3 may grow into the reported usable space without
-            // reallocating, so that byte must not be exposed as usable storage.
+            // With ALL_INTERIOR_POINTERS enabled (the default), BDWGC reserves one byte at the end.
+            // It does not scan for pointers in the last pointer-sized slot containing that byte.
+            // Exclude the reserved byte to prevent storing a pointer the collector could miss,
+            // which in turn could free an object that is still in use.
             if (GC_get_all_interior_pointers()) --size;
             return size;
         }

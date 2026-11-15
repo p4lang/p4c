@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 
@@ -11,6 +12,7 @@
 
 #if HAVE_LIBGC
 #include <gc/gc.h>
+#include <gc/gc_mark.h>
 #endif
 
 #ifdef __GLIBC__
@@ -69,8 +71,8 @@ TEST(Allocator, UsableSizePreservesEndPointer) {
         ASSERT_NE(ptr, nullptr);
         const auto usable = allocationSize(ptr);
         ASSERT_GE(usable, size);
-        // Z3 can grow an allocation up to its usable size without calling realloc.
-        // Its one-past-the-end pointer must still keep the same GC object alive.
+        // Code can use the reported space without allocating again. A pointer
+        // just past that space must still keep the same block alive.
         EXPECT_EQ(GC_base(ptr + usable), GC_base(ptr));
         free(ptr);
     }
@@ -84,6 +86,47 @@ TEST(Allocator, UsableSizePreservesEndPointer) {
         EXPECT_EQ(GC_base(static_cast<char *>(ptr) + usable), GC_base(ptr));
         free(ptr);
     }
+}
+
+namespace {
+
+void **volatile retainedAllocation;
+unsigned finalizedChildren;
+
+void finalizeChild(void *, void *) { ++finalizedChildren; }
+
+// Use a separate function so the test does not keep another copy of the child's
+// address in a register or on the stack.
+[[gnu::noinline]] void retainChildInLastUsableWord() {
+    retainedAllocation = static_cast<void **>(malloc(sizeof(void *)));
+    const auto slots = allocationSize(retainedAllocation) / sizeof(void *);
+    void *child = GC_malloc(32);
+    GC_register_finalizer_no_order(child, finalizeChild, nullptr, nullptr, nullptr);
+    retainedAllocation[slots - 1] = child;
+}
+
+[[gnu::noinline]] void collectUnreachableChildren() {
+    // Clear leftover copies of the child's address from the stack so they do
+    // not keep the child alive after the test removes the stored pointer.
+    volatile std::uintptr_t clearedStack[4096] = {};
+    GC_clear_stack(nullptr);
+    GC_gcollect();
+    GC_invoke_finalizers();
+    (void)clearedStack[0];
+}
+
+}  // namespace
+
+TEST(Allocator, LastUsableWordRetainsPointers) {
+    finalizedChildren = 0;
+    retainChildInLastUsableWord();
+    for (unsigned i = 0; i < 5; ++i) collectUnreachableChildren();
+    EXPECT_EQ(finalizedChildren, 0U);
+
+    retainedAllocation = nullptr;
+    for (unsigned i = 0; i < 5; ++i) collectUnreachableChildren();
+    // Verify that collection actually runs and the child can be finalized.
+    EXPECT_EQ(finalizedChildren, 1U);
 }
 #endif
 
