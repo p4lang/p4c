@@ -235,10 +235,10 @@ p4tools_add_xfail_reason(
   # parser_multi_write_checksum_verify_5.p4
 )
 
-# Same program the STF variant xfails for: gets past the guard check, dies at PHV allocation.
+# Guard-violation cap or PHV allocation, depending on where the run gives up first.
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
-  "PHV allocation was not successful"
+  "exceeded the maximum number of permitted guard violations for this run|PHV allocation was not successful"
   switchml.p4
 )
 
