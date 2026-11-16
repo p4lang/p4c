@@ -123,7 +123,15 @@ class DoGlobalCopyPropagation final : public Transform {
     explicit DoGlobalCopyPropagation(
         ReferenceMap *rM, TypeMap *tM,
         std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *acts)
-        : refMap(rM), typeMap(tM), actions(acts) {}
+        : refMap(rM), typeMap(tM), actions(acts) {
+        // For the following IR:
+        //   e0 = expr;
+        //   expr = e1;
+        // expr can be replaced in the first assignment, but not the second.
+        // Visit every occurrence of the original expr node so that only the occurrence
+        // in the first assignment gets replaced.
+        visitDagOnce = false;
+    }
 
     // Returns the stored value for the used variable
     const IR::Expression *copyprop_name(cstring name);
