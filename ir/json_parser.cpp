@@ -64,11 +64,10 @@ void dump(const JsonData *json) { std::cout << json << std::endl; }
 bool JsonData::strict = false;
 
 static inline std::streamoff lastpos(std::istream &in) {
-    // Position queries must not turn a successful read at EOF (or a
-    // non-seekable stream) into a failed extraction.
-    auto state = in.rdstate();
-    std::streamoff pos = in.tellg();
-    in.clear(state);
+    // Query the buffer directly: tellg's sentry can set failbit at EOF and
+    // throw before we can restore the state when stream exceptions are enabled.
+    if (!in.rdbuf()) return -1;
+    std::streamoff pos = in.rdbuf()->pubseekoff(0, std::ios::cur, std::ios::in);
     if (pos > 0) --pos;
     return pos;
 }
@@ -90,6 +89,7 @@ static std::string token(std::istream &in) {
 static std::string jsonStringEscapes(std::string_view raw, std::streamoff position) {
     std::string result;
     auto invalid = [&]() { throw JsonData::error("invalid JSON string escape", position); };
+    auto invalidUtf8 = [&]() { throw JsonData::error("invalid UTF-8 in JSON string", position); };
     auto hex4 = [&](size_t offset) {
         unsigned value = 0;
         if (offset + 4 > raw.size()) invalid();
@@ -107,7 +107,28 @@ static std::string jsonStringEscapes(std::string_view raw, std::streamoff positi
     for (size_t i = 0; i < raw.size(); ++i) {
         if (static_cast<unsigned char>(raw[i]) < 0x20) invalid();
         if (raw[i] != '\\') {
-            result += raw[i];
+            auto lead = static_cast<unsigned char>(raw[i]);
+            if (lead < 0x80) {
+                result += raw[i];
+                continue;
+            }
+            // Check raw UTF-8 as well as escaped Unicode scalar values.
+            size_t length = lead >= 0xc2 && lead <= 0xdf   ? 2
+                            : lead >= 0xe0 && lead <= 0xef ? 3
+                            : lead >= 0xf0 && lead <= 0xf4 ? 4
+                                                           : 0;
+            if (!length || raw.size() - i < length) invalidUtf8();
+            unsigned codepoint = lead & (0x7f >> length);
+            for (size_t j = 1; j < length; ++j) {
+                auto byte = static_cast<unsigned char>(raw[i + j]);
+                if ((byte & 0xc0) != 0x80) invalidUtf8();
+                codepoint = (codepoint << 6) | (byte & 0x3f);
+            }
+            if ((length == 3 && codepoint < 0x800) || (length == 4 && codepoint < 0x10000) ||
+                (codepoint >= 0xd800 && codepoint <= 0xdfff) || codepoint > 0x10ffff)
+                invalidUtf8();
+            result.append(raw.substr(i, length));
+            i += length - 1;
             continue;
         }
         if (++i == raw.size()) invalid();
@@ -149,7 +170,8 @@ static std::istream &jsonCharacter(std::istream &in, char &ch, bool strict) {
     return in.get(ch);
 }
 
-std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict) {
+std::unique_ptr<JsonData> JsonData::parse(std::istream &in, bool strict) {
+    std::unique_ptr<JsonData> json;
     if (strict && !in.good()) throw JsonData::error("unreadable JSON input", lastpos(in));
     while (in) {
         char ch = 0;
@@ -167,12 +189,11 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     }
                     in.unget();
 
-                    std::unique_ptr<JsonData> key, val;
-                    parseJson(in, key, strict);
+                    auto key = parse(in, strict);
                     jsonCharacter(in, ch, strict);
                     if (strict && (!in || ch != ':'))
                         throw JsonData::error("missing ':' in object", lastpos(in));
-                    parseJson(in, val, strict);
+                    auto val = parse(in, strict);
                     if (strict && (!key || !key->is<JsonString>() || !val))
                         throw JsonData::error("invalid object member", lastpos(in));
                     if (strict && key->to<JsonString>()->find('\0') != std::string::npos)
@@ -187,7 +208,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonObject>(std::move(obj));
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             }
             case '[': {
                 std::vector<std::unique_ptr<JsonData>> vec;
@@ -200,8 +221,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     }
                     in.unget();
 
-                    std::unique_ptr<JsonData> elem;
-                    parseJson(in, elem, strict);
+                    auto elem = parse(in, strict);
                     vec.emplace_back(std::move(elem));
 
                     jsonCharacter(in, ch, strict);
@@ -212,7 +232,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonVector>(std::move(vec));
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             }
             case '"': {
                 std::string s;
@@ -234,7 +254,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonString>(s);
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             }
             case '-':
             case '0':
@@ -276,7 +296,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonNumber>(big_int(num));
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             }
             case 't':
             case 'T':
@@ -292,7 +312,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonBoolean>(true);
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             case 'f':
             case 'F':
                 if (strict) {
@@ -307,7 +327,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonBoolean>(false);
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             case 'n':
             case 'N':
                 if (strict) {
@@ -322,7 +342,7 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                 json = std::make_unique<JsonNull>();
                 json->start = start;
                 json->finish = lastpos(in);
-                return in;
+                return json;
             default:
                 if (strict) {
                     if (isalpha(static_cast<unsigned char>(ch)) || ch == '_') {
@@ -337,9 +357,14 @@ std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool 
                     }
                 }
                 if (in && !isspace(static_cast<unsigned char>(ch))) in.unget();
-                return in;
+                return json;
         }
     }
+    return json;
+}
+
+std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict) {
+    if (auto parsed = JsonData::parse(in, strict)) json = std::move(parsed);
     return in;
 }
 

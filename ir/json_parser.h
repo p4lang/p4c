@@ -33,8 +33,13 @@ class JsonData : public ICastable {
     virtual ~JsonData() = default;
     static bool strict;  // enforce strict syntax checking of json on input, default false.
 
-    friend std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
-    friend std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict);
+    /// Extract one JSON value without reading or changing the global mode.
+    /// Strict mode throws error for malformed input, invalid UTF-8, and NUL in
+    /// cstring-backed object keys. Numbers are integers only (JsonNumber);
+    /// fractions and exponents are unsupported. Legacy mode can return nullptr
+    /// when no value is extracted. Stream exceptions follow the stream's mask.
+    /// Document consumers must check for trailing input after the value.
+    static std::unique_ptr<JsonData> parse(std::istream &in, bool strict);
     struct error : public std::runtime_error {
         const JsonData *data = nullptr;  // object/item with error if parsed
         std::streamoff loc = -1;         // location of the error if no object
@@ -123,10 +128,8 @@ std::string getIndent(int l);
 
 std::ostream &operator<<(std::ostream &out, const JsonData *json);
 inline std::ostream &operator<<(std::ostream &out, const JsonData &json) { return out << &json; }
-/// Extract one JSON value with per-call checking, without changing the global mode.
-/// Numbers are integers only (JsonNumber); fractions and exponents are unsupported.
-/// Strict mode rejects NUL in cstring-backed object keys rather than truncating it.
-/// Document consumers must check for trailing input after extracting the value.
+/// Compatibility adapter for callers using the stream extraction interface.
+/// Leaves json unchanged if no value is extracted or parsing throws.
 std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict);
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
 

@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <streambuf>
 #include <string>
 #include <vector>
 
@@ -277,4 +279,175 @@ TEST(JSON, StrictParserRejectsUnrepresentableObjectKeys) {
     std::istringstream input(R"({"a\u0000b":1,"a":2})");
     std::unique_ptr<JsonData> result;
     EXPECT_THROW(parseJson(input, result, true), JsonData::error);
+}
+
+TEST(JSON, StrictParserValidatesRawUtf8) {
+    for (const std::string bytes :
+         {"\x80", "\xbf", "\xc0\x80", "\xc1\xbf", "\xc2", "\xc2x", "\xe0\x80\x80", "\xe0\x9f\xbf",
+          "\xed\xa0\x80", "\xed\xbf\xbf", "\xe2\x82", "\xe2(\xa1", "\xf0\x80\x80\x80",
+          "\xf0\x8f\xbf\xbf", "\xf4\x90\x80\x80", "\xf5\x80\x80\x80", "\xff"}) {
+        SCOPED_TRACE(bytes);
+        std::istringstream value("\"" + bytes + "\"");
+        EXPECT_THROW(JsonData::parse(value, true), JsonData::error);
+        std::istringstream key("{\"" + bytes + "\":1}");
+        EXPECT_THROW(JsonData::parse(key, true), JsonData::error);
+        // The stricter encoding contract must not change legacy byte strings.
+        std::istringstream legacy("\"" + bytes + "\"");
+        auto result = JsonData::parse(legacy, false);
+        ASSERT_TRUE(result);
+        ASSERT_TRUE(result->is<JsonString>());
+        EXPECT_EQ(*result->to<JsonString>(), bytes);
+    }
+    for (const std::string bytes :
+         {"\x7f", "\xc2\x80", "\xdf\xbf", "\xe0\xa0\x80", "\xed\x9f\xbf", "\xee\x80\x80",
+          "\xef\xbf\xbf", "\xf0\x90\x80\x80", "\xf4\x8f\xbf\xbf", "é😀"}) {
+        SCOPED_TRACE(bytes);
+        std::istringstream input("\"" + bytes + "\"");
+        auto result = JsonData::parse(input, true);
+        ASSERT_TRUE(result);
+        ASSERT_TRUE(result->is<JsonString>());
+        EXPECT_EQ(*result->to<JsonString>(), bytes);
+    }
+}
+
+TEST(JSON, ParserLocationQueriesPreserveStreamState) {
+    for (const char *text : {"true", "false", "null", "12", "\"text\"", "[]", "{}"}) {
+        SCOPED_TRACE(text);
+        std::istringstream input(text);
+        input.exceptions(std::ios::failbit | std::ios::badbit);
+        EXPECT_NO_THROW({
+            auto result = JsonData::parse(input, true);
+            EXPECT_NE(result, nullptr);
+            EXPECT_FALSE(input.fail());
+        });
+    }
+    std::istream missingBuffer(nullptr);
+    EXPECT_THROW(JsonData::parse(missingBuffer, true), JsonData::error);
+}
+
+TEST(JSON, PerCallModeAndExtractionCompatibility) {
+    // Restore the global even when an assertion or unexpected exception exits.
+    struct RestoreMode {
+        bool saved = JsonData::strict;
+        ~RestoreMode() { JsonData::strict = saved; }
+    } restore;
+    for (bool global : {false, true}) {
+        JsonData::strict = global;
+        std::istringstream strict("[1,]");
+        EXPECT_THROW(JsonData::parse(strict, true), JsonData::error);
+        EXPECT_EQ(JsonData::strict, global);
+        std::istringstream legacy("[1,]");
+        auto value = JsonData::parse(legacy, false);
+        ASSERT_TRUE(value);
+        EXPECT_EQ(JsonData::strict, global);
+        std::istringstream extracted("[1,]");
+        if (global)
+            EXPECT_THROW(extracted >> value, JsonData::error);
+        else
+            EXPECT_NO_THROW(extracted >> value);
+
+        auto *original = value.get();
+        std::istringstream invalid("[1,]");
+        EXPECT_THROW(parseJson(invalid, value, true), JsonData::error);
+        EXPECT_EQ(value.get(), original);
+        std::istringstream noValue("?");
+        EXPECT_EQ(&parseJson(noValue, value, false), &noValue);
+        EXPECT_EQ(value.get(), original);
+        EXPECT_EQ(noValue.peek(), '?');
+        std::istringstream eof;
+        eof.setstate(std::ios::eofbit);
+        EXPECT_EQ(JsonData::parse(eof, false), nullptr);
+        EXPECT_EQ(JsonData::strict, global);
+    }
+}
+
+namespace {
+
+class NonSeekingJsonBuffer : public std::stringbuf {
+ public:
+    using std::stringbuf::stringbuf;
+
+ protected:
+    pos_type seekoff(off_type, std::ios::seekdir, std::ios::openmode) override {
+        return pos_type(off_type(-1));
+    }
+    pos_type seekpos(pos_type, std::ios::openmode) override { return pos_type(off_type(-1)); }
+};
+
+// Supply characters without a get area, so even one putback is unsupported.
+class NoPutbackJsonBuffer : public std::streambuf {
+    std::string bytes;
+    size_t offset = 0;
+
+ public:
+    explicit NoPutbackJsonBuffer(std::string text) : bytes(std::move(text)) {}
+
+ protected:
+    int_type underflow() override {
+        return offset == bytes.size() ? traits_type::eof()
+                                      : traits_type::to_int_type(bytes[offset]);
+    }
+    int_type uflow() override {
+        auto ch = underflow();
+        if (!traits_type::eq_int_type(ch, traits_type::eof())) ++offset;
+        return ch;
+    }
+};
+
+}  // namespace
+
+TEST(JSON, ParserSupportsNonSeekingStreams) {
+    for (bool strict : {false, true}) {
+        NonSeekingJsonBuffer buffer(R"({"a":[true,false,null,12,"é"]})");
+        std::istream input(&buffer);
+        input.exceptions(std::ios::failbit | std::ios::badbit);
+        auto result = JsonData::parse(input, strict);
+        ASSERT_TRUE(result);
+        EXPECT_TRUE(result->is<JsonObject>());
+        EXPECT_FALSE(input.fail());
+        JsonData::LocationInfo locations("pipe", input);
+        EXPECT_EQ(locations.desc(*result), "");
+    }
+}
+
+TEST(JSON, StrictTokensLeaveDelimitersWithoutPutback) {
+    for (const char *text : {"true,", "false]", "null}", "true", "false", "null"}) {
+        SCOPED_TRACE(text);
+        NoPutbackJsonBuffer buffer(text);
+        std::istream input(&buffer);
+        auto result = JsonData::parse(input, true);
+        ASSERT_TRUE(result);
+        EXPECT_FALSE(input.fail());
+        auto last = std::string(text).back();
+        if (last == ',' || last == ']' || last == '}') {
+            EXPECT_EQ(input.get(), last);
+        }
+    }
+}
+
+TEST(JSON, StrictParserRejectsUnicodeWhitespaceOutsideStrings) {
+    // Includes every sequence recognized by PR #5935's JSON parser.
+    for (const std::string space :
+         {"\xc2\xa0", "\xe2\x80\x80", "\xe2\x80\x81", "\xe2\x80\x82", "\xe2\x80\x83",
+          "\xe2\x80\x87", "\xe2\x80\x88", "\xe2\x80\x89", "\xe2\x80\x8a", "\xe2\x80\xaf",
+          "\xe2\x81\xa0", "\xe3\x80\x80", "\xef\xbb\xbf"}) {
+        for (const std::string &text :
+             {space + "[]", "[" + space + "1]", "[1," + space + "2]", "[1" + space + "]",
+              "{\"a\"" + space + ":1}", "{\"a\":" + space + "1}"}) {
+            SCOPED_TRACE(text);
+            std::istringstream input(text);
+            EXPECT_THROW(JsonData::parse(input, true), JsonData::error);
+        }
+        std::istringstream quoted("\"" + space + "\"");
+        auto result = JsonData::parse(quoted, true);
+        ASSERT_TRUE(result);
+        EXPECT_EQ(*result->to<JsonString>(), space);
+    }
+}
+
+TEST(JSON, StrictParserRejectsNonStringObjectKeys) {
+    for (const char *text : {"{true:1}", "{null:1}", "{[]:1}", "{{}:1}"}) {
+        std::istringstream input(text);
+        EXPECT_THROW(JsonData::parse(input, true), JsonData::error);
+    }
 }
