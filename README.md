@@ -279,34 +279,61 @@ platforms are untested; you can try to use them, but YMMV.
 
 - CMake 3.16.3 or higher
 
-- Boehm-Weiser garbage-collector C++ library
-
 - GNU Bison and Flex for the parser and lexical analyzer generators.
-
-- Google Protocol Buffers v3.25.3 or higher for control plane API generation
-
-- Boost.Multiprecision library for arbitrary precision arithmetic
 
 - Python 3 and uv for scripting and running tests
 
 - Optional: Documentation generation requires Doxygen (1.13.2) and Graphviz (2.38.0 or higher).
 
+The following libraries are integral to P4C. By default, CMake downloads and
+builds pinned versions of them as part of the P4C build, so they do not need
+to be installed beforehand. To use versions installed on the system instead,
+see the dependency options in [Installing P4C from source](#installing-p4c-from-source).
+
+- The Boehm-Weiser garbage collector ([bdwgc](https://github.com/ivmai/bdwgc)).
+  See also [Garbage collector](#garbage-collector).
+
+- Google Abseil.
+
+- Boost.Multiprecision for arbitrary precision arithmetic.
+
+- Google Protocol Buffers (v3.25.3) for control plane API generation. Protobuf
+  is only required when the control-plane library is enabled
+  (`-DENABLE_CONTROL_PLANE=ON`, the default).
+
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
   * [BMv2](backends/bmv2/README.md)
-  * [eBPF](backends/ebpf/README.md)
-  * [graphs](backends/graphs/README.md)
+  * [eBPF](backends/ebpf/README.md). The eBPF and uBPF test suites, which
+    are part of the default `check` target, require `libpcap-dev`.
+  * [uBPF](backends/ubpf/README.md)
+  * [TC](backends/tc/README.md)
+  * [DPDK](backends/dpdk/README.md)
+  * [graphs](backends/graphs/README.md). This backend is enabled by default
+    and requires Boost 1.83 or newer headers.
+  * [P4Tools](backends/p4tools/README.md)
+  * [Tofino](backends/tofino/bf-p4c/README.md#dependencies)
 
 ### Ubuntu dependencies
 
 Most dependencies can be installed using `apt-get install`:
 
 ```bash
-sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
+sudo apt-get install cmake g++ git automake libtool bison flex \
 libfl-dev libboost-dev llvm pkg-config python3 python3-pip \
-tcpdump
+tcpdump libpcap-dev curl
 
 ```
+`libboost-dev` is needed for the graphs backend, and `libpcap-dev` for the
+eBPF and uBPF tests that run as part of `cmake --build build --target check`.
+
+On Ubuntu 22.04, `libboost-dev` provides Boost 1.74, which is older than the
+version the graphs backend requires with the fetched Multiprecision library.
+Configure with `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON` to use the
+Multiprecision headers from the installed Boost instead (this is what the CI
+does on Ubuntu 22.04), or with `-DENABLE_P4C_GRAPHS=OFF` to skip the graphs
+backend.
+
 Python dependencies can be installed using `uv`:
 ```bash
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
@@ -371,9 +398,9 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 ### Fedora dependencies
 
 ```bash
-sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
+sudo dnf install -y cmake g++ git automake libtool bison flex \
 libfl-devel gmp-devel boost-devel llvm pkg-config \
-python3 python3-pip tcpdump uv
+python3 python3-pip tcpdump libpcap-devel uv
 
 uv sync
 ```
@@ -421,11 +448,11 @@ Installing on macOS:
 
 - Install dependencies using Homebrew:
   ```
-  brew install autoconf automake libtool bdw-gc boost bison pkg-config
+  brew install autoconf automake libtool boost bison pkg-config
   ```
   or with MacPorts
   ```
-  sudo port install autoconf automake coreutils libtool boehmgc boost bison pkg-config
+  sudo port install autoconf automake coreutils libtool boost bison pkg-config
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
