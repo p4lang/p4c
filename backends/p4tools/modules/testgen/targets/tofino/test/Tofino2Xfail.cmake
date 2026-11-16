@@ -109,9 +109,11 @@ p4tools_add_xfail_reason(
   # tna_meter_lpf_wred.p4
 )
 
+# The STF run dies with an uncaught exception; the PTF run of the same program passes.
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "terminate called after throwing an instance of"
+  switch_tofino2_y2.p4
 )
 
 p4tools_add_xfail_reason(
