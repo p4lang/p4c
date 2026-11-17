@@ -1,0 +1,11 @@
+<map id="P4::P4V1::RenameFieldPath" name="P4::P4V1::RenameFieldPath">
+<area shape="rect" id="Node000001" title=" " alt="" coords="129,157,329,184"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_v1_1_1_fix_bridged_intrinsic_metadata.html" title=" " alt="" coords="5,232,213,277"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="200,192,142,234,140,229,195,194"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_v1_1_1_fix_pktgen_header_path.html" title=" " alt="" coords="236,241,462,268"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="262,191,332,240,327,240,260,196"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="174,81,284,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,122,231,157,227,155,228,127"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="185,5,273,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="230,46,232,81,226,80,228,51"/>
+</map>

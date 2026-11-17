@@ -1,0 +1,10 @@
+<map id="BFN::CollectHardwareConstrainedFields" name="BFN::CollectHardwareConstrainedFields">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,248,277"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="61,157,192,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,198,129,233,124,231,125,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="83,5,170,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="116,45,109,81,109,108,123,156,118,156,104,109,104,81,114,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="118,81,228,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="143,44,168,80,162,81,143,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="159,120,137,158,133,155,155,124"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="P4::P4Tools::P4Testgen::Bmv2::MetadataCollection" name="P4::P4Tools::P4Testgen::Bmv2::MetadataCollection">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,249,208,294"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="22,157,191,201"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,215,109,250,104,248,105,219"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="53,81,160,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,122,109,157,104,155,106,127"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="50,5,163,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,46,109,81,104,80,106,51"/>
+</map>

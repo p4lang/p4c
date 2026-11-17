@@ -1,0 +1,21 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,213,113,241"/>
+<area shape="rect" id="Node000001" href="$class_adjust_egress_packet_length.html" title=" " alt="" coords="186,5,378,33"/>
+<area shape="poly" id="edge2631_Node000000_Node000001" title=" " alt="" coords="66,198,78,162,97,120,124,79,159,44,187,30,184,34,162,48,128,82,102,123,83,164,71,199"/>
+<area shape="rect" id="Node000002" href="$class_check_for_unimplemented_features.html" title=" " alt="" coords="161,57,403,85"/>
+<area shape="poly" id="edge2632_Node000000_Node000002" title=" " alt="" coords="72,198,107,145,131,118,159,96,188,84,184,88,162,100,135,122,111,148,77,201"/>
+<area shape="rect" id="Node000003" href="$group__midend.html#class_copy_block_pragmas" title="Pass that copies block annotations to the block&#39;s tables." alt="" coords="208,109,356,137"/>
+<area shape="poly" id="edge2633_Node000000_Node000003" title=" " alt="" coords="83,201,118,173,160,147,210,132,206,136,162,152,121,177,87,205"/>
+<area shape="rect" id="Node000004" href="$struct_create_thread_local_instances.html" title=" " alt="" coords="179,161,384,189"/>
+<area shape="poly" id="edge2634_Node000000_Node000004" title=" " alt="" coords="126,208,160,199,216,188,212,191,161,204,129,212"/>
+<area shape="rect" id="Node000005" href="$group__parde.html#struct_merge_parser_states" title="Merges a chain of states into a large state (before parser lowering). Find the longest chain that: Fo..." alt="" coords="210,213,354,241"/>
+<area shape="poly" id="edge2635_Node000000_Node000005" title=" " alt="" coords="127,225,212,225,208,229,129,230"/>
+<area shape="rect" id="Node000006" href="$class_move_to_egress.html" title=" " alt="" coords="225,265,339,293"/>
+<area shape="poly" id="edge2636_Node000000_Node000006" title=" " alt="" coords="127,242,161,250,227,266,222,268,160,255,128,247"/>
+<area shape="rect" id="Node000007" href="$class_normalize_hash_list.html" title="Normalize field lists in hashing expression (Hash.get primitive)" alt="" coords="210,317,354,345"/>
+<area shape="poly" id="edge2637_Node000000_Node000007" title=" " alt="" coords="85,249,121,277,162,302,212,320,207,322,160,307,118,282,85,254"/>
+<area shape="rect" id="Node000008" href="$group__bridged__packing.html#class_rename_arch_params" title="Pass that governs replacement of the user&#45;supplied parameter names with the corresponding parameter n..." alt="" coords="206,369,358,397"/>
+<area shape="poly" id="edge2638_Node000000_Node000008" title=" " alt="" coords="75,252,111,306,135,332,162,354,183,365,208,374,202,375,181,370,159,359,131,336,107,309,74,258"/>
+<area shape="rect" id="Node000009" href="$struct_simplify_references.html" title=" " alt="" coords="208,421,356,449"/>
+<area shape="poly" id="edge2639_Node000000_Node000009" title=" " alt="" coords="68,253,83,290,102,332,128,372,162,406,184,419,210,429,205,429,182,424,159,411,124,376,97,334,78,292,68,259"/>
+</map>

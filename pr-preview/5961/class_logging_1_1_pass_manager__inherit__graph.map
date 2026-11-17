@@ -1,0 +1,30 @@
+<map id="Logging::PassManager" name="Logging::PassManager">
+<area shape="rect" id="Node000001" title=" " alt="" coords="478,240,645,268"/>
+<area shape="rect" id="Node000005" href="$class_alias.html" title=" " alt="" coords="785,5,838,33"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="570,224,587,183,612,134,647,85,668,63,691,44,714,31,739,23,787,18,782,20,740,28,716,36,694,48,672,67,651,88,617,137,592,186,574,227"/>
+<area shape="rect" id="Node000006" href="$class_allocate_parser_checksums.html" title=" " alt="" coords="717,57,906,85"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="576,225,621,159,654,125,691,96,721,84,716,87,694,100,657,129,625,163,580,228"/>
+<area shape="rect" id="Node000007" href="$class_b_f_n_1_1_process_parde.html" title=" " alt="" coords="741,109,883,137"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="585,227,632,186,661,165,692,147,743,133,738,135,694,152,664,169,635,190,588,231"/>
+<area shape="rect" id="Node000008" href="$group___deparser_copy_opt.html#class_deparser_copy_opt" title="Top level PassManager." alt="" coords="744,161,880,189"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="608,231,692,199,746,188,741,189,693,204,610,236"/>
+<area shape="rect" id="Node000009" href="$class_find_dependency_graph.html" title=" " alt="" coords="728,213,896,241"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="660,241,730,235,725,237,661,246"/>
+<area shape="rect" id="Node000010" href="$class_log_flexible_packing.html" title=" " alt="" coords="739,265,885,293"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="660,261,741,271,736,272,661,266"/>
+<area shape="rect" id="Node000011" href="$class_lower_parser.html" title=" " alt="" coords="762,317,862,345"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="610,271,693,302,764,322,759,322,692,307,609,277"/>
+<area shape="rect" id="Node000012" href="$class_p_h_v___analysis_pass.html" title=" " alt="" coords="742,369,882,397"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="588,276,635,317,664,337,694,354,745,373,739,373,692,359,661,342,632,321,587,281"/>
+<area shape="rect" id="Node000013" href="$class_table_alloc_pass.html" title=" " alt="" coords="754,421,870,449"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="579,279,626,344,657,378,694,406,723,419,756,430,750,430,721,424,691,411,654,382,621,348,577,283"/>
+<area shape="rect" id="Node000014" href="$class_table_dependency_graph_summary.html" title=" " alt="" coords="693,473,931,501"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="574,280,592,322,617,370,651,418,694,458,718,473,713,472,691,463,647,422,613,373,587,324,571,284"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="299,240,430,268"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="445,251,480,253,475,255,446,256"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,240,93,268"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="108,251,300,252,297,256,109,256"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="141,265,251,293"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="107,262,143,268,138,271,109,266"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="266,266,301,263,296,265,268,271"/>
+</map>

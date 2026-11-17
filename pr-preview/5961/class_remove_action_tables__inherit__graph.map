@@ -1,0 +1,10 @@
+<map id="RemoveActionTables" name="RemoveActionTables">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,232,163,260"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="18,157,150,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,198,87,233,81,231,82,202"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="40,5,128,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,45,67,81,67,108,81,156,76,156,61,109,61,81,72,50"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="76,81,186,109"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="101,43,125,80,120,81,100,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="116,120,94,158,90,155,113,124"/>
+</map>
