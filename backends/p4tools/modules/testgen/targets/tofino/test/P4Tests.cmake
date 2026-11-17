@@ -178,8 +178,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/TofinoXfail.cmake)
 
 set (P4TOOLS_TESTGEN_TOFINO_T2NA_STF ${P4TOOLS_TESTGEN_TOFINO_T2NA})
 list(REMOVE_ITEM P4TOOLS_TESTGEN_TOFINO_T2NA_STF
-  # This test times out when running on STF.
-  # Compiler outcome is flaky on CI; the PTF run of the same program covers it.
   ${CMAKE_CURRENT_LIST_DIR}/p4-programs/tofino2_only/switch_tofino2_y2.p4
 )
 p4tools_add_tests(
