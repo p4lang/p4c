@@ -94,6 +94,7 @@ target_link_libraries(p4ctoolkit
   PRIVATE absl::symbolize
   # These libraries are exposed by a header.
   PUBLIC absl::bits
+  PUBLIC p4c_multiprecision
   PUBLIC absl::flat_hash_map
   PUBLIC absl::strings
   PUBLIC absl::str_format

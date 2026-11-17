@@ -9,6 +9,9 @@ macro(p4c_obtain_multiprecision)
     OFF
   )
 
+  # Usage requirements for the P4C libraries whose headers use big_int.
+  add_library(p4c_multiprecision INTERFACE)
+
   if(P4C_USE_PREINSTALLED_MULTIPRECISION)
     find_path(P4C_MULTIPRECISION_INCLUDE_DIR boost/multiprecision/cpp_int.hpp
       HINTS ${Boost_INCLUDE_DIRS} ${BOOST_ROOT}/include)
@@ -29,6 +32,7 @@ macro(p4c_obtain_multiprecision)
     set(BUILD_TESTING OFF)
     set(BOOST_MP_STANDALONE ON)
     add_compile_definitions(BOOST_MP_STANDALONE)
+    target_compile_definitions(p4c_multiprecision INTERFACE BOOST_MP_STANDALONE)
 
     # DOWNLOAD_EXTRACT_TIMESTAMP was introduced in CMake 3.24.
     set(P4C_MULTIPRECISION_DOWNLOAD_OPTIONS)
@@ -59,5 +63,7 @@ macro(p4c_obtain_multiprecision)
   endif()
 
   include_directories(SYSTEM ${P4C_MULTIPRECISION_INCLUDE_DIR} ${P4C_BOOST_CONFIG_INCLUDE_DIR})
+  target_include_directories(p4c_multiprecision SYSTEM INTERFACE
+    ${P4C_MULTIPRECISION_INCLUDE_DIR} ${P4C_BOOST_CONFIG_INCLUDE_DIR})
   message(STATUS "Done with setting up Multiprecision for P4C.")
 endmacro(p4c_obtain_multiprecision)
