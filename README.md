@@ -304,13 +304,11 @@ see the dependency options in [Installing P4C from source](#installing-p4c-from-
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
   * [BMv2](backends/bmv2/README.md)
-  * [eBPF](backends/ebpf/README.md). The eBPF and uBPF test suites, which
-    are part of the default `check` target, require `libpcap-dev`.
+  * [eBPF](backends/ebpf/README.md)
   * [uBPF](backends/ubpf/README.md)
   * [TC](backends/tc/README.md)
   * [DPDK](backends/dpdk/README.md)
-  * [graphs](backends/graphs/README.md). This backend is enabled by default
-    and requires Boost 1.83 or newer headers.
+  * [graphs](backends/graphs/README.md)
   * [P4Tools](backends/p4tools/README.md)
   * [Tofino](backends/tofino/bf-p4c/README.md#dependencies)
 
@@ -321,19 +319,9 @@ Most dependencies can be installed using `apt-get install`:
 ```bash
 sudo apt-get install cmake g++ git automake libtool bison flex \
 libfl-dev libboost-dev llvm pkg-config python3 python3-pip \
-tcpdump libpcap-dev curl
+tcpdump curl
 
 ```
-`libboost-dev` is needed for the graphs backend, and `libpcap-dev` for the
-eBPF and uBPF tests that run as part of `cmake --build build --target check`.
-
-On Ubuntu 22.04, `libboost-dev` provides Boost 1.74, which is older than the
-version the graphs backend requires with the fetched Multiprecision library.
-Configure with `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON` to use the
-Multiprecision headers from the installed Boost instead (this is what the CI
-does on Ubuntu 22.04), or with `-DENABLE_P4C_GRAPHS=OFF` to skip the graphs
-backend.
-
 Python dependencies can be installed using `uv`:
 ```bash
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
@@ -400,7 +388,7 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 ```bash
 sudo dnf install -y cmake g++ git automake libtool bison flex \
 libfl-devel gmp-devel boost-devel llvm pkg-config \
-python3 python3-pip tcpdump libpcap-devel uv
+python3 python3-pip tcpdump uv
 
 uv sync
 ```
