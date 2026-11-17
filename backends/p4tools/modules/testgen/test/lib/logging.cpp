@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <sstream>
+#include <string>
 
 #include "lib/timer.h"
 
@@ -60,6 +61,20 @@ TEST_F(LoggingTest, DisabledLoggingDoesNotFormat) {
     Log::addDebugSpec("p4tools_logging_disabled:0");
     EXPECT_NO_THROW(printFeature("p4tools_logging_disabled", 4, "%q", StreamValue{}));
     EXPECT_TRUE(output.str().empty());
+}
+
+// Each tag keeps its own log level when calls alternate between tags.
+TEST_F(LoggingTest, AlternatingLabelsKeepTheirLevels) {
+    Log::addDebugSpec("p4tools_logging_disabled:0");
+    for (int round = 0; round < 3; ++round) {
+        printFeature("p4tools_logging_disabled", 4, "hidden %1%", round);
+        printFeature("p4tools_logging_test", 4, "shown %1%", round);
+    }
+    EXPECT_EQ(output.str().find("hidden"), std::string::npos) << output.str();
+    for (int round = 0; round < 3; ++round) {
+        EXPECT_NE(output.str().find("shown " + std::to_string(round)), std::string::npos)
+            << output.str();
+    }
 }
 
 }  // namespace
