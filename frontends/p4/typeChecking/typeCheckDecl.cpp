@@ -449,6 +449,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
         return member;
     }
     const auto *exprType = getType(member->value);
+    // The initializer failed to type check; the error has already been signalled.
+    if (exprType == nullptr) return member;
     auto *tvs = unifyCast(member, type, exprType,
                           "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
                           {member, exprType, type});
