@@ -156,6 +156,7 @@ $(function(){initNavTree('graphs_backend.html',''); initResizable(true); });
 <h2><a class="anchor" id="dependencies-3"></a>
 Dependencies</h2>
 <p>In addition to other P4C dependencies, this backend requires the Boost graph headers. On a Debian system, they can be installed with <code>sudo apt-get install libboost-graph-dev</code>.</p>
+<p>Older Boost.Graph headers do not work with the Boost.Multiprecision library that P4C fetches by default. If your system Boost is older than 1.83 (for example on Ubuntu 22.04), configure with <code>-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON</code>, or disable this backend with <code>-DENABLE_P4C_GRAPHS=OFF</code>.</p>
 <h2><a class="anchor" id="usage"></a>
 Usage</h2>
 <div class="fragment"><div class="line">mkdir out</div>
