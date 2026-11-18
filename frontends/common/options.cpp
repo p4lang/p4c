@@ -5,6 +5,7 @@
 
 #include "options.h"
 
+#include "absl/strings/str_split.h"
 #include "frontends/p4/frontend.h"
 
 namespace P4 {
@@ -14,9 +15,8 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
         "--excludeFrontendPasses", "pass1[,pass2]",
         [this](const char *arg) {
             excludeFrontendPasses = true;
-            // FIXME: just split into string_view's
-            auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) passesToExcludeFrontend.push_back(cstring(pass));
+            for (std::string_view pass : absl::StrSplit(arg, ','))
+                passesToExcludeFrontend.push_back(cstring(pass));
             return true;
         },
         "Exclude passes from frontend passes whose name is equal\n"
@@ -35,8 +35,8 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
         "--excludeMidendPasses", "pass1[,pass2]",
         [this](const char *arg) {
             excludeMidendPasses = true;
-            auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) passesToExcludeMidend.push_back(cstring(pass));
+            for (std::string_view pass : absl::StrSplit(arg, ','))
+                passesToExcludeMidend.push_back(cstring(pass));
             return true;
         },
         "Exclude passes from midend passes whose name is equal\n"
@@ -178,8 +178,8 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
                                                            "parser"_cs,
                                                            "inlined"_cs,
                                                            "extern"_cs};
-            auto copy = strdup(arg);
-            while (cstring metric = cstring(strsep(&copy, ","))) {
+            for (std::string_view name : absl::StrSplit(arg, ',')) {
+                cstring metric(name);
                 if (metric == "all") {
                     CompilerOptions::selectedMetrics = validMetrics;
                     return true;
