@@ -24,6 +24,8 @@ license(
 
 exports_files(["LICENSE"])
 
+exports_files(["test/gtest/gtestp4c.cpp"])
+
 # Deprecated: use //p4include instead.
 alias(
     name = "p4include",
@@ -222,6 +224,8 @@ cc_library(
             "frontends/p4/typeChecking/typeCheckExpr_v1.cpp",
         ],
     ) + [
+        # IR extensions must be linked alongside the generated IR.
+        "//backends/p4tools:ir_extension_sources",
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
         "backends/dpdk/spec.cpp",
