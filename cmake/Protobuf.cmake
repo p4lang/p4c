@@ -3,7 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 macro(p4c_obtain_protobuf)
-  set(P4C_PROTOBUF_VERSION 25.3)
+  set(
+    P4C_PROTOBUF_VERSION 25.3 CACHE STRING
+    "Protobuf version to use in building p4c, of the form 25.3 or 33.5"
+  )
   option(
     P4C_USE_PREINSTALLED_PROTOBUF
     "Look for a preinstalled version of Protobuf in the system instead of installing a prebuilt binary using FetchContent."
@@ -41,6 +44,8 @@ macro(p4c_obtain_protobuf)
     if(ENABLE_PROTOBUF_STATIC)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
+    get_target_property(Protobuf_INCLUDE_DIRS protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "Protobuf_INCLUDE_DIRS=${Protobuf_INCLUDE_DIRS}")
   else()
     message(STATUS "Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4C...")
 
@@ -89,6 +94,7 @@ macro(p4c_obtain_protobuf)
     # Protobuf does not seem to set Protobuf_INCLUDE_DIRS correctly when used as a module, but we
     # need this variable for generating code.
     list(APPEND Protobuf_INCLUDE_DIRS "${protobuf_SOURCE_DIR}/src/")
+    message(STATUS "Protobuf_INCLUDE_DIRS=${Protobuf_INCLUDE_DIRS}")
 
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
