@@ -63,11 +63,12 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
+    EnumOn32Bits enumPolicy;
     PassManager midEnd = {};
     ParserConfig config;
     if (options.loadIRFromJson == false) {
         midEnd.addPasses(
-            {new P4::ConvertEnums(&typeMap, new EnumOn32Bits()),
+            {new P4::ConvertEnums(&typeMap, &enumPolicy),
              new P4::ClearTypeMap(&typeMap),
              new P4::RemoveMiss(&typeMap),
              new P4::EliminateInvalidHeaders(&typeMap),
