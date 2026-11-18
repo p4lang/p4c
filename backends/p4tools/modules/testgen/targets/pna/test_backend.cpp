@@ -50,11 +50,11 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
         exit(EXIT_FAILURE);
     }
     if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testBackendConfiguration);
+        testWriter = std::make_unique<Metadata>(testBackendConfiguration);
     } else if (testBackendString == "PTF") {
-        testWriter = new PTF(testBackendConfiguration);
+        testWriter = std::make_unique<PTF>(testBackendConfiguration);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",

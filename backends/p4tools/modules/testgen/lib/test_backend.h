@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -42,7 +43,7 @@ class TestBackEnd {
 
  protected:
     /// Writes the tests out to a file.
-    TestFramework *testWriter = nullptr;
+    std::unique_ptr<TestFramework> testWriter;
 
     /// Pointer to the symbolic executor.
     /// TODO: Remove this. We only need to update coverage tracking.
@@ -64,7 +65,7 @@ class TestBackEnd {
     [[nodiscard]] bool needsToTerminate(int64_t testCount) const;
 
  public:
-    TestBackEnd(const TestBackEnd &) = default;
+    TestBackEnd(const TestBackEnd &) = delete;
 
     TestBackEnd(TestBackEnd &&) = default;
 
