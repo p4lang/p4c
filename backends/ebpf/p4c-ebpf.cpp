@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "backends/ebpf/version.h"
@@ -85,7 +86,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoEbpfContext(new EbpfContext);
+    AutoCompileContext autoEbpfContext(std::make_unique<EbpfContext>());
     auto &options = EbpfContext::get().options();
     options.compilerVersion = cstring(P4C_EBPF_VERSION_STRING);
 
