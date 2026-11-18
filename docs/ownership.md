@@ -87,8 +87,3 @@ ctest --test-dir build-asan -L memory-leak --no-tests=error --output-on-failure
 Leak detection is disabled during the build because the IR generator still
 retains allocations. The labeled tests must release their allocations; passing
 them does not establish leak freedom for every backend or compiler input.
-
-The [Testgen memory benchmark](../backends/p4tools/modules/testgen/benchmarks/README.md)
-measures peak RSS at increasing test counts. A memory ceiling catches large
-growth regressions, but passing it does not establish that allocations are
-released; retain the leak checks as well.

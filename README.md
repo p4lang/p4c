@@ -476,10 +476,7 @@ to build without it. In this mode, IR references use intrusive reference
 counting, and supporting objects use scoped or shared ownership.
 See the [ownership guide](docs/ownership.md) when modifying these lifetimes.
 
-The no-GC ownership migration is still in progress. Passing compiler tests
-does not establish that a backend is leak-free. The
-[Testgen memory benchmark](backends/p4tools/modules/testgen/benchmarks/README.md)
-describes measuring memory growth and checking allocations with Valgrind.
+Backend-specific ownership validation is ongoing.
 
 ### Crash dumps
 
