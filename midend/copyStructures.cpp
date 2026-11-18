@@ -12,7 +12,8 @@ namespace P4 {
 
 const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     const auto *type = typeMap->getType(statement->left);
-    if (!type->is<IR::Type_StructLike>() && !type->is<IR::Type_Array>()) {
+    if (!type->is<IR::Type_StructLike>() && !type->is<IR::Type_Array>() &&
+        !type->is<IR::Type_Tuple>()) {
         return statement;
     }
 
@@ -50,6 +51,31 @@ const IR::Node *RemoveAliases::postorder(IR::P4Control *control) {
         declarations.clear();
     }
     return control;
+}
+
+const IR::Node *RemoveAliases::postorder(IR::P4Action *fn) {
+    if (!declarations.empty() && !isInContext<IR::P4Control>()) {
+        auto *body = fn->body->clone();
+        body->components.prepend(declarations);
+        declarations.clear();
+        fn->body = body;
+    }
+    return fn;
+}
+
+const IR::Node *RemoveAliases::preorder(IR::Function *fn) {
+    IR::IndexedVector<IR::Declaration> saved(std::move(declarations));
+    declarations.clear();
+    prune();
+    fn->visit_children(*this, getContext()->child_name);
+    if (!declarations.empty()) {
+        auto *body = fn->body->clone();
+        body->components.prepend(declarations);
+        declarations.clear();
+        fn->body = body;
+    }
+    declarations = std::move(saved);
+    return fn;
 }
 
 const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) {
