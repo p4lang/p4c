@@ -1,0 +1,9 @@
+issue2544_shadowing1.p4(25): [--Wwarn=shadow] warning: 'h' shadows 'h'
+        Headers h = h;
+                ^
+issue2544_shadowing1.p4(23)
+control ingress(inout Headers h) {
+                              ^
+issue2544_shadowing1.p4(25): [--Wwarn=unused] warning: 'h' is unused
+        Headers h = h;
+                ^
