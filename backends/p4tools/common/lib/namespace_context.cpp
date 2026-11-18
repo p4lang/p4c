@@ -98,7 +98,7 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
 const std::set<cstring> &NamespaceContext::getUsedNames() const {
     if (!usedNames) {
         if (this == Empty) {
-            usedNames = *new std::set<cstring>();
+            usedNames.emplace();
         } else {
             usedNames = outer->getUsedNames();
 
