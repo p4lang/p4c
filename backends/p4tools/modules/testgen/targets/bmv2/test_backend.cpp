@@ -53,15 +53,17 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
     }
 
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testBackendConfiguration);
+        testWriter = std::make_unique<PTF>(testBackendConfiguration);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else if (testBackendString == "PROTOBUF") {
-        testWriter = new Protobuf(testBackendConfiguration, programInfo.getP4RuntimeAPI());
+        testWriter =
+            std::make_unique<Protobuf>(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "PROTOBUF_IR") {
-        testWriter = new ProtobufIr(testBackendConfiguration, programInfo.getP4RuntimeAPI());
+        testWriter =
+            std::make_unique<ProtobufIr>(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testBackendConfiguration);
+        testWriter = std::make_unique<Metadata>(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
