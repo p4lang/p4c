@@ -13,6 +13,7 @@ set(LIBP4CTOOLKIT_SRCS
     cstring.cpp
     error_catalog.cpp
     error_message.cpp
+    exceptions.cpp
     exename.cpp
     fdstream.cpp
     format.cpp

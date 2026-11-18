@@ -13,10 +13,10 @@
 #include <unistd.h>
 
 #include <exception>
+#include <source_location>
 #include <string>
 #include <utility>
 
-#include "absl/strings/str_cat.h"
 #include "lib/format.h"
 
 namespace P4::Util {
@@ -62,6 +62,11 @@ class P4CExceptionBase : public std::exception {
     std::string message;
     void traceCreation() {}
 
+    /// Add an exception heading to already-formatted text without invoking the formatter.
+    P4CExceptionBase(std::string formattedMessage, const char *heading, const char *color);
+    P4CExceptionBase(std::source_location location, std::string formattedMessage,
+                     const char *heading, const char *color);
+
  public:
     /// Use already-formatted text without invoking the diagnostic formatter.
     explicit P4CExceptionBase(std::string formattedMessage) : message(std::move(formattedMessage)) {
@@ -82,23 +87,15 @@ class CompilerBug final : public P4CExceptionBase {
  public:
     /// Also usable when the diagnostic formatter itself fails.
     explicit CompilerBug(std::string formattedMessage)
-        : P4CExceptionBase(std::move(formattedMessage)) {
-        // Check if output is redirected and if so, then don't color text so that
-        // escape characters are not present
-        message = absl::StrCat(cerr_colorize(ANSI_RED), "Compiler Bug", cerr_clear_colors(), ":\n",
-                               message);
-    }
+        : P4CExceptionBase(std::move(formattedMessage), "Compiler Bug", ANSI_RED) {}
 
     template <typename... Args>
     explicit CompilerBug(const char *format, Args &&...args)
         : CompilerBug(createBugMessage(format, args...)) {}
 
     template <typename... Args>
-    CompilerBug(int line, const char *file, const char *format, Args &&...args)
-        : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        message = absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_RED),
-                               "Compiler Bug", cerr_clear_colors(), ": ", message);
-    }
+    CompilerBug(std::source_location location, const char *format, Args &&...args)
+        : P4CExceptionBase(location, createBugMessage(format, args...), "Compiler Bug", ANSI_RED) {}
 };
 
 /// This class indicates an unimplemented feature in the compiler
@@ -106,19 +103,12 @@ class CompilerUnimplemented final : public P4CExceptionBase {
  public:
     template <typename... Args>
     explicit CompilerUnimplemented(const char *format, Args &&...args)
-        : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        // Do not add colors when redirecting to stderr
-        message = absl::StrCat(cerr_colorize(ANSI_BLUE), "Not yet implemented", cerr_clear_colors(),
-                               ":\n", message);
-    }
+        : P4CExceptionBase(createBugMessage(format, args...), "Not yet implemented", ANSI_BLUE) {}
 
     template <typename... Args>
-    CompilerUnimplemented(int line, const char *file, const char *format, Args &&...args)
-        : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        message =
-            absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_BLUE),
-                         "Unimplemented compiler support", cerr_clear_colors(), ": ", message);
-    }
+    CompilerUnimplemented(std::source_location location, const char *format, Args &&...args)
+        : P4CExceptionBase(location, createBugMessage(format, args...),
+                           "Unimplemented compiler support", ANSI_BLUE) {}
 };
 
 /// This class indicates a compilation error that we do not want to recover from.
@@ -130,26 +120,41 @@ class CompilationError : public P4CExceptionBase {
         : P4CExceptionBase(format, std::forward<Args>(args)...) {}
 };
 
-/// FIXME: Use __VA_OPT__ for calls without an input string?
-#define BUG(...)                                                      \
-    do {                                                              \
-        throw P4::Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
-#define BUG_CHECK(e, ...)           \
-    do {                            \
-        if (!(e)) BUG(__VA_ARGS__); \
-    } while (0)
-#define P4C_UNIMPLEMENTED(...)                                                  \
-    do {                                                                        \
-        throw P4::Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
+/// Capture the caller's location when a format string is passed to a variadic function.
+/// A defaulted source_location parameter after an argument pack would prevent deduction.
+struct FormatWithLocation {
+    const char *format;
+    std::source_location location;
+
+    // The implicit conversion captures the location at the call site.
+    // NOLINTNEXTLINE(runtime/explicit)
+    constexpr FormatWithLocation(const char *format,
+                                 std::source_location location = std::source_location::current())
+        : format(format), location(location) {}
+};
 
 }  // namespace P4::Util
 
-/// Report an error and exit
-#define FATAL_ERROR(...)                               \
-    do {                                               \
-        throw P4::Util::CompilationError(__VA_ARGS__); \
+template <typename... Args>
+[[noreturn]] inline void BUG(P4::Util::FormatWithLocation fmt, Args &&...args) {
+    throw P4::Util::CompilerBug(fmt.location, fmt.format, std::forward<Args>(args)...);
+}
+
+// Keep diagnostic arguments unevaluated when the check succeeds.
+#define BUG_CHECK(e, ...)             \
+    do {                              \
+        if (!(e)) ::BUG(__VA_ARGS__); \
     } while (0)
+
+template <typename... Args>
+[[noreturn]] inline void P4C_UNIMPLEMENTED(P4::Util::FormatWithLocation fmt, Args &&...args) {
+    throw P4::Util::CompilerUnimplemented(fmt.location, fmt.format, std::forward<Args>(args)...);
+}
+
+/// Report an error and exit
+template <typename... Args>
+[[noreturn]] inline void FATAL_ERROR(const char *format, Args &&...args) {
+    throw P4::Util::CompilationError(format, std::forward<Args>(args)...);
+}
 
 #endif /* LIB_EXCEPTIONS_H_ */
