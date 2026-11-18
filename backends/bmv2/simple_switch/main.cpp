@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "backends/bmv2/common/JsonObjects.h"
@@ -34,7 +35,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
+    AutoCompileContext autoBMV2Context(std::make_unique<BMV2::SimpleSwitchContext>());
     auto &options = BMV2::SimpleSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(BMV2_SIMPLESWITCH_VERSION_STRING);
@@ -103,11 +104,12 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend =
-        new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    auto backend = std::make_unique<BMV2::SimpleSwitchBackend>(options, &midEnd.refMap,
+                                                               &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
+    AutoCompileContext autoContext(
+        std::make_unique<BMV2::BMV2Context>(BMV2::SimpleSwitchContext::get()));
     try {
         backend->convert(toplevel);
     } catch (const std::exception &bug) {
