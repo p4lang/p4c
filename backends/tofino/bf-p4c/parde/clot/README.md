@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2024 Intel Corporation
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # CLOT allocator and metric {#clot_alloc_and_metric}
