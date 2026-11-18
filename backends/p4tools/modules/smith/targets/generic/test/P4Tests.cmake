@@ -25,7 +25,7 @@ if (ENABLE_GTESTS)
     target_link_libraries(
         smith-compile-core
         PRIVATE smith
-        PRIVATE gtest
+        PRIVATE GTest::gtest
         PRIVATE ${SMITH_LIBS}
         PRIVATE ${P4C_LIBRARIES}
         PRIVATE ${P4C_LIB_DEPS}
@@ -37,4 +37,3 @@ if (ENABLE_GTESTS)
     endif()
 
 endif()
-
