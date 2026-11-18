@@ -17,9 +17,6 @@
 
 namespace P4::P4Tools::P4Testgen {
 
-/// A cache of already computed nodes to avoid superfluous computation.
-using NodeCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
-
 /// CoverableNodesScanner is similar to @ref CollectNodes. It collects all the nodes
 /// present in a particular node. However, compared to CollectNodes, it traverses the entire
 /// subsequent parser DAG for a particular parser state. If there is a loop in the parser state, it
