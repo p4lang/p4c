@@ -36,14 +36,13 @@ SharedPnaProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 
-const IR::StateVariable &SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(PnaConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*parser_istd"),
-                                                 "input_port"));
+IR::StateVariable SharedPnaProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(PnaConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*parser_istd"), "input_port"));
 }
 
-const IR::StateVariable &SharedPnaProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
+IR::StateVariable SharedPnaProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
 }
 
 const IR::Expression *SharedPnaProgramInfo::dropIsActive() const { return &PnaConstants::DROP_VAR; }
