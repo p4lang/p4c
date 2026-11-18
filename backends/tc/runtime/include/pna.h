@@ -2,7 +2,11 @@
  * Copyright (C) 2023 Intel Corporation
  * SPDX-FileCopyrightText: 2023 Intel Corporation
  *
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: GPL-2.0-only or BSD-2-Clause
+ *
+ * See this article for details on the dual license used for this
+ * file:
+ * https://github.com/p4lang/.github/blob/main/copyright-and-license-issues/ebpf-program-licenses.md
  */
 
 #ifndef P4C_PNA_H
