@@ -1,3 +1,9 @@
+/*
+* SPDX-FileCopyrightText: 2026 Pantherun Technologies
+*
+* SPDX-License-Identifier: Apache-2.0
+*/
+
 #include <core.p4>
 
 int<8> mul(in int<8> a, int<8> b = 2, in int<8> c) {
