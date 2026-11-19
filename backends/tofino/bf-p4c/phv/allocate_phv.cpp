@@ -4341,7 +4341,7 @@ static std::string diagnoseSuperCluster(const PHV::SuperCluster &sc) {
     std::sort(sortedFields.begin(), sortedFields.end(),
               [](const PHV::Field *f1, const PHV::Field *f2) { return f1->name < f2->name; });
     msg << "These fields have the following field-level constraints:" << std::endl;
-    for (auto *f : fields)
+    for (auto *f : sortedFields)
         msg << "    " << printSliceConstraints(PHV::FieldSlice(f, StartLen(0, f->size)))
             << std::endl;
     msg << std::endl;
