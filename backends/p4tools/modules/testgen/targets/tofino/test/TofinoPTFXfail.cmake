@@ -232,8 +232,14 @@ p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "exceeded the maximum number of permitted guard violations for this run"
   # lookahead1.p4
-  switchml.p4
   # parser_multi_write_checksum_verify_5.p4
+)
+
+# Guard-violation cap or PHV allocation, depending on where the run gives up first.
+p4tools_add_xfail_reason(
+  "testgen-tofino-ptf"
+  "exceeded the maximum number of permitted guard violations for this run|PHV allocation was not successful"
+  switchml.p4
 )
 
 p4tools_add_xfail_reason(

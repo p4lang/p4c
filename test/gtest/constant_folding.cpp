@@ -4,6 +4,11 @@
 
 #include <gtest/gtest.h>
 
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -162,6 +167,104 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     ASSERT_TRUE(sf_2);
     auto *ts_2 = sf_2->type->to<IR::Type_Array>();
     EXPECT_TRUE(ts_2->size->is<IR::Constant>());
+}
+
+namespace {
+
+/// Collects assigned values.
+class AssignedValues : public Inspector {
+ public:
+    std::vector<const IR::Expression *> values;
+
+ private:
+    bool preorder(const IR::AssignmentStatement *assign) override {
+        values.push_back(assign->right);
+        return false;
+    }
+};
+
+const char *const structDecls = R"(
+    struct S { bit<8> a; bit<16> b; }
+    struct N { S s; bool f; }
+    const S s1 = { a = 1, b = 2 };
+    const S s2 = { a = 1, b = 3 };
+    const S s1r = { b = 2, a = 1 };
+    const N n1 = { s = { a = 1, b = 2 }, f = true };
+    const N n2 = { f = true, s = { b = 2, a = 1 } };
+    const N n3 = { s = { a = 1, b = 3 }, f = true };
+)";
+
+/// Folds @p expr to a bool, or nullopt.
+std::optional<bool> foldBool(const std::string &expr) {
+    // Fresh context per program.
+    AutoCompileContext autoContext(std::make_unique<GTestContext>());
+    const std::string source = std::string(structDecls) + "const bool result = " + expr + ";\n" +
+                               R"(
+        control C(out bool o);
+        package Top(C c);
+        control c(out bool o) { apply { o = result; } }
+        Top(c()) main;
+    )";
+    auto test = FrontendTestCase::create(P4_SOURCE(source.c_str()));
+    if (!test) return std::nullopt;
+    AssignedValues assigned;
+    test->program->apply(assigned);
+    if (assigned.values.size() != 1) return std::nullopt;
+    const auto *value = assigned.values.front()->to<IR::BoolLiteral>();
+    if (value == nullptr) return std::nullopt;
+    return value->value;
+}
+
+}  // namespace
+
+struct P4CConstantFoldingComparison : P4CTest {};
+
+TEST_F(P4CConstantFoldingComparison, StructEquality) {
+    const std::vector<std::pair<std::string, bool>> cases = {
+        {"s1 == s1", true},
+        {"s1 == s2", false},
+        {"s1 != s2", true},
+        {"s1 != s1", false},
+        {"s1 == { a = 1, b = 2 }", true},
+        {"s1 == { 1, 3 }", false},
+        {"n1 == n3", false},
+        {"n1 != n3", true},
+        {"n1.s == s1", true},
+        {"n3.s == s1", false},
+    };
+    for (const auto &[expr, expected] : cases) {
+        EXPECT_EQ(std::optional<bool>(expected), foldBool(expr)) << expr;
+    }
+}
+
+TEST_F(P4CConstantFoldingComparison, StructEqualityIgnoresInitializerFieldOrder) {
+    EXPECT_EQ(std::optional<bool>(true), foldBool("s1 == s1r"));
+    EXPECT_EQ(std::optional<bool>(false), foldBool("s1 != s1r"));
+    EXPECT_EQ(std::optional<bool>(true), foldBool("n1 == n2"));
+}
+
+TEST_F(P4CConstantFoldingComparison, StructMemberComparedToLiteral) {
+    const std::vector<std::pair<std::string, bool>> cases = {
+        {"s1.a == 1", true},           {"1 == s1.a", true},
+        {"s1.b != 3", true},           {"s1.a < 5", true},
+        {"s1.a > 1", false},           {"s1.a >= 2", false},
+        {"n1.s.b <= 2 && n1.f", true},
+    };
+    for (const auto &[expr, expected] : cases) {
+        EXPECT_EQ(std::optional<bool>(expected), foldBool(expr)) << expr;
+    }
+}
+
+TEST_F(P4CConstantFoldingComparison, NonConstantOperandIsNotCompileTimeConstant) {
+    std::string source = P4_SOURCE(R"(
+        struct S { bit<8> a; }
+        control c() {
+            S v = { a = 1 };
+            const bool r = v.a == 1;
+            apply { }
+        }
+    )");
+    EXPECT_FALSE(FrontendTestCase::create(source));
 }
 
 }  // namespace P4::Test
