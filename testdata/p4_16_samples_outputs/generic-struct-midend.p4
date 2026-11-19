@@ -39,25 +39,30 @@ struct H4_H2_S {
     H2_S x;
 }
 
-struct H3<T> {
-    H2_S        r;
-    T           s;
-    H2<T>       h2;
-    H4<H2<T>>   h3;
-    tuple<T, T> t;
+struct tuple_0<T0, T1> {
+    T0 f0;
+    T1 f1;
 }
 
-struct tuple_0 {
+struct tuple_0_S_S {
     S f0;
     S f1;
 }
 
+struct H3<T> {
+    H2_S          r;
+    T             s;
+    H2<T>         h2;
+    H4<H2<T>>     h3;
+    tuple_0<T, T> t;
+}
+
 struct H3_S {
-    H2_S    r;
-    S       s;
-    H2_S    h2;
-    H4_H2_S h3;
-    tuple_0 t;
+    H2_S        r;
+    S           s;
+    H2_S        h2;
+    H4_H2_S     h3;
+    tuple_0_S_S t;
 }
 
 header GH<T> {
