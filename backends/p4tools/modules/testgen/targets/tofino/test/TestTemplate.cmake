@@ -83,6 +83,10 @@ macro(p4tools_add_test_with_args)
   set(target ${TOOLS_TOFINO_TESTS_TARGET})
   set(arch ${TOOLS_TOFINO_TESTS_ARCH})
   set(test_args ${TOOLS_TOFINO_TESTS_TEST_ARGS})
+  if(alias STREQUAL "switchml.p4")
+    # SwitchML recirculates packets through the other three Tofino pipes.
+    string(APPEND test_args " --port-ranges 128:143,256:271,384:399")
+  endif()
   set(ctest_p4c_args ${TOOLS_TOFINO_TESTS_CTEST_P4C_ARGS})
   set(cmake_args ${TOOLS_TOFINO_TESTS_CMAKE_ARGS})
 
