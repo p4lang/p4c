@@ -131,7 +131,7 @@ var searchData=
   ['schema_20review_20board_20members_128',['Schema review board members',['..//home/runner/work/p4c/p4c/backends/tofino/compiler_interfaces/README.md#schema-review-board-members',1,'']]],
   ['schema_20versioning_20policy_129',['Schema versioning policy',['..//home/runner/work/p4c/p4c/backends/tofino/compiler_interfaces/README.md#schema-versioning-policy',1,'']]],
   ['scmloc_130',['ScmLoc',['../struct_memories_1_1_use_1_1_scm_loc.html',1,'Memories::Use']]],
-  ['scope_131',['scope',['../class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html#abb885f444412952c42b03a59ef4bd358',1,'P4::P4Tools::P4Smith::P4Scope']]],
+  ['scope_131',['scope',['../outlining.html#regression-scope',1,'Regression scope'],['../class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html#abb885f444412952c42b03a59ef4bd358',1,'P4::P4Tools::P4Smith::P4Scope::scope']]],
   ['scope_20purpose_132',['Scope &amp; Purpose',['../agents.html#scope--purpose',1,'']]],
   ['scopedtimer_133',['ScopedTimer',['../class_p4_1_1_util_1_1_scoped_timer.html',1,'P4::Util']]],
   ['scopedtimerctx_134',['ScopedTimerCtx',['../struct_p4_1_1_util_1_1_scoped_timer_ctx.html',1,'P4::Util']]],

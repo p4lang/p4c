@@ -148,6 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3cbf4567bbf8646071c1718d8d3f3185" id="r_a3cbf4567bbf8646071c1718d8d3f3185"><td class="memItemLeft" align="right" valign="top"><a id="a3cbf4567bbf8646071c1718d8d3f3185" name="a3cbf4567bbf8646071c1718d8d3f3185"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Member *expression) override</td></tr>
 <tr class="separator:a3cbf4567bbf8646071c1718d8d3f3185"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52e208bdd26dee04d0ba7e269c0e7e54" id="r_a52e208bdd26dee04d0ba7e269c0e7e54"><td class="memItemLeft" align="right" valign="top"><a id="a52e208bdd26dee04d0ba7e269c0e7e54" name="a52e208bdd26dee04d0ba7e269c0e7e54"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::ParserState *parserState) override</td></tr>
+<tr class="separator:a52e208bdd26dee04d0ba7e269c0e7e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_e_b_p_f_1_1_psa_state_translation_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_e_b_p_f_1_1_psa_state_translation_visitor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_e_b_p_f_1_1_psa_state_translation_visitor.html">P4::EBPF::PsaStateTranslationVisitor</a></td></tr>
 <tr class="memitem:a7c7a311ba072dd42d5b431411cdb95aa inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_psa_state_translation_visitor" id="r_a7c7a311ba072dd42d5b431411cdb95aa"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>PsaStateTranslationVisitor</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_psa_parser.html">EBPFPsaParser</a> *prsr)</td></tr>
@@ -212,6 +215,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCBinaryOperation
 <tr class="memitem:ae03e05fb3710a73f61f16cf6947b6303 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_ae03e05fb3710a73f61f16cf6947b6303"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCLarge</b> (const IR::Operation_Binary *, unsigned int)</td></tr>
 <tr class="separator:ae03e05fb3710a73f61f16cf6947b6303 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8416067dc0b2abccb6cad5940c060360 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a8416067dc0b2abccb6cad5940c060360"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCUnsignedArithmetic</b> (const IR::Operation_Binary *)</td></tr>
+<tr class="separator:a8416067dc0b2abccb6cad5940c060360 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4100d47c82d006468af142654aa473be inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a4100d47c82d006468af142654aa473be"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>getBitAlignment</b> (const IR::Expression *expression)</td></tr>
 <tr class="separator:a4100d47c82d006468af142654aa473be inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -523,6 +529,9 @@ template&lt;class T, typename = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a68a1ea665584e44acea7887a57e23051" id="r_a68a1ea665584e44acea7887a57e23051"><td class="memItemLeft" align="right" valign="top"><a id="a68a1ea665584e44acea7887a57e23051" name="a68a1ea665584e44acea7887a57e23051"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>emittingOutlineRegion</b> = false</td></tr>
+<tr class="separator:a68a1ea665584e44acea7887a57e23051"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2e9bf10cd87e302a284d1a3048f9df1" id="r_af2e9bf10cd87e302a284d1a3048f9df1"><td class="memItemLeft" align="right" valign="top"><a id="af2e9bf10cd87e302a284d1a3048f9df1" name="af2e9bf10cd87e302a284d1a3048f9df1"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>extractedVarbit</b> = false</td></tr>
 <tr class="separator:af2e9bf10cd87e302a284d1a3048f9df1"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p_h_v_1_1v2_1_1_allocator_base_1_1_dfs_state.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="class_p_h_v_1_1v2_1_1_allocator_base_1_1_dfs_lists_allocator.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="127,-33.5 0,-33.5 0,0 127,0 127,-33.5"/>
 <text xml:space="preserve" text-anchor="start" x="8" y="-20" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::v2::AllocatorBase</text>
-<text xml:space="preserve" text-anchor="middle" x="63.5" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">::DfsState</text>
+<text xml:space="preserve" text-anchor="middle" x="63.5" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">::DfsListsAllocator</text>
 </a>
 </g>
 </g>

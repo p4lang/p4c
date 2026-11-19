@@ -1,5 +1,7 @@
 var NAVTREEINDEX32 =
 {
+"hierarchy.html":[13,2],
+"index.html":[],
 "intermediate_representation_ir.html":[2],
 "midend.html":[4],
 "namespace_action_data.html":[12,0,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX32 =
 "namespace_p4_1_1_p4_tools.html":[12,0,14,9],
 "namespace_p4_1_1_p4_tools.html#a00301b84e5252bf2ec7c669d5363c67c":[12,0,14,9,38],
 "namespace_p4_1_1_p4_tools.html#a11ded6d1736cc467764cc127ff8d453c":[12,0,14,9,50],
-"namespace_p4_1_1_p4_tools.html#a1221dc113e20155790e998a0d9aff542":[12,0,14,9,45],
-"namespace_p4_1_1_p4_tools.html#a1f22150914b35ffbfa8bf91ba882305d":[12,0,14,9,54],
-"namespace_p4_1_1_p4_tools.html#a25fbbff9af0855df1e10137e487cc320":[12,0,14,9,42]
+"namespace_p4_1_1_p4_tools.html#a1221dc113e20155790e998a0d9aff542":[12,0,14,9,45]
 };

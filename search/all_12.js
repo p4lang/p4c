@@ -167,7 +167,7 @@ var searchData=
   ['headerpacketmetricspass_164',['HeaderPacketMetricsPass',['../class_p4_1_1_header_packet_metrics_pass.html',1,'P4']]],
   ['headerpushpop_165',['HeaderPushPop',['../class_header_push_pop.html',1,'']]],
   ['headers_166',['Headers',['../class_elim_unused_1_1_headers.html',1,'ElimUnused']]],
-  ['headers_167',['headers',['../class_parser_header_sequences.html#af3b141d025afe740662fd7692bf4dfce',1,'ParserHeaderSequences::headers'],['../group__bridged__packing.html',1,'Packing of bridged and fixed-size headers']]],
+  ['headers_167',['headers',['../outlining.html#deparser-headers',1,'Deparser headers'],['../class_parser_header_sequences.html#af3b141d025afe740662fd7692bf4dfce',1,'ParserHeaderSequences::headers'],['../group__bridged__packing.html',1,'Packing of bridged and fixed-size headers']]],
   ['headerstackinfo_168',['HeaderStackInfo',['../struct_b_f_n_1_1_header_stack_info.html',1,'BFN']]],
   ['headerstackmap_169',['headerStackMap',['../class_field_extract_info.html#a224f23ff93da7b29e7ffdff23c94746a',1,'FieldExtractInfo']]],
   ['headertocurrentindex_170',['headerToCurrentIndex',['../struct_b_f_n_1_1_resolve_header_stack_index.html#ac58c9045f663ebb9495b2d76004511b9',1,'BFN::ResolveHeaderStackIndex']]],

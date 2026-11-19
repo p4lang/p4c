@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher_3_010_00_01_types_8_8_8_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="152.5,-33.5 0,-33.5 0,0 152.5,0 152.5,-33.5"/>
 <text xml:space="preserve" text-anchor="start" x="8" y="-20" font-family="Helvetica,sans-Serif" font-size="10.00">P4::Util::Detail::TupleHasher</text>
-<text xml:space="preserve" text-anchor="middle" x="76.25" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; index, Types &gt;</text>
+<text xml:space="preserve" text-anchor="middle" x="76.25" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; 0, Types... &gt;</text>
 </a>
 </g>
 </g>

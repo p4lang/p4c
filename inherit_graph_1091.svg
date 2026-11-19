@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_u_t__hash__handle.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="96.25,-20.75 0,-20.75 0,0 96.25,0 96.25,-20.75"/>
-<text xml:space="preserve" text-anchor="middle" x="48.12" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">UT_hash_handle</text>
+<g id="a_Node000000"><a xlink:href="struct_u_t__hash__bucket.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="95.5,-20.75 0,-20.75 0,0 95.5,0 95.5,-20.75"/>
+<text xml:space="preserve" text-anchor="middle" x="47.75" y="-7.25" font-family="Helvetica,sans-Serif" font-size="10.00">UT_hash_bucket</text>
 </a>
 </g>
 </g>
