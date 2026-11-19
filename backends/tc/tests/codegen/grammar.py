@@ -385,7 +385,8 @@ def collect(compiler, root):
     variants = root / 'variants'
     variants.mkdir(exist_ok=True)
     register_init.variants(compiler, variants)
-    directories.append(variants / 'wide-128')
+    for name in ('wide-128', 'wide-128-leading-zero'):
+        directories.append(variants / name)
 
     cases = []
     for directory in directories:
