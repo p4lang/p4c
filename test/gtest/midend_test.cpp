@@ -14,6 +14,7 @@
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "midend/convertEnums.h"
+#include "midend/eliminateTuples.h"
 #include "midend/global_copyprop.h"
 #include "midend/replaceSelectRange.h"
 
@@ -318,6 +319,114 @@ TEST_F(P4CMidend, replaceSelectRangeSigned4) {
 TEST_F(P4CMidend, replaceSelectRangeSigned5) {
     testReplaceSelectRange<int16_t>(
         {{0, 15}}, [](CollectRangesAndMasks collect) { ASSERT_EQ(collect.masks.size(), 1u); });
+}
+
+// EliminateTuples replaces tuples of type variables in generic extern methods, and the calls
+// still type check.
+TEST_F(P4CMidend, EliminateTuplesGenericExternMethod) {
+    auto program = P4::parseP4String(R"(
+        extern Pair<T> {
+            Pair();
+            tuple<T, T> get(in T x);
+            void set(in tuple<T, T> value);
+            void setNested(in tuple<T, tuple<T, T>> value);
+        }
+        control c(inout bit<8> a, inout bit<8> b) {
+            Pair<bit<8>>() p;
+            apply {
+                tuple<bit<8>, bit<8>> r = p.get(a);
+                p.set(r);
+                p.set({ b, a });
+                p.setNested({ a, r });
+                // A concrete tuple with the same shape as the setNested argument.
+                tuple<bit<8>, tuple<bit<8>, bit<8>>> n = { a, { b, a } };
+                a = r[0] + n[1][0];
+                b = r[1] + n[0];
+            }
+        }
+    )");
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    TypeMap typeMap;
+    program = program->apply(EliminateTuples(&typeMap));
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    struct CountTypes : public Inspector {
+        size_t tuples = 0;
+        size_t specializedStructs = 0;
+        void postorder(const IR::Type_BaseList *) override { tuples++; }
+        void postorder(const IR::Type_Specialized *type) override {
+            if (type->baseType->path->name.name.startsWith("tuple")) specializedStructs++;
+        }
+    } counts;
+    program->apply(counts);
+    EXPECT_EQ(counts.tuples, 0U);
+
+    // The extern methods use specialized generic structs.
+    auto pair = program->getDeclsByName("Pair"_cs)->single()->checkedTo<IR::Type_Extern>();
+    auto get = pair->lookupMethod(
+        "get"_cs, new IR::Vector<IR::Argument>({new IR::Argument(new IR::Constant(1))}));
+    ASSERT_NE(get, nullptr);
+    EXPECT_TRUE(get->type->returnType->is<IR::Type_Specialized>());
+
+    // The control uses concrete structs only.
+    auto control = program->getDeclsByName("c"_cs)->single()->checkedTo<IR::P4Control>();
+    CountTypes controlCounts;
+    control->apply(controlCounts);
+    EXPECT_EQ(controlCounts.specializedStructs, 0U);
+
+    ReferenceMap refMap;
+    program = program->apply(TypeChecking(&refMap, &typeMap, true));
+    ASSERT_NE(program, nullptr);
+    EXPECT_EQ(errorCount(), 0U);
+}
+
+// EliminateTuples replaces a tuple without type variables with a plain struct, also inside a
+// generic declaration, if no generic tuple has the same shape.
+TEST_F(P4CMidend, EliminateTuplesConcreteTupleShapes) {
+    auto program = P4::parseP4String(R"(
+        struct S<T> {
+            T value;
+            tuple<bit<8>, bool, bit<4>> flags;
+        }
+        extern Pair<T> {
+            Pair();
+            tuple<T, T> get(in T x);
+        }
+        control c(inout bit<8> a) {
+            Pair<bit<8>>() p;
+            apply {
+                tuple<bit<8>, bool, bit<4>> t = { a, false, 4w2 };
+                S<bit<8>> s;
+                s.flags = t;
+                a = s.flags[0] + t[0];
+            }
+        }
+    )");
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    TypeMap typeMap;
+    program = program->apply(EliminateTuples(&typeMap));
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    // Only the shape of tuple<T, T> is generic.
+    size_t genericStructs = 0;
+    size_t threeFieldStructs = 0;
+    for (const auto *object : program->objects) {
+        const auto *st = object->to<IR::Type_Struct>();
+        if (st == nullptr || !st->name.name.startsWith("tuple")) continue;
+        if (!st->typeParameters->empty()) genericStructs++;
+        if (st->fields.size() == 3) {
+            EXPECT_TRUE(st->typeParameters->empty()) << st;
+            threeFieldStructs++;
+        }
+    }
+    EXPECT_EQ(genericStructs, 1U);
+    EXPECT_GE(threeFieldStructs, 1U);
 }
 
 }  // namespace P4::Test
