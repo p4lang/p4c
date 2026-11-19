@@ -63,6 +63,8 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
 add_library (ir STATIC ${IR_SRCS})
 target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})
+# lib/big_int.h is exposed by the IR headers.
+target_link_libraries(ir PUBLIC p4c_multiprecision)
 
 
 add_dependencies(ir genIR)
