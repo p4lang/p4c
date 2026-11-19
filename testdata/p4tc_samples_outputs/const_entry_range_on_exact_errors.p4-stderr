@@ -1,0 +1,3 @@
+p4tc_samples/const_entry_range_on_exact_errors.p4(46): [--Werror=invalid] error: 2816 .. 3071: a range does not fit an exact match key
+            0x0B00 .. 0x0BFF : a_with_control_params(1);
+            ^^^^^^^^^^^^^^^^
