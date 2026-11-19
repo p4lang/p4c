@@ -74,8 +74,8 @@ struct user_meta_t {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
-	bit<48> MyIC_tbl_ethernet_srcAddr
-	bit<48> MyIC_foo_ethernet_dstAddr
+	bit<48> MyIC_tbl_0_ethernet_srcAddr
+	bit<48> MyIC_foo_0_ethernet_dstAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -109,9 +109,9 @@ action a3 args instanceof a3_arg_t {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
-		m.MyIC_tbl_ethernet_srcAddr exact
+		m.MyIC_tbl_0_ethernet_srcAddr exact
 		m.local_metadata_data exact
 		m.local_metadata_data1 lpm
 	}
@@ -125,9 +125,9 @@ table tbl {
 }
 
 
-table foo {
+table foo_0 {
 	key {
-		m.MyIC_foo_ethernet_dstAddr exact
+		m.MyIC_foo_0_ethernet_dstAddr exact
 		m.local_metadata_data exact
 		m.local_metadata_data1 lpm
 	}
@@ -141,7 +141,7 @@ table foo {
 }
 
 
-table bar {
+table bar_0 {
 	actions {
 		NoAction
 	}
@@ -165,26 +165,26 @@ apply {
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
-	MYIP_ACCEPT :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	MYIP_ACCEPT :	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpnh LABEL_END
-	mov m.MyIC_foo_ethernet_dstAddr h.ethernet.dstAddr
-	table foo
-	LABEL_END :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	mov m.MyIC_foo_0_ethernet_dstAddr h.ethernet.dstAddr
+	table foo_0
+	LABEL_END :	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpnh LABEL_END_0
-	mov m.MyIC_foo_ethernet_dstAddr h.ethernet.dstAddr
-	table foo
-	LABEL_END_0 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	mov m.MyIC_foo_0_ethernet_dstAddr h.ethernet.dstAddr
+	table foo_0
+	LABEL_END_0 :	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpnh LABEL_FALSE_1
 	jmp LABEL_END_1
-	LABEL_FALSE_1 :	table bar
-	LABEL_END_1 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	LABEL_FALSE_1 :	table bar_0
+	LABEL_END_1 :	mov m.MyIC_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpnh LABEL_FALSE_2
 	jmp LABEL_END_2
-	LABEL_FALSE_2 :	table bar
+	LABEL_FALSE_2 :	table bar_0
 	LABEL_END_2 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

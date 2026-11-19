@@ -136,7 +136,7 @@ action execute_1 args none {
 	LABEL_END_9 :	return
 }
 
-table stub {
+table stub_0 {
 	key {
 		m.MainControlT_key exact
 	}
@@ -172,7 +172,7 @@ apply {
 	mov m.MainControlT_tmp_33 m.MainControlT_tmp_32
 	and m.MainControlT_tmp_33 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_33
-	table stub
+	table stub_0
 	jmp LABEL_END_0
 	LABEL_FALSE :	jmpneq LABEL_END_0 m.local_metadata_depth 0x1
 	jmpneq LABEL_END_0 h.vlan_tag_1.ether_type h.ethernet.etherType
@@ -181,7 +181,7 @@ apply {
 	mov m.MainControlT_tmp_35 m.MainControlT_tmp_34
 	and m.MainControlT_tmp_35 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_35
-	table stub
+	table stub_0
 	LABEL_END_0 :	emit h.ethernet
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1

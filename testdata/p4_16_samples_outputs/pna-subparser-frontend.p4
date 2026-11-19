@@ -32,9 +32,6 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t me
     state start {
         hdr.ethernet.setInvalid();
         hdr.ipv4.setInvalid();
-        transition CommonParser_start;
-    }
-    state CommonParser_start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;

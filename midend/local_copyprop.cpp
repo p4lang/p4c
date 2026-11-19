@@ -345,7 +345,8 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
         if (var->val) {
             if (policy(getChildContext(), var->val, this)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
-                CopySrcInfo copy(srcInfo);
+                // Prefer the value's own source position.
+                CopySrcInfo copy(var->val->srcInfo.isValid() ? var->val->srcInfo : srcInfo);
                 return var->val->apply(copy);
             }
             LOG3("  policy rejects propagation of " << name << ": " << var->val);
@@ -473,10 +474,12 @@ IR::ForStatement *DoLocalCopyPropagation::preorder(IR::ForStatement *s) {
     s->apply(LoopPrepass(*this), getContext());
     ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
     visit(s->condition, "condition");
+    auto &after_cond = flow_clone();
     visit(s->body, "body");
     flow_merge_global_from("-CONTINUE-"_cs);
     visit(s->updates, "updates");
     flow_merge_global_from("-BREAK-"_cs);
+    flow_merge(after_cond);
     prune();
     return s;
 }
@@ -486,10 +489,12 @@ IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
     visit(s->collection, "collection", 2);
     s->apply(LoopPrepass(*this), getContext());
     ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
+    auto &before_loop = flow_clone();
     visit(s->ref, "ref", 1);
     visit(s->body, "body", 3);
     flow_merge_global_from("-CONTINUE-"_cs);
     flow_merge_global_from("-BREAK-"_cs);
+    flow_merge(before_loop);
     prune();
     return s;
 }

@@ -200,15 +200,18 @@ class ConvertToEBPFDeparserPSA : public Inspector {
     pipeline_type pipelineType;
 
     const IR::Parameter *parserHeaders;
+    const IR::Parameter *controlUserMetadata;
     const IR::Parameter *istd;
     EBPF::EBPFDeparserPSA *deparser;
 
  public:
     ConvertToEBPFDeparserPSA(EBPFProgram *program, const IR::Parameter *parserHeaders,
-                             const IR::Parameter *istd, pipeline_type type)
+                             const IR::Parameter *controlUserMetadata, const IR::Parameter *istd,
+                             pipeline_type type)
         : program(program),
           pipelineType(type),
           parserHeaders(parserHeaders),
+          controlUserMetadata(controlUserMetadata),
           istd(istd),
           deparser(nullptr) {}
 

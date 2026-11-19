@@ -14,6 +14,7 @@
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "midend/convertEnums.h"
+#include "midend/global_copyprop.h"
 #include "midend/replaceSelectRange.h"
 
 using namespace P4;
@@ -30,6 +31,49 @@ class EnumOn32Bits : public ChooseEnumRepresentation {
 }  // namespace
 
 class P4CMidend : public P4CTest {};
+
+TEST_F(P4CMidend, GlobalCopyPropagationCopyInCopyOut) {
+    for (bool named : {false, true}) {
+        auto program = P4::parseP4String(std::string(R"(
+                extern void copy(out bit<32> destination, in bit<32> source);
+                control C(out bit<32> result) {
+                    bit<32> value;
+                    action a() {
+            )") + (named ? "copy(source = value, destination = value);" : "copy(value, value);") +
+                                         R"(
+                        result = value;
+                    }
+                    apply {
+                        value = 32w7;
+                        a();
+                    }
+                }
+            )");
+        ASSERT_NE(program, nullptr);
+        ASSERT_EQ(errorCount(), 0U);
+
+        ReferenceMap refMap;
+        TypeMap typeMap;
+        program = program->apply(GlobalCopyPropagation(&refMap, &typeMap));
+        ASSERT_NE(program, nullptr);
+        ASSERT_EQ(errorCount(), 0U);
+
+        auto control = program->getDeclsByName("C"_cs)->single()->checkedTo<IR::P4Control>();
+        auto action = control->controlLocals.getDeclaration("a"_cs)->checkedTo<IR::P4Action>();
+        auto call =
+            action->body->components.at(0)->checkedTo<IR::MethodCallStatement>()->methodCall;
+        EXPECT_TRUE(call->arguments->at(named ? 1 : 0)->expression->is<IR::PathExpression>());
+        auto input = call->arguments->at(named ? 0 : 1)->expression->to<IR::Constant>();
+        ASSERT_NE(input, nullptr);
+        EXPECT_EQ(input->asInt(), 7);
+        auto assignment = action->body->components.at(1)->checkedTo<IR::AssignmentStatement>();
+        EXPECT_TRUE(assignment->right->is<IR::PathExpression>());
+
+        program = program->apply(TypeChecking(&refMap, &typeMap, true));
+        ASSERT_NE(program, nullptr);
+        EXPECT_EQ(errorCount(), 0U);
+    }
+}
 
 // test various way of using enum
 TEST_F(P4CMidend, convertEnums_pass) {

@@ -230,4 +230,78 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     }
 }
 
+// Tests for default_action checking with invalid header/union literals.
+struct P4CFrontendDefaultAction : P4CFrontend {
+    P4CFrontendDefaultAction() {
+        addPasses({new P4::DoConstantFolding(), new P4::TypeInference(&typeMap, false, false)});
+    }
+
+    P4::TypeMap typeMap;
+};
+
+TEST_F(P4CFrontendDefaultAction, InvalidHeaderActionArgs) {
+    std::string program = P4_SOURCE(R"(
+        header h_t {
+            bit<8> f;
+        }
+        header_union hu_t {
+            h_t h1;
+            h_t h2;
+        }
+        control C() {
+            action a(in h_t h, in hu_t hu) {
+            }
+            table t {
+                actions = {
+                    a((h_t) {#}, (hu_t) {#});
+                }
+                default_action = a((h_t) {#}, (hu_t) {#});
+            }
+            apply {
+                t.apply();
+            }
+        }
+        control proto();
+        package top(proto p);
+        top(C()) main;
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::P4::errorCount(), 0);
+}
+
+TEST_F(P4CFrontendDefaultAction, MismatchedInvalidHeaderActionArgs) {
+    std::string program = P4_SOURCE(R"(
+        header h1_t {
+            bit<8> f;
+        }
+        header h2_t {
+            bit<16> f;
+        }
+        control C() {
+            action a(in h1_t h) {
+            }
+            table t {
+                actions = {
+                    a((h1_t) {#});
+                }
+                default_action = a((h2_t) {#});
+            }
+            apply {
+                t.apply();
+            }
+        }
+        control proto();
+        package top(proto p);
+        top(C()) main;
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    EXPECT_GT(::P4::errorCount(), 0);
+}
+
 }  // namespace P4::Test

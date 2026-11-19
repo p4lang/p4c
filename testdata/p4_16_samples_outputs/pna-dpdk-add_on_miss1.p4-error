@@ -28,5 +28,5 @@ const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimePro
 pna-dpdk-add_on_miss1.p4(98): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEVER' is unused
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t) 3;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table outbound_conntrack_ct_tcp_table. Copying all match fields to metadata
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table inbound_conntrack_ct_tcp_table. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table ct_tcp_table. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table ct_tcp_table. Copying all match fields to metadata

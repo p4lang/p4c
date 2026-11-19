@@ -37,7 +37,7 @@ action next_hop args instanceof next_hop_arg_t {
 	return
 }
 
-table ipv4_da {
+table ipv4_da_0 {
 	key {
 		h.ipv4.dstAddr exact
 	}
@@ -56,7 +56,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	table ipv4_da
+	table ipv4_da_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

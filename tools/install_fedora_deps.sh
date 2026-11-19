@@ -20,10 +20,7 @@ sudo dnf install -y -q \
     bison \
     boost-devel \
     boost-filesystem \
-    boost-graph \
-    boost-iostreams \
     boost-program-options \
-    boost-test \
     boost-thread \
     ccache \
     clang-15 \

@@ -23,7 +23,6 @@ MESSAGE("-- Adding p4c-barefoot")
 set(BF_P4C_UNIFIED_SOURCE_CHUNK_SIZE "5" CACHE STRING
     "Target unified compilation chunk size for bf-p4c (an integer or ALL)")
 
-find_package (Boost REQUIRED COMPONENTS graph)
 if (ENABLE_BAREFOOT_INTERNAL)
   add_definitions("-DBAREFOOT_INTERNAL=1")
 endif()
@@ -83,9 +82,8 @@ get_schema_version(resources_schema RESOURCES_SCHEMA_VERSION)
 MESSAGE(STATUS "Found source info schema version ${RESOURCES_SCHEMA_VERSION}")
 add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
-set (HAVE_LIBBOOST_GRAPH 1)
-
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
+# The Boost.Graph algorithms used here are header-only.
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};Boost::headers;${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
@@ -538,7 +536,7 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
+target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} bfn_p4runtime ir)
 target_include_directories(
   tofinobackend
   # We also export Z3's includes with the common library.
@@ -547,7 +545,7 @@ target_include_directories(
   # FIXME: This should be pulled with FetchContent.
   PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
 )
-add_dependencies(tofinobackend frontend genLogging bfn_p4runtime)
+add_dependencies(tofinobackend frontend genLogging)
 
 if(BUILD_STATIC_BFP4C_LIBS)
   add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
@@ -846,7 +844,8 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 endif()
-target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
+target_link_libraries(bfn_p4runtime PUBLIC p4runtime::cpp PRIVATE absl::prefetch)
+target_include_directories(bfn_p4runtime PUBLIC "${P4C_BINARY_DIR}/control-plane")
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
@@ -1058,5 +1057,3 @@ if (ENABLE_GTESTS)
   # set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
 
 endif(ENABLE_GTESTS)
-
-

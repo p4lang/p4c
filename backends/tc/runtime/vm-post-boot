@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2025 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +20,9 @@ HOST_IP=$1
 
 mkdir -p /home/ci/.ssh
 sudo bash -c "cat /mnt/id_rsa.pub > /home/ci/.ssh/authorized_keys"
+
+# Generated programs always call the bpf_p4tc_skb_meta_set kfunc
+sudo modprobe ext_skb_meta
 
 sudo ip l set dev ens2 up
 sudo ip a add $HOST_IP/24 dev ens2

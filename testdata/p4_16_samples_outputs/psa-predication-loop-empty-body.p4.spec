@@ -48,7 +48,7 @@ action increment_in_loop args none {
 	LABEL_END :	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -66,7 +66,7 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.local_metadata_counter 0x0
-	table tbl
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

@@ -103,7 +103,7 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		m.local_metadata_data1 exact
 		m.local_metadata_data2 exact
@@ -139,7 +139,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	table tbl
+	INGRESSPARSERIMPL_ACCEPT :	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

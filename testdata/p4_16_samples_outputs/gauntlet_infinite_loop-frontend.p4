@@ -20,9 +20,6 @@ parser p(packet_in packet, out headers hdr) {
         tmp.nop.setInvalid();
         tmp.p.setInvalid();
         tmp_0.setInvalid();
-        transition sub_parser_start;
-    }
-    state sub_parser_start {
         transition sub_parser_next;
     }
     state sub_parser_next {

@@ -1,0 +1,6 @@
+table-entries-dup-base.p4(23): [--Werror=keys] error: Duplicate entry keys
+            2 : a1(2);
+            ^
+table-entries-dup-base.p4(22)
+            0x02 : a1(1);
+            ^^^^

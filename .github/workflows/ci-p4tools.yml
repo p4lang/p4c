@@ -27,8 +27,7 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
-      # This pins BMv2 to current upstream main.
-      BMV2_REF: 883d4eae360de7b6ad0aaf52ba6d30a2401cd0e0
+      BMV2_REF: 5c722502bc390cbd5f5b77f0d107c9b3fb92ab56
     steps:
       - uses: actions/checkout@v7
         with:

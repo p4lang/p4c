@@ -85,6 +85,7 @@ class JSONLoader {
     }
     template <typename T>
     [[nodiscard]] const T &as() const {
+        if (!is<T>()) error("type mismatch in json");
         return json->as<T>();
     }
     template <typename T>
@@ -131,7 +132,7 @@ class JSONLoader {
             return nullptr;
         }
         track_decode();
-        int id;
+        int id = -1;  // load() leaves id untouched if Node_ID is absent.
         auto success = load("Node_ID", id) || error("missing field Node_ID");
         if (!success) return nullptr;
         if (id >= 0) {
@@ -344,7 +345,8 @@ class JSONLoader {
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>> unpack_json(T &v) {
-        v = as<JsonNumber>();
+        // Use the full-precision value to avoid truncation through int.
+        v = static_cast<T>(as<JsonNumber>().val);
     }
     void unpack_json(big_int &v) { v = as<JsonNumber>().val; }
     void unpack_json(std::string &v) {
@@ -361,20 +363,32 @@ class JSONLoader {
     }
 
     void unpack_json(LTBitMatrix &m) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> m;
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> m;
+        else
+            error("bit matrix value not a string");
     }
 
     void unpack_json(bitvec &v) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> v;
+        else
+            error("bitvec value not a string");
     }
 
     template <typename T>
     std::enable_if_t<std::is_enum_v<T>> unpack_json(T &v) {
-        if (auto *s = json->to<JsonString>()) *s >> v;
+        if (auto *s = json->to<JsonString>())
+            *s >> v;
+        else
+            error("enum tag not a string");
     }
 
     void unpack_json(match_t &v) {
-        if (auto *s = json->to<JsonString>()) s->c_str() >> v;
+        if (auto *s = json->to<JsonString>())
+            s->c_str() >> v;
+        else
+            error("match name not a string");
     }
 
     template <typename T>

@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -65,6 +66,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -82,6 +84,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name(".my_drop") action my_drop_2() {
         smeta_2.ingress_port = standard_metadata.ingress_port;
@@ -100,6 +103,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_2.checksum_error = standard_metadata.checksum_error;
         smeta_2.parser_error = standard_metadata.parser_error;
         smeta_2.priority = standard_metadata.priority;
+        smeta_2.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_2);
         standard_metadata.ingress_port = smeta_2.ingress_port;
         standard_metadata.egress_spec = smeta_2.egress_spec;
@@ -117,6 +121,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_2.checksum_error;
         standard_metadata.parser_error = smeta_2.parser_error;
         standard_metadata.priority = smeta_2.priority;
+        standard_metadata.lag_hash = smeta_2.lag_hash;
     }
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }

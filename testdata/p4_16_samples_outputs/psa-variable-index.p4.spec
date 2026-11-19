@@ -60,7 +60,7 @@ action NoAction args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -126,7 +126,7 @@ apply {
 	mov m.Ingress_vid m.Ingress_hsVar_0
 	LABEL_END_4 :	mov m.local_metadata_ret m.Ingress_vid
 	add m.local_metadata_ret 0x5
-	table tbl
+	table tbl_0
 	LABEL_END_3 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.vlan_tag_0

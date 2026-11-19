@@ -42,7 +42,7 @@ action default_route_drop args none {
 	return
 }
 
-table ipv4_tbl {
+table ipv4_tbl_0 {
 	key {
 		h.ipv4.dstAddr exact
 		h.ipv4.srcAddr wildcard
@@ -64,7 +64,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	table ipv4_tbl
+	table ipv4_tbl_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

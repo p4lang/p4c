@@ -116,6 +116,11 @@ ip netns exec switch sysctl -w net.ipv6.conf.all.disable_ipv6=1
 ip netns exec switch sysctl -w net.ipv6.conf.all.autoconf=0
 ip netns exec switch sysctl -w net.ipv6.conf.all.accept_ra=0
 
+# PassToKernelStackTest routes packets through the kernel stack of the switch
+# namespace. A new namespace inherits IPv4 forwarding from the host, so enable
+# it here rather than depend on the host having it on.
+ip netns exec switch sysctl -w net.ipv4.ip_forward=1
+
 silent_echo_conf() {
   echo "Switch configuration:"
   ip netns exec switch ip link

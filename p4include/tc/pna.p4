@@ -453,6 +453,23 @@ extern void skb_set_queue_mapping(in bit<16> dummy);
 extern void skb_set_protocol(in bit<16> dummy);
 extern void skb_set_meta();
 
+// The stack may hold the outermost 802.1Q (or 802.1ad) tag of a received
+// frame in skb metadata instead of in the frame bytes.  The parser reads it
+// through the vlan_* members of pna_main_parser_input_metadata_t and a
+// control block through these accessors.  vlan_tci is PCP, DEI and VID, and
+// vlan_proto is the tag protocol (0x8100 or 0x88a8) in host byte order.
+// Presence is reported separately: a zero TCI is still a tag.
+extern bit<1> skb_get_vlan_present();
+extern bit<16> skb_get_vlan_tci();
+extern bit<16> skb_get_vlan_proto();
+// These operate on the frame as well as on the metadata, so a program states
+// them explicitly; reading the tag above never moves it.  push adds a tag,
+// pop removes the outermost one and copies the tag it exposes, if any, into
+// the metadata.  Both may relocate the packet, so they are only available in
+// a control block, before the deparser runs.
+extern void skb_vlan_push(in bit<16> vlan_proto, in bit<16> vlan_tci);
+extern void skb_vlan_pop();
+
 struct tc_ControlPath_Counter<W, S> {
   @tc_key S index;
   @tc_data W pkts;
@@ -606,6 +623,11 @@ struct pna_main_parser_input_metadata_t {
     // If this packet has FROM_HOST source, input_port contains
     // the id of the vport from which the packet came
     PortId_t                 input_port;   // network/host port id
+    // Outermost 802.1Q tag, when the stack holds it in metadata instead of
+    // in the frame.  It is not part of the bytes this parser extracts.
+    bit<1>                   vlan_present;
+    bit<16>                  vlan_tci;     // PCP, DEI and VID
+    bit<16>                  vlan_proto;   // 0x8100 or 0x88a8
 }
 
 // is_host_port(p) returns true if p is a host port, otherwise false.

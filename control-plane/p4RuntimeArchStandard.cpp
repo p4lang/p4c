@@ -104,7 +104,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         }
 
         // Convert the generic type for the digest method call to a P4DataTypeSpec
-        auto *typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not "
                   "be converted to P4Info P4DataTypeSpec",

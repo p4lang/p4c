@@ -5,13 +5,8 @@ module(
 
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
-bazel_dep(name = "boost.algorithm", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.functional", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.graph", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.iostreams", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.multi_index", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.multiprecision", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.serialization", version = "1.90.0.bcr.1")
 bazel_dep(name = "googleapis", version = "0.0.0-20260223-edfe7983")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
@@ -25,7 +20,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_m4", version = "0.3")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "z3", version = "4.15.2")
-bazel_dep(name = "p4runtime", version = "1.5.0.bcr.1")
+bazel_dep(name = "p4runtime", version = "1.6.0")
 
 p4c_repositories = use_extension("//bazel:repositories.bzl", "p4c_repositories")
 use_repo(

@@ -1501,7 +1501,7 @@ bool PackWithConstraintSolver::preorder(const IR::HeaderOrMetadata *hdr) {
     auto isNonByteAlignedFlexibleField = [&](const IR::StructField *f) {
         return f->getAnnotation("flexible"_cs) != nullptr && f->type->width_bits() % 8 != 0;
     };
-    for (auto f : *hdr->type->fields.getEnumerator()->where(isNonByteAlignedFlexibleField)) {
+    for (auto f : hdr->type->fields.getEnumerator()->where(isNonByteAlignedFlexibleField)) {
         cstring fieldName = hdr->name + "."_cs + f->name;
         const auto *field = phv.field(fieldName);
         nonByteAlignedFields.insert(field);
@@ -1513,7 +1513,7 @@ bool PackWithConstraintSolver::preorder(const IR::HeaderOrMetadata *hdr) {
     auto isByteAlignedFlexibleField = [&](const IR::StructField *f) {
         return f->getAnnotation("flexible"_cs) != nullptr && f->type->width_bits() % 8 == 0;
     };
-    for (auto f : *hdr->type->fields.getEnumerator()->where(isByteAlignedFlexibleField)) {
+    for (auto f : hdr->type->fields.getEnumerator()->where(isByteAlignedFlexibleField)) {
         cstring fieldName = hdr->name + "."_cs + f->name;
         const auto *field = phv.field(fieldName);
         byteAlignedFields.insert(field);
@@ -1940,7 +1940,7 @@ bool LogRepackedHeaders::preorder(const IR::HeaderOrMetadata *h) {
 
     // Check if this header may have been repacked by looking for flexible fields
     bool isRepacked = false;
-    for (auto f : *h->type->fields.getEnumerator()) {
+    for (auto f : h->type->fields.getEnumerator()) {
         if (f->getAnnotation("flexible"_cs)) {
             isRepacked = true;
             break;

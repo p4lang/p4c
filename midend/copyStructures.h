@@ -13,6 +13,25 @@
 
 namespace P4 {
 
+struct CopyStructuresConfig {
+    /// Specific targets may allow functions or methods to return structs.
+    /// Such methods will not be converted in this pass. Setting the
+    /// errorOnMethodCall flag will produce an error message if such a
+    /// method is encountered.
+    bool errorOnMethodCall = true;
+
+    /// Do not only copy normal structures but also perform copy assignments for headers.
+    bool copyHeaders = false;
+    /// Expand header union assignments into member assignments. This expansion has a known
+    /// correctness bug: copying an invalid member can invalidate a previously copied member.
+    /// Expansion is disabled by default to preserve union validity. Pipelines that require
+    /// member assignments must explicitly enable it.
+    /// See https://github.com/p4lang/p4c/issues/3842.
+    bool expandUnions = false;
+    /// Also split up assignments of tuples.
+    bool copyTuples = false;
+};
+
 /**
  * Convert assignments between structures to assignments between fields
  *
@@ -36,7 +55,7 @@ namespace P4 {
  *   Further, struct initialization is converted to assignment on struct fields
  *
  *   header assignments and tuple assignments are optionally converted in this pass, based
- *   on constructor argument
+ *   on the configuration
  *
  * @pre none
  * @post
@@ -45,28 +64,23 @@ namespace P4 {
  *
  */
 class DoCopyStructures : public Transform {
+    /// The type map.
     TypeMap *typeMap;
-    /// Specific targets may allow functions or methods to return structs.
-    /// Such methods will not be converted in this pass. Setting the
-    /// errorOnMethodCall flag will produce an error message if such a
-    ///  method is encountered.
-    bool errorOnMethodCall;
 
-    /// Do not only copy normal structures but also perform copy assignments for headers.
-    bool copyHeaders;
-    /// Also split up assignments of tuples
-    bool copyTuples;
+    /// Configuration options.
+    CopyStructuresConfig config;
 
  public:
-    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false,
-                              bool copyTuples = true)
-        : typeMap(typeMap),
-          errorOnMethodCall(errorOnMethodCall),
-          copyHeaders(copyHeaders),
-          copyTuples(copyTuples) {
+    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config)
+        : typeMap(typeMap), config(config) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
+    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false,
+                              bool copyTuples = true)
+        : DoCopyStructures(typeMap, {.errorOnMethodCall = errorOnMethodCall,
+                                     .copyHeaders = copyHeaders,
+                                     .copyTuples = copyTuples}) {}
     // FIXME -- this should be a preorder so we can deal with nested structs directly,
     // but that fails because we depend on the typeMap which will be out of date after
     // expanding outer copies.  So we need to repeat this pass in a loop
@@ -117,15 +131,22 @@ class RemoveAliases : public Transform {
 
 class CopyStructures : public PassRepeated {
  public:
-    explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
-                            bool copyHeaders = false, bool copyTuples = false,
+    explicit CopyStructures(TypeMap *typeMap, CopyStructuresConfig config,
                             TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
         setName("CopyStructures");
         if (typeChecking == nullptr) typeChecking = new TypeChecking(nullptr, typeMap);
         addPasses({typeChecking, new RemoveAliases(typeMap), typeChecking,
-                   new DoCopyStructures(typeMap, errorOnMethodCall, copyHeaders, copyTuples)});
+                   new DoCopyStructures(typeMap, config)});
     }
+    explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
+                            bool copyHeaders = false, bool copyTuples = false,
+                            TypeChecking *typeChecking = nullptr)
+        : CopyStructures(typeMap,
+                         {.errorOnMethodCall = errorOnMethodCall,
+                          .copyHeaders = copyHeaders,
+                          .copyTuples = copyTuples},
+                         typeChecking) {}
 };
 
 }  // namespace P4

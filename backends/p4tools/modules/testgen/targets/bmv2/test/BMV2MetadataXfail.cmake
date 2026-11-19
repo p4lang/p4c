@@ -13,6 +13,13 @@
 ####################################################################################################
 # These are failures in P4Testgen that need to be fixed.
 
+# P4Testgen does not support array expressions as state variables.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  "ArrayExpression is not a valid StateVariable"
+  stack-swap-alias-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-metadata"
   "Unknown or unimplemented extern method: .*[.]recirculate_preserving_field_list"
@@ -33,6 +40,7 @@ p4tools_add_xfail_reason(
   "with type .* is not a Constant"
   # Most of these come from varbits
   issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+  shifted-dynamic-slice-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
 )
 
 p4tools_add_xfail_reason(
@@ -126,6 +134,13 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-metadata"
   "Unknown or unimplemented extern method: fn_foo"
   issue3091.p4  # user defined extern
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  # P4Testgen reaches this error only if it skips the generic extern argument.
+  "Unknown or unimplemented extern method: observe"
+  generic-extern-instance-argument.p4
 )
 
 p4tools_add_xfail_reason(

@@ -122,6 +122,7 @@ struct tuple_9 {
     bit<1>  f13;
     error   f14;
     bit<3>  f15;
+    bit<16> f16;
 }
 
 struct tuple_10 {
@@ -168,7 +169,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         log_msg<tuple_7>("GREPME hdr.ethernet=(dstAddr:{},srcAddr:{},etherType:{})", (tuple_7){f0 = hdr.ethernet.dstAddr,f1 = hdr.ethernet.srcAddr,f2 = hdr.ethernet.etherType});
         log_msg<tuple_0>("GREPME hdr.ipv4.isValid()={}", (tuple_0){f0 = hdr.ipv4.isValid()});
         log_msg<tuple_8>("GREPME hdr.ipv4=(version:{},ihl:{},diffserv:{},totalLen:{},identification:{},flags:{},fragOffset:{},ttl:{},protocol:{},hdrChecksum:{},srcAddr:{},dstAddr:{})", (tuple_8){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.hdrChecksum,f10 = hdr.ipv4.srcAddr,f11 = hdr.ipv4.dstAddr});
-        log_msg<tuple_9>("GREPME stdmeta=(ingress_port:{},egress_spec:{},egress_port:{},instance_type:{},packet_length:{},enq_timestamp:{},enq_qdepth:{},deq_timedelta:{},deq_qdepth:{},ingress_global_timestamp:{},egress_global_timestamp:{},mcast_grp:{},egress_rid:{},checksum_error:{},parser_error:{},priority:{})", (tuple_9){f0 = stdmeta.ingress_port,f1 = stdmeta.egress_spec,f2 = stdmeta.egress_port,f3 = stdmeta.instance_type,f4 = stdmeta.packet_length,f5 = stdmeta.enq_timestamp,f6 = stdmeta.enq_qdepth,f7 = stdmeta.deq_timedelta,f8 = stdmeta.deq_qdepth,f9 = stdmeta.ingress_global_timestamp,f10 = stdmeta.egress_global_timestamp,f11 = stdmeta.mcast_grp,f12 = stdmeta.egress_rid,f13 = stdmeta.checksum_error,f14 = stdmeta.parser_error,f15 = stdmeta.priority});
+        log_msg<tuple_9>("GREPME stdmeta=(ingress_port:{},egress_spec:{},egress_port:{},instance_type:{},packet_length:{},enq_timestamp:{},enq_qdepth:{},deq_timedelta:{},deq_qdepth:{},ingress_global_timestamp:{},egress_global_timestamp:{},mcast_grp:{},egress_rid:{},checksum_error:{},parser_error:{},priority:{},lag_hash:{})", (tuple_9){f0 = stdmeta.ingress_port,f1 = stdmeta.egress_spec,f2 = stdmeta.egress_port,f3 = stdmeta.instance_type,f4 = stdmeta.packet_length,f5 = stdmeta.enq_timestamp,f6 = stdmeta.enq_qdepth,f7 = stdmeta.deq_timedelta,f8 = stdmeta.deq_qdepth,f9 = stdmeta.ingress_global_timestamp,f10 = stdmeta.egress_global_timestamp,f11 = stdmeta.mcast_grp,f12 = stdmeta.egress_rid,f13 = stdmeta.checksum_error,f14 = stdmeta.parser_error,f15 = stdmeta.priority,f16 = stdmeta.lag_hash});
         log_msg<tuple_10>("GREPME error.PacketTooShort={}", (tuple_10){f0 = error.PacketTooShort});
     }
     @hidden table tbl_issue2201bmv2l92 {

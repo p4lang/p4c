@@ -1,0 +1,14 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 27646489
+    name: "send_to_port"
+    alias: "send_to_port"
+    annotations: "@noWarn(\"unused\")"
+  }
+}

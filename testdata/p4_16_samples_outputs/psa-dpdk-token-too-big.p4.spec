@@ -155,7 +155,7 @@ action drop_1 args none {
 	return
 }
 
-;oldname:vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk
+;oldname:vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_0
 table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6 {
 	key {
 		h.ethernet.dst_addr exact

@@ -1,4 +1,8 @@
 /*
+SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,6 +18,8 @@ limitations under the License.
 
 #ifndef IR_ANNOTATIONS_H_
 #define IR_ANNOTATIONS_H_
+
+#include <initializer_list>
 
 #include "ir/vector.h"
 #include "lib/cstring.h"
@@ -31,9 +37,14 @@ namespace Annotations {
 
 void addIfNew(Vector<Annotation> &annotations, cstring name, const Expression *expr,
               bool structured = false);
+/// An empty list creates an annotation with no arguments.
+void addIfNew(Vector<Annotation> &annotations, cstring name,
+              std::initializer_list<const Expression *> exprs, bool structured = false);
 void addIfNew(Vector<Annotation> &annotations, const IR::Annotation *ann);
 void addOrReplace(Vector<Annotation> &annotations, cstring name, const Expression *expr,
                   bool structured = false);
+void addOrReplace(Vector<Annotation> &annotations, cstring name,
+                  std::initializer_list<const Expression *> exprs, bool structured = false);
 void addOrReplace(Vector<Annotation> &annotations, const IR::Annotation *ann);
 }  // namespace Annotations
 

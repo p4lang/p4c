@@ -1,0 +1,116 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControl.left_api.inner_api.route",
+      "id" : 38529043,
+      "table_type" : "MatchAction_Direct",
+      "size" : 16,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.h.value",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 20039185,
+          "name" : "MainControl.left_api.inner_api.send",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "port",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        },
+        {
+          "id" : 18425128,
+          "name" : "MainControl.left_api.inner_api.discard",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.MainControl.right_api.inner_api.route",
+      "id" : 49961511,
+      "table_type" : "MatchAction_Direct",
+      "size" : 16,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.h.value",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 28595530,
+          "name" : "MainControl.right_api.inner_api.send",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "port",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        },
+        {
+          "id" : 18086363,
+          "name" : "MainControl.right_api.inner_api.discard",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

@@ -34,11 +34,11 @@ struct metadata_t {
 	bit<32> pna_main_input_metadata_direction
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlImpl_ct_tcp_table_key
-	bit<32> MainControlImpl_ct_tcp_table_key_0
-	bit<8> MainControlImpl_ct_tcp_table_ipv4_protocol
-	bit<16> MainControlImpl_ct_tcp_table_key_1
-	bit<16> MainControlImpl_ct_tcp_table_key_2
+	bit<32> MainControlImpl_ct_tcp_table_0_key
+	bit<32> MainControlImpl_ct_tcp_table_0_key_0
+	bit<8> MainControlImpl_ct_tcp_table_0_ipv4_protocol
+	bit<16> MainControlImpl_ct_tcp_table_0_key_1
+	bit<16> MainControlImpl_ct_tcp_table_0_key_2
 	bit<8> MainControlT_do_add_on_miss
 	bit<8> MainControlT_update_aging_info
 	bit<8> MainControlT_update_expire_time
@@ -94,7 +94,7 @@ action ct_tcp_table_miss args none {
 	LABEL_END_7 :	return
 }
 
-table set_ct_options {
+table set_ct_options_0 {
 	key {
 		h.tcp.flags wildcard
 	}
@@ -108,13 +108,13 @@ table set_ct_options {
 }
 
 
-learner ct_tcp_table {
+learner ct_tcp_table_0 {
 	key {
-		m.MainControlImpl_ct_tcp_table_key
-		m.MainControlImpl_ct_tcp_table_key_0
-		m.MainControlImpl_ct_tcp_table_ipv4_protocol
-		m.MainControlImpl_ct_tcp_table_key_1
-		m.MainControlImpl_ct_tcp_table_key_2
+		m.MainControlImpl_ct_tcp_table_0_key
+		m.MainControlImpl_ct_tcp_table_0_key_0
+		m.MainControlImpl_ct_tcp_table_0_ipv4_protocol
+		m.MainControlImpl_ct_tcp_table_0_key_1
+		m.MainControlImpl_ct_tcp_table_0_key_2
 	}
 	actions {
 		ct_tcp_table_hit @tableonly
@@ -150,7 +150,7 @@ apply {
 	jmpneq LABEL_END m.pna_main_input_metadata_direction 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
-	table set_ct_options
+	table set_ct_options_0
 	LABEL_END :	jmpnv LABEL_END_0 h.ipv4
 	jmpnv LABEL_END_0 h.tcp
 	jmpeq LABEL_TRUE_1 m.pna_main_input_metadata_direction 0x0
@@ -169,12 +169,12 @@ apply {
 	mov m.MainControlT_key_2 h.tcp.srcPort
 	jmp LABEL_END_4
 	LABEL_TRUE_4 :	mov m.MainControlT_key_2 h.tcp.dstPort
-	LABEL_END_4 :	mov m.MainControlImpl_ct_tcp_table_key m.MainControlT_key
-	mov m.MainControlImpl_ct_tcp_table_key_0 m.MainControlT_key_0
-	mov m.MainControlImpl_ct_tcp_table_ipv4_protocol h.ipv4.protocol
-	mov m.MainControlImpl_ct_tcp_table_key_1 m.MainControlT_key_1
-	mov m.MainControlImpl_ct_tcp_table_key_2 m.MainControlT_key_2
-	table ct_tcp_table
+	LABEL_END_4 :	mov m.MainControlImpl_ct_tcp_table_0_key m.MainControlT_key
+	mov m.MainControlImpl_ct_tcp_table_0_key_0 m.MainControlT_key_0
+	mov m.MainControlImpl_ct_tcp_table_0_ipv4_protocol h.ipv4.protocol
+	mov m.MainControlImpl_ct_tcp_table_0_key_1 m.MainControlT_key_1
+	mov m.MainControlImpl_ct_tcp_table_0_key_2 m.MainControlT_key_2
+	table ct_tcp_table_0
 	LABEL_END_0 :	emit h.eth
 	tx m.pna_main_output_metadata_output_port
 }

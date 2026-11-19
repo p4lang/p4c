@@ -1,5 +1,9 @@
 #!/bin/bash -x
 
+# SPDX-FileCopyrightText: 2025 Mojatatu Networks
+#
+# SPDX-License-Identifier: Apache-2.0
+
 RUNTIME_DIR=$1
 
 cd $RUNTIME_DIR/iproute2-p4tc-pub

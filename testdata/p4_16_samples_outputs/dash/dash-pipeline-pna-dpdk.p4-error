@@ -108,7 +108,7 @@ dash-pipeline-pna-dpdk.p4(942): [--Wwarn=invalid-header] warning: accessing a fi
             ^^^^^^^^^^^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table pa_validation. Copying all match fields to metadata
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table inbound_routing. Copying all match fields to metadata
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table outbound_outbound_mapping_stage_ca_to_pa. Copying all match fields to metadata
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_meter_rule. Copying all match fields to metadata
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_meter_bucket. Copying all match fields to metadata
-[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_eni_meter. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table ca_to_pa. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table meter_rule. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table meter_bucket. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table eni_meter. Copying all match fields to metadata

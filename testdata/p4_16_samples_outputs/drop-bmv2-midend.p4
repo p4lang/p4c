@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -33,6 +34,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta_0.checksum_error = smeta.checksum_error;
         smeta_0.parser_error = smeta.parser_error;
         smeta_0.priority = smeta.priority;
+        smeta_0.lag_hash = smeta.lag_hash;
         mark_to_drop(smeta_0);
         smeta.ingress_port = smeta_0.ingress_port;
         smeta.egress_spec = smeta_0.egress_spec;
@@ -50,6 +52,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.checksum_error = smeta_0.checksum_error;
         smeta.parser_error = smeta_0.parser_error;
         smeta.priority = smeta_0.priority;
+        smeta.lag_hash = smeta_0.lag_hash;
     }
     @name("IngressI.forward") table forward_0 {
         actions = {

@@ -154,7 +154,7 @@ bool TypeUnification::unifyFunctions(const BinaryConstraint *constraint, bool sk
         constraints->add(constraint->create(dest->returnType, src->returnType));
 
     auto sit = src->parameters->parameters.begin();
-    for (auto dit : *dest->parameters->getEnumerator()) {
+    for (auto dit : dest->parameters->getEnumerator()) {
         if (sit == src->parameters->parameters.end()) {
             if (dit->isOptional()) continue;
             if (dit->defaultValue != nullptr) continue;
@@ -222,7 +222,8 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
 bool TypeUnification::containsDots(const IR::Type_StructLike *type) {
     if (type->fields.empty()) return false;
     size_t lastIndex = type->fields.size() - 1;
-    return type->fields.at(lastIndex)->type->is<IR::Type_Any>();
+    const auto *lastField = type->fields.at(lastIndex);
+    return lastField->name == IR::Dots::name && lastField->type->is<IR::Type_Any>();
 }
 
 bool TypeUnification::containsDots(const IR::Type_BaseList *type) {
@@ -371,6 +372,15 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                "Cannot unify %1% and %2% both of which "
                                                "contain unspecified fields",
                                                strct, st);
+            if (!strctHasDots) {
+                for (auto f : st->fields) {
+                    if (f->name != IR::Dots::name && !strct->getField(f->name))
+                        return constraint->reportError(
+                            constraints->getCurrentSubstitution(),
+                            "Field %1% in initializer is not a member of structure %2%", f->name,
+                            strct);
+                }
+            }
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
             if ((strct->fields.size() != st->fields.size()) && !strctHasDots && !stHasDots)
@@ -399,7 +409,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
             if (stHasDots) {
                 auto dotsType = new IR::Type_UnknownStruct(st->name, std::move(missingFields));
-                auto dotsField = st->getField("..."_cs);
+                auto dotsField = st->getField(IR::Dots::name);
                 CHECK_NULL(dotsField);
                 auto partial = new IR::Type_Fragment(dotsType);
                 constraints->add(new EqualityConstraint(dotsField->type, partial, constraint));
@@ -450,6 +460,10 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             constraints->add(constraint->create(dstack->elementType, sstack->elementType));
             return true;
         } else if (auto list = src->to<IR::Type_List>()) {
+            if (!dstack->sizeKnown())
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "%1%: Size of header stack type should be a constant", dstack);
             bool hasDots = containsDots(list);
             size_t listSize = list->components.size();
             if (dstack->getSize() != listSize && !hasDots)

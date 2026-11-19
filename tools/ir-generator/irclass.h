@@ -87,6 +87,7 @@ class IrElement : public Util::IHasSourceInfo {
         Virtual = 1 << 3,
         Static = 1 << 4,
         Const = 1 << 5,
+        Explicit = 1 << 6,
     };
     static inline const char *modifier(int m) {
         if (m & IrElement::NullOK) return "NullOK";
@@ -95,6 +96,7 @@ class IrElement : public Util::IHasSourceInfo {
         if (m & IrElement::Static) return "static";
         if (m & IrElement::Inline) return "inline";
         if (m & IrElement::Const) return "const";
+        if (m & IrElement::Explicit) return "explicit";
         return "";
     }
 };
@@ -120,7 +122,7 @@ class IrMethod : public IrElement {
     std::vector<const IrField *> args;
     cstring body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
-         isUser = false, isFriend = false;
+         isUser = false, isFriend = false, isExplicit = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
         : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}
@@ -339,8 +341,8 @@ class IrClass : public IrElement {
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;
-    Util::Enumerator<IrField *> *getFields() const;
-    Util::Enumerator<IrMethod *> *getUserMethods() const;
+    Util::EnumeratorPtr<IrField *> getFields() const;
+    Util::EnumeratorPtr<IrMethod *> getUserMethods() const;
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
     // name with scope qual if needed in the context
 };
@@ -362,7 +364,7 @@ class IrEnumType : public IrElement {
 
 class IrDefinitions {
     std::vector<IrElement *> elements;
-    Util::Enumerator<IrClass *> *getClasses() const;
+    Util::EnumeratorPtr<IrClass *> getClasses() const;
 
  public:
     explicit IrDefinitions(std::vector<IrElement *> classes) : elements(classes) {}
@@ -374,7 +376,7 @@ class IrDefinitions {
         IrClass::nodemapClass()->resolve();
         IrClass::ideclaration()->resolve();
         IrClass::indexedVectorClass()->resolve();
-        for (auto cls : *getClasses()) cls->resolve();
+        for (auto cls : getClasses()) cls->resolve();
         toposort();
     }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;

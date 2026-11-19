@@ -8,6 +8,8 @@
 #ifndef CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 #define CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 
+#include <memory>
+
 #include "lib/cstring.h"
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
@@ -71,12 +73,12 @@ struct P4SymbolSuffixSet {
         unsigned instances = 0;
 
         // Outgoing edges from this node. The SuffixNode should never be null.
-        std::map<cstring, SuffixNode *> edges;
+        std::map<cstring, std::shared_ptr<SuffixNode>> edges;
     };
 
     // The root of our tree of suffixes. Note that this is *not* the data
     // structure known as a suffix tree.
-    SuffixNode *suffixesRoot = new SuffixNode;
+    std::shared_ptr<SuffixNode> suffixesRoot = std::make_shared<SuffixNode>();
 };
 
 /// A table which tracks the symbols which are visible to P4Runtime and their
@@ -97,11 +99,11 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
      * assignment has access to a non-const reference to the symbol table.
      */
     template <typename Func>
-    static P4RuntimeSymbolTable *create(Func function) {
+    static std::unique_ptr<P4RuntimeSymbolTable> create(Func function) {
         // Create and initialize the symbol table. At this stage, ids aren't
         // available, because computing ids requires global knowledge of all the
         // P4Runtime symbols in the program.
-        auto *symbols = new P4RuntimeSymbolTable();
+        auto symbols = std::unique_ptr<P4RuntimeSymbolTable>(new P4RuntimeSymbolTable());
         function(*symbols);
 
         // Now that the symbol table is initialized, we can compute ids.
@@ -112,10 +114,9 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
         return symbols;
     }
 
-    static P4RuntimeSymbolTable *generateSymbols(const IR::P4Program *program,
-                                                 const IR::ToplevelBlock *evaluatedProgram,
-                                                 ReferenceMap *refMap, TypeMap *typeMap,
-                                                 P4RuntimeArchHandlerIface *archHandler);
+    static std::unique_ptr<P4RuntimeSymbolTable> generateSymbols(
+        const IR::P4Program *program, const IR::ToplevelBlock *evaluatedProgram,
+        ReferenceMap *refMap, TypeMap *typeMap, P4RuntimeArchHandlerIface *archHandler);
 
     /// Add a @type symbol, extracting the name and id from @declaration.
     void add(P4RuntimeSymbolType type, const IR::IDeclaration *declaration) override;

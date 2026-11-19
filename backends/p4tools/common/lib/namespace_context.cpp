@@ -103,7 +103,7 @@ const std::set<cstring> &NamespaceContext::getUsedNames() const {
             usedNames = outer->getUsedNames();
 
             // Add names in curNamespace.
-            for (const auto *decl : *curNamespace->getDeclarations()) {
+            for (const auto *decl : curNamespace->getDeclarations()) {
                 usedNames->insert(decl->getName());
             }
         }

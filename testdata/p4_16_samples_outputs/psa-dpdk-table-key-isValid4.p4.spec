@@ -57,8 +57,8 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> ingress_tbl_ethernet_dstAddr
-	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<48> ingress_tbl_0_ethernet_dstAddr
+	bit<48> ingress_tbl_0_ethernet_srcAddr
 	bit<8> Ingress_tmp
 	bit<8> Ingress_tmp_0
 	bit<8> Ingress_tmp_1
@@ -82,11 +82,11 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		m.Ingress_key wildcard
-		m.ingress_tbl_ethernet_dstAddr exact
-		m.ingress_tbl_ethernet_srcAddr exact
+		m.ingress_tbl_0_ethernet_dstAddr exact
+		m.ingress_tbl_0_ethernet_srcAddr exact
 	}
 	actions {
 		NoAction
@@ -133,9 +133,9 @@ apply {
 	mov m.Ingress_key 0x0
 	jmp LABEL_END_3
 	LABEL_TRUE_0 :	mov m.Ingress_key 0x1
-	LABEL_END_3 :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
-	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
+	LABEL_END_3 :	mov m.ingress_tbl_0_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_tbl_0_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

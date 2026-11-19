@@ -64,6 +64,7 @@ jobs:
       ENABLE_GTESTS: ${{ matrix.gtest }}
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
+      BMV2_REF: 5c722502bc390cbd5f5b77f0d107c9b3fb92ab56
     steps:
       - uses: actions/checkout@v7
         with:

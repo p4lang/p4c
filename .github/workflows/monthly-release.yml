@@ -20,3 +20,5 @@ jobs:
     with:
       version_file: Version.txt
       reviewers: fruffy, jafingerhut, jnfoster
+    secrets:
+      RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}

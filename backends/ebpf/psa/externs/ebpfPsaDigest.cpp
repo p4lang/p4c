@@ -140,7 +140,12 @@ void EBPFDigestPSA::processMethod(CodeBuilder *builder, cstring method,
 void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
                                     Inspector *codegen) const {
     builder->emitIndent();
-    builder->appendFormat("bpf_map_push_elem(&%v, &", instanceName);
+    builder->appendFormat("bpf_map_push_elem(&%v, ", instanceName);
+    const auto *pe = elem->to<IR::PathExpression>();
+    auto *cg = dynamic_cast<CodeGenInspector *>(codegen);
+    if (pe == nullptr || cg == nullptr || !cg->isPointerVariable(pe->path->name.name)) {
+        builder->append("&");
+    }
     codegen->visit(elem);
     builder->append(", BPF_EXIST)");
     builder->endOfStatement(true);

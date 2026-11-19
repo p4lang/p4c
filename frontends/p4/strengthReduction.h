@@ -61,6 +61,7 @@ class StrengthReductionPolicy {
 class DoStrengthReduction final : public Transform, P4WriteContext {
  protected:
     TypeMap *typeMap = nullptr;
+    std::shared_ptr<StrengthReductionPolicy> defaultPolicy;
     StrengthReductionPolicy *policy;
 
     /// @returns `true` if @p expr is the constant `1`.
@@ -86,7 +87,9 @@ class DoStrengthReduction final : public Transform, P4WriteContext {
 
  public:
     DoStrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
-        : typeMap(typeMap), policy(policy ? policy : new StrengthReductionPolicy()) {
+        : typeMap(typeMap),
+          defaultPolicy(policy ? nullptr : std::make_shared<StrengthReductionPolicy>()),
+          policy(policy ? policy : defaultPolicy.get()) {
         visitDagOnce = true;
         setName("StrengthReduction");
     }

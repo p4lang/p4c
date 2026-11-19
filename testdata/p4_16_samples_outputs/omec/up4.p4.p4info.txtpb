@@ -401,16 +401,25 @@ actions {
     id: 1
     name: "src_iface"
     bitwidth: 8
+    type_name {
+      name: "InterfaceType"
+    }
   }
   params {
     id: 2
     name: "direction"
     bitwidth: 8
+    type_name {
+      name: "Direction"
+    }
   }
   params {
     id: 3
     name: "slice_id"
     bitwidth: 4
+    type_name {
+      name: "Slice"
+    }
   }
 }
 actions {
@@ -490,6 +499,9 @@ actions {
     id: 2
     name: "tc"
     bitwidth: 2
+    type_name {
+      name: "TrafficClass"
+    }
   }
   params {
     id: 3
@@ -534,6 +546,9 @@ actions {
     id: 4
     name: "tc"
     bitwidth: 2
+    type_name {
+      name: "TrafficClass"
+    }
   }
   params {
     id: 5

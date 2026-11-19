@@ -1,18 +1,18 @@
 /**
  * Copyright (C) 2024 Intel Corporation
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations under the License.
- * 
- * 
+ *
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -27,8 +27,10 @@
 #include <p4/config/v1/p4info.pb.h>
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include "barefoot/p4info.pb.h"
 #pragma GCC diagnostic pop
@@ -46,10 +48,11 @@ using namespace P4;
 
 class P4RuntimeStdConverter {
  public:
-    explicit P4RuntimeStdConverter(const p4configv1::P4Info *p4infoIn) : p4infoIn(p4infoIn) {}
+    explicit P4RuntimeStdConverter(std::shared_ptr<const p4configv1::P4Info> p4infoIn)
+        : p4infoIn(std::move(p4infoIn)) {}
 
-    const p4configv1::P4Info *convert() {
-        p4configv1::P4Info *p4info = new p4configv1::P4Info;
+    std::shared_ptr<const p4configv1::P4Info> convert() {
+        auto p4info = std::make_shared<p4configv1::P4Info>();
         p4info->CopyFrom(*p4infoIn);
 
         using ConverterFn =
@@ -108,7 +111,7 @@ class P4RuntimeStdConverter {
                 continue;
             }
             for (const auto &externInstance : externType.instances())
-                converterIt->second(p4info, externInstance);
+                converterIt->second(p4info.get(), externInstance);
         }
 
         // Update allowed TNA externs
@@ -135,7 +138,7 @@ class P4RuntimeStdConverter {
 
         // update implementation_id and direct_resource_ids fields in Table
         // messages because the ids have changed
-        updateTables(p4info);
+        updateTables(p4info.get());
 
         return p4info;
     }
@@ -381,7 +384,7 @@ class P4RuntimeStdConverter {
         }
     }
 
-    const p4configv1::P4Info *p4infoIn;
+    std::shared_ptr<const p4configv1::P4Info> p4infoIn;
     std::unordered_set<P4Id> allocatedIds{};
     std::unordered_map<P4Id, P4Id> oldToNewIds{};
     // Maps an action profile id to the corresponding action selector. If an

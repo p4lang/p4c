@@ -120,7 +120,7 @@ action inbound_conntrack_ct_tcp_table_miss_0 args none {
 	return
 }
 
-table ipv4_host {
+table ipv4_host_0 {
 	key {
 		h.ipv4.dst_addr exact
 	}
@@ -222,7 +222,7 @@ apply {
 	mov m.MainControlImpl_inbound_conntrack_ct_tcp_table_retval_2 h.tcp.src_port
 	table inbound_conntrack_ct_tcp_table
 	LABEL_END :	jmpnv LABEL_END_1 h.ipv4
-	table ipv4_host
+	table ipv4_host_0
 	LABEL_END_1 :	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp

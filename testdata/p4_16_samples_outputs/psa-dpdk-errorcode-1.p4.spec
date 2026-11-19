@@ -78,7 +78,7 @@ action execute_1 args none {
 	LABEL_END_0 :	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr wildcard
 	}
@@ -109,7 +109,7 @@ apply {
 	mov m.Ingress_err 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.Ingress_err 0x1
-	LABEL_END :	table tbl
+	LABEL_END :	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

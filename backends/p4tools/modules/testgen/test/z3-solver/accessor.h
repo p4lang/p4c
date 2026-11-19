@@ -34,7 +34,7 @@ class Z3SolverAccessor {
     safe_vector<const Constraint *> getP4Assertions() { return solver.p4Assertions; }
 
     /// Get Z3 context. Used by GTests only.
-    const z3::context &getContext() { return solver.getZ3Ctx(); }
+    const z3::context &getContext() { return solver.context(); }
 
     /// Gets checkpoints that have been made. Used by GTests only.
     std::vector<size_t> &getCheckpoints() { return solver.checkpoints; }

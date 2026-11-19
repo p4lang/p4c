@@ -9,6 +9,7 @@
 #define CONTROL_PLANE_TYPESPECCONVERTER_H_
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "ir/ir.h"
@@ -43,7 +44,7 @@ class TypeSpecConverter : public Inspector {
     ::p4::config::v1::P4TypeInfo *p4RtTypeInfo;
     /// after translating an Expression to P4DataTypeSpec, save the result to
     /// 'map'.
-    std::map<const IR::Type *, ::p4::config::v1::P4DataTypeSpec *> map;
+    std::map<const IR::Type *, std::shared_ptr<::p4::config::v1::P4DataTypeSpec>> map;
 
     TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       ::p4::config::v1::P4TypeInfo *p4RtTypeInfo);
@@ -74,10 +75,9 @@ class TypeSpecConverter : public Inspector {
     /// Generates the appropriate p4.P4DataTypeSpec message for @type. If
     /// @typeInfo is nullptr, then the relevant information is not generated for
     /// named types.
-    static const ::p4::config::v1::P4DataTypeSpec *convert(const P4::ReferenceMap *refMap,
-                                                           P4::TypeMap *typeMap,
-                                                           const IR::Type *type,
-                                                           ::p4::config::v1::P4TypeInfo *typeInfo);
+    static std::shared_ptr<const ::p4::config::v1::P4DataTypeSpec> convert(
+        const P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::Type *type,
+        ::p4::config::v1::P4TypeInfo *typeInfo);
 };
 
 /// See section "User-defined types" in P4RT specification.
@@ -98,8 +98,8 @@ struct TranslationAnnotation {
 /// TranslationAnnotation with the values parsed from the annotation.
 bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *payload);
 
-/// getTypeName returns a cstring for use as type_name for a Type_Newtype. It
-/// returns nullptr if @type is not a Type_Newtype.
+/// getTypeName returns a cstring for use as type_name for a Type_Newtype or a
+/// Type_SerEnum. It returns nullptr if @type is neither.
 cstring getTypeName(const IR::Type *type, TypeMap *typeMap);
 
 }  // namespace ControlPlaneAPI

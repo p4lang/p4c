@@ -434,7 +434,7 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->newline();
     builder->emitIndent();
 
-    builder->appendFormat("int %s = BYTES(%s) - (%s - (u8*)%s)", outerHdrOffsetVar.c_str(),
+    builder->appendFormat("long %s = BYTES(%s) - (%s - (u8*)%s)", outerHdrOffsetVar.c_str(),
                           outerHdrLengthVar.c_str(), program->headerStartVar.c_str(),
                           program->packetStartVar.c_str());
     builder->endOfStatement(true);
@@ -483,7 +483,7 @@ void EBPFDeparser::emit(CodeBuilder *builder) {
     auto prepareBufferTranslator = new DeparserPrepareBufferTranslator(this);
     prepareBufferTranslator->setBuilder(builder);
     prepareBufferTranslator->copyPointerVariables(codeGen);
-    prepareBufferTranslator->substitute(this->headers, this->parserHeaders);
+    prepareBufferTranslator->copySubstitutions(codeGen);
     controlBlock->container->body->apply(*prepareBufferTranslator);
 
     emitBufferAdjusts(builder);
@@ -504,7 +504,7 @@ void EBPFDeparser::emit(CodeBuilder *builder) {
     auto hdrEmitTranslator = new DeparserHdrEmitTranslator(this);
     hdrEmitTranslator->setBuilder(builder);
     hdrEmitTranslator->copyPointerVariables(codeGen);
-    hdrEmitTranslator->substitute(this->headers, this->parserHeaders);
+    hdrEmitTranslator->copySubstitutions(codeGen);
     controlBlock->container->body->apply(*hdrEmitTranslator);
 
     builder->newline();

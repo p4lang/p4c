@@ -108,7 +108,7 @@ class IndexedVector : public Vector<T> {
         if (it == declarations.end()) return nullptr;
         return it->second->template to<U>();
     }
-    Util::Enumerator<const IDeclaration *> *getDeclarations() const {
+    Util::EnumeratorPtr<const IDeclaration *> getDeclarations() const {
         return Util::enumerate(Values(declarations));
     }
     iterator erase(iterator from, iterator to) {

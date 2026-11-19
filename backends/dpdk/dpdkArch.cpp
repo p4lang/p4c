@@ -655,8 +655,7 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(control);
     CHECK_NULL(table);
-    structure->key_map.emplace(control->name.originalName + "_" + table->name.originalName,
-                               tableKeys);
+    structure->key_map.emplace(table->controlPlaneName(), tableKeys);
     return false;
 }
 
@@ -1221,7 +1220,7 @@ void DefActionValue::postorder(const IR::P4Table *t) {
             P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(), refMap, typeMap);
         BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected action in default_action",
                   default_action);
-        structure->defActionParamList[t->toString()] =
+        structure->defActionParamList[t->name.name] =
             new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
     }
 }
@@ -1684,15 +1683,13 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
     if (keyName.startsWith("h.")) {
         isHeader = true;
         keyName = keyName.replace('.', '_');
-        keyName =
-            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
+        keyName = keyName.replace("h_", control->name.name + "_" + table->name.name + "_");
     } else if (metaCopyNeeded) {
         if (keyName.startsWith("m.")) {
             keyName = keyName.replace('.', '_');
-            keyName = keyName.replace(
-                "m_", control->name.toString() + "_" + table->name.toString() + "_");
+            keyName = keyName.replace("m_", control->name.name + "_" + table->name.name + "_");
         } else {
-            keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
+            keyName = control->name.name + "_" + table->name.name + "_" + keyName;
         }
     }
 
@@ -1774,10 +1771,10 @@ std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_mat
     const IR::P4Table *tbl) {
     cstring grpActionName = cstring::empty, memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
-        grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
-        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        grpActionName = refMap->newName(tbl->name.name + "_set_group_id");
+        memActionName = refMap->newName(tbl->name.name + "_set_member_id");
     } else if (implementation == TableImplementation::ACTION_PROFILE) {
-        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        memActionName = refMap->newName(tbl->name.name + "_set_member_id");
     } else {
         BUG("Unexpected table implementation type");
     }

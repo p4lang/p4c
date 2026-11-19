@@ -57,9 +57,9 @@ struct metadata_t {
 	bit<32> local_metadata_next_hop_id
 	bit<8> local_metadata_bypass
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlImpl_inbound_table_ipv4_src_addr
-	bit<32> MainControlImpl_inbound_table_ipv4_dst_addr
-	bit<32> MainControlImpl_inbound_table_esp_spi
+	bit<32> MainControlImpl_inbound_table_0_ipv4_src_addr
+	bit<32> MainControlImpl_inbound_table_0_ipv4_dst_addr
+	bit<32> MainControlImpl_inbound_table_0_esp_spi
 	bit<8> MainParserT_parser_from_ipsec
 	bit<32> MainParserT_parser_status
 	bit<8> MainParserT_parser_tmp_0
@@ -141,11 +141,11 @@ action next_hop_set args instanceof next_hop_set_arg_t {
 	return
 }
 
-table inbound_table {
+table inbound_table_0 {
 	key {
-		m.MainControlImpl_inbound_table_ipv4_src_addr exact
-		m.MainControlImpl_inbound_table_ipv4_dst_addr exact
-		m.MainControlImpl_inbound_table_esp_spi exact
+		m.MainControlImpl_inbound_table_0_ipv4_src_addr exact
+		m.MainControlImpl_inbound_table_0_ipv4_dst_addr exact
+		m.MainControlImpl_inbound_table_0_esp_spi exact
 	}
 	actions {
 		ipsec_enable
@@ -157,7 +157,7 @@ table inbound_table {
 }
 
 
-table outbound_table {
+table outbound_table_0 {
 	key {
 		h.ipv4.src_addr exact
 		h.ipv4.dst_addr exact
@@ -172,7 +172,7 @@ table outbound_table {
 }
 
 
-table routing_table {
+table routing_table_0 {
 	key {
 		h.ipv4.dst_addr lpm
 	}
@@ -185,7 +185,7 @@ table routing_table {
 }
 
 
-table next_hop_table {
+table next_hop_table_0 {
 	key {
 		m.local_metadata_next_hop_id exact
 	}
@@ -232,24 +232,24 @@ apply {
 	LABEL_TRUE_2 :	mov m.MainControlT_tmp 0x1
 	LABEL_END_2 :	jmpneq LABEL_FALSE_1 m.MainControlT_tmp 0x1
 	jmpneq LABEL_FALSE_2 m.MainControlT_status 0x0
-	table routing_table
-	table next_hop_table
+	table routing_table_0
+	table next_hop_table_0
 	jmp LABEL_END_1
 	LABEL_FALSE_2 :	drop
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	jmpnv LABEL_FALSE_3 h.ipv4
 	jmpnv LABEL_FALSE_4 h.esp
-	mov m.MainControlImpl_inbound_table_ipv4_src_addr h.ipv4.src_addr
-	mov m.MainControlImpl_inbound_table_ipv4_dst_addr h.ipv4.dst_addr
-	mov m.MainControlImpl_inbound_table_esp_spi h.esp.spi
-	table inbound_table
+	mov m.MainControlImpl_inbound_table_0_ipv4_src_addr h.ipv4.src_addr
+	mov m.MainControlImpl_inbound_table_0_ipv4_dst_addr h.ipv4.dst_addr
+	mov m.MainControlImpl_inbound_table_0_esp_spi h.esp.spi
+	table inbound_table_0
 	jmpneq LABEL_END_1 m.local_metadata_bypass 0x1
-	table routing_table
-	table next_hop_table
+	table routing_table_0
+	table next_hop_table_0
 	jmp LABEL_END_1
 	jmp LABEL_END_1
-	LABEL_FALSE_4 :	table routing_table
-	table next_hop_table
+	LABEL_FALSE_4 :	table routing_table_0
+	table next_hop_table_0
 	jmp LABEL_END_1
 	LABEL_FALSE_3 :	drop
 	jmp LABEL_END_1
@@ -263,13 +263,13 @@ apply {
 	LABEL_TRUE_8 :	mov m.MainControlT_tmp_0 0x1
 	LABEL_END_8 :	jmpneq LABEL_FALSE_6 m.MainControlT_tmp_0 0x1
 	jmpneq LABEL_FALSE_7 m.MainControlT_status_0 0x0
-	table routing_table
-	table next_hop_table
+	table routing_table_0
+	table next_hop_table_0
 	jmp LABEL_END_1
 	LABEL_FALSE_7 :	drop
 	jmp LABEL_END_1
 	LABEL_FALSE_6 :	jmpnv LABEL_FALSE_8 h.ipv4
-	table outbound_table
+	table outbound_table_0
 	jmp LABEL_END_1
 	LABEL_FALSE_8 :	drop
 	LABEL_END_1 :	jmpnv LABEL_END_12 h.ipsec_hdr

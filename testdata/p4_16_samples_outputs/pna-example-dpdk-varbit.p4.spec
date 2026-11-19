@@ -72,7 +72,7 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -85,7 +85,7 @@ table tbl {
 }
 
 
-table tbl2 {
+table tbl2_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -117,8 +117,8 @@ apply {
 	shr m.MainParserT_parser_tmp_1_extract_tmp 0x3
 	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_1_extract_tmp
 	MAINPARSERIMPL_ACCEPT :	mov m.pna_main_output_metadata_output_port 0x0
-	table tbl
-	table tbl2
+	table tbl_0
+	table tbl2_0
 	emit h.ethernet
 	emit h.ipv4_base
 	tx m.pna_main_output_metadata_output_port

@@ -21,6 +21,9 @@ tables {
     name: "a.vlan_tag[0].ether_type"
     bitwidth: 16
     match_type: EXACT
+    type_name {
+      name: "ether_type_t"
+    }
   }
   action_refs {
     id: 21257015

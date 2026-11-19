@@ -66,7 +66,7 @@ action add_on_miss_action2 args none {
 	return
 }
 
-learner ipv4_da {
+learner ipv4_da_0 {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -89,7 +89,7 @@ learner ipv4_da {
 		}
 }
 
-learner ipv4_da2 {
+learner ipv4_da2_0 {
 	key {
 		m.local_metadata_key
 	}
@@ -119,8 +119,8 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	table ipv4_da
-	table ipv4_da2
+	table ipv4_da_0
+	table ipv4_da2_0
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

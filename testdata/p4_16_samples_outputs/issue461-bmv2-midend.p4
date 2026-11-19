@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -71,6 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -88,6 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats_0;
     @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
@@ -150,6 +153,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         smeta_2.checksum_error = standard_metadata.checksum_error;
         smeta_2.parser_error = standard_metadata.parser_error;
         smeta_2.priority = standard_metadata.priority;
+        smeta_2.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_2);
         standard_metadata.ingress_port = smeta_2.ingress_port;
         standard_metadata.egress_spec = smeta_2.egress_spec;
@@ -167,6 +171,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         standard_metadata.checksum_error = smeta_2.checksum_error;
         standard_metadata.parser_error = smeta_2.parser_error;
         standard_metadata.priority = smeta_2.priority;
+        standard_metadata.lag_hash = smeta_2.lag_hash;
     }
     @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

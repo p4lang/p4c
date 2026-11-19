@@ -18,6 +18,31 @@ namespace P4::P4Tools::Test {
 using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
+TEST(Z3SolverOwnership, ClearMemoryPreservesAssertionsAndOtherSolvers) {
+    const IR::SymbolicVariable *value =
+        P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), "reset_value"_cs);
+    ConstraintVector constraints = {
+        new IR::Equ(value, IR::Constant::get(IR::Type_Bits::get(8), 42))};
+    Z3Solver other;
+    ASSERT_EQ(other.checkSat(constraints), true);
+    for (bool incremental : {false, true}) {
+        Z3Solver solver(incremental);
+        ASSERT_EQ(solver.checkSat(constraints), true);
+        for (int iteration = 0; iteration < 3; ++iteration) {
+            solver.clearMemory();
+            EXPECT_EQ(solver.getAssertions().size(), 1U);
+            ASSERT_EQ(solver.checkSat(constraints), true);
+            auto model = solver.getSymbolicMapping();
+            ASSERT_EQ(model.size(), 1U);
+            EXPECT_EQ(model.at(value)->checkedTo<IR::Constant>()->value, 42);
+            EXPECT_EQ(other.checkSat(constraints), true);
+        }
+        solver.reset();
+        EXPECT_TRUE(solver.getAssertions().empty());
+        EXPECT_EQ(solver.checkSat(constraints), true);
+    }
+}
+
 class Z3SolverSatisfiabilityChecks : public testing::Test {
     P4Tools::Z3Solver solver;
 
@@ -192,5 +217,57 @@ TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
         testCheckSat(inputExpression, false);
     }
 }
+
+namespace {
+
+class CountedTranslationVariable : public IR::SymbolicVariable {
+    unsigned &visits;
+
+ public:
+    explicit CountedTranslationVariable(unsigned &visits)
+        : IR::SymbolicVariable(IR::Type_Boolean::get(), "shared"_cs), visits(visits) {}
+
+    bool apply_visitor_preorder(Inspector &visitor) const override {
+        ++visits;
+        return IR::SymbolicVariable::apply_visitor_preorder(visitor);
+    }
+};
+
+TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
+    unsigned visits = 0;
+    const IR::Expression *expression = new CountedTranslationVariable(visits);
+    for (unsigned depth = 0; depth < 14; ++depth) {
+        expression = new IR::LOr(expression, expression);
+    }
+    Z3Solver solver;
+    Z3Translator translator(solver);
+    auto translated = translator.translate(expression).simplify();
+    EXPECT_TRUE(translated.is_const());
+    EXPECT_EQ(visits, 1U);
+
+    // Solver declarations and IR types can change between applications. A cache from the
+    // preceding traversal must not suppress declarations after a solver reset.
+    solver.reset();
+    solver.push();
+    expression->apply(translator);
+    EXPECT_TRUE(z3::eq(translated, translator.getResult().simplify()));
+    EXPECT_EQ(visits, 2U);
+}
+
+TEST(Z3Translator, KeepsDistinctSymbolTypesSeparate) {
+    const auto *bits8 = IR::Type_Bits::get(8);
+    const auto *bits16 = IR::Type_Bits::get(16);
+    const auto *small = new IR::SymbolicVariable(bits8, "same_label"_cs);
+    const auto *large = new IR::SymbolicVariable(bits16, "same_label"_cs);
+    const auto *expression = new IR::Equ(new IR::Cast(bits16, small), large);
+    Z3Solver solver;
+    Z3Translator translator(solver);
+    const auto translated = translator.translate(expression);
+    EXPECT_EQ(translated.arg(0).get_sort().bv_size(), 16U);
+    EXPECT_EQ(translated.arg(0).arg(0).get_sort().bv_size(), 8U);
+    EXPECT_EQ(translated.arg(1).get_sort().bv_size(), 16U);
+}
+
+}  // namespace
 
 }  // namespace P4::P4Tools::Test

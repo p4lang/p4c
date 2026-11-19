@@ -323,6 +323,7 @@ class ConvertToBackendIR : public Inspector {
         unsigned instance_id;
         bool is_num_elements;
         int num_elements;
+        const IR::Expression *initial_value = nullptr;
     };
     struct ExternBlock {
         cstring externId;
@@ -371,6 +372,8 @@ class ConvertToBackendIR : public Inspector {
     safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_Extern *extn,
                                                             const IR::Declaration_Instance *decl,
                                                             cstring eName);
+    void initializeExternControlPath(safe_vector<const IR::TCKey *> &keys,
+                                     const IR::Expression *initialValue);
     cstring getControlPathKeyAnnotation(const IR::StructField *field);
     unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);

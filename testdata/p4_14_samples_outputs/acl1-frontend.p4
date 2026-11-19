@@ -169,6 +169,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".drop_stats") counter<bit<8>>(32w256, CounterType.packets) drop_stats;
 @name(".drop_stats_2") counter<bit<8>>(32w256, CounterType.packets) drop_stats_2;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("ingress.reason_code") bit<16> reason_code_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -181,8 +182,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".copy_to_cpu") action copy_to_cpu(@name("reason_code") bit<16> reason_code_2) {
         meta.fabric_metadata.reason_code = reason_code_2;
     }
-    @name(".redirect_to_cpu") action redirect_to_cpu(@name("reason_code") bit<16> reason_code_3) {
-        meta.fabric_metadata.reason_code = reason_code_3;
+    @name(".redirect_to_cpu") action redirect_to_cpu(@name("reason_code") bit<16> reason_code_4) {
+        reason_code_0 = reason_code_4;
+        meta.fabric_metadata.reason_code = reason_code_0;
     }
     @name(".drop_packet") action drop_packet() {
     }

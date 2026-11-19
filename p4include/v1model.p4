@@ -102,6 +102,9 @@ struct standard_metadata_t {
     /// set packet priority
     @alias("intrinsic_metadata.priority")
     bit<3> priority;
+    /// Hash value provided by the P4 program for selecting a member port within a LAG.
+    @alias("intrinsic_metadata.lag_hash")
+    bit<16> lag_hash;
 }
 
 enum CounterType {

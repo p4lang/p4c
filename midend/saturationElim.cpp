@@ -84,13 +84,13 @@ const IR::Mux *SaturationElim::eliminate(const IR::Operation_Binary *binary) {
             // to detecting overflow in the addition of x + (-y). Based on the above reasoning for
             // addition, we have overflow when
             //
-            //   x > 0 && -y > 0 && x - y <= 0
-            //     <=> x > 0 && y <= 0 && x - y <= 0
-            const auto *leftPositive = new IR::Grt(boolType, binary->left, zero);
+            //   x >= 0 && -y >= 0 && x - y < 0
+            //     <=> x >= 0 && y <= 0 && x - y < 0
+            const auto *leftNonNegative = new IR::Geq(boolType, binary->left, zero);
             const auto *rightNonPositive = new IR::Leq(boolType, binary->right, zero);
-            const auto *exprNonPositive = new IR::Leq(boolType, expr, zero);
+            const auto *exprNegative = new IR::Lss(boolType, expr, zero);
             overflowCondition = new IR::LAnd(
-                boolType, leftPositive, new IR::LAnd(boolType, rightNonPositive, exprNonPositive));
+                boolType, leftNonNegative, new IR::LAnd(boolType, rightNonPositive, exprNegative));
 
             // Detection of underflowing subtraction, x - y, of two signed numbers works similarly
             // to detecting underflow in the addition of x + (-y). Based on the above reasoning for

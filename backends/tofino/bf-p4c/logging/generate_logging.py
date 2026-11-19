@@ -31,7 +31,7 @@ debug = 0
 
 
 def escape_cpp(to_translate, translate_to='_'):
-    not_letters_or_digits = '!"#%\'()*+,-./:;<=>?@[\]^`{|}~'
+    not_letters_or_digits = '!"#%\'()*+,-./:;<=>?@[\\]^`{|}~'
     # translate_table = dict((ord(char), translate_to) for char in not_letters_or_digits)
     translate_table = str.maketrans(
         not_letters_or_digits, translate_to * len(not_letters_or_digits)
@@ -366,7 +366,7 @@ class EnumDataMember(DataMember):
 
     def genTypeDecl(self, generator):
         if self.body is None:
-            raise TypeError('Invalid body for enum ' + name)
+            raise TypeError('Invalid body for enum ' + self.name)
         decl = 'enum class ' + self.cppType() + ' { '
         first = True
         # if the data member is optional we need to generate a value in the enum to

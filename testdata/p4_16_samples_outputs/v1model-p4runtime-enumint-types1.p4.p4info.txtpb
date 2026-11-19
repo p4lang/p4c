@@ -228,6 +228,9 @@ tables {
     name: "hdr.custom.s0"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "serenum_t"
+    }
   }
   action_refs {
     id: 28429210
@@ -453,6 +456,9 @@ actions {
     id: 26
     name: "s0"
     bitwidth: 8
+    type_name {
+      name: "serenum_t"
+    }
   }
 }
 actions {

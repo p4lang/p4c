@@ -17,7 +17,12 @@ limitations under the License.
 
 #include <memory>
 
+#if __has_include(<boost/multiprecision/fwd.hpp>)
 #include <boost/multiprecision/fwd.hpp>
+#else
+// Older installed releases do not provide a forward-declaration header.
+#include <boost/multiprecision/cpp_int.hpp>
+#endif
 
 namespace P4 {
 

@@ -40,6 +40,10 @@ class EBPFPipeline : public EBPFProgram {
     /// A variable to store ifindex after mapping (e.g. due to recirculation).
     cstring inputPortVar;
 
+    /// Fields of struct hdr_md that hold this pipeline's headers and user metadata.
+    cstring cpumapHeadersField = "cpumap_hdr"_cs;
+    cstring cpumapUserMetadataField = "cpumap_usermeta"_cs;
+
     EBPFControlPSA *control;
     EBPFDeparserPSA *deparser;
 
@@ -194,6 +198,10 @@ class TCIngressPipeline : public EBPFIngressPipeline {
 
     void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
     void emitTrafficManager(CodeBuilder *builder) override;
+
+ protected:
+    /// Clears the global metadata of a packet that this pipeline has not marked yet.
+    void emitResetUnmarkedGlobalMetadata(CodeBuilder *builder);
 
  private:
     void emitTCWorkaroundUsingMeta(CodeBuilder *builder);

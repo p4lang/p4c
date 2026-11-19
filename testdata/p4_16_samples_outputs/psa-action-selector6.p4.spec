@@ -43,15 +43,15 @@ struct a2_arg_t {
 	bit<16> param
 }
 
-struct tbl1_set_member_id_arg_t {
+struct tbl1_0_set_member_id_arg_t {
 	bit<32> member_id
 }
 
-struct tbl_set_group_id_arg_t {
+struct tbl_0_set_group_id_arg_t {
 	bit<32> group_id
 }
 
-struct tbl_set_member_id_arg_t {
+struct tbl_0_set_member_id_arg_t {
 	bit<32> member_id
 }
 
@@ -101,28 +101,28 @@ action a2_1 args instanceof a2_1_arg_t {
 	return
 }
 
-action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
+action tbl_0_set_group_id args instanceof tbl_0_set_group_id_arg_t {
 	mov m.Ingress_as_group_id t.group_id
 	return
 }
 
-action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
 	mov m.Ingress_as_member_id t.member_id
 	return
 }
 
-action tbl1_set_member_id args instanceof tbl1_set_member_id_arg_t {
+action tbl1_0_set_member_id args instanceof tbl1_0_set_member_id_arg_t {
 	mov m.Ingress_ap_member_id t.member_id
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl_set_group_id
-		tbl_set_member_id
+		tbl_0_set_group_id
+		tbl_0_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
@@ -144,12 +144,12 @@ table as {
 }
 
 
-table tbl1 {
+table tbl1_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl1_set_member_id
+		tbl1_0_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
@@ -171,7 +171,7 @@ table ap {
 }
 
 
-table foo {
+table foo_0 {
 	actions {
 		NoAction
 	}
@@ -180,7 +180,7 @@ table foo {
 }
 
 
-table bar {
+table bar_0 {
 	actions {
 		NoAction
 	}
@@ -206,7 +206,7 @@ apply {
 	mov m.Ingress_as_member_id 0x0
 	mov m.Ingress_as_group_id 0xFFFFFFFF
 	mov m.Ingress_switchExprTmp_0 0xFFFFFFFF
-	table tbl
+	table tbl_0
 	jmpnh LABEL_END
 	jmpeq LABEL_END_0 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
@@ -214,13 +214,13 @@ apply {
 	LABEL_END :	jmpeq LABEL_SWITCH m.Ingress_switchExprTmp_0 0x0
 	jmpeq LABEL_SWITCH_0 m.Ingress_switchExprTmp_0 0x1
 	jmp LABEL_ENDSWITCH
-	LABEL_SWITCH :	table foo
+	LABEL_SWITCH :	table foo_0
 	jmp LABEL_ENDSWITCH
-	LABEL_SWITCH_0 :	table bar
+	LABEL_SWITCH_0 :	table bar_0
 	LABEL_ENDSWITCH :	mov m.Ingress_as_member_id 0x0
 	mov m.Ingress_as_group_id 0xFFFFFFFF
 	mov m.Ingress_switchExprTmp_1 0xFFFFFFFF
-	table tbl
+	table tbl_0
 	jmpnh LABEL_END_1
 	jmpeq LABEL_END_2 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
@@ -228,23 +228,23 @@ apply {
 	LABEL_END_1 :	jmpeq LABEL_SWITCH_1 m.Ingress_switchExprTmp_1 0x0
 	jmpeq LABEL_SWITCH_2 m.Ingress_switchExprTmp_1 0x1
 	jmp LABEL_ENDSWITCH_0
-	LABEL_SWITCH_1 :	table bar
+	LABEL_SWITCH_1 :	table bar_0
 	jmp LABEL_ENDSWITCH_0
-	LABEL_SWITCH_2 :	table foo
+	LABEL_SWITCH_2 :	table foo_0
 	LABEL_ENDSWITCH_0 :	mov m.Ingress_ap_member_id 0x0
 	mov m.Ingress_switchExprTmp 0xFFFFFFFF
-	table tbl1
+	table tbl1_0
 	jmpnh LABEL_END_3
 	table ap
 	LABEL_END_3 :	jmpeq LABEL_SWITCH_3 m.Ingress_switchExprTmp 0x0
 	jmpeq LABEL_SWITCH_4 m.Ingress_switchExprTmp 0x1
 	jmp LABEL_DEFAULT_1
-	LABEL_SWITCH_3 :	table bar
+	LABEL_SWITCH_3 :	table bar_0
 	jmp LABEL_ENDSWITCH_1
-	LABEL_SWITCH_4 :	table foo
+	LABEL_SWITCH_4 :	table foo_0
 	jmp LABEL_ENDSWITCH_1
-	LABEL_DEFAULT_1 :	table foo
-	table bar
+	LABEL_DEFAULT_1 :	table foo_0
+	table bar_0
 	LABEL_ENDSWITCH_1 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

@@ -156,10 +156,6 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   endif()
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-  # Link Boost statically
-  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
-  set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # TODO: We can not use -static here because of compilation and portability problems:
@@ -228,14 +224,8 @@ p4c_obtain_abseil()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# The boost graph headers are optional and only required by the graphs back end.
-find_package (Boost QUIET COMPONENTS graph)
-if (Boost_FOUND)
-  set (HAVE_LIBBOOST_GRAPH 1)
-else ()
-  message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
-endif ()
-find_package (Boost REQUIRED COMPONENTS iostreams)
+include(Multiprecision)
+p4c_obtain_multiprecision()
 
 # Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
 # One can disable the GC, e.g., to run under Valgrind, by editing config.h.
@@ -247,9 +237,6 @@ if (ENABLE_MULTITHREAD)
   add_definitions("-DMULTITHREAD")
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-set (HAVE_LIBBOOST_IOSTREAMS 1)
-list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
   list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()
@@ -432,38 +419,16 @@ set(EXTENSION_IR_LIBS)
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
-if (ENABLE_CONTROL_PLANE)
-########################################## P4Runtime Begin #########################################
-# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
-# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
-# need to keep the P4Runtime installation in the top-level CMakelists file.
-# Print download state while setting up P4Runtime.
-set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-set(FETCHCONTENT_QUIET OFF)
-# Fetch and declare the P4Runtime library.
-FetchContent_Declare(
-  p4runtime
-  GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5
-  GIT_PROGRESS TRUE
-)
-FetchContent_MakeAvailable(p4runtime)
-set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-message(STATUS "Done with setting up P4Runtime for P4C.")
-# The standard P4Runtime protocol buffers message definitions live in the PI
-# repo, which is included in this repo as a git module.
-set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
-                                                          "Path to the P4Runtime directory."
-)
-endif()
-########################################## P4Runtime End ##########################################
-
 add_subdirectory (frontends)
 add_subdirectory (midend)
 if (ENABLE_CONTROL_PLANE)
     OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
     include(Protobuf)
     p4c_obtain_protobuf()
+
+    # P4Runtime must use the same Protobuf library and protoc as P4C.
+    include(P4Runtime)
+    p4c_obtain_p4runtime()
     add_subdirectory (control-plane)
 endif()
 
@@ -499,7 +464,7 @@ endif ()
 if (ENABLE_EBPF)
     add_subdirectory (backends/ebpf)
 endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+if (ENABLE_P4C_GRAPHS)
   add_subdirectory (backends/graphs)
 endif ()
 if (ENABLE_P4TC)

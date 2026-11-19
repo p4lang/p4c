@@ -130,12 +130,13 @@ void EBPFPipeline::emitCPUMAPInitializers(CodeBuilder *builder) {
 
 void EBPFPipeline::emitHeadersFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("%v = &(hdrMd->cpumap_hdr);", parser->headers->name);
+    builder->appendFormat("%v = &(hdrMd->%v);", parser->headers->name, cpumapHeadersField);
 }
 
 void EBPFPipeline::emitMetadataFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("%v = &(hdrMd->cpumap_usermeta);", control->user_metadata->name);
+    builder->appendFormat("%v = &(hdrMd->%v);", control->user_metadata->name,
+                          cpumapUserMetadataField);
 }
 
 void EBPFPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
@@ -457,8 +458,22 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
 }
 
 // =====================TCIngressPipeline=============================
+void TCIngressPipeline::emitResetUnmarkedGlobalMetadata(CodeBuilder *builder) {
+    // Global metadata in skb->cb is only valid for packets marked by this
+    // pipeline. Clear it for other packets, which may carry stale data.
+    builder->emitIndent();
+    builder->appendFormat("if (%v->mark != %u) ", compilerGlobalMetadata, packetMark);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("__builtin_memset(%v, 0, sizeof(struct psa_global_metadata))",
+                          compilerGlobalMetadata);
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
+    emitResetUnmarkedGlobalMetadata(builder);
 
     // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
     builder->emitIndent();
@@ -737,6 +752,7 @@ void XDPEgressPipeline::emitCheckPacketMarkMetadata(CodeBuilder *builder) {
 
 void TCTrafficManagerForXDP::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
+    emitResetUnmarkedGlobalMetadata(builder);
 
     // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
     builder->emitIndent();

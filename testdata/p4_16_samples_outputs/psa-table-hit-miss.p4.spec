@@ -43,7 +43,7 @@ action remove_header args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -60,18 +60,18 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
-	table tbl
+	table tbl_0
 	jmpnh LABEL_END
 	invalidate h.ethernet
-	LABEL_END :	table tbl
+	LABEL_END :	table tbl_0
 	jmpnh LABEL_FALSE_0
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	validate h.ethernet
-	LABEL_END_0 :	table tbl
+	LABEL_END_0 :	table tbl_0
 	jmpnh LABEL_FALSE_1
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	validate h.ethernet
-	LABEL_END_1 :	table tbl
+	LABEL_END_1 :	table tbl_0
 	jmpnh LABEL_END_2
 	invalidate h.ethernet
 	LABEL_END_2 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

@@ -1,0 +1,6 @@
+issue5477.p4(24): [--Wwarn=unreachable] warning: accept state in parser SubParserReject is unreachable
+parser SubParserReject(packet_in packet,
+       ^^^^^^^^^^^^^^^
+issue5477.p4(33): [--Wwarn=unreachable] warning: accept state in parser Parser is unreachable
+parser Parser(packet_in packet,
+       ^^^^^^

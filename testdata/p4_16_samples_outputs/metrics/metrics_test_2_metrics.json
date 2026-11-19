@@ -1,5 +1,5 @@
 {
-  "lines_of_code" : 220,
+  "lines_of_code" : 223,
   "cyclomatic_complexity" : {
     "MyParser" : 17,
     "MyVerifyChecksum" : 1,
@@ -10,15 +10,15 @@
   },
   "halstead" : {
     "unique_operators" : 41,
-    "unique_operands" : 119,
-    "total_operators" : 312,
-    "total_operands" : 339,
-    "vocabulary" : 160,
-    "length" : 651,
-    "difficulty" : 58.3992,
-    "volume" : 4766.58,
-    "effort" : 278364,
-    "estimated_bugs" : 1.58886
+    "unique_operands" : 125,
+    "total_operators" : 318,
+    "total_operands" : 351,
+    "vocabulary" : 166,
+    "length" : 669,
+    "difficulty" : 57.564,
+    "volume" : 4933.9,
+    "effort" : 284015,
+    "estimated_bugs" : 1.64463
   },
   "unused_code" : {
     "actions" : 0,

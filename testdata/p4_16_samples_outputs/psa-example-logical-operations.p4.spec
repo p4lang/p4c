@@ -45,7 +45,7 @@ action forward args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.srcAddr exact
 	}
@@ -62,7 +62,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h
-	table tbl
+	table tbl_0
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta2
 	mov m.Ingress_tmp m.local_metadata_meta3

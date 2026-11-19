@@ -34,11 +34,11 @@ struct a2_arg_t {
 	bit<16> param
 }
 
-struct tbl_set_group_id_arg_t {
+struct tbl_0_set_group_id_arg_t {
 	bit<32> group_id
 }
 
-struct tbl_set_member_id_arg_t {
+struct tbl_0_set_member_id_arg_t {
 	bit<32> member_id
 }
 
@@ -68,23 +68,23 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
+action tbl_0_set_group_id args instanceof tbl_0_set_group_id_arg_t {
 	mov m.Ingress_as_group_id t.group_id
 	return
 }
 
-action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
 	mov m.Ingress_as_member_id t.member_id
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl_set_group_id
-		tbl_set_member_id
+		tbl_0_set_group_id
+		tbl_0_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
@@ -122,7 +122,7 @@ apply {
 	extract h.ethernet
 	mov m.Ingress_as_member_id 0x0
 	mov m.Ingress_as_group_id 0xFFFFFFFF
-	table tbl
+	table tbl_0
 	jmpnh LABEL_END
 	jmpeq LABEL_END_0 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel

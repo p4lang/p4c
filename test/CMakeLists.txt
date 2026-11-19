@@ -8,6 +8,7 @@
 ################################################################################
 
 set (GTEST_UNITTEST_SOURCES
+  gtest/annotations.cpp
   gtest/arch_test.cpp
   gtest/bitrange.cpp
   gtest/bitvec_test.cpp
@@ -26,11 +27,13 @@ set (GTEST_UNITTEST_SOURCES
   gtest/fdstream.cpp
   gtest/flat_map.cpp
   gtest/format_test.cpp
+  gtest/gc.cpp
   gtest/helpers.cpp
   gtest/hash.cpp
   gtest/hvec_map.cpp
   gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
+  gtest/interpreter.cpp
   gtest/ir.cpp
   gtest/ir-splitter.cpp
   gtest/ir-traversal.cpp

@@ -51,7 +51,7 @@ action execute_1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -74,7 +74,7 @@ apply {
 	LABEL_FALSE :	mov m.Ingress_tmp_0 0x5
 	LABEL_END :	mov m.local_metadata_data m.Ingress_tmp_0
 	add m.local_metadata_data 0x5
-	table tbl
+	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

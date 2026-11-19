@@ -21,15 +21,7 @@ parser IParser(packet_in packet, inout headers hdr) {
         transition accept;
     }
     state s2 {
-        transition IParser2_start;
-    }
-    state IParser2_start {
         packet.extract<h_t>(hdr.h2);
-        transition select(hdr.h2.f) {
-            default: s2_0;
-        }
-    }
-    state s2_0 {
         transition accept;
     }
 }

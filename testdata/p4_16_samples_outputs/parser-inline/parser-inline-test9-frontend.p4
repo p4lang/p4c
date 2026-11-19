@@ -33,9 +33,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start {
         hdr_0.f = 8w42;
-        transition p0_0;
-    }
-    state p0_0 {
         hdr.h1 = hdr_0;
         transition accept;
     }
@@ -49,19 +46,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start_0 {
         hdr_0.f = 8w42;
-        transition p2_0;
-    }
-    state p2_0 {
         hdr.h2 = hdr_0;
-        transition p4;
+        packet.extract<data_t>(hdr.h3);
+        transition accept;
     }
     state p3 {
         hdr_0 = hdr.h2;
         transition Subparser_start_0;
-    }
-    state p4 {
-        packet.extract<data_t>(hdr.h3);
-        transition accept;
     }
 }
 

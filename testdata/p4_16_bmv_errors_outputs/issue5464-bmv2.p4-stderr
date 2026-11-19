@@ -11,3 +11,5 @@ parser EmptyParser(packet_in b, headers_t headers, metadata_t meta,
 issue5464-bmv2.p4(36): [--Werror=Target model error] error: 32w0: expected a HashAlgorithm member
         verify_checksum(false, { }, meta.result, HashAlgorithm.csum16);
                                                  ^^^^^^^^^^^^^
+
+Are you using an up-to-date v1model.p4?

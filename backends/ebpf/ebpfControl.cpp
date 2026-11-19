@@ -47,7 +47,7 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
     builder->append("(");
     bool first = true;
 
-    for (auto p : *function->substitution.getParametersInArgumentOrder()) {
+    for (auto p : function->substitution.getParametersInArgumentOrder()) {
         if (!first) builder->append(", ");
         first = false;
         auto arg = function->substitution.lookup(p);

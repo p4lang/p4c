@@ -72,6 +72,7 @@ class StorageLocation : public IHasDbPrint, public ICastable {
 #endif
     }
     cstring toString() const { return name; }
+    virtual const char *locClass() const = 0;
 
     /// @returns All locations inside that represent valid bits.
     LocationSet getValidBits() const;
@@ -107,6 +108,7 @@ class BaseLocation : public StorageLocation {
     void addValidBits(LocationSet *) const override {}
     void addLastIndexField(LocationSet *) const override {}
     void removeHeaders(LocationSet *result) const override;
+    const char *locClass() const override { return "Base"; }
 
     DECLARE_TYPEINFO(BaseLocation, StorageLocation);
 };
@@ -134,8 +136,15 @@ class WithFieldsLocation : public StorageLocation {
     void addField(cstring field, LocationSet *addTo) const;
     void removeHeaders(LocationSet *result) const override;
     auto fields() const { return Values(fieldLocations); }
+    const char *locClass() const override { return "WithFields"; }
     void dbprint(std::ostream &out) const override {
-        for (auto f : fieldLocations) out << *f.second << " ";
+        out << "<" << locClass() << ">{";
+        const char *sep = "";
+        for (auto f : fieldLocations) {
+            out << sep << *f.second;
+            sep = ", ";
+        }
+        out << "}";
     }
 
     DECLARE_TYPEINFO(WithFieldsLocation, StorageLocation);
@@ -155,6 +164,7 @@ class StructLocation : public WithFieldsLocation {
     bool isHeader() const { return type->is<IR::Type_Header>(); }
     bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
     bool isStruct() const { return type->is<IR::Type_Struct>(); }
+    const char *locClass() const override { return "Struct"; }
 
     DECLARE_TYPEINFO(StructLocation, WithFieldsLocation);
 };
@@ -182,8 +192,15 @@ class IndexedLocation : public StorageLocation {
     void addElement(unsigned index, LocationSet *result) const;
     auto begin() const { return elements.cbegin(); }
     auto end() const { return elements.cend(); }
+    const char *locClass() const override { return "Indexed"; }
     void dbprint(std::ostream &out) const override {
-        for (unsigned i = 0; i < elements.size(); i++) out << *elements.at(i) << " ";
+        out << "<" << locClass() << ">[";
+        const char *sep = "";
+        for (unsigned i = 0; i < elements.size(); i++) {
+            out << sep << *elements.at(i);
+            sep = ", ";
+        }
+        out << "]";
     }
     size_t getSize() const { return elements.size(); }
     void removeHeaders(LocationSet *result) const override;
@@ -200,6 +217,7 @@ class TupleLocation : public IndexedLocation {
  public:
     void addValidBits(LocationSet *) const override {}
     void addLastIndexField(LocationSet *) const override {}
+    const char *locClass() const override { return "Tuple"; }
 
     DECLARE_TYPEINFO(TupleLocation, IndexedLocation);
 };
@@ -219,6 +237,7 @@ class ArrayLocation : public IndexedLocation {
     void addValidBits(LocationSet *result) const override;
     void removeHeaders(LocationSet *) const override {}  // no results added
     void addLastIndexField(LocationSet *result) const override;
+    const char *locClass() const override { return "Array"; }
 
     DECLARE_TYPEINFO(ArrayLocation, IndexedLocation);
 };
@@ -335,7 +354,7 @@ class LocationSet : public IHasDbPrint {
         if (locations.empty()) out << "LocationSet::empty";
         for (auto l : locations) {
             l->dbprint(out);
-            out << " ";
+            out << "; ";
         }
     }
     // only defined for canonical representations

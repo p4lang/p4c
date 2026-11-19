@@ -26,6 +26,9 @@ If a file is missing after cleanup, ccache can compile it again.
 
 # Daily cleanup
 
+The scheduled `ci-cache-maintenance.yml` workflow uses the shared
+[`p4lang/.github` cache retention action](https://github.com/p4lang/.github/tree/main/CI/cache-retention).
+
 - Keep the latest main cache for each build configuration and archive version.
 - Keep the latest cache for each open PR and job; remove older copies and closed-PR caches.
 - Remove PR caches that have gone unused longest to target 2 GB of PR caches and 9 GB total.
@@ -34,7 +37,7 @@ If a file is missing after cleanup, ccache can compile it again.
 
 # Checks
 
-Run `python3 .github/scripts/cache_retention.py` with `GH_TOKEN` and
-`GITHUB_REPOSITORY` set to preview cleanup; add `--apply` to delete the listed caches.
+Run the Cache maintenance workflow manually with `dry-run` enabled to preview
+cleanup. Scheduled runs apply the policy automatically.
 
 Check compiler cache hits, build times, and saved cache sizes before changing the limits.

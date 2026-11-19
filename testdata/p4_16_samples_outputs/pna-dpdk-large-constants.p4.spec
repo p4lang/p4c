@@ -166,7 +166,7 @@ action set_hop_limit args instanceof set_hop_limit_arg_t {
 	return
 }
 
-table filter_tbl {
+table filter_tbl_0 {
 	key {
 		h.ipv6.srcAddr exact
 	}
@@ -201,7 +201,7 @@ apply {
 	mov h.MainControlT_tmp_13_128.lower_half 0x89ABCDEF12345678
 	mov m.MainControlT_tmp_13 h.MainControlT_tmp_13_128.lower_half
 	movh m.MainControlT_tmp_13 h.MainControlT_tmp_13_128.upper_half
-	table filter_tbl
+	table filter_tbl_0
 	emit h.ethernet
 	emit h.mpls
 	emit h.ipv6

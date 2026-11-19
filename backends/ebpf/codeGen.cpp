@@ -62,6 +62,7 @@ static cstring getMask(P4::TypeMap *typeMap, const IR::Node *node) {
 }
 
 bool CodeGenInspector::preorder(const IR::Operation_Binary *b) {
+    if (emitTCUnsignedArithmetic(b)) return false;
     if (!b->is<IR::BOr>() && !b->is<IR::BAnd>() && !b->is<IR::BXor>() && !b->is<IR::Equ>() &&
         !b->is<IR::Neq>())
         widthCheck(b);
@@ -112,7 +113,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", b->left, type);
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
-        builder->append("memcmp(&");
+        builder->append("__builtin_memcmp(&");
         if (builder->target->name == "P4TC") {
             emitTCBinaryOperation(b);
         } else {
@@ -288,7 +289,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression *expression) {
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (!first) builder->append(", ");
         expressionPrecedence = DBPrint::Prec_Low;
         first = false;
@@ -320,7 +321,7 @@ bool CodeGenInspector::preorder(const IR::Type_Enum *type) {
     builder->append(type->name);
     builder->spc();
     builder->blockStart();
-    for (auto e : *type->getDeclarations()) {
+    for (auto e : type->getDeclarations()) {
         builder->emitIndent();
         builder->append(e->getName().name);
         builder->appendLine(",");
@@ -496,6 +497,42 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
 void CodeGenInspector::emitTCLarge(const IR::Operation_Binary *b, unsigned int width) {
     ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Don't yet handle %1% on %2%-bit values",
                 b->getStringOp(), width);
+}
+
+bool CodeGenInspector::emitTCUnsignedArithmetic(const IR::Operation_Binary *b) {
+    if (builder->target->name != "P4TC" ||
+        (!b->is<IR::Add>() && !b->is<IR::Sub>() && !b->is<IR::Mul>()))
+        return false;
+    auto type = typeMap->getType(b)->to<IR::Type_Bits>();
+    if (type == nullptr || type->isSigned || type->size > 64) return false;
+
+    // Unsigned C arithmetic avoids integer-promotion overflow. Truncate each
+    // result before a surrounding cast or comparison can observe the carry.
+    auto target = dynamic_cast<const P4TCTarget *>(builder->target);
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    builder->append("(((u64)(");
+    auto emitOperand = [&](const IR::Expression *operand) {
+        if (auto constant = operand->to<IR::Constant>()) {
+            builder->append(Util::toString(constant->value, 0, false, constant->base));
+            builder->append("ULL");
+        } else if (target->getByteOrder(typeMap, findContext<IR::P4Action>(), operand) ==
+                   "NETWORK") {
+            emitAndConvertByteOrder(operand, "HOST"_cs);
+        } else {
+            getBitAlignment(operand);
+        }
+    };
+    emitOperand(b->left);
+    builder->append(") ");
+    builder->append(b->getStringOp());
+    builder->append(" (u64)(");
+    emitOperand(b->right);
+    builder->append("))");
+    if (type->size < 64) builder->appendFormat(" & %lluULL", (1ULL << type->size) - 1);
+    builder->append(")");
+    expressionPrecedence = prec;
+    return true;
 }
 
 void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b) {

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Reversing a stack must retain both original header values.
+packet 0 1234
+expect 0 3412
+packet 0 abcd
+expect 0 cdab
+packet 0 00ff
+expect 0 ff00
+packet 0 ff00
+expect 0 00ff
+packet 0 5555
+expect 0 5555
+# An invalid source header must remain invalid after moving to its new slot.
+packet 0 fe34
+expect 0 34
+packet 0 12fe
+expect 0 12

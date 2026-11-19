@@ -43,7 +43,7 @@ action a1 args none {
 	return
 }
 
-table tbl {
+table tbl_0 {
 	key {
 		h.ethernet.srcAddr exact
 	}
@@ -62,7 +62,7 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	table tbl
+	MAINPARSERIMPL_ACCEPT :	table tbl_0
 	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

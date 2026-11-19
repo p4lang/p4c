@@ -27,6 +27,20 @@ const Type_Bits *getBitTypeToFit(int value) {
     return Type_Bits::get(width);
 }
 
+const Type_Extern *getExternType(const Type *type) {
+    CHECK_NULL(type);
+    if (const auto *externType = type->to<Type_Extern>()) {
+        return externType;
+    }
+    if (const auto *specialized = type->to<Type_SpecializedCanonical>()) {
+        if (!specialized->baseType->is<Type_Extern>()) {
+            return nullptr;
+        }
+        return specialized->substituted->checkedTo<Type_Extern>();
+    }
+    return nullptr;
+}
+
 /* =============================================================================================
  *  Expressions
  * ============================================================================================= */
@@ -109,6 +123,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         return new IR::ListExpression(srcInfo, *vec);
     }
     if (const auto *ta = type->to<IR::Type_Array>()) {
+        if (!ta->sizeKnown()) return nullptr;
         auto *vec = new IR::Vector<IR::Expression>();
         const auto *elementType = ta->elementType;
         for (size_t i = 0; i < ta->getSize(); i++) {

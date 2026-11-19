@@ -184,7 +184,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
-            new P4::CopyStructures(&typeMap, false /* errorOnMethodCall */),
+            // FlattenHeaderUnion requires union copies to be expanded into member assignments.
+            new P4::CopyStructures(&typeMap, {.errorOnMethodCall = false, .expandUnions = true}),
             new P4::NestedStructs(&typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),
@@ -192,6 +193,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::FlattenInterfaceStructs(&typeMap),
             new P4::EliminateTypedef(&typeMap),
             new P4::HSIndexSimplifier(&typeMap),
+            // EliminateInvalidHeaders can introduce parser-state-local declarations that must be
+            // hoisted before ParsersUnroll.
+            new P4::MoveDeclarations(true),
             new P4::ParsersUnroll(config, &refMap, &typeMap),
             new P4::FlattenHeaderUnion(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&typeMap, true),

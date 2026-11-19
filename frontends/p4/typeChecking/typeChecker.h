@@ -236,6 +236,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Declaration_Constant *constant);
     const IR::Node *postorder(const IR::P4Control *cont);
     const IR::Node *postorder(const IR::P4Parser *cont);
+    const IR::Node *postorder(const IR::ParserState *state);
     const IR::Node *postorder(const IR::Method *method);
 
     const IR::Node *postorder(const IR::Type_Type *type);
@@ -389,6 +390,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Declaration_Constant *constant) override;
     void postorder(const IR::P4Control *cont) override;
     void postorder(const IR::P4Parser *cont) override;
+    void postorder(const IR::ParserState *state) override;
     void postorder(const IR::Method *method) override;
 
     void postorder(const IR::Type_Type *type) override;
@@ -533,6 +535,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Declaration_Constant *constant) override;
     const IR::Node *postorder(IR::P4Control *cont) override;
     const IR::Node *postorder(IR::P4Parser *cont) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
     const IR::Node *postorder(IR::Method *method) override;
 
     const IR::Node *postorder(IR::Type_Type *type) override;

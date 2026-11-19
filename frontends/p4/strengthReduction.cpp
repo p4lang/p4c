@@ -530,11 +530,8 @@ const IR::Node *DoStrengthReduction::postorder(IR::PlusSlice *expr) {
         expr->e0 = sh->left;
         expr->e1 = new IR::Add(sh->srcInfo, expr->e1, sh->right);
     }
-    if (auto sh = expr->e0->to<IR::Shl>()) {
-        if (!sh->left->type->is<IR::Type_Bits>()) return expr;
-        expr->e0 = sh->left;
-        expr->e1 = new IR::Sub(sh->srcInfo, expr->e1, sh->right);
-    }
+    // Keep left shifts: the slice may include zero-filled bits, which cannot be
+    // represented by subtracting the shift amount from an unsigned offset.
     return expr;
 }
 

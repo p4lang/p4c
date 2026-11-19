@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ir/ir.h"
 #include "ir/json_loader.h"
@@ -71,7 +72,6 @@ TEST(JSON, std_map) {
 }
 
 TEST(IR, SourceInfoJsonEscaping) {
-    // No quotes: quoted lines take a separate path in getBriefSourceFragment.
     Util::InputSources sources;
     sources.appendText("foo(a\\b);");
     sources.mapLine("test.p4", 1);
@@ -91,6 +91,30 @@ TEST(IR, SourceInfoJsonEscaping) {
     const std::string serialized = obj->toString().string();
     EXPECT_NE(std::string::npos, serialized.find("\"foo(a\\\\b);\""));
     EXPECT_EQ(std::string::npos, serialized.find("\"foo(a\\\\\\\\b);\""));
+}
+
+TEST(IR, SourceInfoJsonQuotedLine) {
+    Util::InputSources sources;
+    sources.appendText("foo(\"a\");\n");
+    sources.seal();
+
+    Util::SourceInfo si(&sources, Util::SourcePosition(1, 4), Util::SourcePosition(1, 7));
+    ASSERT_TRUE(si.isValid());
+    auto *c = new IR::Constant(si, big_int(2));
+    const cstring raw = cstring::literal("\"a\"");
+
+    std::unique_ptr<Util::JsonObject> obj(c->sourceInfoJsonObj());
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(raw, obj->getAs<Util::JsonValue>("source_fragment")->getString());
+
+    std::stringstream ss;
+    JSONGenerator(ss, true).emit(static_cast<const IR::Node *>(c));
+    EXPECT_NE(std::string::npos, ss.str().find("\"source_fragment\" : \"\\\"a\\\"\""));
+
+    const IR::Node *loaded = nullptr;
+    JSONLoader(ss) >> loaded;
+    ASSERT_NE(loaded, nullptr);
+    EXPECT_EQ(raw, loaded->srcInfo.srcBrief);
 }
 
 TEST(JSON, variant) {
@@ -113,4 +137,15 @@ TEST(JSON, variant) {
     for (size_t i = 0; i < data.size() && i < copy.size(); ++i) {
         EXPECT_EQ(data[i], copy[i]);
     }
+}
+
+TEST(JSON, IntegralRoundTrip) {
+    // Integers wider than int must survive a JSON round trip exactly.
+    const std::vector<unsigned long long> values = {
+        0ULL, 1ULL, 2147483647ULL, 2147483648ULL, 8589934591ULL, 18446744073709551615ULL};
+    std::stringstream ss;
+    JSONGenerator(ss).emit(values);
+    std::vector<unsigned long long> result;
+    JSONLoader(ss) >> result;
+    EXPECT_EQ(values, result);
 }

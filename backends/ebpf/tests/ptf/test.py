@@ -10,9 +10,6 @@
 # other GPL modules, please change the license to Apache-2.0.
 
 import copy
-import platform
-import unittest
-from distutils.version import LooseVersion
 
 from common import *
 from ptf.mask import Mask
@@ -36,6 +33,48 @@ class SimpleForwardingPSATest(P4EbpfTest):
         self.table_set_default(table="ingress_tbl_fwd", action=1, data=[DP_PORTS[2]])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
+
+
+class DeparserMetadataPSATest(P4EbpfTest):
+    """Both deparsers read the user metadata"""
+
+    p4_file_path = "p4testdata/deparser-metadata.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        pkt[IP].chksum = 0x1234
+        pkt[IP].id = 0x5678
+        testutils.verify_packet(self, pkt, PORT1)
+
+
+@tc_only
+class DeparserMetadataEmitPSATest(P4EbpfTest):
+    """
+    The ingress deparser emits a header kept in the user metadata.
+    TC only: with XDP the headers are emitted in TC and the user metadata is not passed there.
+    """
+
+    p4_file_path = "p4testdata/deparser-metadata-emit.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        raw = bytes(pkt)
+        exp_pkt = Ether(raw[:34] + b"\x9a\xbc" + raw[34:])
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+
+class EgressOwnTypesPSATest(P4EbpfTest):
+    """Egress uses other header and user metadata types than ingress"""
+
+    p4_file_path = "p4testdata/egress-own-types.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        pkt[Ether].src = "11:22:33:44:55:66"
+        testutils.verify_packet(self, pkt, PORT1)
 
 
 class PSAResubmitTest(P4EbpfTest):
@@ -401,6 +440,22 @@ class WideFieldDigest(P4EbpfTest):
                 )
 
 
+class DigestMetadataPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/digest-metadata.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+        digests = self.digest_get("IngressDeparserImpl_d")
+        if len(digests) != 1:
+            self.fail("Expected 1 digest message, got {}".format(len(digests)))
+        d = digests[0]
+        if int(d["a"], 0) != 0x11223344 or int(d["b"], 0) != 0x5566:
+            self.fail("Digest map stored wrong values: a->{}, b->{}".format(d["a"], d["b"]))
+
+
 class CountersPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/counters.p4"
     p4info_reference_file_path = "p4testdata/counters.p4info.txtpb"
@@ -590,10 +645,6 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
-)
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
 
@@ -786,10 +837,6 @@ class PassToKernelStackTest(P4EbpfTest):
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to failure",
-)
 class LPMTableCachePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/table-cache-lpm.p4"
     p4c_additional_args = "--table-caching"
@@ -825,7 +872,7 @@ class LPMTableCachePSATest(P4EbpfTest):
         # Update table entry to test if NIKSS library invalidates cache
         self.table_update(
             table="ingress_tbl_lpm",
-            key=["00:11:22:33:44:55"],
+            key=["00:11:22:33:44:55/48"],
             action=1,
             data=["11:22:33:44:55:66"],
         )

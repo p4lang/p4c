@@ -4,6 +4,7 @@ error {
     TcpBadSackOptionLength
 }
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -253,6 +254,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -270,6 +272,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name(".my_drop") action my_drop_3() {
         smeta_3.ingress_port = standard_metadata.ingress_port;
@@ -288,6 +291,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta_3.checksum_error = standard_metadata.checksum_error;
         smeta_3.parser_error = standard_metadata.parser_error;
         smeta_3.priority = standard_metadata.priority;
+        smeta_3.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_3);
         standard_metadata.ingress_port = smeta_3.ingress_port;
         standard_metadata.egress_spec = smeta_3.egress_spec;
@@ -305,6 +309,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_3.checksum_error;
         standard_metadata.parser_error = smeta_3.parser_error;
         standard_metadata.priority = smeta_3.priority;
+        standard_metadata.lag_hash = smeta_3.lag_hash;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
         meta._fwd_metadata_l2ptr0 = l2ptr_1;
@@ -360,6 +365,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         smeta_4.checksum_error = standard_metadata.checksum_error;
         smeta_4.parser_error = standard_metadata.parser_error;
         smeta_4.priority = standard_metadata.priority;
+        smeta_4.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_4);
         standard_metadata.ingress_port = smeta_4.ingress_port;
         standard_metadata.egress_spec = smeta_4.egress_spec;
@@ -377,6 +383,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         standard_metadata.checksum_error = smeta_4.checksum_error;
         standard_metadata.parser_error = smeta_4.parser_error;
         standard_metadata.priority = smeta_4.priority;
+        standard_metadata.lag_hash = smeta_4.lag_hash;
     }
     @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

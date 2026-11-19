@@ -168,7 +168,7 @@ action decap_one_tunnel_layer_just_before_eth args none {
 	return
 }
 
-table header_mod {
+table header_mod_0 {
 	key {
 		h.mac.da exact
 	}
@@ -205,7 +205,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_TCP :	extract h.tcp
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.mac
-	table header_mod
+	table header_mod_0
 	LABEL_END :	mov m.pna_main_output_metadata_output_port 0x1
 	emit h.mac
 	emit h.ipv4_0

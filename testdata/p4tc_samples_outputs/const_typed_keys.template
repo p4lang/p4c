@@ -1,0 +1,24 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/const_typed_keys numtables 1
+
+$TC p4template create action/const_typed_keys/MainControlImpl/send actid 1 \
+	param port type dev
+$TC p4template update action/const_typed_keys/MainControlImpl/send state active
+
+$TC p4template create action/const_typed_keys/MainControlImpl/drop actid 2
+$TC p4template update action/const_typed_keys/MainControlImpl/drop state active
+
+$TC p4template create table/const_typed_keys/MainControlImpl/typed_keys \
+	tblid 1 \
+	type ternary \
+	keysz 160 permissions 0x3da4 tentries 1024 nummasks 8 \
+	table_acts act name const_typed_keys/MainControlImpl/send \
+	act name const_typed_keys/MainControlImpl/drop
+$TC p4template update table/const_typed_keys/MainControlImpl/typed_keys default_miss_action permissions 0x1024 action const_typed_keys/MainControlImpl/drop
+$TC p4template create table/const_typed_keys/MainControlImpl/typed_keys entry hdr.ipv4.dstAddr 10.0.0.1 hdr.ipv6.dstAddr 2001:db8:0:0:0:0:0:1 permissions 0x1024 action const_typed_keys/MainControlImpl/drop
+$TC p4template create table/const_typed_keys/MainControlImpl/typed_keys entry hdr.ipv4.dstAddr 10.0.0.0/0xff000000 hdr.ipv6.dstAddr 1:db8:0:0:0:0:0:0/0x00ffffff000000000000000000000000 permissions 0x1024 action const_typed_keys/MainControlImpl/drop
+$TC p4template update pipeline/const_typed_keys state ready

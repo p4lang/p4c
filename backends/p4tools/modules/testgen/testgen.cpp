@@ -54,8 +54,26 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
     return new DepthFirstSearch(solver, programInfo);
 }
 
+void reportSkippedPaths(const SymbolicExecutor &symbolicExecutor) {
+    const auto &skippedPaths = symbolicExecutor.getSkippedPaths();
+    if (skippedPaths.empty()) {
+        return;
+    }
+    size_t total = 0;
+    for (const auto &prunedPath : skippedPaths) {
+        total += prunedPath.second;
+    }
+    warning("The run skipped %1% path(s), because the target does yet not model the construct.",
+            total);
+    for (const auto &[message, count] : skippedPaths) {
+        warning("%1% path(s): %2%", count, message);
+    }
+}
+
 /// Analyse the results of the symbolic execution and generate diagnostic messages.
-int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBackend) {
+int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBackend,
+                const SymbolicExecutor &symbolicExecutor) {
+    reportSkippedPaths(symbolicExecutor);
     // Do not print this warning if assertion mode is enabled.
     if (testBackend.getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
         warning(
@@ -96,7 +114,7 @@ std::optional<AbstractTestList> generateAndCollectAbstractTests(
     symbolicExecutor->run([testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
-    auto result = postProcess(testgenOptions, *testBackend);
+    auto result = postProcess(testgenOptions, *testBackend, *symbolicExecutor);
     if (result != EXIT_SUCCESS) {
         return std::nullopt;
     }
@@ -144,7 +162,7 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     symbolicExecutor->run([testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
-    return postProcess(testgenOptions, *testBackend);
+    return postProcess(testgenOptions, *testBackend, *symbolicExecutor);
 }
 
 std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view> program,

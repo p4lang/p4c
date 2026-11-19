@@ -232,7 +232,7 @@ void EBPFTable::emitActionArguments(CodeBuilder *builder, const IR::P4Action *ac
     builder->append("struct ");
     builder->blockStart();
 
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
         type->declare(builder, p->externalName(), false);
@@ -618,7 +618,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat(".u = {.%s = {", name.c_str());
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
         builder->append(",");
@@ -690,7 +690,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
         builder->emitIndent();
         builder->appendFormat(".u = {.%s = {", name.c_str());
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto arg = mi->substitution.lookup(p);
             arg->apply(cg);
             builder->append(",");
@@ -768,14 +768,21 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->emitIndent();
     builder->appendFormat("for (int i = 0; i < sizeof(struct %v_mask) / 4; i++) ", keyTypeName);
     builder->blockStart();
-    cstring str = absl::StrFormat("*(((__u32 *) &%v) + i)", key);
+    // Copy the key chunk with memcpy. Reading the key through a __u32 pointer
+    // breaks strict aliasing, and clang then may drop the stores to its
+    // narrower fields.
+    builder->emitIndent();
+    builder->appendLine("__u32 key_chunk;");
+    builder->emitIndent();
+    builder->appendFormat(
+        "__builtin_memcpy(&key_chunk, ((__u8 *) &%v) + i * 4, sizeof(key_chunk));", key);
+    builder->newline();
     builder->target->emitTraceMessage(
-        builder, "Control: [Ternary] Masking next 4 bytes of %llx with mask %llx", 2, str,
+        builder, "Control: [Ternary] Masking next 4 bytes of %llx with mask %llx", 2, "key_chunk",
         "mask[i]");
 
     builder->emitIndent();
-    builder->appendFormat("chunk[i] = ((__u32 *) &%v)[i] & mask[i];", key);
-    builder->newline();
+    builder->appendLine("chunk[i] = key_chunk & mask[i];");
     builder->blockEnd(true);
 
     builder->emitIndent();

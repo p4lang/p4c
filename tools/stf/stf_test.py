@@ -13,7 +13,7 @@ import os.path
 import sys
 
 from .stf_parser import STFParser
-from .stf_runner import STFRunner
+from .stf_runner import STFNamedEntry, STFRunner
 
 
 class STFTest(STFRunner):

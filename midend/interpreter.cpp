@@ -4,6 +4,8 @@
 
 #include "interpreter.h"
 
+#include <algorithm>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
@@ -473,17 +475,21 @@ SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
 }
 
 void SymbolicArray::shift(int amount) {
+    // Compute the magnitude without negating INT_MIN. Counts at least as large as
+    // the stack invalidate every header (P4-16 section 8.18), in either direction.
+    const auto magnitude =
+        amount < 0 ? 0U - static_cast<unsigned>(amount) : static_cast<unsigned>(amount);
+    const size_t count = std::min<size_t>(magnitude, values.size());
     if (amount < 0) {
-        for (unsigned i = 0; i < values.size() + amount; i++) values[i] = values[i - amount];
-        for (unsigned i = values.size() + amount; i < values.size(); i++) {
+        for (size_t i = 0; i < values.size() - count; i++) values[i]->assign(values[i + count]);
+        for (size_t i = values.size() - count; i < values.size(); i++) {
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
         }
     } else if (amount > 0) {
-        for (unsigned i = 0; i < values.size() - amount; i++)
-            values[values.size() - i - 1] = values[values.size() - i - amount - 1];
-        for (unsigned i = 0; i < (unsigned)amount; i++) {
+        for (size_t i = values.size(); i > count; i--) values[i - 1]->assign(values[i - count - 1]);
+        for (size_t i = 0; i < count; i++) {
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
@@ -1238,7 +1244,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
 
     // For all other methods we act conservatively:
     // in arguments are unchanged, and the out arguments have an unknown value.
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
             auto arg = mi->substitution.lookup(p);
             auto val = get(arg->expression);
