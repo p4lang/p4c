@@ -18,7 +18,6 @@ struct headers_t {
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     @name("MainParserImpl.local_hdr") my_header_t local_hdr_0;
     state start {
-        local_hdr_0.setInvalid();
         pkt.extract<my_header_t>(local_hdr_0);
         transition select(local_hdr_0.type1) {
             16w0x1234: parse_h1;

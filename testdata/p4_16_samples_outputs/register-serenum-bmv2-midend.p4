@@ -18,7 +18,6 @@ struct Meta {
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     @name("p.e") ethernet_t e_0;
     state start {
-        e_0.setInvalid();
         pkt.extract<ethernet_t>(e_0);
         transition select(e_0.eth_type) {
             16w0x800: accept;

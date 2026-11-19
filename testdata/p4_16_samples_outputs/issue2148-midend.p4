@@ -18,13 +18,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.not_initialized") H not_initialized_1;
     @name("ingress.new_val") bit<32> new_val_1;
     @name("ingress.do_thing_action") action do_thing_action() {
-        not_initialized_0.setInvalid();
     }
     @hidden action issue2148l27() {
         new_val_1 = 32w232;
     }
     @hidden action issue2148l23() {
-        not_initialized_1.setInvalid();
         new_val_1 = 32w1;
     }
     @hidden action issue2148l36() {
