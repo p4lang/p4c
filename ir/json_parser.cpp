@@ -84,8 +84,9 @@ static std::string token(std::istream &in) {
     return rv;
 }
 
-// Validate JSON escapes before using the existing C escape decoder. JSON has
-// fewer escape forms, and represents supplementary characters as surrogate pairs.
+// Strict input needs JSON escape and UTF-8 validation. CUnescape accepts C-only
+// escapes but rejects JSON's escaped slash and UTF-16 surrogate pairs, which we
+// normalize here. Legacy input goes directly to CUnescape.
 static std::string jsonStringEscapes(std::string_view raw, std::streamoff position) {
     std::string result;
     auto invalid = [&]() { throw JsonData::error("invalid JSON string escape", position); };
@@ -363,13 +364,9 @@ std::unique_ptr<JsonData> JsonData::parse(std::istream &in, bool strict) {
     return json;
 }
 
-std::istream &parseJson(std::istream &in, std::unique_ptr<JsonData> &json, bool strict) {
-    if (auto parsed = JsonData::parse(in, strict)) json = std::move(parsed);
-    return in;
-}
-
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
-    return parseJson(in, json, JsonData::strict);
+    if (auto parsed = JsonData::parse(in, JsonData::strict)) json = std::move(parsed);
+    return in;
 }
 
 std::pair<int, int> JsonData::LocationInfo::loc(std::streamoff l) {
