@@ -31,6 +31,12 @@ macro(obtain_z3)
     # Set variables for later consumption.
     set(Z3_LIB z3::z3)
     set(Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
+
+    set(_z3_ver "unknown")
+    if(Z3_VERSION_STRING)
+      set(_z3_ver "${Z3_VERSION_STRING}")
+    endif()
+    p4c_record_dependency(NAME z3 VERSION "${_z3_ver}" REVISION "unknown")
   else()
     # Pull in a specific version of Z3 and link against it.
     set(Z3_VERSION "4.13.3")
@@ -72,6 +78,17 @@ macro(obtain_z3)
         "Patch does not apply because the patch was already applied."
     )
     fetchcontent_makeavailable_but_exclude_install(z3)
+    # The Z3 commit is listed by --version. Only read it from a git checkout, otherwise git
+    # reports the commit of an enclosing repository, such as p4c itself.
+    if(EXISTS "${z3_SOURCE_DIR}/.git")
+      execute_process(
+        COMMAND git rev-parse --short HEAD
+        OUTPUT_VARIABLE P4C_Z3_GIT_SHA
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE rc
+        WORKING_DIRECTORY ${z3_SOURCE_DIR}
+      )
+    endif()
 
     # Suppress warnings for all Z3 targets.
     get_all_targets(Z3_BUILD_TARGETS ${z3_SOURCE_DIR})
@@ -93,6 +110,12 @@ macro(obtain_z3)
     # We have to make sure we only include our local version.
     set(Z3_LIB libz3)
     set(Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/src/api ${z3_SOURCE_DIR}/src/api/c++)
+
+    set(_z3_rev "unknown")
+    if(P4C_Z3_GIT_SHA)
+      set(_z3_rev "${P4C_Z3_GIT_SHA}")
+    endif()
+    p4c_record_dependency(NAME z3 VERSION "${Z3_VERSION}" REVISION "${_z3_rev}")
   endif()
 
   message(STATUS "Done with setting up Z3.")

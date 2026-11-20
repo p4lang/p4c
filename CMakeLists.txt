@@ -561,6 +561,12 @@ add_custom_target(update_includes ALL
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
+# Generate build_dependencies.h header from recorded dependencies for --version output.
+p4c_generate_dependency_header(
+  "${P4C_BINARY_DIR}/build_dependencies.h"
+  "${P4C_SOURCE_DIR}/cmake/build_dependencies.h.in"
+)
+
 endif (NOT FORMATTING_ONLY)
 
 ########################################## Linters Begin ##########################################

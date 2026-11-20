@@ -512,6 +512,10 @@ def main():
     # deal with early exits
     if opts.show_version:
         print("p4c", get_version())
+        print(
+            "For the versions of the libraries a back end is built with, "
+            "run its binary with --version, for example: p4c-bm2-ss --version"
+        )
         sys.exit(0)
 
     if opts.show_target_help:

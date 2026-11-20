@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Google LLC
+#
+# SPDX-License-Identifier: Apache-2.0
+
 load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
@@ -59,6 +63,22 @@ cc_library(
     hdrs = ["config.h"],
     include_prefix = ".",
     deps = [":sed_config_h"],
+)
+
+genrule(
+    name = "generate_build_dependencies_h",
+    srcs = ["cmake/build_dependencies.h.in"],
+    outs = ["build_dependencies.h"],
+    # For Bazel builds, generate the build dependencies metadata.
+    cmd = "sed -e 's|@P4C_DEPENDENCY_TEXT@|dependency name=absl version=unknown revision=unknown\\ndependency name=p4runtime version=1.6.0 revision=unknown\\ndependency name=protobuf version=unknown revision=unknown\\n|g' < $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
+    name = "build_dependencies_h",
+    hdrs = ["build_dependencies.h"],
+    include_prefix = ".",
+    deps = [":generate_build_dependencies_h"],
 )
 
 cc_library(
@@ -265,6 +285,7 @@ cc_library(
         "//conditions:default": [],
     }),
     deps = [
+        ":build_dependencies_h",
         ":config_h",
         ":flex_lexer_h",
         ":lib",

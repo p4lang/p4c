@@ -41,6 +41,12 @@ macro(p4c_obtain_protobuf)
     if(ENABLE_PROTOBUF_STATIC)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
+
+    set(_proto_ver "unknown")
+    if(Protobuf_VERSION)
+      set(_proto_ver "${Protobuf_VERSION}")
+    endif()
+    p4c_record_dependency(NAME protobuf VERSION "${_proto_ver}" REVISION "unknown")
   else()
     message(STATUS "Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4C...")
 
@@ -94,6 +100,8 @@ macro(p4c_obtain_protobuf)
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
     set(CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE_PREV})
+
+    p4c_record_dependency(NAME protobuf VERSION "${P4C_PROTOBUF_VERSION}" REVISION "unknown")
   endif()
 
   message(STATUS "Done with setting up Protobuf for P4C.")

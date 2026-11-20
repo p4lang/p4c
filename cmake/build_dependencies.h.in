@@ -1,0 +1,11 @@
+// SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
+#ifndef P4C_BUILD_DEPENDENCIES_H_
+#define P4C_BUILD_DEPENDENCIES_H_
+
+inline constexpr char buildDependencies[] =
+    R"deps(@P4C_DEPENDENCY_TEXT@)deps";
+
+#endif  // P4C_BUILD_DEPENDENCIES_H_
