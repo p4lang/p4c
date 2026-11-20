@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set (P4_FRONTEND_SRCS
+  common/preprocessorDiagnostics.cpp
   p4/actionsInlining.cpp
   p4/callGraph.cpp
   p4/checkConstants.cpp
