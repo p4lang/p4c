@@ -3,9 +3,11 @@
 #include <cerrno>
 #include <cstdio>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string_view>
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_format.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
@@ -31,11 +33,15 @@ void AbstractParserDriver::onReadToken(const char *text) {
 void AbstractParserDriver::onReadLineNumber(const char *text) {
     char *last;
     errno = 0;
-    lineDirectiveLine = strtol(text, &last, 10);
+    auto line = strtoul(text, &last, 10);
     const bool consumedEntireToken = strlen(last) == 0;
-    if (errno != 0 || !consumedEntireToken) {
+    if (errno != 0 || !consumedEntireToken || line > std::numeric_limits<unsigned>::max()) {
         auto &context = BaseCompileContext::get();
         context.errorReporter().parser_error(sources, "Error parsing line number %s", text);
+    } else {
+        lineDirectiveLine = line;
+        auto file = sources->getSourceLine(sources->getCurrentLineNumber()).fileName;
+        sources->mapLine(file.string(), lineDirectiveLine);
     }
 }
 
@@ -44,8 +50,15 @@ void AbstractParserDriver::onReadComment(const char *text, bool lineComment) {
 }
 
 void AbstractParserDriver::onReadFileName(const char *text) {
-    lineDirectiveFile = cstring(text);
-    sources->mapLine(text, lineDirectiveLine);
+    std::string filename;
+    std::string error;
+    if (!absl::CUnescape(std::string_view(text + 1, strlen(text) - 2), &filename, &error)) {
+        BaseCompileContext::get().errorReporter().parser_error(
+            yylloc, "Invalid filename in line directive: " + error);
+        return;
+    }
+    lineDirectiveFile = cstring(filename);
+    sources->mapLine(filename, lineDirectiveLine);
 }
 
 void AbstractParserDriver::onReadIdentifier(cstring id) { lastIdentifier = id; }
@@ -76,7 +89,9 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
 #endif
 
     // Provide an initial source location.
-    sources->mapLine(sourceFile, sourceLine);
+    // mapLine describes the line following a directive; here the first physical
+    // line itself is sourceLine, without a preceding directive.
+    sources->mapLine(sourceFile, sourceLine + 1);
 
     // Parse.
     if (parser.parse() != 0) return false;
