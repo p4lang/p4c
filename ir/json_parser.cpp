@@ -79,10 +79,10 @@ static std::string token(std::istream &in) {
 
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
     while (in) {
-        char ch;
+        char ch, tmp;
         in >> std::ws >> ch;
         std::streamoff start = lastpos(in);
-        switch (ch) {
+        switch (ch & 0xff) {
             case '{': {
                 string_map<std::unique_ptr<JsonData>> obj;
                 do {
@@ -224,7 +224,47 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                 json->start = start;
                 json->finish = lastpos(in);
                 return in;
+            case 0xc2:
+                in >> ch;
+                if ((ch & 0xff) == 0xa0) continue;  // UTF-8 NBSP
+                in.unget();
+                goto failure;
+            case 0xe2:
+                in >> tmp;
+                if ((tmp & 0xff) == 0x80) {
+                    in >> tmp;
+                    if ((tmp & 0xff) == 0x80 || (tmp & 0xff) == 0x81 || (tmp & 0xff) == 0x82 ||
+                        (tmp & 0xff) == 0x83 || (tmp & 0xff) == 0x87 || (tmp & 0xff) == 0x88 ||
+                        (tmp & 0xff) == 0x89 || (tmp & 0xff) == 0x8a || (tmp & 0xff) == 0xaf)
+                        continue;  // various UTF-8 spaces
+                    in.unget();
+                } else if ((tmp & 0xff) == 0x81) {
+                    in >> tmp;
+                    if ((tmp & 0xff) == 0xa0) continue;  // UTF-8 word joiner
+                    in.unget();
+                }
+                in.unget();
+                goto failure;
+            case 0xe3:
+                in >> tmp;
+                if ((tmp & 0xff) == 0x80) {
+                    in >> tmp;
+                    if ((tmp & 0xff) == 0x80) continue;  // ideographic space
+                    in.unget();
+                }
+                in.unget();
+                goto failure;
+            case 0xef:
+                in >> tmp;
+                if ((tmp & 0xff) == 0xbb) {
+                    in >> tmp;
+                    if ((tmp & 0xff) == 0xbf) continue;  // BOM
+                    in.unget();
+                }
+                in.unget();
+                goto failure;
             default:
+            failure:
                 if (JsonData::strict) {
                     if (isalpha(ch) || ch == '_') {
                         auto tok = token(in);
@@ -233,6 +273,15 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                     } else if (!isspace(ch)) {
                         std::string msg = "Unexpected character '";
                         msg += ch;
+                        while ((ch & 0xc0) == 0xc0) {
+                            in >> tmp;
+                            if ((tmp & 0xc0) != 0x80) {
+                                in.unget();
+                                break;
+                            }
+                            msg += tmp;
+                            ch <<= 1;
+                        }
                         msg += '\'';
                         throw JsonData::error(msg, start);
                     }
