@@ -465,7 +465,9 @@ TEST(JSON, StrictTokensLeaveDelimitersAcrossRefills) {
                 ASSERT_TRUE(result);
                 EXPECT_FALSE(input.fail());
                 EXPECT_EQ(input.eof(), !delimiter);
-                if (delimiter) EXPECT_EQ(input.get(), last);
+                if (delimiter) {
+                    EXPECT_EQ(input.get(), last);
+                }
             }
         }
     }
