@@ -39,6 +39,12 @@ In addition to other P4C dependencies, this backend requires the Boost graph
 headers. On a Debian system, they can be installed with `sudo apt-get install
 libboost-graph-dev`.
 
+Older Boost.Graph headers do not work with the Boost.Multiprecision library
+that P4C fetches by default. If your system Boost is older than 1.83 (for
+example on Ubuntu 22.04), configure with
+`-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON`, or disable this backend with
+`-DENABLE_P4C_GRAPHS=OFF`.
+
 ## Usage
 
 ```
