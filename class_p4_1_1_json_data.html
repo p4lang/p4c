@@ -129,9 +129,9 @@ $(function(){initNavTree('class_p4_1_1_json_data.html',''); initResizable(true);
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
-<a href="#friends">Friends</a> &#124;
 <a href="class_p4_1_1_json_data-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::JsonData Class Reference</div></div>
 </div><!--header-->
@@ -192,6 +192,11 @@ template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a4115d7f39d312eac35d583797deabb83 inherit pub_methods_struct_p4_1_1_r_t_t_i_1_1_base" id="r_a4115d7f39d312eac35d583797deabb83"><td class="memItemLeft" align="right" valign="top">virtual TypeId&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a4115d7f39d312eac35d583797deabb83">typeId</a> () const noexcept=0</td></tr>
 <tr class="separator:a4115d7f39d312eac35d583797deabb83 inherit pub_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a4d21dbb9ea9fd809cfdd3636cbd6e868" id="r_a4d21dbb9ea9fd809cfdd3636cbd6e868"><td class="memItemLeft" align="right" valign="top">static std::unique_ptr&lt; <a class="el" href="class_p4_1_1_json_data.html">JsonData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d21dbb9ea9fd809cfdd3636cbd6e868">parse</a> (std::istream &amp;in, bool strict)</td></tr>
+<tr class="separator:a4d21dbb9ea9fd809cfdd3636cbd6e868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:adbb1a16cab4c888d7823354abde6e925" id="r_adbb1a16cab4c888d7823354abde6e925"><td class="memItemLeft" align="right" valign="top"><a id="adbb1a16cab4c888d7823354abde6e925" name="adbb1a16cab4c888d7823354abde6e925"></a>
@@ -216,13 +221,52 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base" id="r_ace64a732901ae7b486559ffffcbbf843"><td class="memItemLeft" align="right" valign="top">
 virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImpl</b> (TypeId <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a4115d7f39d312eac35d583797deabb83">typeId</a>) const noexcept=0</td></tr>
 <tr class="separator:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
-Friends</h2></td></tr>
-<tr class="memitem:a60c647139edebd355d7cb715019381f4" id="r_a60c647139edebd355d7cb715019381f4"><td class="memItemLeft" align="right" valign="top"><a id="a60c647139edebd355d7cb715019381f4" name="a60c647139edebd355d7cb715019381f4"></a>
-std::istream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&gt;&gt;</b> (std::istream &amp;in, std::unique_ptr&lt; <a class="el" href="class_p4_1_1_json_data.html">JsonData</a> &gt; &amp;json)</td></tr>
-<tr class="separator:a60c647139edebd355d7cb715019381f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4d21dbb9ea9fd809cfdd3636cbd6e868" name="a4d21dbb9ea9fd809cfdd3636cbd6e868"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d21dbb9ea9fd809cfdd3636cbd6e868">&#9670;&#160;</a></span>parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="class_p4_1_1_json_data.html">JsonData</a> &gt; P4::JsonData::parse </td>
+          <td>(</td>
+          <td class="paramtype">std::istream &amp;</td>          <td class="paramname"><span class="paramname"><em>in</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>strict</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Extract one JSON value. Check trailing input separately to validate a document. Numbers must be integers. In strict mode, strings must contain valid Unicode and object keys cannot contain NUL. Stream exceptions follow the stream's exception mask.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">in</td><td>Input stream. </td></tr>
+    <tr><td class="paramname">strict</td><td>Enforce strict syntax independently of JsonData::strict. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Ownership of the value, or nullptr if legacy mode extracts no value. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">error</td><td>If strict mode encounters malformed or unsupported input. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!--
