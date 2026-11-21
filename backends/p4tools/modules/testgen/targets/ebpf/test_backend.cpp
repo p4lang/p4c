@@ -49,7 +49,7 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo,
     }
 
     if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
