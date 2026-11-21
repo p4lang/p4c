@@ -509,7 +509,7 @@ def main():
     if args.mode == "deparser-bits":
         code = (output / "outlined/case_control_blocks.c").read_text()
         assert (
-            "__p4tc_deparser_emit_nibbles_t(skb, &pkt_hdrs->nibbles" in code
+            "p4tc_deparser_emit_nibbles_t(skb, &pkt_hdrs->nibbles" in code
         ), "the outlined deparser did not name the header argument"
         assert "&hdr->nibbles" not in code, "the outlined deparser kept a hard-coded name"
     if args.mode == "parser":
@@ -573,10 +573,19 @@ def main():
                 "crosses the boundary",
             ),
             (
-                "parser-instance",
+                "instance-crosses",
                 ["--tc-outline-parser-range=parse_checksum:parse_last"],
-                "outline-checksum",
-                "is an extern instance",
+                "outline-checksum-cross",
+                "extern instance whose state would not cross the boundary",
+            ),
+            (
+                "instance-two-regions",
+                [
+                    "--tc-outline-parser-range=start:parse_flags",
+                    "--tc-outline-parser-range=parse_flags:finish",
+                ],
+                "outline-checksum-two",
+                "extern instance whose state would not cross the boundary",
             ),
         ]:
             directory = output / ("negative-" + name)
@@ -702,6 +711,143 @@ def main():
             )
             record.setdefault("negative", []).append(name)
     if args.mode == "parser":
+        # A parser-local extern instance whose whole lifetime fits in one
+        # region is outlined with the region: the helper registers its own
+        # copy while its states are emitted, and the parser body keeps a
+        # second copy for everything outside the region.
+        directory = output / "outline-checksum"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=parse_checksum:parse_last",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-checksum.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-checksum_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        instance_of = r"struct p4tc_ext_csum_params (\w+)"
+        helper_instances = set(re.findall(instance_of, helper))
+        body_instances = set(re.findall(instance_of, body))
+        assert len(helper_instances) == 1, helper_instances
+        # Every use of the instance is in the helper, so the caller owns no copy.
+        assert body_instances == set(), body_instances
+        helper_name = next(iter(helper_instances))
+        for method in ("clear", "get"):
+            assert f"bpf_p4tc_ext_csum_16bit_complement_{method}(&{helper_name}" in helper, (
+                method,
+                helper_name,
+            )
+        # Every checksum call the helper makes goes to its own copy.
+        called = set(re.findall(r"bpf_p4tc_ext_csum_16bit_complement_\w+\(&(\w+)", helper))
+        assert called == {helper_name}, (called, helper_name)
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-checksum_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        # A checksum add whose fields do not total a multiple of 16 bits cannot
+        # be added as a u16 word. The extern requires a multiple of 16 bits and
+        # the emission used to leave the accumulated word unterminated and drop
+        # the add, which clang then rejected.
+        directory = output / "checksum-bits"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                ROOT / "testdata/p4_16_samples/tc-codegen-checksum-bits.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-checksum-bits_parser.c").read_text()
+        # A three-bit and a thirteen-bit field fill one word between them, and
+        # so do two eight-bit fields; the wide field is added a word at a time.
+        for expression in (
+            "= (hdr->ipv4.flags << 13) | hdr->ipv4.fragment_offset;",
+            "= (hdr->pair.high << 8) | hdr->pair.low;",
+            "= htons(((u16 *)(hdr->wide.value))[7]);",
+        ):
+            assert expression in code, (expression, code)
+        # One add per word: three two-field/single-field words and eight for the
+        # 128-bit field.
+        assert code.count("bpf_p4tc_ext_csum_16bit_complement_add(") == 11, code
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-checksum-bits_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        # A list that stops mid-word is refused, at the field it starts with.
+        directory = output / "checksum-short"
+        directory.mkdir()
+        result = execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-checksum-cross.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+            success=False,
+        )
+        assert result.returncode != 0, result.returncode
+        assert b"must be a multiple of 16 bits" in result.stderr, result.stderr
+        assert re.search(
+            rb"tc-codegen-outline-checksum-cross\.p4\(\d+\):.*must be a multiple of 16 bits",
+            result.stderr,
+        ), result.stderr
+        record.setdefault("negative", []).append("checksum-short")
         bounds = {"invalid": [], "valid": []}
         malformed = [
             "-1",
@@ -776,6 +922,10 @@ def main():
                 ["--tc-outline-parser-local=left:cached_left:8191"],
                 ["0", "1", "8191", "0008191", "4294967295"],
                 "if (p4tc_cache_cached_left > {v})",
+                # The option's rejection happens at the helper entry, before
+                # the region runs, and reports PacketTooShort.
+                "meta->left = p4tc_cache_cached_left; return 0x80000000u | ((unsigned)"
+                "PacketTooShort << 16);",
             ),
             (
                 "--tc-outline-parser-local",
@@ -785,7 +935,9 @@ def main():
                 "p4tc_cache_cached_left = meta->left;",
             ),
         ]
-        for name, template, extra, values, expected in valid:
+        for case in valid:
+            name, template, extra, values, expected = case[:5]
+            also = case[5] if len(case) > 5 else None
             for number, value in enumerate(values):
                 directory = output / f"valid-{name.strip('-')}-{number}"
                 directory.mkdir()
@@ -807,8 +959,155 @@ def main():
                 )
                 code = (directory / "tc-codegen-emission_parser.c").read_text()
                 assert expected.replace("{v}", str(int(value))) in code, (name, value)
+                if also is not None:
+                    assert also in code, (name, value)
                 bounds["valid"].append([name, value])
         record["parser_bounds"] = bounds
+        # The helper names its arguments after the program, so an outlined
+        # parser whose header and metadata parameters are renamed must not
+        # acquire the fixture's names.
+        directory = output / "outline-renamed"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:parse_flags",
+                "--tc-outline-parser-range=parse_flags:finish",
+                "--tc-outline-parser-bound=left:8191",
+                "--tc-outline-parser-local=left:cached_left:8191",
+                "--tc-outline-parser-offset-max=1522",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-renamed.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-renamed_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        assert "struct headers_t *pkts, struct metadata_t *md" in helper, helper
+        assert "hdr->" not in code and "meta->" not in code, code
+        assert "u32 p4tc_cache_cached_left = md->left;" in helper, helper
+        assert "md->left = p4tc_cache_cached_left; return" in helper, helper
+        assert "load_half(hdr_start, 0)" in helper, helper
+        assert "p4tc_cache_cached_left" not in body, body
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-renamed_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        record.setdefault("renamed", []).append("outline-renamed")
+        # A region can state its own metadata bound: a verify() as the entry
+        # state's first statement narrows the cache the helper proves the packet
+        # access with, so --tc-outline-parser-bound is not needed. The verify
+        # must run before the access it bounds and against the cached scalar,
+        # which is what the metadata-driven advance reads.
+        directory = output / "outline-bound"
+        directory.mkdir()
+        execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:walk",
+                "--tc-outline-parser-range=walk:finish",
+                "--tc-outline-parser-offset-max=1522",
+                "--tc-outline-parser-local=skip:cached_skip:64",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-bound.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+        )
+        code = (directory / "tc-codegen-outline-bound_parser.c").read_text()
+        helper, _, body = code.partition("run_parser")
+        assert "u32 p4tc_cache_cached_skip = meta->skip;" in helper, helper
+        check = "if (!((p4tc_cache_cached_skip <= 64)))"
+        advance = "u32 advance_bits = p4tc_cache_cached_skip;"
+        assert check in helper, helper
+        assert advance in helper, helper
+        assert helper.index(check) < helper.index(advance), helper
+        # The bound is the program's verify, not the helper's entry check: the
+        # refusal is the parser error the program names, not PacketTooShort.
+        assert "p4tc_cache_cached_skip > 64" not in helper, helper
+        assert "return 0x80000000u | ((unsigned)ParserInvalidArgument << 16);" in helper, helper
+        assert "p4tc_cache_cached_skip" not in body, body
+        includes = [
+            "-I" + str(directory),
+            "-I" + str(ROOT / "backends/tc/runtime/include"),
+            "-I" + str(ROOT / "backends/ebpf/runtime"),
+        ]
+        if Path("/usr/include/x86_64-linux-gnu").exists():
+            includes.append("-I/usr/include/x86_64-linux-gnu")
+        for unit in ["parser", "control_blocks"]:
+            execute(
+                [
+                    "clang-19",
+                    "-O2",
+                    "--target=bpfel",
+                    "-mcpu=v3",
+                    "-D__KERNEL__",
+                    *includes,
+                    "-c",
+                    directory / f"tc-codegen-outline-bound_{unit}.c",
+                    "-o",
+                    directory / f"{unit}.bpf.o",
+                ],
+                directory,
+                "bpf-" + unit,
+            )
+        record["outline_bound"] = "p4-verify"
+        # Stating the bound both ways is refused: the option's entry check would
+        # reject first, with its own error and no P4 source location.
+        directory = output / "outline-bound-both"
+        directory.mkdir()
+        result = execute(
+            [
+                args.compiler.resolve(),
+                "-I",
+                ROOT / "p4include",
+                "--tc-outline-parser-range=start:walk",
+                "--tc-outline-parser-range=walk:finish",
+                "--tc-outline-parser-offset-max=1522",
+                "--tc-outline-parser-local=skip:cached_skip:64",
+                "--tc-outline-parser-bound=skip:64",
+                ROOT / "testdata/p4_16_samples/tc-codegen-outline-bound.p4",
+                "-o",
+                directory,
+            ],
+            directory,
+            "p4",
+            success=False,
+        )
+        assert result.returncode != 0, result.returncode
+        assert b"would reject first with its own error" in result.stderr, result.stderr
+        # The diagnostic points at the verify(), not at a helper entry.
+        assert re.search(
+            rb"tc-codegen-outline-bound\.p4\(\d+\):.*bounds 'skip'", result.stderr
+        ), result.stderr
+        record.setdefault("negative", []).append("bound-both")
     if args.mode == "deparser":
         bounds = {"invalid": [], "valid": []}
         for number, value in enumerate(

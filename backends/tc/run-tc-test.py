@@ -75,6 +75,13 @@ PARSER.add_argument(
     nargs='+',
     help=("Specifies list of externs used in testcase"),
 )
+PARSER.add_argument(
+    "-P",
+    "--provision-only",
+    dest="provisionOnly",
+    action='store_true',
+    help=("Load the generated template and stop; no traffic and no stf file"),
+)
 
 extern_to_mod_name = {
     'Register': 'native',
@@ -117,6 +124,7 @@ class Options(object):
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
         self.extern_mods = {}
+        self.provisionOnly = False
 
 
 def run_model(tc: TCInfra, testfile: Optional[Path], extern_mods) -> int:
@@ -127,6 +135,19 @@ def run_model(tc: TCInfra, testfile: Optional[Path], extern_mods) -> int:
     result = tc.compare_compiled_files()
     if result != testutils.SUCCESS:
         return result
+
+    # A load check stops once the template is loaded: it has nothing to send
+    # and nothing to expect, and it needs no stf file.
+    if tc.options.provisionOnly:
+        result = tc.spawn_bridge()
+        if result != testutils.SUCCESS:
+            return result
+
+        result = tc.boot()
+        if result != testutils.SUCCESS:
+            return result
+
+        return tc.provision(extern_mods)
 
     # If there is no testfile, just run the compilation testing
     if not testfile:
@@ -218,6 +239,9 @@ def main(argv: Any) -> None:
 
     if args.externs:
         options.extern_mods = validate_externs(args.externs)
+
+    if args.provisionOnly:
+        options.provisionOnly = True
 
     argv = argv[1:]
 

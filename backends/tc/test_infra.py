@@ -477,7 +477,13 @@ class TCInfra:
         for extern_mod, _ in extern_mods.items():
             self.virtme.run(f"modprobe {extern_mod}")
 
-    def run(self, testfile, extern_mods):
+    def provision(self, extern_mods):
+        """Load the generated template, with no traffic and no expectations.
+
+        This is what a template load check runs: everything up to and including
+        the tc script, so a value it cannot parse fails here, and nothing after
+        it, so the check does not need an stf file.
+        """
         # Root is necessary to load ebpf into the kernel
         if not testutils.check_root():
             testutils.log.warning("This test requires root privileges; skipping execution.")
@@ -491,7 +497,10 @@ class TCInfra:
         self._load_extern_mods(extern_mods)
         # Load template script
         self.base_template = os.path.basename(self.template)
-        result = self.virtme.run_intros("{introspection}/" + f"{self.base_template}.template")
+        return self.virtme.run_intros("{introspection}/" + f"{self.base_template}.template")
+
+    def run(self, testfile, extern_mods):
+        result = self.provision(extern_mods)
         if result != testutils.SUCCESS:
             return result
 

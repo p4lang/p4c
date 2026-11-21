@@ -101,6 +101,31 @@ class PNAArchTC : public PNAEbpfGenerator {
     DECLARE_TYPEINFO(PNAArchTC);
 };
 
+// A parser region emitted as a non-inlined helper by the tc backend.
+struct ParserOutlineRegion {
+    cstring helperName;
+    cstring startState;
+    cstring endState;
+    cstring boundField;
+    unsigned boundValue = 0;
+    cstring localField;
+    cstring localName;
+    // Labels inside the helper. They are allocated with the program's name
+    // generator, because parser states are emitted as labels too and a state
+    // named like one of these would otherwise collide with it.
+    cstring doneLabel;
+    cstring noMatchLabel;
+    unsigned localMax = 0;
+    unsigned offsetMax = 0;
+    bool offsetMaxSet = false;
+    bool noHdr = false;
+    std::set<cstring> states;
+    // Parser-local extern instances used only inside this region. The
+    // helper gets its own instance, so their names are registered for the
+    // duration of the region's emission.
+    std::vector<cstring> instances;
+};
+
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
     const TCOptions &tcOptions;
 
@@ -116,6 +141,12 @@ class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
     void emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) override;
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
 
+    // True while the prologue of an outlining helper is emitted. The helper
+    // runs a fragment of the parser body, so it declares only the locals its
+    // region can reach.
+    bool emittingOutlineHelper = false;
+    bool outlineHelperUsesLength = false;
+
     DECLARE_TYPEINFO(TCIngressPipelinePNA, EBPF::TCIngressPipeline);
 };
 
@@ -127,8 +158,12 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
 
     bool preorder(const IR::Member *expression) override;
     bool preorder(const IR::ParserState *parserState) override;
+    bool preorder(const IR::PathExpression *path) override;
     mutable bool extractedVarbit = false;
-    bool emittingOutlineRegion = false;
+    // Set while the visitor emits the states of an outlining helper. The helper
+    // owns a private copy of its region's cached metadata field and of its
+    // extern instances, so name resolution follows the region.
+    const ParserOutlineRegion *outlineRegion = nullptr;
 
  protected:
     unsigned int compileExtractVarbits(const IR::Expression *, const IR::StructField *,
@@ -146,23 +181,12 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
  public:
-    // Parser regions emitted as separate helpers by the tc backend.
-    struct OutlineRegion {
-        cstring helperName;
-        cstring startState;
-        cstring endState;
-        cstring boundField;
-        unsigned boundValue = 0;
-        cstring localField;
-        cstring localName;
-        unsigned localMax = 0;
-        unsigned offsetMax = 0;
-        bool offsetMaxSet = false;
-        bool noHdr = false;
-        std::set<cstring> states;
-    };
-    std::vector<OutlineRegion> outlineRegions;
+    std::vector<ParserOutlineRegion> outlineRegions;
     std::set<cstring> outlinedStates;
+    // Instances listed in a region's helper. Every use of them is inside that
+    // helper, so the parser body must not declare a second copy.
+    std::set<cstring> outlinedInstances;
+    bool emittingHelperInstance = false;
 
     bool setOutlineRange(cstring helper, cstring start, cstring end);
     void setOutlineBound(cstring field, unsigned value) {
@@ -188,7 +212,7 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
         if (!outlineRegions.empty()) outlineRegions.back().noHdr = true;
     }
     bool hasOutline() const { return !outlineRegions.empty(); }
-    const OutlineRegion *getOutlineRegion(cstring start) const {
+    const ParserOutlineRegion *getOutlineRegion(cstring start) const {
         for (auto &region : outlineRegions)
             if (region.startState == start) return &region;
         return nullptr;

@@ -26,7 +26,7 @@ struct metadata_t {
 }
 
 struct tuple_0 {
-    bit<8> f0;
+    bit<16> f0;
 }
 
 parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
@@ -43,7 +43,7 @@ parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_ma
     state parse_checksum {
         pkt.extract<tail_t>(hdr.tail);
         ck_0.clear();
-        ck_0.add<tuple_0>((tuple_0){f0 = hdr.tail.value});
+        ck_0.add<tuple_0>((tuple_0){f0 = hdr.ethernet.kind});
         tmp = ck_0.get();
         meta.seen = (bit<8>)tmp;
         transition parse_last;
@@ -55,34 +55,34 @@ parser Parser(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_ma
 }
 
 control Ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action tccodegenoutlinechecksum45() {
+    @hidden action tccodegenoutlinechecksum46() {
         send_to_port(32w1);
     }
-    @hidden table tbl_tccodegenoutlinechecksum45 {
+    @hidden table tbl_tccodegenoutlinechecksum46 {
         actions = {
-            tccodegenoutlinechecksum45();
+            tccodegenoutlinechecksum46();
         }
-        const default_action = tccodegenoutlinechecksum45();
+        const default_action = tccodegenoutlinechecksum46();
     }
     apply {
-        tbl_tccodegenoutlinechecksum45.apply();
+        tbl_tccodegenoutlinechecksum46.apply();
     }
 }
 
 control Deparser(packet_out pkt, inout headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action tccodegenoutlinechecksum50() {
+    @hidden action tccodegenoutlinechecksum51() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<tail_t>(hdr.tail);
         pkt.emit<last_t>(hdr.last);
     }
-    @hidden table tbl_tccodegenoutlinechecksum50 {
+    @hidden table tbl_tccodegenoutlinechecksum51 {
         actions = {
-            tccodegenoutlinechecksum50();
+            tccodegenoutlinechecksum51();
         }
-        const default_action = tccodegenoutlinechecksum50();
+        const default_action = tccodegenoutlinechecksum51();
     }
     apply {
-        tbl_tccodegenoutlinechecksum50.apply();
+        tbl_tccodegenoutlinechecksum51.apply();
     }
 }
 
