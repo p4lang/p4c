@@ -119,7 +119,8 @@ class AbstractTest(bt.P4RuntimeTest):
         self.verifyPackets()
 
     def meter_write_with_predefined_config(self, meter_name, index, value, direct):
-        """Since we can not blast the target with packets, we have to carefully craft an artificial scenario where the meter will return the color we want. We do this by setting the meter config in such a way that the meter is forced to assign the desired color. For example, for RED to the lowest threshold values, to force a RED assignment."""
+        """Select the meter color for the first packet. BMv2 starts each bucket full,
+        so a zero burst size keeps the corresponding bucket empty."""
         value = self.EnumColor(value)
         if value == self.EnumColor.GREEN:
             meter_config = bt.p4runtime_pb2.MeterConfig(
@@ -127,11 +128,11 @@ class AbstractTest(bt.P4RuntimeTest):
             )
         elif value == self.EnumColor.YELLOW:
             meter_config = bt.p4runtime_pb2.MeterConfig(
-                cir=1, cburst=1, pir=4294967295, pburst=4294967295
+                cir=1, cburst=0, pir=4294967295, pburst=4294967295
             )
         elif value == self.EnumColor.RED:
             meter_config = bt.p4runtime_pb2.MeterConfig(
-                cir=1, cburst=1, pir=1, pburst=1
+                cir=1, cburst=0, pir=1, pburst=0
             )
         else:
             raise self.failureException(f"Unsupported meter value {value}")
