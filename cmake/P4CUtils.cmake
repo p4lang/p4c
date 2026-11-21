@@ -447,3 +447,46 @@ function(get_all_targets _result _dir)
   get_directory_property(_sub_targets DIRECTORY "${_dir}" BUILDSYSTEM_TARGETS)
   set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
 endfunction()
+
+# Record dependency metadata for --version output.
+function(p4c_record_dependency)
+  cmake_parse_arguments(ARG "" "NAME;VERSION;REVISION" "" ${ARGN})
+  if(NOT ARG_NAME)
+    message(FATAL_ERROR "p4c_record_dependency requires NAME")
+  endif()
+
+  if(NOT ARG_VERSION OR ARG_VERSION STREQUAL "")
+    set(ARG_VERSION "unknown")
+  endif()
+
+  if(NOT ARG_REVISION OR ARG_REVISION STREQUAL "")
+    set(ARG_REVISION "unknown")
+  endif()
+
+  string(STRIP "${ARG_VERSION}" ARG_VERSION)
+  string(STRIP "${ARG_REVISION}" ARG_REVISION)
+
+  get_property(deps GLOBAL PROPERTY P4C_RECORDED_DEPENDENCIES)
+  if(NOT "${ARG_NAME}" IN_LIST deps)
+    list(APPEND deps "${ARG_NAME}")
+    set_property(GLOBAL PROPERTY P4C_RECORDED_DEPENDENCIES "${deps}")
+  endif()
+
+  set_property(GLOBAL PROPERTY P4C_DEP_${ARG_NAME}_VERSION "${ARG_VERSION}")
+  set_property(GLOBAL PROPERTY P4C_DEP_${ARG_NAME}_REVISION "${ARG_REVISION}")
+endfunction()
+
+# Generate build_dependencies.h from recorded dependencies.
+function(p4c_generate_dependency_header output_file template_file)
+  get_property(deps GLOBAL PROPERTY P4C_RECORDED_DEPENDENCIES)
+  if(deps)
+    list(SORT deps)
+  endif()
+  set(P4C_DEPENDENCY_TEXT "")
+  foreach(dep IN LISTS deps)
+    get_property(ver GLOBAL PROPERTY P4C_DEP_${dep}_VERSION)
+    get_property(rev GLOBAL PROPERTY P4C_DEP_${dep}_REVISION)
+    string(APPEND P4C_DEPENDENCY_TEXT "dependency name=${dep} version=${ver} revision=${rev}\n")
+  endforeach()
+  configure_file("${template_file}" "${output_file}" @ONLY)
+endfunction()

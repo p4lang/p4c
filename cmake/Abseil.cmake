@@ -15,6 +15,12 @@ macro(p4c_obtain_abseil)
     set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
     find_package(absl REQUIRED)
 
+    set(_absl_ver "unknown")
+    if(absl_VERSION)
+      set(_absl_ver "${absl_VERSION}")
+    endif()
+    p4c_record_dependency(NAME absl VERSION "${_absl_ver}" REVISION "unknown")
+
     if(ENABLE_ABSEIL_STATIC)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
@@ -61,6 +67,8 @@ macro(p4c_obtain_abseil)
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+
+    p4c_record_dependency(NAME absl VERSION "${P4C_ABSEIL_VERSION}" REVISION "unknown")
   endif()
 
   message(STATUS "Done with setting up Abseil for P4C.")

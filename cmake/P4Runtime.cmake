@@ -46,4 +46,25 @@ function(p4c_obtain_p4runtime)
 
   # Backend schemas and Python bindings still need the .proto import directory.
   set(P4RUNTIME_STD_DIR "${proto_dir}" PARENT_SCOPE)
+  set(P4C_P4RUNTIME_VERSION "1.6.0" PARENT_SCOPE)
+  if (EXISTS "${p4runtime_SOURCE_DIR}/.git")
+    execute_process (COMMAND git rev-parse --short HEAD
+      OUTPUT_VARIABLE P4C_P4RUNTIME_GIT_SHA
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE rc
+      WORKING_DIRECTORY ${p4runtime_SOURCE_DIR})
+  else()
+    set(P4C_P4RUNTIME_GIT_SHA "0bea6a3")
+  endif()
+  set(P4C_P4RUNTIME_GIT_SHA "${P4C_P4RUNTIME_GIT_SHA}" PARENT_SCOPE)
+
+  if(P4C_USE_PREINSTALLED_P4RUNTIME)
+    set(_p4rt_ver "unknown")
+    if(p4runtime_VERSION)
+      set(_p4rt_ver "${p4runtime_VERSION}")
+    endif()
+    p4c_record_dependency(NAME p4runtime VERSION "${_p4rt_ver}" REVISION "unknown")
+  else()
+    p4c_record_dependency(NAME p4runtime VERSION "1.6.0" REVISION "${P4C_P4RUNTIME_GIT_SHA}")
+  endif()
 endfunction()

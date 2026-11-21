@@ -15,6 +15,12 @@ macro(p4c_obtain_bdwgc)
     option(ENABLE_MULTITHREAD "Use multithreading" OFF)
     find_package(LibGc 7.2.0 REQUIRED)
     check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
+
+    set(_bdwgc_ver "unknown")
+    if(LibGc_VERSION)
+      set(_bdwgc_ver "${LibGc_VERSION}")
+    endif()
+    p4c_record_dependency(NAME bdwgc VERSION "${_bdwgc_ver}" REVISION "unknown")
   else()
     # Print out download state while setting up BDWGC.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
@@ -68,6 +74,20 @@ macro(p4c_obtain_bdwgc)
     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_PREV})
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_PREV})
     set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_PREV} CACHE BOOL "")
+
+    set(_bdwgc_rev "unknown")
+    if(EXISTS "${bdwgc_SOURCE_DIR}/.git")
+      execute_process(
+        COMMAND git rev-parse --short HEAD
+        OUTPUT_VARIABLE _bdwgc_rev
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE rc
+        WORKING_DIRECTORY ${bdwgc_SOURCE_DIR}
+      )
+    else()
+      set(_bdwgc_rev "7f1503d")
+    endif()
+    p4c_record_dependency(NAME bdwgc VERSION "8.2.6" REVISION "${_bdwgc_rev}")
 
     message(STATUS "Done with setting up BDWGC for P4C.")
   endif()

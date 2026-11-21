@@ -57,6 +57,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/nethash.cpp
   gtest/visitor.cpp
   gtest/metrics_test.cpp
+  gtest/version_option_test.cpp
 )
 
 if (ENABLE_CONTROL_PLANE)

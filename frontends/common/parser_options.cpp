@@ -22,6 +22,7 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_format.h"
+#include "build_dependencies.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
@@ -94,6 +95,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         [this](const char *) {
             std::cerr << binaryName << std::endl;
             std::cerr << "Version " << compilerVersion << std::endl;
+            std::cerr << buildDependencies;
             exit(0);
             return false;
         },
