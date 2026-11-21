@@ -304,6 +304,38 @@ TEST_F(TaintTest, Taint10) {
     }
 }
 
+/// Check that a shift by a variable amount is tainted only if an operand is tainted.
+/// Input: (value >> amount)[7:0] and (value << amount)[7:0]
+/// Expected output: no taint
+/// Input: (taint<32> >> amount)[7:0] and (taint<32> << amount)[7:0]
+/// Expected output: taint
+/// Input: (value >> taint<8>)[7:0] and (value << taint<8>)[7:0]
+/// Expected output: taint
+TEST_F(TaintTest, Taint11) {
+    const auto *valueType = IR::Type_Bits::get(32);
+    const auto *amountType = IR::Type_Bits::get(8);
+    const auto *value = ToolsVariables::getSymbolicVariable(valueType, "value"_cs);
+    const auto *amount = ToolsVariables::getSymbolicVariable(amountType, "amount"_cs);
+    const auto *taintedValue = ToolsVariables::getTaintExpression(valueType);
+    const auto *taintedAmount = ToolsVariables::getTaintExpression(amountType);
+    {
+        ASSERT_FALSE(Taint::hasTaint(new IR::Slice(new IR::Shr(valueType, value, amount), 7, 0)));
+        ASSERT_FALSE(Taint::hasTaint(new IR::Slice(new IR::Shl(valueType, value, amount), 7, 0)));
+    }
+    {
+        ASSERT_TRUE(
+            Taint::hasTaint(new IR::Slice(new IR::Shr(valueType, taintedValue, amount), 7, 0)));
+        ASSERT_TRUE(
+            Taint::hasTaint(new IR::Slice(new IR::Shl(valueType, taintedValue, amount), 7, 0)));
+    }
+    {
+        ASSERT_TRUE(
+            Taint::hasTaint(new IR::Slice(new IR::Shr(valueType, value, taintedAmount), 7, 0)));
+        ASSERT_TRUE(
+            Taint::hasTaint(new IR::Slice(new IR::Shl(valueType, value, taintedAmount), 7, 0)));
+    }
+}
+
 }  // anonymous namespace
 
 }  // namespace P4::P4Tools::Test

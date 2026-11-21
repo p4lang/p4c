@@ -50,19 +50,18 @@ static bitvec computeTaintedBits(const IR::Expression *expr) {
     }
     if (const auto *binaryExpr = expr->to<IR::Operation_Binary>()) {
         bitvec fullmask(0, expr->type->width_bits());
+        // Constant shifts move the tainted bits and we know where to.
         if (const auto *shl = binaryExpr->to<IR::Shl>()) {
             if (const auto *shiftConst = shl->right->to<IR::Constant>()) {
                 int shift = static_cast<int>(shiftConst->value);
                 return fullmask & (computeTaintedBits(shl->left) << shift);
             }
-            return fullmask;
         }
         if (const auto *shr = binaryExpr->to<IR::Shr>()) {
             if (const auto *shiftConst = shr->right->to<IR::Constant>()) {
                 int shift = static_cast<int>(shiftConst->value);
                 return computeTaintedBits(shr->left) >> shift;
             }
-            return fullmask;
         }
         if (binaryExpr->is<IR::BAnd>() || binaryExpr->is<IR::BOr>() || binaryExpr->is<IR::BXor>()) {
             // Bitwise binary operations cannot taint other bits than those tainted in either lhs or
@@ -72,6 +71,7 @@ static bitvec computeTaintedBits(const IR::Expression *expr) {
         // Be conservative here. If either of the expressions contain even a single tainted bit, the
         // entire operation is tainted. The reason is that we need to account for overflow. A
         // tainted MSB or LSB can cause an expression to overflow and underflow.
+        // Shifts by a variable amount can move a tainted bit to any position.
         auto taintLeft = computeTaintedBits(binaryExpr->left);
         auto taintRight = computeTaintedBits(binaryExpr->right);
         if (taintLeft.empty() && taintRight.empty()) {
