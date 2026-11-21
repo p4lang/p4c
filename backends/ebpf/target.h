@@ -194,13 +194,9 @@ class KernelSamplesTarget : public Target {
 class P4TCTarget : public KernelSamplesTarget {
  public:
     explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC"_cs) {}
-    // FIXME: The code is terrible broken: the function is called on both
-    // *parsed* and *unparsed* annotations (!!!!)
     static cstring getByteOrderFromAnnotation(const IR::IAnnotated *node) {
         if (const auto *anno = node->getAnnotation("tc_type"_cs)) {
-            cstring value = anno->needsParsing()
-                                ? anno->getUnparsed().at(0)->text
-                                : anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+            cstring value = anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
             if (value == "macaddr" || value == "ipv4" || value == "ipv6" || value == "be16" ||
                 value == "be32" || value == "be64") {
                 return "NETWORK"_cs;

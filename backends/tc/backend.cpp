@@ -1833,12 +1833,11 @@ bool Backend::process() {
     auto hook = options.getDebugHook();
     target = new EBPF::P4TCTarget(options.emitTraceMessages);
     ScanWidths *sw = new ScanWidths(typeMap, refMap, target);
-    parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
     EBPF::EBPFTypeFactory::createFactory(typeMapEBPF, true);
     PassManager backEnd = {};
-    backEnd.addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
+    backEnd.addPasses({new P4::ClearTypeMap(typeMap, true),
                        new P4::TypeChecking(refMap, typeMap, true), sw, tcIR, genIJ});
     widths = sw;
     backEnd.addDebugHook(hook, true);

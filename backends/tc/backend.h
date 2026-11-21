@@ -430,7 +430,6 @@ class Backend : public PassManager {
     IR::TCPipeline *pipeline = new IR::TCPipeline();
     TC::ConvertToBackendIR *tcIR;
     TC::IntrospectionGenerator *genIJ;
-    TC::ParseTCAnnotations *parseTCAnno;
     const IR::ToplevelBlock *top = nullptr;
     EbpfOptions ebpfOption;
     EBPF::Target *target;
