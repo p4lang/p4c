@@ -29,7 +29,7 @@ class hasSideEffects : public Inspector, public ResolutionContext {
 
         /* assume has side effects if we can't look it up */
         if (typeMap) {
-            auto *mi = P4::MethodInstance::resolve(mc, this, typeMap, true);
+            auto mi = P4::MethodInstance::resolve(mc, this, typeMap, true);
             if (auto *bm = mi->to<P4::BuiltInMethod>()) {
                 if (bm->name == IR::Type_Header::isValid) return true;
             } else if (auto *em = mi->to<P4::ExternMethod>()) {

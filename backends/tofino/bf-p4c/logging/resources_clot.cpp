@@ -42,7 +42,7 @@ bool ClotResourcesLogging::preorder(const IR::BFN::LoweredParserState *state) {
     auto parserIR = findContext<IR::BFN::LoweredParser>();
     BUG_CHECK(parserIR, "State does not belong to a parser? %1%", state);
 
-    for (const auto *match : state->transitions) {
+    for (const IR::BFN::LoweredParserMatch *match : state->transitions) {
         collectClotUsages(match, state, parserIR->gress);
     }
 
@@ -59,13 +59,13 @@ void ClotResourcesLogging::end_apply() {
 void ClotResourcesLogging::collectClotUsages(const IR::BFN::LoweredParserMatch *match,
                                              const IR::BFN::LoweredParserState *state,
                                              gress_t gress) {
-    for (auto *ck : match->checksums) {
+    for (const IR::BFN::LoweredParserChecksum *ck : match->checksums) {
         if (auto *csum = ck->to<IR::BFN::LoweredParserChecksum>())
             if (csum->type == IR::BFN::ChecksumMode::CLOT)
                 clotTagToChecksumUnit[csum->clot_dest.tag] = csum->unit_id;
     }
 
-    for (auto *stmt : match->extracts) {
+    for (const IR::BFN::LoweredParserPrimitive *stmt : match->extracts) {
         if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>()) {
             // Don't generate JSON for the extracted CLOT if the CLOT is spilled.
             if (!extract->is_start) continue;

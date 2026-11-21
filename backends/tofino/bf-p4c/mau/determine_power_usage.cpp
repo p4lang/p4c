@@ -375,7 +375,7 @@ void DeterminePowerUsage::postorder(const IR::MAU::Table *t) {
                 std::max(mau_features_->max_selector_words_[t->gress][t->stage()], sel_words);
 
         } else if (mem.type == Memories::Use::STATEFUL) {
-            auto *att = t->get_attached(use.first);
+            auto att = t->get_attached(use.first);
             if (att && att->use != IR::MAU::StatefulUse::NO_USE) {
                 auto local_stateful_table = PowerMemoryAccess();
                 local_stateful_table.ram_read += 1;  // Stateful are only one ram wide

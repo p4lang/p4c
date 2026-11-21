@@ -38,7 +38,7 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
     const auto &executionState = state.get();
 
     if (const auto *selectExpr = parserState->selectExpression->to<IR::SelectExpression>()) {
-        for (const auto *selectCase : selectExpr->selectCases) {
+        for (auto selectCase : selectExpr->selectCases) {
             const auto *decl = executionState.findDecl(selectCase->state)->getNode();
             decl->apply_visitor_preorder(*this);
         }
@@ -74,10 +74,10 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
             TableUtils::checkTableImmutability(*table, properties);
             auto tableActionList = TableUtils::buildTableActionList(*table);
             if (properties.tableIsImmutable) {
-                const auto *entries = table->getEntries();
+                auto entries = table->getEntries();
                 if (entries != nullptr) {
                     auto entryVector = entries->entries;
-                    for (const auto *entry : entryVector) {
+                    for (auto entry : entryVector) {
                         if (coverageOptions.coverTableEntries && entry->getSourceInfo().isValid()) {
                             coverableNodes.insert(entry);
                         }
@@ -95,7 +95,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                     actionType->apply_visitor_preorder(*this);
                 }
             }
-            const auto *defaultAction = table->getDefaultAction();
+            auto defaultAction = table->getDefaultAction();
             const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
             const auto *actionType = executionState.getP4Action(tableAction);
             actionType->apply_visitor_preorder(*this);
@@ -144,17 +144,17 @@ void CoverableNodesScanner::updateNodeCoverage(const IR::Node *node,
                                                P4::Coverage::CoverageSet &nodes) {
     CHECK_NULL(node);
 
-    static NodeCache CACHED_NODES;
+    auto &cachedNodes = state.get().getCoverageCache();
     // If the node is already in the cache, return it.
-    auto it = CACHED_NODES.find(node);
-    if (it != CACHED_NODES.end()) {
+    auto it = cachedNodes.find(node);
+    if (it != cachedNodes.end()) {
         nodes.insert(it->second.begin(), it->second.end());
         return;
     }
     node->apply(*this);
     nodes.insert(coverableNodes.begin(), coverableNodes.end());
     // Store the result in the cache.
-    CACHED_NODES.emplace(node, coverableNodes);
+    cachedNodes.emplace(node, coverableNodes);
 }
 
 CoverableNodesScanner::CoverableNodesScanner(const ExecutionState &state)

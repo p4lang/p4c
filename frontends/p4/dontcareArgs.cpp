@@ -18,7 +18,7 @@ Visitor::profile_t DontcareArgs::init_apply(const IR::Node *node) {
 
 const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     bool changes = false;
-    auto vec = new IR::Vector<IR::Argument>();
+    IR::MutablePtr<IR::Vector<IR::Argument>> vec = new IR::Vector<IR::Argument>();
 
     auto mi = MethodInstance::resolve(expression, this, typeMap);
     for (auto p : mi->substitution.getParametersInArgumentOrder()) {

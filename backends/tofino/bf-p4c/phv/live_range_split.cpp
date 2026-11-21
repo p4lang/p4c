@@ -648,7 +648,7 @@ void LiveRangeSplit::report(const ContainerSequences &splits) {
     LOG_DEBUG1('\n');
 }
 
-const IR::Node *LiveRangeSplitOrFail::apply_visitor(const IR::Node *root, const char *) {
+IR::Ptr<IR::Node> LiveRangeSplitOrFail::apply_visitor(const IR::Node *root, const char *) {
     if (unallocated.empty()) {
         return root;
     }

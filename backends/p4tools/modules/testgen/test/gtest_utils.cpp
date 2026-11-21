@@ -21,7 +21,7 @@
 
 namespace P4::P4Tools::Test {
 
-P4ToolsTestCase::P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults)
+P4ToolsTestCase::P4ToolsTestCase(std::shared_ptr<const P4Tools::CompilerResult> compilerResults)
     : compilerResults(compilerResults) {}
 
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
@@ -56,7 +56,7 @@ const IR::P4Program &P4ToolsTestCase::getProgram() const {
 }
 
 const P4Tools::CompilerResult &P4ToolsTestCase::getCompilerResult() const {
-    return compilerResults;
+    return *compilerResults;
 }
 
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,

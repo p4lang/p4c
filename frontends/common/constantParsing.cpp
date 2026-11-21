@@ -62,7 +62,7 @@ static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char
     bool isSigned = *sep++ == 's';
     sep += strspn(sep, " \t\r\n");
     big_int value = Util::cvtInt(sep + skip, base);
-    const IR::Type *type = IR::Type_Bits::get(srcInfo, size, isSigned);
+    auto type = IR::Type_Bits::get(srcInfo, size, isSigned);
     IR::Constant *result = new IR::Constant(srcInfo, type, value, base);
     return result;
 }
@@ -81,7 +81,7 @@ IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConst
 }
 
 int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant) {
-    auto cst = parseConstant(srcInfo, constant, 0);
+    IR::MutablePtr<IR::Constant> cst = parseConstant(srcInfo, constant, 0);
     if (!cst->fitsInt()) {
         ::P4::error(ErrorType::ERR_OVERLIMIT,
                     "%1$x: this implementation does not support bitstrings this large", cst);

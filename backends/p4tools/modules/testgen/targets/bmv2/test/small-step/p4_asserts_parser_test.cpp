@@ -49,7 +49,7 @@ using P4TestContext = P4Tools::CompileContext<P4TestOptions>;
 using P4Tools::ConstraintsVector;
 
 ConstraintsVector loadExample(const char *curFile, bool flag) {
-    AutoCompileContext autoP4TestContext(new P4TestContext);
+    AutoCompileContext autoP4TestContext(std::make_unique<P4TestContext>());
     auto &options = P4TestContext::get().options();
     const char *argv = "./gtest-p4testgen";
     options.process(1, (char *const *)&argv);
@@ -57,7 +57,7 @@ ConstraintsVector loadExample(const char *curFile, bool flag) {
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program;
     options.file = std::filesystem::path(sourcePath) / curFile;
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {

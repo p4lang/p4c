@@ -35,9 +35,9 @@ bool P4::CheckTableEntries::get_mask_val(const IR::Expression *e, int width, big
                                          big_int &val) {
     while (auto *c = e->to<IR::Cast>()) e = c->expr;
     if (auto *m = e->to<IR::Mask>()) {
-        auto *l = m->left;
+        auto l = m->left;
         while (auto *c = l->to<IR::Cast>()) l = c->expr;
-        auto *r = m->right;
+        auto r = m->right;
         while (auto *c = r->to<IR::Cast>()) r = c->expr;
         auto *lc = l->to<IR::Constant>();
         auto *rc = r->to<IR::Constant>();
@@ -79,13 +79,13 @@ bool P4::CheckTableEntries::keys_equal(const IR::Expression *k1, const IR::Expre
 
     if (auto *r1 = k1->to<IR::Range>()) {
         if (auto *r2 = k2->to<IR::Range>()) {
-            auto *l1 = r1->left;
+            auto l1 = r1->left;
             while (auto *c = l1->to<IR::Cast>()) l1 = c->expr;
-            auto *right1 = r1->right;
+            auto right1 = r1->right;
             while (auto *c = right1->to<IR::Cast>()) right1 = c->expr;
-            auto *l2 = r2->left;
+            auto l2 = r2->left;
             while (auto *c = l2->to<IR::Cast>()) l2 = c->expr;
-            auto *right2 = r2->right;
+            auto right2 = r2->right;
             while (auto *c = right2->to<IR::Cast>()) right2 = c->expr;
 
             auto *c_l1 = l1->to<IR::Constant>();
@@ -118,12 +118,12 @@ bool P4::CheckTableEntries::ternary_covers(const IR::Expression *k1, const IR::E
 }
 
 bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
-    auto *entries = tbl->getEntries();
+    const IR::EntriesList *entries = tbl->getEntries();
     if (!entries || entries->entries.empty()) return false;
-    auto *key = tbl->getKey();
+    const IR::Key *key = tbl->getKey();
     BUG_CHECK(key, "%1% table has entries and no key", tbl);
     std::vector<bool> ternary_keys;
-    for (auto *key_el : key->keyElements) {
+    for (const IR::KeyElement *key_el : key->keyElements) {
         cstring matchKind = key_el->matchType->path->name.name;
         ternary_keys.push_back(matchKind == "ternary"_cs || matchKind == "optional"_cs);
     }
@@ -133,7 +133,7 @@ bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
     // look at all of them -- O(n^2) in the number of entries
     std::vector<const IR::ListExpression *> prev_keys;
 
-    for (auto *entry : entries->entries) {
+    for (const IR::Entry *entry : entries->entries) {
         BUG_CHECK(entry->keys->size() == ternary_keys.size(), "%1% key size mismatch", entry);
 
         for (auto *prev : prev_keys) {
@@ -141,9 +141,9 @@ bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
             bool is_covered = true;
 
             for (unsigned i = 0; i < entry->keys->size(); ++i) {
-                auto *k1 = prev->components[i];
-                auto *k2 = entry->keys->components[i];
-                auto *key_el = key->keyElements[i];
+                auto k1 = prev->components[i];
+                auto k2 = entry->keys->components[i];
+                auto key_el = key->keyElements[i];
                 int width = get_width_bits(key_el->expression->type);
 
                 if (keys_equal(k1, k2, width)) {

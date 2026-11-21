@@ -21,7 +21,7 @@
 namespace BFN {
 
 // Overrides the setTypeType method in base classes.
-const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
+IR::Ptr<IR::Type> TypeInference::setTypeType(IR::Ptr<IR::Type> type, bool learn) {
     if (done()) return type;
     const IR::Type *typeToCanonicalize;
     if (readOnly)
@@ -37,7 +37,7 @@ const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
             (void)canon->apply(tc);
             if (errorCount() > e) return nullptr;
         }
-        auto tt = new IR::Type_Type(canon);
+        IR::Ptr<IR::Type_Type> tt = new IR::Type_Type(canon);
         setType(getOriginal(), tt);
         setType(type, tt);
     }

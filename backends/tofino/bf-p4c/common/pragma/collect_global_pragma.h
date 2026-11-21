@@ -27,7 +27,7 @@ using namespace P4;
 
 class CollectGlobalPragma : public Inspector {
     /// Vector of all global pragmas that need to communicated to the backend.
-    std::vector<const IR::Annotation *> global_pragmas_;
+    std::vector<IR::Ptr<IR::Annotation>> global_pragmas_;
 
     /// Given an IR::StructField* node, extract the header name associated with that node. @returns
     /// an empty string if the name annotation does not actually have an associated name.
@@ -47,7 +47,7 @@ class CollectGlobalPragma : public Inspector {
     bool preorder(const IR::StructField *) override;
 
  public:
-    const std::vector<const IR::Annotation *> &global_pragmas() const { return global_pragmas_; }
+    const std::vector<IR::Ptr<IR::Annotation>> &global_pragmas() const { return global_pragmas_; }
 
     /// Vector of all PHV pragmas recognized by the backend.
     static const std::vector<std::string> *g_global_pragma_names;

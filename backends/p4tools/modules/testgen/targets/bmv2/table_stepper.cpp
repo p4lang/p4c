@@ -115,7 +115,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -133,7 +133,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : parameters->parameters) {
+        for (auto parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -192,7 +192,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -211,7 +211,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : parameters->parameters) {
+        for (auto parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -274,7 +274,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
 }
 
 bool Bmv2V1ModelTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation");
+    auto impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -316,7 +316,7 @@ bool Bmv2V1ModelTableStepper::checkForActionProfile() {
 }
 
 bool Bmv2V1ModelTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation");
+    auto impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -390,7 +390,7 @@ void Bmv2V1ModelTableStepper::checkTargetProperties(
 
 void Bmv2V1ModelTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *keys = table->getKey();
+    auto keys = table->getKey();
     const auto &testgenOptions = TestgenOptions::get();
     auto hasMatchKeys = false;
     for (const auto &keyProperties : properties.resolvedKeys) {
@@ -421,7 +421,7 @@ void Bmv2V1ModelTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {

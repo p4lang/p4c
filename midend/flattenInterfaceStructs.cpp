@@ -23,8 +23,8 @@ static const IR::Type_Struct *isNestedStruct(const P4::TypeMap *typeMap, const I
 void NestedStructMap::createReplacement(const IR::Type_Struct *type) {
     auto repl = ::P4::get(replacement, type);
     if (repl != nullptr) return;
-    repl =
-        new StructTypeReplacement<IR::Type_Struct>(typeMap, type, new AnnotationSelectionPolicy());
+    AnnotationSelectionPolicy policy;
+    repl = std::make_shared<StructTypeReplacement<IR::Type_Struct>>(typeMap, type, &policy);
     LOG3("Replacement for " << type << " is " << repl);
     replacement.emplace(type, repl);
 }

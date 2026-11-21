@@ -136,7 +136,7 @@ class UpdatePhase0Header : public Transform {
 
  private:
     IR::Node *preorder(IR::Type_Struct *s) override {
-        if (auto *d = declarations->getDeclaration(s->name.toString())) {
+        if (const IR::IDeclaration *d = declarations->getDeclaration(s->name.toString())) {
             LOG4("modifying struct " << s << " to header " << d->to<IR::Type_Header>());
             return d->to<IR::Node>()->clone();
         }

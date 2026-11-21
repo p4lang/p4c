@@ -26,7 +26,7 @@ void ElimActionRun::ActionTableUse::postorder(const IR::Member *mem) {
     if (mem->member != IR::Type_Table::action_run) return;
     auto *mce = mem->expr->to<IR::MethodCallExpression>();
     if (!mce) return;
-    auto *mi = MethodInstance::resolve(mce, this);
+    auto mi = MethodInstance::resolve(mce, this);
     auto *tbl = mi->object->to<IR::P4Table>();
     if (!tbl) return;
     LOG3("found: " << mem);
@@ -37,7 +37,7 @@ void ElimActionRun::ActionTableUse::postorder(const IR::Member *mem) {
     }
     auto *info = &it->second;
     IR::IndexedVector<IR::Declaration_ID> tags;
-    for (auto *ale : tbl->getActionList()->actionList) {
+    for (const IR::ActionListElement *ale : tbl->getActionList()->actionList) {
         cstring name = ale->getName();
         BUG_CHECK(!self.actionsToModify.count(name),
                   "action %s used in multiple tables (%s and %s) -- LocalizeActions must be run "
@@ -59,7 +59,7 @@ const IR::Expression *ElimActionRun::RewriteActionRun::postorder(IR::Member *mem
     if (mem->member != IR::Type_Table::action_run) return mem;
     auto *mce = mem->expr->to<IR::MethodCallExpression>();
     if (!mce) return mem;
-    auto *mi = MethodInstance::resolve(mce, this);
+    auto mi = MethodInstance::resolve(mce, this);
     auto *tbl = mi->object->to<IR::P4Table>();
     if (!tbl) return mem;
     auto &info = self.actionRunTables.at(tbl->name);

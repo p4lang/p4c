@@ -79,10 +79,10 @@ const IR::SymbolicVariable *RefersToParser::lookUpBuiltinKey(
 
 const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &srcTable,
                                                              cstring keyReference) {
-    const auto *key = srcTable.getKey();
+    auto key = srcTable.getKey();
     BUG_CHECK(key != nullptr, "Table %1% does not have any keys.", srcTable);
-    for (const auto *keyElement : key->keyElements) {
-        const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
+    for (auto keyElement : key->keyElements) {
+        auto nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
         if (keyReference == nameAnnot->getName()) {
@@ -111,7 +111,7 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
     // occurrence of a table where the suffix matches.
     // Ideally, we would use originalName, but originalName currently is not preserved correctly.
     const IR::IDeclaration *tableDeclaration = nullptr;
-    for (const auto *decl : ctrlContext.getDeclarations()) {
+    for (auto decl : ctrlContext.getDeclarations()) {
         auto declName = decl->controlPlaneName();
         if (declName.endsWith(tableReference)) {
             tableDeclaration = decl;
@@ -126,17 +126,17 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
 }
 
 bool RefersToParser::preorder(const IR::P4Table *tableContext) {
-    const auto *key = tableContext->getKey();
+    auto key = tableContext->getKey();
     if (key == nullptr) {
         return false;
     }
     const auto *controlContext = findOrigCtxt<IR::P4Control>();
     CHECK_NULL(controlContext);
 
-    for (const auto *keyElement : key->keyElements) {
-        for (const auto *annotation : keyElement->getAnnotations()) {
+    for (auto keyElement : key->keyElements) {
+        for (auto annotation : keyElement->getAnnotations()) {
             if (annotation->name == "refers_to" || annotation->name == "referenced_by") {
-                const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
+                auto nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
                 BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                           annotation->name.name);
                 const auto *srcKey = ControlPlaneState::getTableKey(
@@ -148,22 +148,22 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
         }
     }
 
-    const auto *actionList = tableContext->getActionList();
+    auto actionList = tableContext->getActionList();
     if (actionList == nullptr) {
         return false;
     }
-    for (const auto *action : actionList->actionList) {
-        const auto *decl = controlContext->getDeclByName(action->getName().name);
+    for (auto action : actionList->actionList) {
+        auto decl = controlContext->getDeclByName(action->getName().name);
         if (decl == nullptr) {
             return false;
         }
         const auto *actionCall = decl->checkedTo<IR::P4Action>();
-        const auto *params = actionCall->parameters;
+        auto params = actionCall->parameters;
         if (params == nullptr) {
             return false;
         }
-        for (const auto *parameter : params->parameters) {
-            for (const auto *annotation : parameter->getAnnotations()) {
+        for (auto parameter : params->parameters) {
+            for (auto annotation : parameter->getAnnotations()) {
                 if (annotation->name == "refers_to" || annotation->name == "referenced_by") {
                     const auto *referredKey = getReferencedKey(*controlContext, *annotation);
                     const auto *srcKey = ControlPlaneState::getTableActionArgument(

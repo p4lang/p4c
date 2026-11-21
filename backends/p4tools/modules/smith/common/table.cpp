@@ -52,8 +52,8 @@ IR::Key *TableGenerator::genKeyElementList(size_t len) {
         }
         // @name
         // Tao: actually, this may never happen
-        const auto *keyAnno = key->getAnnotations().at(0);
-        const auto *annotExpr = keyAnno->getExpr(0);
+        auto keyAnno = key->getAnnotations().at(0);
+        auto annotExpr = keyAnno->getExpr(0);
         cstring keyAnnotatName;
         if (annotExpr->is<IR::StringLiteral>()) {
             const auto *strExpr = annotExpr->to<IR::StringLiteral>();
@@ -100,7 +100,7 @@ IR::MethodCallExpression *TableGenerator::genTableActionCall(cstring method_name
     auto *args = new IR::Vector<IR::Argument>();
     IR::IndexedVector<IR::StatOrDecl> decls;
 
-    for (const auto *par : params) {
+    for (auto par : params) {
         if (!target().expressionGenerator().checkInputArg(par)) {
             return nullptr;
         }
@@ -142,7 +142,7 @@ IR::ActionList *TableGenerator::genActionList(size_t len) {
         }
         actNames.insert(actName);
 
-        const auto *params = p4Act->parameters;
+        auto params = p4Act->parameters;
 
         IR::MethodCallExpression *mce = genTableActionCall(actName, *params);
         if (mce != nullptr) {

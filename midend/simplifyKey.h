@@ -87,8 +87,8 @@ class IsMask : public IsLikeLeftValue {
     other policies with a logical 'or'.
 */
 class OrPolicy : public KeyIsSimple {
-    KeyIsSimple *left;
-    KeyIsSimple *right;
+    std::shared_ptr<KeyIsSimple> left;
+    std::shared_ptr<KeyIsSimple> right;
 
  public:
     OrPolicy(KeyIsSimple *left, KeyIsSimple *right) : left(left), right(right) {
@@ -133,8 +133,8 @@ class OrPolicy : public KeyIsSimple {
 class DoSimplifyKey : public Transform {
     MinimalNameGenerator nameGen;
     TypeMap *typeMap;
-    KeyIsSimple *key_policy;
-    std::map<const IR::P4Table *, TableInsertions *> toInsert;
+    std::shared_ptr<KeyIsSimple> key_policy;
+    std::map<IR::Ptr<IR::P4Table>, std::shared_ptr<TableInsertions>> toInsert;
 
  public:
     DoSimplifyKey(TypeMap *typeMap, KeyIsSimple *key_policy)

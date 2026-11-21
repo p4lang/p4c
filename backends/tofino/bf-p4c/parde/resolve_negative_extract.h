@@ -147,7 +147,7 @@ struct ResolveNegativeExtract : public PassManager {
 
             unsigned curr_shift = 0;
             std::for_each(pred->transitions.begin(), pred->transitions.end(),
-                          [&curr_shift](const auto *tr) {
+                          [&curr_shift](auto tr) {
                               curr_shift = curr_shift > tr->shift ? curr_shift : tr->shift;
                           });
             unsigned min_shift = required_history;
@@ -155,7 +155,7 @@ struct ResolveNegativeExtract : public PassManager {
 
             // For extracts, identify the earliest start byte for each end byte
             std::map<int, int> end_to_earliest_start;
-            for (const auto *stmt : pred->statements) {
+            for (auto stmt : pred->statements) {
                 if (const auto *extract = stmt->to<IR::BFN::Extract>()) {
                     if (const auto *rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
                         auto range = rval->range;
@@ -246,7 +246,7 @@ struct ResolveNegativeExtract : public PassManager {
                 // Current shift amount for the state
                 unsigned curr_shift = 0;
                 std::for_each(state->transitions.begin(), state->transitions.end(),
-                              [this, state, &curr_shift, delay_shift](const auto *tr) {
+                              [this, state, &curr_shift, delay_shift](auto tr) {
                                   curr_shift = curr_shift > tr->shift ? curr_shift : tr->shift;
                                   if (tr->next) {
                                       this->state_delay[tr->next->name] = delay_shift;
@@ -261,7 +261,7 @@ struct ResolveNegativeExtract : public PassManager {
                 // Split the statements into statements to delay to child states and statements to
                 // keep in current state
                 IR::Vector<IR::BFN::ParserPrimitive> new_statements;
-                for (const auto *stmt : state->statements) {
+                for (auto stmt : state->statements) {
                     bool keep = true;
                     if (const auto *extract = stmt->to<IR::BFN::Extract>()) {
                         if (const auto *rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
@@ -723,7 +723,7 @@ struct ResolveNegativeExtract : public PassManager {
                                                                  tr->shift + state_shift, tr->next);
                         duplicated_state->transitions.push_back(new_trans);
                     }
-                    for (const auto stmt : orig_state->statements) {
+                    for (auto stmt : orig_state->statements) {
                         duplicated_state->statements.push_back(stmt->clone());
                     }
                     duplicated_states.emplace(orig_state,

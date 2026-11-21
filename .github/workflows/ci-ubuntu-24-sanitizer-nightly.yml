@@ -32,7 +32,7 @@ jobs:
       COMPILE_WITH_CLANG: ON
       BUILD_AUTO_VAR_INIT_PATTERN: ON
       ENABLE_SANITIZERS: ON
-      UBSAN_OPTIONS: print_stacktrace=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
       ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:
       - uses: actions/checkout@v7
@@ -44,7 +44,16 @@ jobs:
         with:
           ccache-key: "ubuntu-24.04-clang-unity-sanitizer"
 
+      - name: Check ownership and compiler leaks
+        # These tests must be leak-free without suppressions. Backend and IR
+        # generator cleanup is still incomplete, so enable LSan for this suite.
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          LSAN_OPTIONS: exitcode=23
+        run: uv run ctest -L memory-leak --no-tests=error --output-on-failure
+        working-directory: ./build
+
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
+        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random -LE memory-leak
         working-directory: ./build

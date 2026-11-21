@@ -36,7 +36,7 @@ void EBPFTableStepper::checkTargetProperties(
 
 void EBPFTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *keys = table->getKey();
+    auto keys = table->getKey();
     // If we have no keys, there is nothing to match.
     if (keys == nullptr) {
         addDefaultAction(std::nullopt);
@@ -45,7 +45,7 @@ void EBPFTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {

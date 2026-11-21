@@ -32,6 +32,7 @@ class ProgramStructure final {
     bool debug;
     FILE *debugStream;
     Namespace *rootNamespace;
+    std::vector<std::unique_ptr<NamedSymbol>> symbols;
     Namespace *currentNamespace;
 
     struct PathContext {
@@ -53,6 +54,7 @@ class ProgramStructure final {
     };
 
     ProgramStructure();
+    ~ProgramStructure();
 
     void setDebug(bool debug) { this->debug = debug; }
     void pushNamespace(SourceInfo info, bool allowDuplicates);

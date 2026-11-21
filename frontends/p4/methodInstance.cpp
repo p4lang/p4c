@@ -13,16 +13,17 @@
 namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
-MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
-                                        const DeclarationLookup *refMap, TypeMap *typeMap,
-                                        bool useExpressionType, const Visitor::Context *ctxt,
-                                        bool incomplete) {
+std::unique_ptr<MethodInstance> MethodInstance::resolve(const IR::MethodCallExpression *mce,
+                                                        const DeclarationLookup *refMap,
+                                                        TypeMap *typeMap, bool useExpressionType,
+                                                        const Visitor::Context *ctxt,
+                                                        bool incomplete) {
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
     if (mt == nullptr && useExpressionType) mt = mce->method->type;
     BUG_CHECK(mt, "%1%: unknown type", mce->method);
     BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
     auto originalType = mt->to<IR::Type_MethodBase>();
-    auto actualType = originalType;
+    IR::Ptr<IR::Type_MethodBase> actualType = originalType;
     if (typeMap && !mce->typeArguments->empty()) {
         auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
@@ -33,7 +34,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
-        auto basetype = typeMap ? typeMap->getType(mem->expr) : mem->expr->type;
+        const IR::Type *basetype = mem->expr->type;
+        if (typeMap) basetype = typeMap->getType(mem->expr);
         if (basetype == nullptr) {
             if (useExpressionType)
                 basetype = mem->expr->type;
@@ -43,19 +45,22 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
         if (auto sc = basetype->to<IR::Type_SpecializedCanonical>()) basetype = sc->baseType;
         if (basetype->is<IR::Type_HeaderUnion>()) {
             if (mem->member == IR::Type_Header::isValid)
-                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
+                return std::unique_ptr<BuiltInMethod>(
+                    new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>()));
         } else if (basetype->is<IR::Type_Header>()) {
             if (mem->member == IR::Type_Header::setValid ||
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
-                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
+                return std::unique_ptr<BuiltInMethod>(
+                    new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>()));
         } else if (basetype->is<IR::Type_Array>()) {
             if (mem->member == IR::Type_Array::push_front ||
                 mem->member == IR::Type_Array::pop_front)
-                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
+                return std::unique_ptr<BuiltInMethod>(
+                    new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>()));
         } else {
-            const IR::IDeclaration *decl = nullptr;
-            const IR::Type *type = nullptr;
+            IR::Ptr<IR::IDeclaration> decl;
+            IR::Ptr<IR::Type> type;
             const IR::Expression *receiver = mem->expr;
             while (auto ai = receiver->to<IR::ArrayIndex>()) receiver = ai->left;
             if (auto th = receiver->to<IR::This>()) {
@@ -63,7 +68,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = receiver->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
+                type = pe->type;
+                if (typeMap) type = typeMap->getType(decl->getNode(), true);
             } else if (auto mc = receiver->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
@@ -71,7 +77,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
             } else if (auto cce = receiver->to<IR::ConstructorCallExpression>()) {
                 auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
                 decl = cc->to<ExternConstructorCall>()->type;
-                type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
+                type = cce->type;
+                if (typeMap) type = typeMap->getTypeType(cce->constructedType, true);
             } else {
                 BUG("unexpected expression %1% resolving method instance", receiver);
             }
@@ -80,16 +87,17 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             if (type->is<IR::IApply>() && mem->member == IR::IApply::applyMethodName) {
-                return new ApplyMethod(mce, decl, type->to<IR::IApply>());
+                return std::unique_ptr<ApplyMethod>(
+                    new ApplyMethod(mce, decl, type->to<IR::IApply>()));
             } else if (type->is<IR::Type_Extern>()) {
                 auto et = type->to<IR::Type_Extern>();
                 auto methodType = mt->to<IR::Type_Method>();
                 CHECK_NULL(methodType);
                 auto method = et->lookupMethod(mem->member, mce->arguments);
                 if (method == nullptr) return nullptr;
-                return new ExternMethod(mce, decl, method, et, methodType,
-                                        type->to<IR::Type_Extern>(),
-                                        actualType->to<IR::Type_Method>(), incomplete);
+                return std::unique_ptr<ExternMethod>(
+                    new ExternMethod(mce, decl, method, et, methodType, type->to<IR::Type_Extern>(),
+                                     actualType->to<IR::Type_Method>(), incomplete));
             }
         }
     } else if (mce->method->is<IR::PathExpression>()) {
@@ -98,15 +106,15 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
         if (auto meth = decl->to<IR::Method>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new ExternFunction(mce, meth, methodType, actualType->to<IR::Type_Method>(),
-                                      incomplete);
+            return std::unique_ptr<ExternFunction>(new ExternFunction(
+                mce, meth, methodType, actualType->to<IR::Type_Method>(), incomplete));
         } else if (auto act = decl->to<IR::P4Action>()) {
-            return new ActionCall(mce, act, mt->to<IR::Type_Action>());
+            return std::unique_ptr<ActionCall>(new ActionCall(mce, act, mt->to<IR::Type_Action>()));
         } else if (auto func = decl->to<IR::Function>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new FunctionCall(mce, func, methodType, actualType->to<IR::Type_Method>(),
-                                    incomplete);
+            return std::unique_ptr<FunctionCall>(new FunctionCall(
+                mce, func, methodType, actualType->to<IR::Type_Method>(), incomplete));
         }
     }
 
@@ -114,17 +122,20 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     return nullptr;  // unreachable
 }
 
-const IR::P4Action *ActionCall::specialize(const DeclarationLookup *refMap) const {
-    SubstituteParameters sp(refMap, &substitution, new TypeVariableSubstitution());
+IR::Ptr<IR::P4Action> ActionCall::specialize(const DeclarationLookup *refMap) const {
+    TypeVariableSubstitution typeSubstitution;
+    SubstituteParameters sp(refMap, &substitution, &typeSubstitution);
     auto result = action->apply(sp);
     return result->to<IR::P4Action>();
 }
 
-ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
-                                          const DeclarationLookup *refMap, TypeMap *typeMap) {
-    auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
-    ConstructorCall *result;
-    const IR::Vector<IR::Type> *typeArguments;
+std::unique_ptr<ConstructorCall> ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
+                                                          const DeclarationLookup *refMap,
+                                                          TypeMap *typeMap) {
+    const IR::Type *ct = cce->type;
+    if (typeMap) ct = typeMap->getTypeType(cce->constructedType, true);
+    std::unique_ptr<ConstructorCall> result;
+    IR::Ptr<IR::Vector<IR::Type>> typeArguments;
     const IR::Type_Name *type;
     const IR::ParameterList *constructorParameters;
 
@@ -144,12 +155,12 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
     auto decl = refMap->getDeclaration(type->path, true);
     if (auto ext = decl ? decl->to<IR::Type_Extern>() : nullptr) {
         auto constr = ext->lookupConstructor(cce->arguments);
-        result = new ExternConstructorCall(cce, ext->to<IR::Type_Extern>(), constr);
+        result.reset(new ExternConstructorCall(cce, ext->to<IR::Type_Extern>(), constr));
         BUG_CHECK(constr, "%1%: constructor not found", ext);
         constructorParameters = constr->type->parameters;
     } else if (auto cont = decl ? decl->to<IR::IContainer>() : nullptr) {
         BUG_CHECK(cont, "%1%: expected a container", dbp(decl));
-        result = new ContainerConstructorCall(cce, cont);
+        result.reset(new ContainerConstructorCall(cce, cont));
         constructorParameters = cont->getConstructorParameters();
     } else {
         BUG("Unexpected constructor call %1%; type is %2%", dbp(cce), dbp(ct));
@@ -160,10 +171,10 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
     return result;
 }
 
-Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, DeclarationLookup *,
-                                      TypeMap *typeMap) {
-    auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
-    const IR::Vector<IR::Type> *typeArguments;
+std::unique_ptr<Instantiation> Instantiation::resolve(const IR::Declaration_Instance *instance,
+                                                      DeclarationLookup *, TypeMap *typeMap) {
+    const IR::Type *type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
+    IR::Ptr<IR::Vector<IR::Type>> typeArguments;
 
     while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
     auto simpleType = type;
@@ -175,13 +186,17 @@ Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, 
     }
 
     if (auto et = simpleType->to<IR::Type_Extern>()) {
-        return new ExternInstantiation(instance, typeArguments, et);
+        return std::unique_ptr<ExternInstantiation>(
+            new ExternInstantiation(instance, typeArguments, et));
     } else if (auto pt = simpleType->to<IR::Type_Package>()) {
-        return new PackageInstantiation(instance, typeArguments, pt);
+        return std::unique_ptr<PackageInstantiation>(
+            new PackageInstantiation(instance, typeArguments, pt));
     } else if (auto pt = simpleType->to<IR::P4Parser>()) {
-        return new ParserInstantiation(instance, typeArguments, pt);
+        return std::unique_ptr<ParserInstantiation>(
+            new ParserInstantiation(instance, typeArguments, pt));
     } else if (auto ct = simpleType->to<IR::P4Control>()) {
-        return new ControlInstantiation(instance, typeArguments, ct);
+        return std::unique_ptr<ControlInstantiation>(
+            new ControlInstantiation(instance, typeArguments, ct));
     }
     BUG("Unexpected instantiation %1%", instance);
     return nullptr;  // unreachable
@@ -192,7 +207,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
     auto *di = object->to<IR::Declaration_Instance>();
     if (!di || !di->initializer) {
         rv.push_back(method);
-    } else if (auto *em_decl =
+    } else if (const IR::IDeclaration *em_decl =
                    di->initializer->components.getDeclaration<IR::IDeclaration>(method->name)) {
         rv.push_back(em_decl);
     } else {
@@ -202,7 +217,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
             for (auto m : sync->getExpr()) {
                 auto mname = m->to<IR::PathExpression>();
                 if (!mname || method->name != mname->path->name) continue;
-                if (auto *am =
+                if (const IR::IDeclaration *am =
                         di->initializer->components.getDeclaration<IR::IDeclaration>(meth->name)) {
                     rv.push_back(am);
                 } else if (!meth->hasAnnotation(IR::Annotation::optionalAnnotation)) {

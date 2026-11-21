@@ -94,7 +94,7 @@ void TofinoTableStepper::evalTableActionProfile(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -181,7 +181,7 @@ void TofinoTableStepper::evalTableActionSelector(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -416,7 +416,7 @@ void TofinoTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> tableMissCondition = std::nullopt;
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
         tofinoProperties.implementaton = TableImplementation::constant;

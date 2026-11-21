@@ -31,8 +31,8 @@ cstring PnaDpdkRegisterValue::getObjectName() const { return "PnaDpdkRegisterVal
 const IR::Expression *PnaDpdkRegisterValue::getCurrentValue(const IR::Expression *index) const {
     const IR::Expression *baseExpr = initialValue;
     for (const auto &pnaDpdkregisterValue : registerConditions) {
-        const auto *storedIndex = pnaDpdkregisterValue.index;
-        const auto *storedVal = pnaDpdkregisterValue.value;
+        auto storedIndex = pnaDpdkregisterValue.index;
+        auto storedVal = pnaDpdkregisterValue.value;
         baseExpr =
             new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
     }
@@ -48,11 +48,12 @@ const IR::Constant *PnaDpdkRegisterValue::getEvaluatedValue() const {
 
 const PnaDpdkRegisterValue *PnaDpdkRegisterValue::evaluate(const Model &model,
                                                            bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(initialValue, doComplete);
+    auto evaluatedValue = model.evaluate(initialValue, doComplete);
     auto *evaluatedRegisterValue = new PnaDpdkRegisterValue(evaluatedValue);
     const std::vector<ActionArg> evaluatedConditions;
     for (const auto &cond : registerConditions) {
-        evaluatedRegisterValue->addRegisterCondition(*cond.evaluate(model, doComplete));
+        IR::Ptr<PnaDpdkRegisterCondition> evaluatedCond = cond.evaluate(model, doComplete);
+        evaluatedRegisterValue->addRegisterCondition(*evaluatedCond);
     }
     return evaluatedRegisterValue;
 }
@@ -77,8 +78,8 @@ const IR::Constant *PnaDpdkRegisterCondition::getEvaluatedIndex() const {
 
 const PnaDpdkRegisterCondition *PnaDpdkRegisterCondition::evaluate(const Model &model,
                                                                    bool doComplete) const {
-    const auto *evaluatedIndex = model.evaluate(index, doComplete);
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedIndex = model.evaluate(index, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
     return new PnaDpdkRegisterCondition(evaluatedIndex, evaluatedValue);
 }
 
@@ -113,7 +114,8 @@ const PnaDpdkActionProfile *PnaDpdkActionProfile::evaluate(const Model &model,
         std::vector<ActionArg> evaluatedArgs;
         evaluatedArgs.reserve(actionArgs.size());
         for (const auto &actionArg : actionArgs) {
-            evaluatedArgs.emplace_back(*actionArg.evaluate(model, doComplete));
+            IR::Ptr<ActionArg> evaluatedArg = actionArg.evaluate(model, doComplete);
+            evaluatedArgs.emplace_back(*evaluatedArg);
         }
         profile->addToActionMap(actionTuple.first, evaluatedArgs);
     }
@@ -159,7 +161,7 @@ const IR::Constant *Optional::getEvaluatedValue() const {
 }
 
 const Optional *Optional::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
     return new Optional(getKey(), evaluatedValue, addMatch);
 }
 
@@ -189,8 +191,8 @@ const IR::Constant *Range::getEvaluatedHigh() const {
 }
 
 const Range *Range::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedLow = model.evaluate(low, doComplete);
-    const auto *evaluatedHigh = model.evaluate(high, doComplete);
+    auto evaluatedLow = model.evaluate(low, doComplete);
+    auto evaluatedHigh = model.evaluate(high, doComplete);
     return new Range(getKey(), evaluatedLow, evaluatedHigh);
 }
 
@@ -207,7 +209,7 @@ const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/,
     P4C_UNIMPLEMENTED("%1% has no implementation for \"evaluate\".", getObjectName());
 }
 
-const std::map<cstring, const IR::Literal *> &MetadataCollection::getMetadataFields() const {
+const std::map<cstring, IR::Ptr<IR::Literal>> &MetadataCollection::getMetadataFields() const {
     return metadataFields;
 }
 

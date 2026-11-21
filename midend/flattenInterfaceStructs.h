@@ -89,7 +89,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     //    bit<6> _t_y2;
     //    bit<3> _x3;
     // }
-    const IR::Type *replacementType;
+    IR::Ptr<IR::Type> replacementType;
     virtual void dbprint(std::ostream &out) const { out << replacementType; }
 
     // Helper for constructor
@@ -139,7 +139,7 @@ struct StructTypeReplacement : public IHasDbPrint {
             }
             vec.push_back(new IR::NamedExpression(f->name, expr));
         }
-        auto type = fieldType->getP4Type()->template to<IR::Type_Name>();
+        IR::Ptr<IR::Type_Name> type = fieldType->getP4Type()->template to<IR::Type_Name>();
         return new IR::StructExpression(root->srcInfo, type, type, std::move(vec));
     }
 };
@@ -151,11 +151,13 @@ struct StructTypeReplacement : public IHasDbPrint {
 struct NestedStructMap {
     P4::TypeMap *typeMap;
 
-    ordered_map<const IR::Type *, StructTypeReplacement<IR::Type_Struct> *> replacement;
+    ordered_map<IR::Ptr<IR::Type>, std::shared_ptr<StructTypeReplacement<IR::Type_Struct>>>
+        replacement;
 
     explicit NestedStructMap(P4::TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     void createReplacement(const IR::Type_Struct *type);
-    StructTypeReplacement<IR::Type_Struct> *getReplacement(const IR::Type *type) const {
+    std::shared_ptr<StructTypeReplacement<IR::Type_Struct>> getReplacement(
+        const IR::Type *type) const {
         return ::P4::get(replacement, type);
     }
     bool empty() const { return replacement.empty(); }
@@ -220,7 +222,8 @@ top<TFlat>(c()) main;
  */
 class ReplaceStructs : public Transform, P4WriteContext, ResolutionContext {
     NestedStructMap *replacementMap;
-    std::map<const IR::Parameter *, StructTypeReplacement<IR::Type_Struct> *> toReplace;
+    std::map<IR::Ptr<IR::Parameter>, std::shared_ptr<StructTypeReplacement<IR::Type_Struct>>>
+        toReplace;
 
  public:
     explicit ReplaceStructs(NestedStructMap *sm) : replacementMap(sm) {

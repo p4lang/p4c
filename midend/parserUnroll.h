@@ -44,11 +44,11 @@ class StackVariable {
     bool operator==(const StackVariable &other) const;
 
  private:
-    const IR::Expression *variable;
+    IR::Ptr<IR::Expression> variable;
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
-    StackVariable(const IR::Expression *expr);  // NOLINT(runtime/explicit)
+    StackVariable(IR::Ptr<IR::Expression> expr);  // NOLINT(runtime/explicit)
 };
 
 /// Class with hash function for @a StackVariable.
@@ -58,19 +58,19 @@ class StackVariableHash {
 };
 
 typedef std::unordered_map<StackVariable, size_t, StackVariableHash> StackVariableMap;
-typedef std::unordered_map<StackVariable, const IR::Expression *, StackVariableHash>
+typedef std::unordered_map<StackVariable, IR::Ptr<IR::Expression>, StackVariableHash>
     StackVariableIndexMap;
 
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
     friend class ParserStateRewriter;
     cstring name;  // new state name
-    const IR::P4Parser *parser;
-    const IR::ParserState *state;        // original state this is produced from
+    IR::Ptr<IR::P4Parser> parser;
+    IR::Ptr<IR::ParserState> state;      // original state this is produced from
     const ParserStateInfo *predecessor;  // how we got here in the symbolic evaluation
-    ValueMap *before;
-    ValueMap *after;
-    IR::ParserState *newState;  // pointer to a new state
+    std::shared_ptr<ValueMap> before;
+    std::shared_ptr<ValueMap> after;
+    IR::MutablePtr<IR::ParserState> newState;  // pointer to a new state
     size_t currentIndex;
     StackVariableMap statesIndexes;  // global map in state indexes
     // set of parsers' states names with are in current path.
@@ -78,7 +78,8 @@ struct ParserStateInfo {
     std::unordered_set<cstring> scenarioHS;    // scenario header stack's operations
     StackVariableIndexMap substitutedIndexes;  // values of the evaluated indexes
     ParserStateInfo(cstring name, const IR::P4Parser *parser, const IR::ParserState *state,
-                    const ParserStateInfo *predecessor, ValueMap *before, size_t index)
+                    const ParserStateInfo *predecessor, std::shared_ptr<ValueMap> before,
+                    size_t index)
         : name(name),
           parser(parser),
           state(state),
@@ -102,8 +103,10 @@ struct ParserStateInfo {
 class ParserInfo {
     friend class RewriteAllParsers;
     // for each original state a vector of states produced by unrolling
-    std::vector<ParserStateInfo *> *ordered_states = new std::vector<ParserStateInfo *>();
-    std::map<cstring, std::vector<ParserStateInfo *> *> states;
+    std::shared_ptr<std::vector<ParserStateInfo *>> ordered_states =
+        std::make_shared<std::vector<ParserStateInfo *>>();
+    std::vector<std::unique_ptr<ParserStateInfo>> ownedStates;
+    std::map<cstring, std::shared_ptr<std::vector<ParserStateInfo *>>> states;
 
  public:
     std::vector<ParserStateInfo *> *get(ParserStateInfo *si) {
@@ -112,18 +115,19 @@ class ParserInfo {
         auto it = states.find(origState);
         if (it == states.end()) {
             vec = new std::vector<ParserStateInfo *>;
-            states.emplace(origState, vec);
+            states.emplace(origState, std::shared_ptr<std::vector<ParserStateInfo *>>(vec));
             ordered_states->push_back(si);
         } else {
-            vec = it->second;
+            vec = it->second.get();
         }
         return vec;
     }
     void add(ParserStateInfo *si) {
+        ownedStates.emplace_back(si);
         auto vec = get(si);
         vec->push_back(si);
     }
-    std::map<cstring, std::vector<ParserStateInfo *> *> &getStates() { return states; }
+    auto &getStates() { return states; }
 };
 
 typedef CallGraph<const IR::ParserState *> StateCallGraph;
@@ -133,18 +137,18 @@ class ParserStructure {
     friend class ParserStateRewriter;
     friend class ParserSymbolicInterpreter;
     friend class AnalyzeParser;
-    std::map<cstring, const IR::ParserState *> stateMap;
+    std::map<cstring, IR::Ptr<IR::ParserState>> stateMap;
 
  public:
-    const IR::P4Parser *parser;
+    IR::Ptr<IR::P4Parser> parser;
     const IR::ParserState *start;
-    const ParserInfo *result;
-    StateCallGraph *callGraph;
+    std::shared_ptr<const ParserInfo> result;
+    std::shared_ptr<StateCallGraph> callGraph;
     std::map<cstring, std::set<cstring>> statesWithHeaderStacks;
     std::map<cstring, size_t> callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser *parser) {
         CHECK_NULL(parser);
-        callGraph = new StateCallGraph(parser->name.name);
+        callGraph = std::make_shared<StateCallGraph>(parser->name.name);
         this->parser = parser;
         start = nullptr;
     }
@@ -237,7 +241,8 @@ class RewriteAllParsers : public Transform {
     // start generation of a code
     const IR::Node *postorder(IR::P4Parser *parser) override {
         // making rewriting
-        auto rewriter = new ParserRewriter(refMap, typeMap, config.unroll);
+        IR::MutablePtr<ParserRewriter> rewriter =
+            new ParserRewriter(refMap, typeMap, config.unroll);
         rewriter->setCalledBy(this);
         parser->apply(*rewriter);
         if (rewriter->wasError) {

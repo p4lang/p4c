@@ -33,10 +33,10 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
 
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(table);
-    TableInsertions *insertions;
+    std::shared_ptr<TableInsertions> insertions;
     auto it = toInsert.find(table);
     if (it == toInsert.end()) {
-        insertions = new TableInsertions();
+        insertions = std::make_shared<TableInsertions>();
         toInsert.emplace(table, insertions);
     } else {
         insertions = it->second;

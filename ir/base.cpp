@@ -39,7 +39,7 @@ cstring Annotation::getSingleString(bool error) const {
 
 cstring IDeclaration::externalName(cstring replace /* = cstring() */) const {
     if (const auto *annotated = to<IAnnotated>()) {
-        if (const auto *anno = annotated->getAnnotation(IR::Annotation::nameAnnotation))
+        if (const IR::Annotation *anno = annotated->getAnnotation(IR::Annotation::nameAnnotation))
             return anno->getName();
         if (replace) return replace;
     }

@@ -25,7 +25,7 @@ namespace P4::graphs {
 
 using Graph = ParserGraphs::Graph;
 
-static cstring toString(const IR::Expression *expression) {
+static cstring toString(IR::Ptr<IR::Expression> expression) {
     std::stringstream ss;
     P4::ToP4 toP4(&ss, false);
     toP4.setListTerm("(", ")");

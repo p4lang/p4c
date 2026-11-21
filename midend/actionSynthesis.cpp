@@ -107,8 +107,9 @@ const IR::Node *DoSynthesizeActions::postorder(IR::P4Control *control) {
 
 const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
     // Find a chain of statements to convert
-    auto actbody = new IR::BlockStatement;                       // build here new action
-    auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
+    IR::MutablePtr<IR::BlockStatement> actbody = new IR::BlockStatement;  // build here new action
+    IR::MutablePtr<IR::BlockStatement> left =
+        new IR::BlockStatement(statement->annotations);  // leftover statements
 
     for (auto c : statement->components) {
         bool moveToAction = false;
@@ -151,7 +152,7 @@ const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
         // Since we have only one 'changes' per P4Control, this may
         // be conservatively creating a new block when it hasn't changed.
         // But the result should be correct.
-        return left;
+        return guardReturn(IR::Ptr<IR::Node>(left));
     }
     return statement;
 }

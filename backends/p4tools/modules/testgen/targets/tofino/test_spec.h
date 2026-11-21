@@ -41,10 +41,10 @@ namespace P4::P4Tools::P4Testgen::Tofino {
 class IndexExpression : public TestObject {
  private:
     /// The index of the expression.
-    const IR::Expression *index;
+    IR::Ptr<IR::Expression> index;
 
     /// The value of the expression.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
  public:
     explicit IndexExpression(const IR::Expression *index, const IR::Expression *value);
@@ -78,7 +78,7 @@ class IndexExpression : public TestObject {
 class IndexMap : public TestObject {
  protected:
     /// A new IndexMap always requires an initial value. This can be a constant or taint.
-    const IR::Expression *initialValue;
+    IR::Ptr<IR::Expression> initialValue;
 
     /// Each element is an API name paired with a match rule.
     std::vector<IndexExpression> indexConditions;
@@ -120,10 +120,10 @@ class IndexMap : public TestObject {
 class TofinoRegisterValue : public IndexMap {
  private:
     /// The register declaration, also contains the control plane name.
-    const IR::Declaration_Instance *decl;
+    IR::Ptr<IR::Declaration_Instance> decl;
 
     /// The index this register is initialized at.
-    const IR::Expression *initialIndex;
+    IR::Ptr<IR::Expression> initialIndex;
 
  public:
     explicit TofinoRegisterValue(const IR::Declaration_Instance *decl,
@@ -151,13 +151,13 @@ class TofinoRegisterValue : public IndexMap {
 class TofinoDirectRegisterValue : public TestObject {
  private:
     /// The table this direct register is attached to.
-    const IR::Expression *initialValue;
+    IR::Ptr<IR::Expression> initialValue;
 
     /// The register declaration, also contains the control plane name.
-    const IR::Declaration_Instance *decl;
+    IR::Ptr<IR::Declaration_Instance> decl;
 
     /// The table this direct register is attached to.
-    const IR::P4Table *table;
+    IR::Ptr<IR::P4Table> table;
 
  public:
     explicit TofinoDirectRegisterValue(const IR::Declaration_Instance *decl,
@@ -191,10 +191,10 @@ class TofinoDirectRegisterValue : public TestObject {
 class TofinoRegisterParam : public TestObject {
  private:
     /// The register param declaration, also contains the control plane name.
-    const IR::Declaration_Instance *decl;
+    IR::Ptr<IR::Declaration_Instance> decl;
 
     /// The initial value of this register parameter.
-    const IR::Expression *initialValue;
+    IR::Ptr<IR::Expression> initialValue;
 
  public:
     explicit TofinoRegisterParam(const IR::Declaration_Instance *decl,
@@ -225,7 +225,7 @@ class TofinoActionProfile : public TestObject {
     std::vector<std::pair<cstring, std::vector<ActionArg>>> actions;
 
     /// The associated action profile declaration.
-    const IR::IDeclaration *profileDecl;
+    IR::Ptr<IR::IDeclaration> profileDecl;
 
  public:
     explicit TofinoActionProfile(const IR::IDeclaration *profileDecl);
@@ -255,10 +255,10 @@ class TofinoActionProfile : public TestObject {
 class TofinoActionSelector : public TestObject {
  private:
     /// The associated action selector declaration.
-    const IR::IDeclaration *selectorDecl;
+    IR::Ptr<IR::IDeclaration> selectorDecl;
 
     /// The associated action profile.
-    const TofinoActionProfile *actionProfile;
+    IR::Ptr<TofinoActionProfile> actionProfile;
 
  public:
     explicit TofinoActionSelector(const IR::IDeclaration *selectorDecl,
@@ -284,10 +284,10 @@ class TofinoActionSelector : public TestObject {
 class Range : public TableMatch {
  private:
     /// The inclusive start of the range.
-    const IR::Expression *low;
+    IR::Ptr<IR::Expression> low;
 
     /// The inclusive end of the range.
-    const IR::Expression *high;
+    IR::Ptr<IR::Expression> high;
 
  public:
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,

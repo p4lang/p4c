@@ -91,7 +91,7 @@ class P4ProgramDCGCreator : public Inspector, private P4::ResolutionContext {
     NodesCallGraph *dcg;
     DCGVertexTypeSet prev;
     std::unordered_set<DCGVertexType> visited;
-    const IR::P4Program *p4program;
+    IR::Ptr<IR::P4Program> p4program;
 
  public:
     explicit P4ProgramDCGCreator(NodesCallGraph *dcg);

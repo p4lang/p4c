@@ -42,23 +42,23 @@ class CompilerTarget : public Target {
     ///
     /// @returns std::nullopt if an error occurs during compilation.
     static CompilerResultOrError runCompiler(const CompilerOptions &options,
-                                             std::string_view toolName, const IR::P4Program *);
+                                             std::string_view toolName, IR::Ptr<IR::P4Program>);
 
  protected:
     /// @see runCompiler.
     virtual CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
-                                                  const IR::P4Program *) const;
+                                                  IR::Ptr<IR::P4Program>) const;
 
     /// Parses the P4 program specified on the command line.
     ///
     /// @returns nullptr if an error occurs during parsing.
-    static const IR::P4Program *runParser(const ParserOptions &options);
+    static IR::Ptr<IR::P4Program> runParser(const ParserOptions &options);
 
     /// Runs the front end of the P4 compiler on the given program.
     ///
     /// @returns nullptr if an error occurs during compilation.
-    const IR::P4Program *runFrontend(const CompilerOptions &options,
-                                     const IR::P4Program *program) const;
+    IR::Ptr<IR::P4Program> runFrontend(const CompilerOptions &options,
+                                       IR::Ptr<IR::P4Program> program) const;
 
     /// A factory method for providing a target-specific mid end implementation.
     [[nodiscard]] virtual MidEnd mkMidEnd(const CompilerOptions &options) const;
@@ -69,8 +69,8 @@ class CompilerTarget : public Target {
     /// Runs the mid end provided by @mkMidEnd on the given program.
     ///
     /// @returns nullptr if an error occurs during compilation.
-    const IR::P4Program *runMidEnd(const CompilerOptions &options,
-                                   const IR::P4Program *program) const;
+    IR::Ptr<IR::P4Program> runMidEnd(const CompilerOptions &options,
+                                     IR::Ptr<IR::P4Program> program) const;
 
     explicit CompilerTarget(std::string_view toolName, const std::string &deviceName,
                             const std::string &archName);

@@ -38,7 +38,7 @@ class Bmv2TestBackend : public TestBackEnd {
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *finalModel,
         const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-        const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) override;
+        const std::vector<IR::Ptr<TraceEvent>> *programTraces) override;
 
     const TestSpec *createTestSpec(const ExecutionState *executionState, const Model *finalModel,
                                    const TestInfo &testInfo) override;

@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <memory>
+
 #include "backends/graphs/version.h"
 #include "controls.h"
 #include "frontends/common/applyOptionsPragmas.h"
@@ -28,10 +30,10 @@ class MidEnd : public PassManager {
  public:
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
 
     explicit MidEnd(CompilerOptions &options);
-    IR::ToplevelBlock *process(const IR::P4Program *&program) {
+    IR::Ptr<IR::ToplevelBlock> process(IR::Ptr<IR::P4Program> &program) {
         program = program->apply(*this);
         return toplevel;
     }
@@ -121,7 +123,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoGraphsContext(new ::graphs::GraphsContext);
+    AutoCompileContext autoGraphsContext(std::make_unique<::graphs::GraphsContext>());
     auto &options = ::graphs::GraphsContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(P4C_GRAPHS_VERSION_STRING);
@@ -133,7 +135,7 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
 
     if (options.loadIRFromJson) {
         std::filebuf fb;
@@ -170,7 +172,7 @@ int main(int argc, char *const argv[]) {
 
     graphs::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
-    const IR::ToplevelBlock *top = nullptr;
+    IR::Ptr<IR::ToplevelBlock> top = nullptr;
     try {
         top = midEnd.process(program);
         if (!options.dumpJsonFile.empty()) {

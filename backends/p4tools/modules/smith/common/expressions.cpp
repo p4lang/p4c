@@ -24,15 +24,16 @@
 
 namespace P4::P4Tools::P4Smith {
 
-const IR::Type_Boolean *ExpressionGenerator::genBoolType() { return IR::Type_Boolean::get(); }
+IR::Ptr<IR::Type_Boolean> ExpressionGenerator::genBoolType() { return IR::Type_Boolean::get(); }
 
-const IR::Type_InfInt *ExpressionGenerator::genIntType() { return IR::Type_InfInt::get(); }
+IR::Ptr<IR::Type_InfInt> ExpressionGenerator::genIntType() { return IR::Type_InfInt::get(); }
 
-const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> &type_probs) const {
+IR::Ptr<IR::Type> ExpressionGenerator::pickRndBaseType(
+    const std::vector<int64_t> &type_probs) const {
     if (type_probs.size() != 7) {
         BUG("pickRndBaseType: Type probabilities must be exact");
     }
-    const IR::Type *tb = nullptr;
+    IR::Ptr<IR::Type> tb = nullptr;
     switch (Utils::getRandInt(type_probs)) {
         case 0: {
             // bool
@@ -70,7 +71,7 @@ const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> 
     return tb;
 }
 
-const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
+IR::Ptr<IR::Type> ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
     const std::vector<int64_t> &typeProbsVector = {
         type_probs.p4_bit,          type_probs.p4_signed_bit, type_probs.p4_varbit,
         type_probs.p4_int,          type_probs.p4_error,      type_probs.p4_bool,
@@ -85,7 +86,7 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
     if (typeProbsVector.size() != 15) {
         BUG("pickRndType: Type probabilities must be exact");
     }
-    const IR::Type *tp = nullptr;
+    IR::Ptr<IR::Type> tp = nullptr;
     size_t idx = Utils::getRandInt(typeProbsVector);
     switch (idx) {
         case 0: {
@@ -193,7 +194,7 @@ IR::BoolLiteral *ExpressionGenerator::genBoolLiteral() {
     return new IR::BoolLiteral(true);
 }
 
-const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) const {
+IR::Ptr<IR::Type_Bits> ExpressionGenerator::genBitType(bool isSigned) const {
     auto bitWidths = availableBitWidths();
     BUG_CHECK(!bitWidths.empty(), "No available bit widths");
     auto size = Utils::getRandInt(0, bitWidths.size() - 1);
@@ -268,8 +269,7 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         if (enumType->members.empty()) {
             BUG("Expression: Enum %s has no members", enumType->name.name);
         }
-        const auto *enumChoice =
-            enumType->members.at(Utils::getRandInt(enumType->members.size() - 1));
+        auto enumChoice = enumType->members.at(Utils::getRandInt(enumType->members.size() - 1));
         expr = new IR::Member(enumType,
                               new IR::PathExpression(enumType, new IR::Path(enumType->getName())),
                               enumChoice->getName());
@@ -320,7 +320,7 @@ IR::MethodCallExpression *ExpressionGenerator::genFunctionCall(cstring method_na
 
     bool canCall = true;
 
-    for (const auto *par : params) {
+    for (auto par : params) {
         if (!checkInputArg(par)) {
             canCall = false;
         } else {
@@ -339,7 +339,7 @@ IR::MethodCallExpression *ExpressionGenerator::genFunctionCall(cstring method_na
 IR::ListExpression *ExpressionGenerator::genExpressionList(IR::Vector<IR::Type> types,
                                                            bool only_lval) {
     IR::Vector<IR::Expression> components;
-    for (const auto *tb : types) {
+    for (auto tb : types) {
         IR::Expression *expr = nullptr;
         if (only_lval) {
             cstring lvalName = P4Scope::pickLval(tb);
@@ -427,7 +427,7 @@ IR::Expression *ExpressionGenerator::createSaturationOperand(const IR::Type_Bits
     int width = P4Scope::constraints.max_phv_container_width;
     if (width != 0) {
         if (tb->width_bits() > width) {
-            const auto *type = IR::Type_Bits::get(width, false);
+            auto type = IR::Type_Bits::get(width, false);
             expr = new IR::Cast(type, expr);
             expr->type = type;
             P4Scope::prop.width_unknown = false;
@@ -613,8 +613,8 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
                 return genBitLiteral(tb);
             }
             size_t split = Utils::getRandInt(1, typeWidth - 1);
-            const auto *tl = IR::Type_Bits::get(typeWidth - split, false);
-            const auto *tr = IR::Type_Bits::get(split, false);
+            auto tl = IR::Type_Bits::get(typeWidth - split, false);
+            auto tr = IR::Type_Bits::get(split, false);
             // width must be known so we cast
             IR::Expression *left = constructBitExpr(tl);
             if (P4Scope::prop.width_unknown) {
@@ -651,7 +651,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
             auto typeWidth = tb->width_bits();
             // TODO(fruffy): this is some arbitrary value...
             auto newTypeSize = Utils::getRandInt(typeWidth, P4Scope::constraints.max_bitwidth);
-            const auto *sliceType = IR::Type_Bits::get(newTypeSize, false);
+            auto sliceType = IR::Type_Bits::get(newTypeSize, false);
             auto *sliceExpr = constructBitExpr(sliceType);
             if (P4Scope::prop.width_unknown) {
                 sliceExpr = new IR::Cast(sliceType, sliceExpr);
@@ -756,7 +756,7 @@ IR::Expression *ExpressionGenerator::constructCmpExpr() {
     // Generate some random type. Can be either bits, int, bool, or structlike
     // For now it is just bits.
     auto newTypeSize = Utils::getRandInt(1, P4Scope::constraints.max_bitwidth);
-    const auto *newType = IR::Type_Bits::get(newTypeSize, false);
+    auto newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
 
@@ -792,7 +792,7 @@ IR::Expression *ExpressionGenerator::constructBooleanExpr() {
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
-            const auto *tb = IR::Type_Boolean::get();
+            auto tb = IR::Type_Boolean::get();
             // TODO(fruffy): This is lazy, we can easily check
             if (P4Scope::req.compile_time_known) {
                 expr = genBoolLiteral();
@@ -880,7 +880,7 @@ IR::Expression *ExpressionGenerator::constructUnaryIntExpr() {
     if (P4Scope::prop.depth > MAX_DEPTH) {
         return genIntLiteral();
     }
-    const auto *tp = IR::Type_InfInt::get();
+    auto tp = IR::Type_InfInt::get();
     P4Scope::prop.depth++;
 
     // we want to avoid negation when we require no negative values
@@ -928,7 +928,7 @@ IR::Expression *ExpressionGenerator::constructBinaryIntExpr() {
     if (P4Scope::prop.depth > MAX_DEPTH) {
         return genIntLiteral();
     }
-    const auto *tp = IR::Type_InfInt::get();
+    auto tp = IR::Type_InfInt::get();
     P4Scope::prop.depth++;
 
     auto pctSub = Probabilities::get().EXPRESSION_INT_BINARY_SUB;
@@ -1038,7 +1038,7 @@ IR::Expression *ExpressionGenerator::constructBinaryIntExpr() {
 }
 
 IR::Expression *ExpressionGenerator::pickIntVar() {
-    const auto *tp = IR::Type_InfInt::get();
+    auto tp = IR::Type_InfInt::get();
     if (P4Scope::checkLval(tp)) {
         cstring name = P4Scope::pickLval(tp);
         return new IR::PathExpression(name);
@@ -1081,7 +1081,7 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
 
     if (const auto *td = P4Scope::getTypeByName(tnName)) {
         if (const auto *tnType = td->to<IR::Type_StructLike>()) {
-            for (const auto *sf : tnType->fields) {
+            for (auto sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
                     if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
@@ -1094,7 +1094,7 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
                     }
                 } else if (const auto *fieldTs = sf->type->to<IR::Type_Array>()) {
                     auto stackSize = fieldTs->getSize();
-                    const auto *stackType = fieldTs->elementType;
+                    auto stackType = fieldTs->elementType;
                     if (const auto *sTypeName = stackType->to<IR::Type_Name>()) {
                         for (size_t idx = 0; idx < stackSize; ++idx) {
                             expr = genStructListExpr(sTypeName);
@@ -1245,7 +1245,7 @@ IR::Expression *ExpressionGenerator::editHdrStack(cstring lval) {
             }
             int stackSz = std::stoi(stackStr.before(stackSzEnd).c_str());
             expr = new IR::Member(expr, subStr.before(hdrBrkt));
-            auto *tb = IR::Type_Bits::get(3, false);
+            auto tb = IR::Type_Bits::get(3, false);
             IR::Expression *idx = genExpression(tb);
             auto *args = new IR::Vector<IR::Argument>();
             args->push_back(new IR::Argument(idx));

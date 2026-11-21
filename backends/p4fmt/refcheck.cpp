@@ -170,7 +170,7 @@ int run(const ReferenceCheckerOptions &options) {
 class RefCheckContext : public BaseCompileContext {};
 
 int main(int argc, char *argv[]) {
-    AutoCompileContext autoP4RefCheckContext(new RefCheckContext);
+    AutoCompileContext autoP4RefCheckContext(std::make_unique<RefCheckContext>());
     P4Fmt::ReferenceCheckerOptions options;
 
     if (options.processOptions(argc, argv) == EXIT_FAILURE || ::P4::errorCount() != 0) {

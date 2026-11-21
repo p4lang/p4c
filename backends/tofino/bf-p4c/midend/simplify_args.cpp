@@ -192,7 +192,7 @@ cstring FlattenHeader::makeName(std::string_view sep) const {
 IR::Vector<IR::Annotation> FlattenHeader::mergeAnnotations() const {
     IR::Vector<IR::Annotation> mergedAnnotations;
     for (auto annosIt = allAnnotations.rbegin(); annosIt != allAnnotations.rend(); annosIt++) {
-        for (const auto *anno : *annosIt) {
+        for (const IR::Annotation *anno : *annosIt) {
             // if an annotation with the same name was added previously, skip
             if (get(mergedAnnotations, anno->name)) continue;
             mergedAnnotations.push_back(anno);
@@ -305,8 +305,8 @@ const IR::Member *FlattenHeader::getTailMembers(const IR::Member *m, int depth) 
 
 const IR::PathExpression *FlattenHeader::replaceSrcInfo(const IR::PathExpression *tgt,
                                                         const IR::PathExpression *src) {
-    const auto *tgtPath = tgt->path;
-    const auto *srcPath = src->path;
+    const IR::Path *tgtPath = tgt->path;
+    const IR::Path *srcPath = src->path;
 
     IR::Path *newPath = new IR::Path(
         srcPath->srcInfo, IR::ID(srcPath->name.srcInfo, tgtPath->name.name), tgtPath->absolute);
@@ -316,8 +316,8 @@ const IR::PathExpression *FlattenHeader::replaceSrcInfo(const IR::PathExpression
 }
 
 const IR::Member *FlattenHeader::replaceSrcInfo(const IR::Member *tgt, const IR::Member *src) {
-    const auto *tgtChildExpr = tgt->expr;
-    const auto *srcChildExpr = src->expr;
+    const IR::Expression *tgtChildExpr = tgt->expr;
+    const IR::Expression *srcChildExpr = src->expr;
 
     const auto *tgtChildMember = tgtChildExpr->to<IR::Member>();
     const auto *srcChildMember = srcChildExpr->to<IR::Member>();
@@ -412,8 +412,8 @@ bool FlattenHeader::preorder(IR::MethodCallExpression *mc) {
         return false;
     }
 
-    auto *arg = mc->arguments->at(field_list_index);
-    auto *aexpr = arg->expression;
+    const IR::Argument *arg = mc->arguments->at(field_list_index);
+    const IR::Expression *aexpr = arg->expression;
     if (auto *liste = aexpr->to<IR::ListExpression>()) {
         LOG4("Flattening arguments: " << liste);
         auto *flattened_args = new IR::Vector<IR::Argument>();
@@ -506,10 +506,10 @@ IR::StructExpression *FlattenHeader::doFlattenStructInitializer(const IR::Struct
 
 IR::ListExpression *FlattenHeader::flatten_list(const IR::ListExpression *args) {
     IR::Vector<IR::Expression> components;
-    for (const auto *expr : args->components) {
+    for (const IR::Expression *expr : args->components) {
         if (const auto *list_arg = expr->to<IR::ListExpression>()) {
             auto *flattened = flatten_list(list_arg);
-            for (const auto *comp : flattened->components) components.push_back(comp);
+            for (const IR::Expression *comp : flattened->components) components.push_back(comp);
         } else {
             components.push_back(expr);
         }

@@ -55,7 +55,7 @@ bool TypeInferenceBase::onlyBitsOrBitStructs(const IR::Type *type) const {
     return false;
 }
 
-const IR::Type *TypeInferenceBase::setTypeType(const IR::Type *type, bool learn) {
+IR::Ptr<IR::Type> TypeInferenceBase::setTypeType(IR::Ptr<IR::Type> type, bool learn) {
     if (done()) return type;
     const IR::Type *typeToCanonicalize;
     if (readOnly)
@@ -69,7 +69,7 @@ const IR::Type *TypeInferenceBase::setTypeType(const IR::Type *type, bool learn)
             bool errs = this->learn(canon, this, getChildContext());
             if (errs) return nullptr;
         }
-        auto tt = new IR::Type_Type(canon);
+        IR::Ptr<IR::Type_Type> tt = new IR::Type_Type(canon);
         setType(getOriginal(), tt);
         setType(type, tt);
     }
@@ -104,7 +104,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4Parser *parser) {
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_InfInt *type) {
     if (done()) return type;
-    auto tt = new IR::Type_Type(getOriginal<IR::Type>());
+    IR::Ptr<IR::Type_Type> tt = new IR::Type_Type(getOriginal<IR::Type>());
     setType(getOriginal(), tt);
     return type;
 }
@@ -277,7 +277,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Var *typeVar) {
         type = IR::Type_Dontcare::get();
     else
         type = getOriginal<IR::Type>();
-    auto tt = new IR::Type_Type(type);
+    IR::Ptr<IR::Type_Type> tt = new IR::Type_Type(type);
     setType(getOriginal(), tt);
     setType(typeVar, tt);
     return typeVar;
@@ -314,7 +314,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Set *type) {
 }
 
 const IR::Type_Bits *TypeInferenceBase::checkUnderlyingEnumType(const IR::Type *enumType) {
-    const auto *resolvedType = getTypeType(enumType);
+    const IR::Type *resolvedType = getTypeType(enumType);
     if (resolvedType == nullptr) return nullptr;
     if (const auto *type = resolvedType->to<IR::Type_Bits>()) {
         return type;

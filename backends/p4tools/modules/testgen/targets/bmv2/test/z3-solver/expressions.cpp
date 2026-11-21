@@ -88,9 +88,9 @@ class Z3SolverTests : public P4TestgenBmv2Test {
         }
 
         // Extract the binary operation from the P4Program
-        const auto *decl = test->getProgram().getDeclsByName("mau"_cs)->single();
+        auto decl = test->getProgram().getDeclsByName("mau"_cs)->single();
         const auto *control = decl->to<IR::P4Control>();
-        for (const auto *st : control->body->components) {
+        for (auto st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {
                 expression = as->condition;
                 if (const auto *op = as->ifTrue->to<IR::AssignmentStatement>()) {
@@ -99,15 +99,15 @@ class Z3SolverTests : public P4TestgenBmv2Test {
             }
         }
     }
-    const IR::Expression *expression = nullptr;
-    const IR::AssignmentStatement *variableValue = nullptr;
+    IR::Ptr<IR::Expression> expression = nullptr;
+    IR::Ptr<IR::AssignmentStatement> variableValue = nullptr;
     std::string condition;
     std::string equation;
 };
 
 namespace Z3Test {
 
-void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {
+void test(IR::Ptr<IR::Expression> expression, IR::Ptr<IR::AssignmentStatement> variableValue) {
     // checking initial data
     ASSERT_TRUE(expression);
     ASSERT_TRUE(variableValue);
@@ -130,7 +130,7 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
 
     ASSERT_EQ(symbolMap.count(variableValue->left->checkedTo<IR::SymbolicVariable>()), 1U);
 
-    const auto *value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
+    auto value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
 
     if (variableValue->right->is<IR::BoolLiteral>()) {
         ASSERT_TRUE(variableValue->right->is<IR::BoolLiteral>());

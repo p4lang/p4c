@@ -39,7 +39,7 @@ IR::MethodCallStatement *ParserGenerator::genHdrExtract(IR::Member *pkt_call, IR
 void ParserGenerator::genHdrUnionExtract(IR::IndexedVector<IR::StatOrDecl> &components,
                                          const IR::Type_HeaderUnion *hdru, IR::ArrayIndex *arr_ind,
                                          IR::Member *pkt_call) {
-    const auto *sf = hdru->fields.at(0);
+    auto sf = hdru->fields.at(0);
     // for (auto sf : hdru->fields) {
     // auto mem = new IR::Member(arr_ind,
     // sf->type->to<IR::Type_Name>()->path->name);
@@ -69,7 +69,7 @@ IR::ParserState *ParserGenerator::genHdrStates() {
     if (sysHdr == nullptr) {
         BUG("Unexpected system header %s", sysHdrType->static_type_name());
     }
-    for (const auto *sf : sysHdr->fields) {
+    for (auto sf : sysHdr->fields) {
         hdrFieldsNames.push_back(sf->name.name);
         hdrFieldsTypes.emplace(sf->name.name, sf->type);
     }
@@ -80,7 +80,7 @@ IR::ParserState *ParserGenerator::genHdrStates() {
         if (const auto *sfTpS = sfType->to<IR::Type_Array>()) {
             auto *mem = new IR::Member(new IR::PathExpression("hdr"), sfName);
             size_t size = sfTpS->getSize();
-            const auto *eleTpName = sfTpS->elementType;
+            auto eleTpName = sfTpS->elementType;
             const auto *eleTp =
                 P4Scope::getTypeByName(eleTpName->to<IR::Type_Name>()->path->name.name);
             if (eleTp->is<IR::Type_Header>()) {
@@ -103,7 +103,7 @@ IR::ParserState *ParserGenerator::genHdrStates() {
                 P4Scope::getTypeByName(sfType->to<IR::Type_Name>()->path->name.name);
             if (hdrFieldTp->is<IR::Type_HeaderUnion>()) {
                 const auto *hdruTp = hdrFieldTp->to<IR::Type_HeaderUnion>();
-                const auto *sf = hdruTp->fields.at(0);
+                auto sf = hdruTp->fields.at(0);
                 auto *hdrMem = new IR::Member(mem, sf->name);
                 components.push_back(genHdrExtract(pktCall, hdrMem));
             } else {
@@ -129,7 +129,7 @@ IR::ParserState *ParserGenerator::genHdrStates() {
 
 IR::ListExpression *ParserGenerator::buildMatchExpr(IR::Vector<IR::Type> types) {
     IR::Vector<IR::Expression> components;
-    for (const auto *tb : types) {
+    for (auto tb : types) {
         IR::Expression *expr = nullptr;
         switch (Utils::getRandInt(0, 2)) {
             case 0: {
@@ -219,7 +219,7 @@ void ParserGenerator::genState(cstring name) {
 
             IR::Vector<IR::Type> types;
             for (size_t i = 0; i <= keySetLen; i++) {
-                const auto *tb = target().expressionGenerator().genBitType(false);
+                auto tb = target().expressionGenerator().genBitType(false);
                 types.push_back(tb);
             }
 

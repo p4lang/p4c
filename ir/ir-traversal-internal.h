@@ -14,6 +14,7 @@
 #ifndef IR_IR_TRAVERSAL_INTERNAL_H_
 #define IR_IR_TRAVERSAL_INTERNAL_H_
 
+#include "ir/node.h"
 #include "lib/exceptions.h"
 #include "lib/rtti_utils.h"
 
@@ -37,6 +38,13 @@ struct Traverse {
         static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         return asgn.value;
     }
+
+#if !HAVE_LIBGC
+    template <typename Obj, typename T>
+    static IR::Ptr<Obj> modify(Obj *, Assign<IR::Ptr<T>> asgn) {
+        return asgn.value;
+    }
+#endif
 
     template <typename Obj, typename T>
     static Obj *modify(Obj *obj, Assign<T> &&asgn) {
@@ -82,14 +90,16 @@ struct Traverse {
     }
 
     template <typename T, typename... Selectors>
+    static void modifyRef(IR::Ptr<T> &ref, Selectors &&...selectors) {
+        IR::MutablePtr<T> copy = ref->clone();
+        ref = modify(static_cast<T *>(copy), std::forward<Selectors>(selectors)...);
+    }
+
+    template <typename T, typename... Selectors>
     static void modifyRef(T &ref, Selectors &&...selectors) {
-        if constexpr (std::is_pointer_v<T>) {
-            ref = modify(ref->clone(), std::forward<Selectors>(selectors)...);
-        } else {
-            auto *res = modify(&ref, std::forward<Selectors>(selectors)...);
-            if (&ref != res) {
-                ref = *res;
-            }
+        auto *res = modify(&ref, std::forward<Selectors>(selectors)...);
+        if (&ref != res) {
+            ref = *res;
         }
     }
 };

@@ -114,7 +114,7 @@ class DoSynthesizeActions : public Transform {
     TypeMap *typeMap;
     std::vector<const IR::P4Action *> actions;  // inserted actions
     bool changes = false;
-    ActionSynthesisPolicy *policy;
+    std::shared_ptr<ActionSynthesisPolicy> policy;
 
  public:
     // If true the statement must be moved to an action

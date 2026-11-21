@@ -19,7 +19,7 @@ const IR::P4Program *MissingIdAssigner::preorder(IR::P4Program *program) {
         archBuilder(refMap, typeMap, toplevel));
     symbols = ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
         toplevel->getProgram(), toplevel, refMap, typeMap, archHandler.get());
-    return newProg;
+    return guardReturn(newProg);
 }
 
 const IR::Property *MissingIdAssigner::postorder(IR::Property *property) {

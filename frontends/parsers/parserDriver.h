@@ -66,7 +66,7 @@ class AbstractParserDriver {
     ////////////////////////////////////////////////////////////////////////////
 
     /// The input sources that comprise the P4 program we're parsing.
-    Util::InputSources *sources;
+    std::shared_ptr<Util::InputSources> sources;
 
     /// The location of the most recent token.
     Util::SourceInfo yylloc;
@@ -101,19 +101,22 @@ class P4ParserDriver final : public AbstractParserDriver {
      *                    set the initial source location.
      * @returns a P4Program object if parsing was successful, or null otherwise.
      */
-    static const IR::P4Program *parse(std::istream &in, std::string_view sourceFile,
-                                      unsigned sourceLine = 1);
-    static const IR::P4Program *parse(FILE *in, std::string_view sourceFile,
-                                      unsigned sourceLine = 1);
+    static IR::Ptr<IR::P4Program> parse(std::istream &in, std::string_view sourceFile,
+                                        unsigned sourceLine = 1);
+    static IR::Ptr<IR::P4Program> parse(FILE *in, std::string_view sourceFile,
+                                        unsigned sourceLine = 1);
+
+    using ProgramSources =
+        std::pair<IR::Ptr<IR::P4Program>, std::shared_ptr<const Util::InputSources>>;
 
     /// Parses the input and returns a pair with the P4Program and InputSources.
     /// Use this when both the parsed P4Program and InputSources are required,
     /// as opposed to the `parse` method, which only returns the P4Program.
-    static std::pair<const IR::P4Program *, const Util::InputSources *> parseProgramSources(
-        std::istream &in, std::string_view sourceFile, unsigned sourceLine = 1);
+    static ProgramSources parseProgramSources(std::istream &in, std::string_view sourceFile,
+                                              unsigned sourceLine = 1);
 
-    static std::pair<const IR::P4Program *, const Util::InputSources *> parseProgramSources(
-        FILE *in, std::string_view sourceFile, unsigned sourceLine = 1);
+    static ProgramSources parseProgramSources(FILE *in, std::string_view sourceFile,
+                                              unsigned sourceLine = 1);
 
     /**
      * Parses a P4-16 annotation body.
@@ -122,56 +125,56 @@ class P4ParserDriver final : public AbstractParserDriver {
      * @returns an AST node if parsing was successful, or null otherwise.
      */
     // Lists /////////////////////////////////////////////////////////////////
-    static const IR::Vector<IR::Expression> *parseExpressionList(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseExpressionList(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::IndexedVector<IR::NamedExpression> *parseKvList(
+    static IR::Ptr<IR::IndexedVector<IR::NamedExpression>> parseKvList(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseConstantList(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseConstantList(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseConstantOrStringLiteralList(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseConstantOrStringLiteralList(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseStringLiteralList(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseStringLiteralList(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
     // Singletons ////////////////////////////////////////////////////////////
-    static const IR::Expression *parseExpression(const Util::SourceInfo &srcInfo,
-                                                 const IR::Vector<IR::AnnotationToken> &body);
+    static IR::Ptr<IR::Expression> parseExpression(const Util::SourceInfo &srcInfo,
+                                                   const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Constant *parseConstant(const Util::SourceInfo &srcInfo,
-                                             const IR::Vector<IR::AnnotationToken> &body);
+    static IR::Ptr<IR::Constant> parseConstant(const Util::SourceInfo &srcInfo,
+                                               const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Expression *parseConstantOrStringLiteral(
+    static IR::Ptr<IR::Expression> parseConstantOrStringLiteral(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::StringLiteral *parseStringLiteral(const Util::SourceInfo &srcInfo,
-                                                       const IR::Vector<IR::AnnotationToken> &body);
+    static IR::Ptr<IR::StringLiteral> parseStringLiteral(
+        const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
     // Pairs /////////////////////////////////////////////////////////////////
-    static const IR::Vector<IR::Expression> *parseExpressionPair(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseExpressionPair(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseConstantPair(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseConstantPair(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseStringLiteralPair(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseStringLiteralPair(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
     // Triples ///////////////////////////////////////////////////////////////
-    static const IR::Vector<IR::Expression> *parseExpressionTriple(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseExpressionTriple(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseConstantTriple(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseConstantTriple(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static const IR::Vector<IR::Expression> *parseStringLiteralTriple(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseStringLiteralTriple(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
     // P4Runtime Annotations /////////////////////////////////////////////////
-    static const IR::Vector<IR::Expression> *parseP4rtTranslationAnnotation(
+    static IR::Ptr<IR::Vector<IR::Expression>> parseP4rtTranslationAnnotation(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
  protected:
@@ -193,11 +196,11 @@ class P4ParserDriver final : public AbstractParserDriver {
     ////////////////////////////////////////////////////////////////////////////
 
     /// Semantic information about the program being parsed.
-    Util::ProgramStructure *structure = nullptr;
+    std::unique_ptr<Util::ProgramStructure> structure;
 
     /// The top-level object that makes up the P4 program (or program fragment)
     /// we're parsing.
-    IR::Node *result = nullptr;
+    IR::MutablePtr<IR::Node> result = nullptr;
 
     /// A scratch buffer to hold the current string literal. (They're lexed
     /// incrementally, so we need to hold some state between tokens.)
@@ -215,8 +218,8 @@ class P4ParserDriver final : public AbstractParserDriver {
 
     /// Common functionality for parsing annotation bodies.
     template <typename T>
-    const T *parse(P4AnnotationLexer::Type type, const Util::SourceInfo &srcInfo,
-                   const IR::Vector<IR::AnnotationToken> &body);
+    IR::Ptr<T> parse(P4AnnotationLexer::Type type, const Util::SourceInfo &srcInfo,
+                     const IR::Vector<IR::AnnotationToken> &body);
 
     /// All P4 `error` declarations are merged together in the node, which is
     /// lazily created the first time we see an `error` declaration. (This node
@@ -254,10 +257,10 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      * @returns a V1Program object if parsing was successful, or null otherwise.
      */
 
-    static const IR::V1Program *parse(std::istream &in, std::string_view sourceFile,
-                                      unsigned sourceLine = 1);
-    static const IR::V1Program *parse(FILE *in, std::string_view sourceFile,
-                                      unsigned sourceLine = 1);
+    static IR::Ptr<IR::V1Program> parse(std::istream &in, std::string_view sourceFile,
+                                        unsigned sourceLine = 1);
+    static IR::Ptr<IR::V1Program> parse(FILE *in, std::string_view sourceFile,
+                                        unsigned sourceLine = 1);
 
  protected:
     friend class V1::V1Lexer;
@@ -271,7 +274,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      * @return an IR::Constant containing the value of @expr, if @expr is a
      * constant expression, or null otherwise.
      */
-    IR::Constant *constantFold(IR::Expression *expr);
+    IR::MutablePtr<IR::Constant> constantFold(IR::Expression *expr);
 
     /// @return a vector of IR::Expressions containing an IR::StringLiteral for
     /// name in @list.
@@ -281,7 +284,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     void clearPragmas();
 
     /// Add @pragma to the list of active pragmas.
-    void addPragma(IR::Annotation *pragma);
+    void addPragma(IR::MutablePtr<IR::Annotation> pragma);
 
     /// @return a IR::Vector containing the active pragmas, and clear the list.
     IR::Vector<IR::Annotation> takePragmasAsVector();
@@ -291,7 +294,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     ////////////////////////////////////////////////////////////////////////////
 
     /// The root of the IR tree we're constructing.
-    IR::V1Program *global = nullptr;
+    IR::MutablePtr<IR::V1Program> global = nullptr;
 
  private:
     /// The currently active pragmas.

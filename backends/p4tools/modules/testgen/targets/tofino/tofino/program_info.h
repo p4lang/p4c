@@ -54,9 +54,9 @@ class TofinoProgramInfo : public TofinoSharedProgramInfo {
     /// @see ProgramInfo::getArchSpec
     [[nodiscard]] const ArchSpec &getArchSpec() const override;
 
-    [[nodiscard]] const IR::StateVariable &getTargetInputPortVar() const override;
+    [[nodiscard]] IR::StateVariable getTargetInputPortVar() const override;
 
-    [[nodiscard]] const IR::StateVariable &getTargetOutputPortVar() const override;
+    [[nodiscard]] IR::StateVariable getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 

@@ -15,11 +15,15 @@
 namespace P4::P4Tools {
 
 /// Represents state of execution after having reached a program point.
-class AbstractExecutionState {
+class AbstractExecutionState
+#if !HAVE_LIBGC
+    : public IR::shared_ptr_base
+#endif
+{
  protected:
     /// The namespace context in the IR for the current state. The innermost element is the P4
     /// program, representing the top-level namespace.
-    const NamespaceContext *namespaces;
+    std::shared_ptr<const NamespaceContext> namespaces;
 
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
@@ -79,10 +83,10 @@ class AbstractExecutionState {
     [[nodiscard]] const IR::Type *resolveType(const IR::Type *type) const;
 
     /// @returns the current namespace context.
-    [[nodiscard]] const NamespaceContext *getNamespaceContext() const;
+    [[nodiscard]] std::shared_ptr<const NamespaceContext> getNamespaceContext() const;
 
     /// Replaces the namespace context in the current state with the given context.
-    void setNamespaceContext(const NamespaceContext *namespaces);
+    void setNamespaceContext(std::shared_ptr<const NamespaceContext> namespaces);
 
     /// Enters a namespace of declarations.
     void pushNamespace(const IR::INamespace *ns);

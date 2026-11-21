@@ -58,7 +58,7 @@ std::ostream &operator<<(std::ostream &out, const P4::IR::BFN::Phase0 *p0) {
     // program, although we do generate code that uses it when translating
     // v1model code to TNA.
     auto *packing = new BFN::FieldPacking;
-    for (auto *field : *p0->fields) {
+    for (auto field : *p0->fields) {
         auto isPadding = field->hasAnnotation("padding"_cs);
 
         LOG4("  - " << field->name << " (" << field->type->width_bits() << "b)"

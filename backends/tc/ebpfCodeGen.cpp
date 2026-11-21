@@ -359,7 +359,7 @@ void TCIngressPipelinePNA::emitCPUMAPInitializers(EBPF::CodeBuilder *builder) {
 // on assignment). Only types the tc target represents as an integer scalar
 // can be cached; byte alignment mirrors EBPFScalarTypePNA.
 static bool cacheableLocalType(const P4::TypeMap *typeMap, const IR::Type *type) {
-    auto *canonical = typeMap->getTypeType(type, true);
+    auto canonical = typeMap->getTypeType(type, true);
     if (canonical == nullptr) return false;
     if (canonical->is<IR::Type_Boolean>()) return true;
     auto *bits = canonical->to<IR::Type_Bits>();
@@ -394,7 +394,7 @@ class ParserLocalUses : public Inspector {
 static bool checkOutlineLocals(const EBPFPnaParser *parser) {
     std::set<cstring> locals;
     std::set<cstring> instances;
-    for (auto *local : parser->parserBlock->container->parserLocals) {
+    for (const auto &local : parser->parserBlock->container->parserLocals) {
         if (local->is<IR::Declaration_Variable>()) {
             locals.insert(local->getName().name);
         } else if (local->is<IR::Declaration_Instance>()) {
@@ -1493,7 +1493,7 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
     }
 
     bool noEndiannessConversion = false;
-    if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
+    if (const IR::Annotation *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
         cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
         if (value == "macaddr" || value == "ipv4" || value == "ipv6") {
             noEndiannessConversion = true;
@@ -4040,7 +4040,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     return;
                 }
                 bool noEndiannessConversion = false;
-                if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
+                if (const IR::Annotation *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
                     cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
                     noEndiannessConversion = value == "macaddr" || value == "ipv4" ||
                                              value == "ipv6" || value == "be16" ||

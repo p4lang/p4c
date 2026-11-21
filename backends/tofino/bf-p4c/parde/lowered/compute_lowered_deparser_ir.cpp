@@ -68,7 +68,7 @@ ComputeLoweredDeparserIR::getPartialUnit(const IR::BFN::EmitChecksum *emitChecks
         }
         checksumFields = removeDeparserZeroFields(checksumFields);
         std::tie(phvSources, clotSources) = lowerFields(phv, clotInfo, checksumFields, true);
-        for (auto *source : phvSources) {
+        for (auto source : phvSources) {
             auto *input = new IR::BFN::ChecksumPhvInput(source);
             input->swap = containerToSwap[source->container];
             unitConfig->phvs.push_back(input);
@@ -102,7 +102,7 @@ ComputeLoweredDeparserIR::getPartialUnit(const IR::BFN::EmitChecksum *emitChecks
             *group.first = removeDeparserZeroFields(*group.first);
             std::tie(phvSources, clotSources) = lowerFields(phv, clotInfo, *group.first, true);
             auto povBit = lowerSingleBit(phv, group.second, PHV::AllocContext::DEPARSER);
-            for (auto *source : phvSources) {
+            for (auto source : phvSources) {
                 auto *input = new IR::BFN::ChecksumPhvInput(source);
                 input->swap = containerToSwap[source->container];
                 input->povBit = povBit;
@@ -213,7 +213,7 @@ bool ComputeLoweredDeparserIR::preorder(const IR::BFN::Deparser *deparser) {
     // dependency between them. For that reason, we start out by grouping
     // emit-like primitives by POV bit and CLOT tag.
     LOG5("Grouping deparser primitives:");
-    for (auto *prim : deparser->emits) {
+    for (auto prim : deparser->emits) {
         if (!prim->is<IR::BFN::EmitField>()) {
             groupedEmits.emplace_back(1, prim);
             lastSimpleEmit = std::nullopt;
@@ -321,14 +321,14 @@ bool ComputeLoweredDeparserIR::preorder(const IR::BFN::Deparser *deparser) {
         IR::Vector<IR::BFN::ContainerRef> emitSources;
         std::tie(emitSources, std::ignore) = lowerFields(phv, clotInfo, sources);
         auto *loweredPovBit = lowerSingleBit(phv, emit->povBit, PHV::AllocContext::DEPARSER);
-        for (auto *source : emitSources) {
+        for (auto source : emitSources) {
             auto *loweredEmit = new IR::BFN::LoweredEmitPhv(loweredPovBit, source);
             loweredDeparser->emits.push_back(loweredEmit);
         }
     }
 
     // Lower deparser parameters from fields to containers.
-    for (auto *param : deparser->params) {
+    for (auto param : deparser->params) {
         bool skipPOV = false;
         if (!param->source) continue;
         auto *loweredSource =
@@ -353,7 +353,7 @@ bool ComputeLoweredDeparserIR::preorder(const IR::BFN::Deparser *deparser) {
 
     // Lower digests from fields to containers.
     for (auto &item : deparser->digests) {
-        auto *digest = item.second;
+        auto digest = item.second;
 
         auto *lowered = new IR::BFN::LoweredDigest(digest->name);
 

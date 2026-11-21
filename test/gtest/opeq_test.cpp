@@ -12,7 +12,7 @@
 using namespace P4;
 
 TEST(IR, OperatorEq) {
-    auto *t = IR::Type::Bits::get(16);
+    const IR::Type *t = IR::Type::Bits::get(16);
     IR::Constant *a = new IR::Constant(t, 10);
     IR::Constant *b = new IR::Constant(t, 10);
     IR::Constant *c = new IR::Constant(t, 20);

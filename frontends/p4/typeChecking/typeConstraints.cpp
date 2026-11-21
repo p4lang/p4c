@@ -26,9 +26,9 @@ void TypeConstraints::addImplicitCastConstraint(const IR::Node *source, const IR
     add(c);
 }
 
-TypeVariableSubstitution *TypeConstraints::solve() {
+std::unique_ptr<TypeVariableSubstitution> TypeConstraints::solve() {
     LOG3("Solving constraints:\n" << *this);
-    currentSubstitution = new TypeVariableSubstitution();
+    currentSubstitution = std::make_unique<TypeVariableSubstitution>();
     while (!constraints.empty()) {
         auto last = constraints.back();
         constraints.pop_back();
@@ -36,7 +36,7 @@ TypeVariableSubstitution *TypeConstraints::solve() {
         if (!success) return nullptr;
     }
     LOG3("Constraint solution:\n" << currentSubstitution);
-    return currentSubstitution;
+    return std::move(currentSubstitution);
 }
 
 bool TypeConstraints::isUnifiableTypeVariable(const IR::Type *type) {
@@ -58,7 +58,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         // check to see whether we already have a substitution for leftTv
         const IR::Type *leftSubst = currentSubstitution->lookup(leftTv);
         if (leftSubst == nullptr) {
-            auto right = constraint->right->apply(replaceVariables)->to<IR::Type>();
+            IR::Ptr<IR::Type> right = constraint->right->apply(replaceVariables)->to<IR::Type>();
             if (leftTv == right->to<IR::ITypeVar>()) return true;
             LOG3("Binding " << leftTv << " => " << right);
             auto error = currentSubstitution->compose(leftTv, right);
@@ -76,7 +76,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         auto rightTv = constraint->right->to<IR::ITypeVar>();
         const IR::Type *rightSubst = currentSubstitution->lookup(rightTv);
         if (rightSubst == nullptr) {
-            auto left = constraint->left->apply(replaceVariables)->to<IR::Type>();
+            IR::Ptr<IR::Type> left = constraint->left->apply(replaceVariables)->to<IR::Type>();
             if (left->to<IR::ITypeVar>() == rightTv) return true;
             LOG3("Binding " << rightTv << " => " << left);
             auto error = currentSubstitution->compose(rightTv, left);
@@ -90,7 +90,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         }
     }
 
-    return unification->unify(constraint);
+    return unification.unify(constraint);
     // this may add more constraints
 }
 
@@ -150,7 +150,7 @@ std::string TypeConstraint::localError(Explain *explainer) const {
 
 bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
                                      std::string message) const {
-    const auto *o = origin;
+    auto o = origin;
     const auto *constraint = this;
 
     Explain explainer(subst);
@@ -171,7 +171,7 @@ bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
     if (lastIsEmpty) message += "\n";
 
     CHECK_NULL(o);
-    ::P4::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
+    ::P4::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), &*o);
     return false;
 }
 

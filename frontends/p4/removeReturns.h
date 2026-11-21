@@ -72,7 +72,7 @@ class MoveToElseAfterBranch : public Modifier {
     bool movedToIfBranch = false;
 
     bool preorder(IR::BlockStatement *) override;
-    bool moveFromParentTo(const IR::Statement *&child);
+    bool moveFromParentTo(IR::Ptr<IR::Statement> &child);
     bool preorder(IR::IfStatement *) override;
     bool preorder(IR::SwitchStatement *) override;
     void postorder(IR::LoopStatement *) override;

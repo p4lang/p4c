@@ -35,17 +35,17 @@ namespace Annotations {
 [[nodiscard]] Vector<Annotation> setNameAnnotation(const Vector<Annotation> &annos, cstring name);
 [[nodiscard]] Vector<Annotation> withoutNameAnnotation(const Vector<Annotation> &annos);
 
-void addIfNew(Vector<Annotation> &annotations, cstring name, const Expression *expr,
+void addIfNew(Vector<Annotation> &annotations, cstring name, IR::Ptr<Expression> expr,
               bool structured = false);
 /// An empty list creates an annotation with no arguments.
 void addIfNew(Vector<Annotation> &annotations, cstring name,
-              std::initializer_list<const Expression *> exprs, bool structured = false);
-void addIfNew(Vector<Annotation> &annotations, const IR::Annotation *ann);
-void addOrReplace(Vector<Annotation> &annotations, cstring name, const Expression *expr,
+              std::initializer_list<IR::Ptr<Expression>> exprs, bool structured = false);
+void addIfNew(Vector<Annotation> &annotations, IR::Ptr<Annotation> ann);
+void addOrReplace(Vector<Annotation> &annotations, cstring name, IR::Ptr<Expression> expr,
                   bool structured = false);
 void addOrReplace(Vector<Annotation> &annotations, cstring name,
-                  std::initializer_list<const Expression *> exprs, bool structured = false);
-void addOrReplace(Vector<Annotation> &annotations, const IR::Annotation *ann);
+                  std::initializer_list<IR::Ptr<Expression>> exprs, bool structured = false);
+void addOrReplace(Vector<Annotation> &annotations, IR::Ptr<Annotation> ann);
 }  // namespace Annotations
 
 }  // namespace P4::IR

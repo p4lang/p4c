@@ -1838,8 +1838,10 @@ bool Backend::process() {
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
     EBPF::EBPFTypeFactory::createFactory(typeMapEBPF, true);
     PassManager backEnd = {};
-    backEnd.addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
-                       new P4::TypeChecking(refMap, typeMap, true), sw, tcIR, genIJ});
+    backEnd.addPasses({static_cast<ParseTCAnnotations *>(parseTCAnno),
+                       new P4::ClearTypeMap(typeMap), new P4::TypeChecking(refMap, typeMap, true),
+                       sw, static_cast<ConvertToBackendIR *>(tcIR),
+                       static_cast<IntrospectionGenerator *>(genIJ)});
     widths = sw;
     backEnd.addDebugHook(hook, true);
 
@@ -1855,7 +1857,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     ebpfOption.exe_name = options.exe_name;
     ebpfOption.file = options.file;
     PnaProgramStructure structure(refMapEBPF, typeMapEBPF);
-    auto parsePnaArch = new ParsePnaArchitecture(&structure);
+    ParsePnaArchitecture parsePnaArch(&structure);
     auto main = toplevel->getMain();
     if (!main) return false;
 
@@ -1867,9 +1869,9 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
         return false;
     }
 
-    main->apply(*parsePnaArch);
+    main->apply(parsePnaArch);
     auto evaluator = new P4::EvaluatorPass(refMapEBPF, typeMapEBPF);
-    auto program = prog;
+    IR::Ptr<IR::P4Program> program = prog;
 
     PassManager rewriteToEBPF = {
         evaluator,
@@ -1881,11 +1883,11 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     program = program->apply(rewriteToEBPF);
 
     // map IR node to compile-time allocated resource blocks.
-    top->apply(*new P4::BuildResourceMap(&structure.resourceMap));
+    top->apply(P4::BuildResourceMap(&structure.resourceMap));
 
     main = top->getMain();
     if (!main) return false;  // no main
-    main->apply(*parsePnaArch);
+    main->apply(parsePnaArch);
     program = top->getProgram();
 
     auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, options, refMapEBPF, typeMapEBPF, tcIR);
@@ -2037,7 +2039,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                     unsigned int width = paramType->to<IR::Type_Bits>()->width_bits();
                     tcActionParam->setBitSize(width);
                 }
-                if (const auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
+                if (const IR::Annotation *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
                     auto expr = anno->getExpr(0);
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         auto val = getTcType(typeLiteral);
@@ -2285,7 +2287,8 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
         if (const auto *path = e->action->to<IR::PathExpression>()) {
             actionName = externalName(refMap->getDeclaration(path->path, true));
         } else if (const auto *mce = e->action->to<IR::MethodCallExpression>()) {
-            auto call = P4::MethodInstance::resolve(mce, refMap, typeMap)->to<P4::ActionCall>();
+            auto method = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            auto call = method->to<P4::ActionCall>();
             BUG_CHECK(call != nullptr, "Unexpected constant entry action %1%", mce);
             actionName = externalName(call->action);
             for (auto param : call->action->getParameters()->parameters) {
@@ -2298,13 +2301,13 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                     return;
                 }
                 cstring paramType;
-                if (auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
+                if (auto anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
                     if (auto *literal = anno->getExpr(0)->to<IR::StringLiteral>())
                         paramType = literal->value;
                 }
                 // The parameter's type may be written as a type name; only its
                 // canonical form carries the width and the sign.
-                auto *canonical = typeMap->getTypeType(param->type, true);
+                auto canonical = typeMap->getTypeType(param->type, true);
                 auto *paramBits = canonical ? canonical->to<IR::Type_Bits>() : nullptr;
                 unsigned paramWidth = paramBits ? paramBits->width_bits() : 0;
                 bool paramSigned = paramBits != nullptr && paramBits->isSigned;
@@ -2413,7 +2416,7 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
             bool isTcMayOverrideHit = false;
-            for (const auto *anno : action->getAnnotations()) {
+            for (const IR::Annotation *anno : action->getAnnotations()) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 } else if (anno->name == ParseTCAnnotations::defaultHit) {
@@ -2543,8 +2546,9 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
             if (externDefinition) {
-                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
-                    externInstanceName));
+                auto extInstDef = const_cast<IR::TCExternInstance *>(
+                    externDefinition->getExternInstance(externInstanceName)
+                        ->to<IR::TCExternInstance>());
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
                 break;
@@ -2577,8 +2581,9 @@ void ConvertToBackendIR::updatePnaDirectMeter(const IR::P4Table *t, IR::TCTable 
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
             if (externDefinition) {
-                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
-                    externInstanceName));
+                auto extInstDef = const_cast<IR::TCExternInstance *>(
+                    externDefinition->getExternInstance(externInstanceName)
+                        ->to<IR::TCExternInstance>());
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
                 foundExtern = true;
@@ -2599,7 +2604,7 @@ void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
     for (auto table : tcPipeline->tableDefs) {
         if (table->tableName == tblname) {
             add_on_miss_tables.push_back(t);
-            auto tableDefinition = ((IR::TCTable *)table);
+            auto tableDefinition = const_cast<IR::TCTable *>(table->to<IR::TCTable>());
             tableDefinition->setTableAddOnMiss();
             tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         }
@@ -2734,7 +2739,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         }
         tableDefinition->setKeySize(keySize);
         tableKeysizeList.emplace(tId, keySize);
-        for (const auto *anno : t->getAnnotations()) {
+        for (const IR::Annotation *anno : t->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tc_acl) {
                 tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
             } else if (anno->name == ParseTCAnnotations::numMask) {
@@ -2766,7 +2771,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                     tcAction = tcPipeline->NoAction;
                 }
                 unsigned int tableFlag = TC::TABLEDEFAULT;
-                for (const auto *anno : action->getAnnotations()) {
+                for (const IR::Annotation *anno : action->getAnnotations()) {
                     if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                         tableFlag = TC::TABLEONLY;
                     } else if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
@@ -2792,7 +2797,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) {
     cstring control_path, data_path;
     // Check if access permissions is defined with annotation @tc_acl
-    if (const auto *anno = ext->getAnnotation(ParseTCAnnotations::tc_acl)) {
+    if (const IR::Annotation *anno = ext->getAnnotation(ParseTCAnnotations::tc_acl)) {
         auto path = GetAnnotatedAccessPath(anno);
         control_path = path->first;
         data_path = path->second;
@@ -2812,10 +2817,10 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     return value.str();
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processExternConstructor(
     const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
     struct ExternInstance *instance) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     for (auto gd : extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
             continue;
@@ -2856,14 +2861,14 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
     return keys;
 }
 
-void ConvertToBackendIR::initializeExternControlPath(safe_vector<const IR::TCKey *> &keys,
+void ConvertToBackendIR::initializeExternControlPath(safe_vector<IR::Ptr<IR::TCKey>> &keys,
                                                      const IR::Expression *initialValue) {
     if (initialValue == nullptr) return;
 
     auto structure = initialValue->to<IR::StructExpression>();
     auto list = initialValue->to<IR::ListExpression>();
     size_t count = 0;
-    for (auto key : keys) {
+    for (const auto &key : keys) {
         if (key->keyAttribute == "param" || key->keyAttribute == "tc_data_scalar") count++;
     }
     if ((structure && structure->size() != count) || (list && list->components.size() != count) ||
@@ -2936,10 +2941,10 @@ ConvertToBackendIR::CounterType ConvertToBackendIR::toCounterType(const int type
     BUG("Unknown counter type %1%", type);
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processCounterControlPathKeys(
     const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
     const IR::Declaration_Instance *decl) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto typeArg = decl->arguments->at(decl->arguments->size() - 1)->expression->to<IR::Constant>();
     CounterType type = toCounterType(typeArg->asInt());
     int kId = 1;
@@ -2979,9 +2984,9 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys
     return keys;
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processExternControlPath(
     const IR::Type_Extern *extn, const IR::Declaration_Instance *decl, cstring eName) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto find = ControlStructPerExtern.find(eName);
     if (find != ControlStructPerExtern.end()) {
         auto extern_control_path = ControlStructPerExtern[eName];
@@ -3021,10 +3026,10 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
     return keys;
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::HandleTypeNameStructField(
     const IR::StructField *field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
     int &kId, cstring annoName) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto type_extern_params = extn->getTypeParameters()->parameters;
     for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
         if (type_extern_params.at(itr)->toString() == field->type->toString()) {
@@ -3159,7 +3164,8 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
             tcPipeline->addExternDefinition(externDefinition);
         } else {
             auto eb = externsInfo[eName];
-            externDefinition = ((IR::TCExtern *)tcPipeline->getExternDefinition(eName));
+            externDefinition = const_cast<IR::TCExtern *>(
+                tcPipeline->getExternDefinition(eName)->to<IR::TCExtern>());
             externDefinition->numinstances = ++eb->no_of_instances;
             instance->instance_id = eb->no_of_instances;
             eb->eInstance.push_back(instance);

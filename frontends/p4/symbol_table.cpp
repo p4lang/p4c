@@ -139,12 +139,16 @@ ProgramStructure::ProgramStructure()
     : debug(false), debugStream(nullptr), rootNamespace(nullptr), currentNamespace(nullptr) {
     rootNamespace = new Namespace(cstring::empty, Util::SourceInfo(), true);
     currentNamespace = rootNamespace;
+    symbols.emplace_back(rootNamespace);
     // We use stderr because we want debugging output
     // to be the same as the bison debugging output.
     debugStream = stderr;
 }
 
+ProgramStructure::~ProgramStructure() = default;
+
 void ProgramStructure::push(Namespace *ns) {
+    symbols.emplace_back(ns);
     CHECK_NULL(ns);
     if (debug) fprintf(debugStream, "ProgramStructure: pushing %s\n", ns->toString().c_str());
     LOG4("ProgramStructure: pushing " << ns->toString());
@@ -180,6 +184,7 @@ void ProgramStructure::declareType(IR::ID id) {
 
     LOG3("ProgramStructure: adding type " << id);
     auto st = new SimpleType(id.name, id.srcInfo);
+    symbols.emplace_back(st);
     currentNamespace->declare(st);
 }
 
@@ -189,6 +194,7 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
     LOG3("ProgramStructure: adding object " << id << " with type " << type);
     auto type_sym = lookup(type);
     auto o = new Object(id.name, id.srcInfo);
+    symbols.emplace_back(o);
     if (type_sym)
         if (auto tns = type_sym->to<Namespace>()) o->setNamespace(tns);
     currentNamespace->declare(o);
@@ -272,6 +278,8 @@ cstring ProgramStructure::toString() const {
 
 void ProgramStructure::clear() {
     rootNamespace->clear();
+    symbols.resize(1);
+    clearPath();
     currentNamespace = rootNamespace;
     debugStream = stderr;
 }

@@ -112,6 +112,21 @@ set (P4_XFAIL_TESTS
 # will be no P4Info file.
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
+# Exercise IR ownership, constructor rewriting, JSON round-trips, and P4Runtime
+# serialization with LeakSanitizer enabled in the no-GC sanitizer job.
+if (ENABLE_SANITIZERS AND NOT ENABLE_GC)
+  foreach(sample IN ITEMS action-synth constructor-call-lifetime refcount-type-lifetime
+                          specIssue884 psa-predication-lifetime-bmv2)
+    set_property(TEST "p4/testdata/p4_16_samples/${sample}.p4" APPEND PROPERTY LABELS memory-leak)
+  endforeach()
+endif()
+
+# This large switch program also round-trips its IR through JSON. Sanitizer
+# instrumentation can exceed the default five-minute limit on shared CI CPUs.
+if (ENABLE_SANITIZERS)
+  set_tests_properties("p4/testdata/p4_16_samples/switch_p4_16.p4" PROPERTIES TIMEOUT 1000)
+endif()
+
 set (P4TEST_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_PARSER_INLINE_TESTS}" "" "-a '--maxErrorCount 100 --parser-inline-opt'")
 
@@ -129,4 +144,3 @@ set (P4_14_SUITES
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")
 set_tests_properties("p14_to_16/testdata/p4_14_samples/switch_20160512/switch.p4" PROPERTIES TIMEOUT 1000)
 endif()
-

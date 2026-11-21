@@ -4,4 +4,37 @@
 
 #include "util.h"
 
-namespace P4::Test::SmallStepUtil {}  // namespace P4::Test::SmallStepUtil
+#include <memory>
+
+namespace P4::P4Tools::Test {
+
+TEST_F(SmallStepTest, CoverageCacheFollowsExecutionBranches) {
+    auto context = P4TestgenTest::SetUp("bmv2", "v1model");
+    ASSERT_NE(context, nullptr);
+    auto first = mkState(Body({}));
+    auto second = mkState(Body({}));
+    std::unique_ptr<ExecutionState> branch(&first.clone());
+    auto *node = new IR::Constant(1);
+    first.getCoverageCache()[node].insert(node);
+    EXPECT_TRUE(branch->getCoverageCache().at(node).count(node));
+    EXPECT_TRUE(second.getCoverageCache().empty());
+}
+
+TEST_F(SmallStepTest, PacketSliceSurvivesAssignmentSimplification) {
+    auto context = P4TestgenTest::SetUp("bmv2", "v1model");
+    ASSERT_NE(context, nullptr);
+    IR::P4Program program;
+    IR::MutablePtr<ExecutionState> state = &ExecutionState::create(&program);
+    state->appendToPacketBuffer(IR::Constant::get(IR::Type_Bits::get(8), 42));
+    auto slice = state->slicePacketBuffer(8);
+    ASSERT_TRUE(slice->is<IR::Slice>());
+    const IR::StateVariable field(
+        new IR::Member(IR::Type_Bits::get(8), new IR::PathExpression("header"), "field"));
+    state->set(field, slice);
+    EXPECT_EQ(state->get(field)->checkedTo<IR::Constant>()->value, 42);
+    // set() replaces the slice with a constant. The caller still owns the slice for tracing.
+    EXPECT_EQ(slice->checkedTo<IR::Slice>()->getH(), 7);
+    EXPECT_EQ(slice->checkedTo<IR::Slice>()->getL(), 0);
+}
+
+}  // namespace P4::P4Tools::Test

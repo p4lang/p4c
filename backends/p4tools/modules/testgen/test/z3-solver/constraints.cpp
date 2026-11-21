@@ -16,10 +16,10 @@
 namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
-using ConstraintVector = const std::vector<const Constraint *>;
+using ConstraintVector = const std::vector<IR::Ptr<Constraint>>;
 
 TEST(Z3SolverOwnership, ClearMemoryPreservesAssertionsAndOtherSolvers) {
-    const IR::SymbolicVariable *value =
+    IR::Ptr<IR::SymbolicVariable> value =
         P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), "reset_value"_cs);
     ConstraintVector constraints = {
         new IR::Equ(value, IR::Constant::get(IR::Type_Bits::get(8), 42))};
@@ -56,9 +56,11 @@ class Z3SolverSatisfiabilityChecks : public testing::Test {
 };
 
 TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
-    const auto *eightBitType = IR::Type_Bits::get(8);
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "foo"_cs);
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "bar"_cs);
+    auto eightBitType = IR::Type_Bits::get(8);
+    IR::Ptr<IR::SymbolicVariable> fooVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "foo"_cs);
+    IR::Ptr<IR::SymbolicVariable> barVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(eightBitType, "bar"_cs);
     {
         auto *expression =
             new IR::Equ(IR::Constant::get(eightBitType, 1), IR::Constant::get(eightBitType, 1));
@@ -111,9 +113,11 @@ TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
 }
 
 TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
-    const auto *stringType = IR::Type_String::get();
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "foo"_cs);
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(stringType, "bar"_cs);
+    auto stringType = IR::Type_String::get();
+    IR::Ptr<IR::SymbolicVariable> fooVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(stringType, "foo"_cs);
+    IR::Ptr<IR::SymbolicVariable> barVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(stringType, "bar"_cs);
     {
         auto *expression =
             new IR::Equ(IR::StringLiteral::get("dead"_cs), IR::StringLiteral::get("dead"_cs));
@@ -166,9 +170,11 @@ TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
 }
 
 TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
-    const auto *boolType = IR::Type_Boolean::get();
-    const auto *fooVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "foo"_cs);
-    const auto *barVar = P4Tools::ToolsVariables::getSymbolicVariable(boolType, "bar"_cs);
+    auto boolType = IR::Type_Boolean::get();
+    IR::Ptr<IR::SymbolicVariable> fooVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(boolType, "foo"_cs);
+    IR::Ptr<IR::SymbolicVariable> barVar =
+        P4Tools::ToolsVariables::getSymbolicVariable(boolType, "bar"_cs);
     {
         auto *expression = new IR::Equ(IR::BoolLiteral::get(true), IR::BoolLiteral::get(true));
         ConstraintVector inputExpression = {expression};
@@ -235,7 +241,7 @@ class CountedTranslationVariable : public IR::SymbolicVariable {
 
 TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
     unsigned visits = 0;
-    const IR::Expression *expression = new CountedTranslationVariable(visits);
+    IR::Ptr<IR::Expression> expression = new CountedTranslationVariable(visits);
     for (unsigned depth = 0; depth < 14; ++depth) {
         expression = new IR::LOr(expression, expression);
     }
@@ -255,11 +261,11 @@ TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
 }
 
 TEST(Z3Translator, KeepsDistinctSymbolTypesSeparate) {
-    const auto *bits8 = IR::Type_Bits::get(8);
-    const auto *bits16 = IR::Type_Bits::get(16);
+    auto bits8 = IR::Type_Bits::get(8);
+    auto bits16 = IR::Type_Bits::get(16);
     const auto *small = new IR::SymbolicVariable(bits8, "same_label"_cs);
     const auto *large = new IR::SymbolicVariable(bits16, "same_label"_cs);
-    const auto *expression = new IR::Equ(new IR::Cast(bits16, small), large);
+    IR::Ptr<IR::Expression> expression = new IR::Equ(new IR::Cast(bits16, small), large);
     Z3Solver solver;
     Z3Translator translator(solver);
     const auto translated = translator.translate(expression);
