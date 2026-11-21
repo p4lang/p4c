@@ -32,8 +32,8 @@ struct Headers_t {
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType, 16w1) {
-            (16w0x800, 16w1): ip;
+        transition select(headers.ethernet.etherType) {
+            16w0x800: ip;
             default: reject;
         }
     }

@@ -833,7 +833,13 @@ bool ToP4::preorder(const IR::SelectCase *e) {
     dump(2);
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
-    setListTerm("(", ")");
+    const auto *list = e->keyset->to<IR::ListExpression>();
+    // Projection can leave a one-element keyset containing a tuple. Parentheses around
+    // that tuple would be parsed as grouping and lose the outer tuple's dimension.
+    if (list && list->size() == 1 && list->components.at(0)->type->is<IR::Type_BaseList>())
+        setListTerm("{ ", " }");
+    else
+        setListTerm("(", ")");
     visit(e->keyset);
     expressionPrecedence = prec;
     doneList();
