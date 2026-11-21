@@ -69,9 +69,26 @@ class ProcessResult(NamedTuple):
     returncode: int
 
 
-def is_err(p4filename: str) -> bool:
-    """True if the filename represents a p4 program that should fail."""
-    return "_errors" in p4filename
+def reference_dir(p4file: Union[str, Path]) -> Path:
+    """Return the directory that mirrors the input's directory under testdata/output."""
+    root = Path(__file__).resolve().parents[1] / "testdata"
+    # Keep the logical path of corpus entries that are symlinks.
+    directory = Path(p4file).parent.resolve()
+    try:
+        relative = directory.relative_to(root)
+    except ValueError:
+        # Standalone and extension tests may keep references beside their own corpus.
+        return directory.with_name(directory.name + "_outputs")
+    return root / "output" / relative
+
+
+def is_err(p4filename: Union[str, Path]) -> bool:
+    """CTest sets the expectation per run. Direct invocations use the suite default."""
+    expectation = os.environ.get("P4C_EXPECT_ERROR")
+    if expectation is not None:
+        return expectation == "1"
+    path = Path(p4filename)
+    return "errors" in path.parent.parts or "_errors" in str(path)
 
 
 def hex_to_byte(hex_str: str) -> str:

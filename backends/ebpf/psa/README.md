@@ -573,7 +573,8 @@ nikss-ctl add-port pipe <PIPELINE-ID> dev <INTF>
 ## Running PTF tests
 
 PSA implementation for eBPF backend is covered by a set of PTF tests that verify a correct behavior of various PSA mechanisms. 
-The test scripts, PTF test cases and test P4 programs are located under `backends/ebpf/tests`. The tests must be executed from this directory.
+Run the PTF test scripts from `backends/ebpf/tests`. The P4 programs are in
+`testdata/ebpf/psa/`, and their P4Info references are in `testdata/output/ebpf/psa/`.
 
 To run all PTF tests:
 

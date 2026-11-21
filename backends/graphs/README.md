@@ -88,23 +88,23 @@ Objects which represent program blocks are ordered in `nodes`, in the order in w
 ## Example
 
 Here is the graph generated for the ingress control block of the
-[flowlet_switching-bmv2.p4](../../testdata/p4_16_samples/flowlet_switching-bmv2.p4)
+[flowlet_switching-bmv2.p4](../../testdata/bmv2/v1model/flowlet_switching-bmv2.p4)
 test program:
 
 ![Flowlet switching ingress graph](resources/flowlet_switching-bmv2.ingress.png)
 
 Here is the graph generated for the egress control block of the
-[flowlet_switching-bmv2.p4](../../testdata/p4_16_samples/flowlet_switching-bmv2.p4)
+[flowlet_switching-bmv2.p4](../../testdata/bmv2/v1model/flowlet_switching-bmv2.p4)
 test program:
 
 ![Flowlet switching egress graph](resources/flowlet_switching-bmv2.egress.png)
 
 Here is the graph generated for the parser block of the
-[flowlet_switching-bmv2.p4](../../testdata/p4_16_samples/flowlet_switching-bmv2.p4)
+[flowlet_switching-bmv2.p4](../../testdata/bmv2/v1model/flowlet_switching-bmv2.p4)
 test program:
 
 ![Flowlet switching ingress graph](resources/flowlet_switching-bmv2.parser.png)
 
-Examples of generated fullGraph for [flowlet_switching-bmv2.p4](../../testdata/p4_16_samples/flowlet_switching-bmv2.p4) program
+Examples of generated fullGraph for [flowlet_switching-bmv2.p4](../../testdata/bmv2/v1model/flowlet_switching-bmv2.p4) program
 and [firewall.p4](https://github.com/p4lang/tutorials/blob/master/exercises/firewall/solution/firewall.p4) program
 can be found in [resources](resources/), also with json fullGraph.

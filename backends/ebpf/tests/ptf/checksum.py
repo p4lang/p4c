@@ -20,7 +20,7 @@ ALL_PORTS = [PORT0, PORT1, PORT2]
 
 @xdp2tc_head_not_supported
 class ChecksumCRC32MultipleUpdatesPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/checksum-updates-crc32.p4"
+    p4_file_path = PSA_PROGRAMS / "checksum-updates-crc32.p4"
 
     def runTest(self):
         pkt = Ether() / "1234567890000"
@@ -31,7 +31,7 @@ class ChecksumCRC32MultipleUpdatesPSATest(P4EbpfTest):
 
 @xdp2tc_head_not_supported
 class ChecksumCRC16MultipleUpdatesPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/checksum-updates-crc16.p4"
+    p4_file_path = PSA_PROGRAMS / "checksum-updates-crc16.p4"
 
     def runTest(self):
         pkt = Ether() / "1234567890000"
@@ -49,7 +49,7 @@ class InternetChecksumPSATest(P4EbpfTest):
      source IP address.
     """
 
-    p4_file_path = "p4testdata/internet-checksum.p4"
+    p4_file_path = PSA_PROGRAMS / "internet-checksum.p4"
 
     def random_ip(self):
         return ".".join(str(random.randint(0, 255)) for _ in range(4))
@@ -77,7 +77,7 @@ class InternetChecksumPSATest(P4EbpfTest):
 
 @xdp2tc_head_not_supported
 class HashCRC16PSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/hash-crc16.p4"
+    p4_file_path = PSA_PROGRAMS / "hash-crc16.p4"
 
     def runTest(self):
         pkt = Ether() / "12345678900"
@@ -88,7 +88,7 @@ class HashCRC16PSATest(P4EbpfTest):
 
 @xdp2tc_head_not_supported
 class HashInActionPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/hash-action.p4"
+    p4_file_path = PSA_PROGRAMS / "hash-action.p4"
 
     def runTest(self):
         pkt = Ether() / "12345678900"
@@ -99,7 +99,7 @@ class HashInActionPSATest(P4EbpfTest):
 
 @xdp2tc_head_not_supported
 class HashCRC32PSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/hash-crc32.p4"
+    p4_file_path = PSA_PROGRAMS / "hash-crc32.p4"
 
     def runTest(self):
         pkt = Ether() / "1234567890000"
@@ -110,7 +110,7 @@ class HashCRC32PSATest(P4EbpfTest):
 
 @xdp2tc_head_not_supported
 class HashRangePSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/hash-range.p4"
+    p4_file_path = PSA_PROGRAMS / "hash-range.p4"
 
     def runTest(self):
         res = 50 + (0xBB3D % 200)
@@ -122,7 +122,7 @@ class HashRangePSATest(P4EbpfTest):
 
 class HashWideField(P4EbpfTest):
     # Tests support for fields wider than 64 bits
-    p4_file_path = "p4testdata/hash-wide-field.p4"
+    p4_file_path = PSA_PROGRAMS / "hash-wide-field.p4"
 
     def runTest(self):
         #      data0          data1        data2

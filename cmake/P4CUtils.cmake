@@ -164,7 +164,7 @@ endfunction()
 # Sets the timeout on tests at 300s (for the slow Travis machines)
 #
 macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
-  set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
+  set(__testfile "${P4C_BINARY_DIR}/${tag}/${alias}.test")
   string(CONCAT __testcontent
     "#! /usr/bin/env bash\n"
     "# Generated file, modify with care\n\n"
@@ -174,8 +174,15 @@ macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_arg
   p4c_test_set_name(__testname ${tag} ${alias})
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test (NAME ${__testname}
-    COMMAND ${tag}/${p4test}.test ${__args}
+    COMMAND ${tag}/${alias}.test ${__args}
     WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  if("${p4test}" MATCHES "^testdata/")
+    if("${p4test}" MATCHES "/errors/")
+      set_tests_properties(${__testname} PROPERTIES ENVIRONMENT "P4C_EXPECT_ERROR=1")
+    else()
+      set_tests_properties(${__testname} PROPERTIES ENVIRONMENT "P4C_EXPECT_ERROR=0")
+    endif()
+  endif()
   if (NOT DEFINED ${tag}_timeout)
     set (${tag}_timeout 300)
   endif()
@@ -252,7 +259,7 @@ endfunction()
 # Arguments:
 #   - tag is a label for the set of tests, for example, p4, p14_to_16, bmv2, ebpf
 #   - driver is the script that is used to run the tests and compare the results
-#   - testsuite is a list of directory patterns, e.g.: testdata/p4_16_samples/*.p4
+#   - testsuite is a list of directory patterns, e.g.: testdata/core/*.p4
 #   - xfail is a set of tests that are expected to fail
 #
 # The macro generates the test files in a directory prefixed by tag.
@@ -272,7 +279,13 @@ macro(p4c_add_tests_w_p4runtime tag driver testsuites xfails p4rt_exclude)
   set(__xfails "")
   p4c_find_test_names("${testsuites}" __tests)
   p4c_find_test_names("${xfails}" __xfails)
-  set(__tests_no_p4runtime "${p4rt_exclude}")
+  set(__tests_no_p4runtime "")
+  set(__p4runtime_exclusions "${p4rt_exclude}")
+  foreach(t IN LISTS __tests)
+    if(t IN_LIST __p4runtime_exclusions)
+      list(APPEND __tests_no_p4runtime "${t}")
+    endif()
+  endforeach()
   set(__tests_p4runtime "${__tests}")
   list (REMOVE_ITEM __tests_p4runtime ${__tests_no_p4runtime})
   p4c_add_test_list (${tag} ${driver} "${__tests_no_p4runtime}" "${__xfails}" "${ARGN}")

@@ -182,13 +182,15 @@ def run_test(options, argv):
             else:
                 result = run_model(ebpf, testfile)
         elif options.replace:
-            exp_dir = os.path.dirname(options.p4filename).replace("_errors", "_errors_outputs", 1)
-            exp_file = options.p4filename.replace("_errors/", "_errors_outputs/", 1) + "-stderr"
-            testutils.check_and_create_dir(Path(exp_dir))
+            exp_dir = testutils.reference_dir(options.p4filename)
+            exp_file = exp_dir / (Path(options.p4filename).name + "-stderr")
+            testutils.check_and_create_dir(exp_dir)
             with open(exp_file, mode="w+", encoding="utf-8") as error_file:
                 error_file.write(out)
         else:  # Expected error, check output matches
-            exp_file = options.p4filename.replace("_errors/", "_errors_outputs/", 1) + "-stderr"
+            exp_file = testutils.reference_dir(options.p4filename) / (
+                Path(options.p4filename).name + "-stderr"
+            )
             with open(exp_file, 'r', encoding="utf-8") as f:
                 exp_stderr = f.read().strip()
             # Output will have full path which differs

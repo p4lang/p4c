@@ -1,0 +1,6 @@
+tc/compiler/errors/meter_errors.p4(103): [--Werror=unexpected] error: global_meter: not a DirectMeter, see declaration of ingress.global_meter
+        pna_direct_meter = global_meter;
+                           ^^^^^^^^^^^^
+tc/compiler/errors/meter_errors.p4(80)
+    Meter<bit<32>>(2048, PNA_MeterType_t.PACKETS) global_meter;
+                                                  ^^^^^^^^^^^^

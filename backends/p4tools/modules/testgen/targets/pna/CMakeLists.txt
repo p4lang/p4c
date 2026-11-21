@@ -3,9 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 if(ENABLE_TESTING)
-  # Include the test subdirectory.
-  message("-- Adding p4testgen pna test suite")
-  include(test/P4Tests.cmake)
+  include("${P4C_SOURCE_DIR}/testdata/dpdk/testgen/Testgen.cmake")
 endif()
 
 # Source files for p4testgen.

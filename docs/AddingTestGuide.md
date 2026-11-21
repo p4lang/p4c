@@ -5,53 +5,41 @@ This document serves as a guide for adding and running tests in the P4C reposito
 
 ## Types of Tests
 
-### Positive Tests
-Positive tests are standard tests where the compiler should not fail due to compile-time errors. The expected output should match the actual output for the test to pass. The compiler should generate an output file with no errors.
+### Choosing a suite
 
-#### Source File Location
-- `testdata/p4_16_samples/`
+Place P4₁₄ inputs in `testdata/p4_14/` and backend-independent P4₁₆ regressions
+in `testdata/core/`. For backend tests, choose the architecture under `bmv2/`
+(v1model, PSA, PNA), `dpdk/` (PSA, PNA), or `ebpf/` (classic, XDP, PSA),
+or the `tc/`, `tofino/`, or `ubpf/` suite. A model include is a useful hint;
+a frontend regression can use a model without testing its backend.
 
-### Negative Tests
-Negative tests check if the compiler correctly catches syntax or semantic errors. These tests are placed in directories with "errors" in their names, and the expected output includes error messages.
+Use `shared/psa/` or `shared/pna/` when both BMv2 and DPDK should exercise the
+same input. Put dedicated Testgen programs in the target's `testgen/` folder.
+Runners and output formats can register the same input with different options.
+Keep companion packet tests and include files with the program.
 
-#### Source File Location
-- `testdata/p4_16_errors/`
-- `testdata/p4_16_bmv_errors/`
-- `testdata/p4_16_dpdk_errors/`
-- `testdata/p4_16_ebpf_errors/`
-- `testdata/p4_16_pna_errors/`
-- `testdata/p4_16_psa_errors/`
+A suite's `errors/` subdirectory contains programs that its runner should
+reject. Backend rejection does not imply frontend rejection. XFAIL means a
+known discrepancy with the expected outcome, not an expected compiler diagnostic.
 
-### Backend-Specific Tests
-Some test programs exist in backend-specific directories, such as eBPF and uBPF tests.
+### Expected output files
 
-#### Source File Location
-- `backends/ebpf/tests/`
-- `backends/ubpf/tests/`
-
-> **Note:** All new tests must be added in the `testdata` directory unless there is a strong reason to add them somewhere else.
-
-### Expected Output Files
-Tests often have corresponding expected output files in directories suffixed with `_outputs`. Any differences between expected and actual output will cause a test failure.
-
-#### Source File Location
-- `testdata/p4_16_samples_outputs/`
-- `testdata/p4_16_errors_outputs/`
-
-Similarly, for other error output files, you can check:
-- `testdata/p4_16_pattern_errors_outputs/`
+Insert `output/` immediately after `testdata/` to find the reference directory
+for an input. This rule applies to rejection tests and nested projects too.
+Different consumers can check different artifacts in the same directory:
+`p4test` checks `foo.p4-stderr`, while DPDK checks `foo.p4.dpdk-stderr`.
 
 #### What Gets Generated
-Running the compiler on a test writes reference files into the matching `_outputs` directory. The set of files depends on the test type.
+Running the compiler on a test writes reference files into the mirrored directory under `testdata/output/`. The set of files depends on the test type.
 
-A positive test in `testdata/p4_16_samples/foo.p4` produces five files in `testdata/p4_16_samples_outputs/`:
+A positive test in `testdata/core/foo.p4` produces five files in `testdata/output/core/`:
 - `foo.p4`: the program after parsing, printed back to P4.
 - `foo-first.p4`: the program near the start of the frontend (the `FrontEndDump` pass).
 - `foo-frontend.p4`: the program after the frontend finishes (the `FrontEndLast` pass).
 - `foo-midend.p4`: the program after the midend finishes (the `MidEndLast` pass).
 - `foo.p4-stderr`: anything the compiler wrote to stderr, such as warnings.
 
-A negative test in `testdata/p4_16_errors/foo.p4` produces two files in `testdata/p4_16_errors_outputs/`. Compilation stops at the error, so the frontend and midend dumps are not written:
+A negative test in `testdata/core/errors/foo.p4` produces two files in `testdata/output/core/errors/`. Compilation stops at the error, so the frontend and midend dumps are not written:
 - `foo.p4`: the program after parsing, printed back to P4.
 - `foo.p4-stderr`: the expected error and warning messages.
 
@@ -87,22 +75,14 @@ You can run tests using `ctest`, which is the recommended approach moving forwar
 
 ## Adding New Tests
 
-1. Add the new `.p4` test file to the appropriate directory (`testdata/p4_16_samples/` for standard tests).
+1. Add the P4 file to the suite that checks its behavior. Use a descriptive name or issue number.
+2. Run `cmake -B build` to discover the new input. Use `ctest --test-dir build -N -R <name>` to check which runners selected it.
+3. Run `P4TEST_REPLACE=1 ctest --test-dir build -R <name>` to generate the references. Inspect the changes and rerun without `P4TEST_REPLACE`.
+4. Commit the input, companion files, and references together.
 
-2. Follow file naming conventions:
-   - Tests targeting BMv2 should end with `-bmv2.p4`.
-   - Tests targeting eBPF should end with `-ebpf.p4`.
-   - General frontend tests should use descriptive names that reflect the feature being tested.
-
-3. Generate reference outputs:
-   - For frontend tests:  
-     `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`
-   - For BMv2 tests:  
-     `../backends/bmv2/run-bmv2-test.py`
-
-   The `-f` flag writes the reference files from the current compiler output, creating them the first time and overwriting them afterward. Run the same command without `-f` to only compare against the checked-in files. Setting `P4TEST_REPLACE=True` in the environment does the same thing as `-f`, which is handy when regenerating many tests at once, for example `P4TEST_REPLACE=True make check`.
-
-4. Commit the test and reference output files.
+Out-of-tree extensions that selected `p4_16_samples/*.p4` should select their
+suite directories explicitly. Do not recursively glob all of `testdata/`:
+`output/` also contains P4 files, and multi-file programs have include-only files.
 
 ## Continuous Integration
 When a pull request is created, the test suite runs automatically using `ctest`. Tests are executed using a recently built version of `simple_switch` from the `p4lang/behavioral-model` repository.

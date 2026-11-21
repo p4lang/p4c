@@ -190,14 +190,9 @@ class ConfigH:
         return str(self.vars)
 
 
-def isError(p4_file: Path) -> bool:
-    # True if the filename represents a p4 program that should fail
-    return "_errors" in str(p4_file)
-
-
 def check_error_reference(options: Options, output: str) -> int:
     # Compare the diagnostics of a negative test against its reference.
-    expected_dir = Path(str(options.p4_file.parent).replace("_errors", "_errors_outputs", 1))
+    expected_dir = testutils.reference_dir(options.p4_file)
     expected_file = expected_dir.joinpath(options.p4_file.name + "-stderr")
     # Reduce leading paths to basenames, as run-p4-sample.py does with sed.
     produced = re.sub(r"^.*/(?=[^/\s]+\.[ph]4?[:(]\d+)", "", output, flags=re.MULTILINE).strip()
@@ -299,7 +294,7 @@ def process_file(options: Options) -> int:
         if "Compiler Bug" in result.output:
             return testutils.FAILURE
 
-    expected_error = isError(options.p4_file)
+    expected_error = testutils.is_err(options.p4_file)
     if expected_error:
         # invert result
         if returnvalue == testutils.SUCCESS:

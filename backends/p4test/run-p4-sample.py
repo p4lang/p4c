@@ -21,6 +21,9 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from threading import Thread
 
+sys.path.append(str(Path(__file__).resolve().parents[2] / "tools"))
+import testutils
+
 SUCCESS = 0
 FAILURE = 1
 
@@ -58,11 +61,6 @@ def usage(options):
     print("          -f: replace reference outputs with newly generated ones")
     print('          -a "args": pass args to the compiler')
     print("          --p4runtime: generate P4Info message in text format")
-
-
-def isError(p4filename):
-    # True if the filename represents a p4 program that should fail
-    return "_errors" in p4filename
 
 
 ignoreStderrDirective = 'P4TEST_IGNORE_STDERR'
@@ -228,26 +226,11 @@ def process_file(options, argv):
     tmpdir = tempfile.mkdtemp(dir=Path(".").absolute())
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
-    dirname = os.path.dirname(options.p4filename)
-    loops_unrolling = False
-    for option in options.compilerOptions:
-        if option == "--loopsUnroll":
-            loops_unrolling = True
-            break
-    if "_samples/" in dirname:
-        expected_dirname = dirname.replace("_samples/", "_samples_outputs/", 1)
-    elif "_errors/" in dirname:
-        expected_dirname = dirname.replace("_errors/", "_errors_outputs/", 1)
-    elif "p4_14/" in dirname:
-        expected_dirname = dirname.replace("p4_14/", "p4_14_outputs/", 1)
-    elif "p4_16/" in dirname:
-        expected_dirname = dirname.replace("p4_16/", "p4_16_outputs/", 1)
-    elif loops_unrolling:
-        expected_dirname = dirname + "_outputs/parser-unroll"
-    else:
-        expected_dirname = dirname + "_outputs"  # expected outputs are here
-    if not os.path.exists(expected_dirname):
-        os.makedirs(expected_dirname)
+    expected_dirname = str(testutils.reference_dir(options.p4filename))
+    if "--loopsUnroll" in options.compilerOptions:
+        expected_dirname = os.path.join(expected_dirname, "parser-unroll")
+    if options.replace:
+        os.makedirs(expected_dirname, exist_ok=True)
 
     # We rely on the fact that these keys are in alphabetical order.
     rename = {
@@ -334,7 +317,7 @@ def process_file(options, argv):
         if "Compiler Bug" in open(stderr).read():
             return FAILURE
 
-    expected_error = isError(options.p4filename)
+    expected_error = testutils.is_err(options.p4filename)
     if expected_error:
         # invert result
         if result == SUCCESS:
@@ -448,7 +431,7 @@ def main(argv):
             options.testName = options.testName[:-3]
 
     result = process_file(options, argv)
-    if isError(options.p4filename) and result == FAILURE:
+    if testutils.is_err(options.p4filename) and result == FAILURE:
         print("Program was expected to fail")
 
     sys.exit(result)

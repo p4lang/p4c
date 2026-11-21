@@ -6,7 +6,7 @@
 # patterns by calling p4c_find_test_names then pass the list to p4tools_add_test_list Arguments: -
 # tag is a label for the set of test suite where this test belongs (for example, p4ctest) - driver
 # is the script that is used to run the tests and compare the results - testsuites is a list of
-# directory patterns, e.g.: testdata/p4_16_samples/*.p4 - xfails is a set of tests that are expected
+# directory patterns, e.g.: testdata/core/*.p4 - xfails is a set of tests that are expected
 # to fail - target is the target to test against - arch is the p4 architecture - std is the p4
 # standard - enable_runner is the flag to compile the p4 and run the runner -- if true, run the
 # runner -- if false, run the PTF test

@@ -19,6 +19,7 @@ import os
 import shlex
 import subprocess
 import time
+from pathlib import Path
 
 import ptf
 import ptf.testutils as testutils
@@ -31,6 +32,9 @@ if not len(logger.handlers):
     logger.addHandler(logging.StreamHandler())
 
 TEST_PIPELINE_ID = 1
+TESTDATA = Path(__file__).resolve().parents[4] / "testdata"
+PSA_PROGRAMS = TESTDATA / "ebpf/psa"
+PSA_REFERENCES = TESTDATA / "output/ebpf/psa"
 TEST_PIPELINE_MOUNT_PATH = "/sys/fs/bpf/pipeline{}".format(TEST_PIPELINE_ID)
 PIPELINE_MAPS_MOUNT_PATH = "{}/maps".format(TEST_PIPELINE_MOUNT_PATH)
 

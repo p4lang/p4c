@@ -29,8 +29,7 @@ Two-level map of the repository (major folders only):
 |-- p4include/             # P4 headers.
 |-- test/                  # Unit tests.
 |-- testdata/              # Test inputs/outputs.
-|   |-- {p4_14_*,p4_16_*,p4tc_*}/ # Test suites.
-|-- tests/                 # Integration tests.
+|   |-- {p4_14,core,shared,bmv2,dpdk,ebpf,tc,tofino,ubpf,output}/ # Test suites.
 |-- tools/                 # Dev scripts.
 ```
 
@@ -60,15 +59,15 @@ Optional tools:
 ## Testing Guidelines
 - Run the full suite with `cmake --build build --target check` (additional `check-*` targets are defined in CMake files when present).
 - Idiomatic filtered runs: `ctest --test-dir build -j<N> --output-on-failure -R <filter>` (use the relevant suite or backend filter).
-- Expected outputs live under `testdata/*_outputs/`; refresh them with `P4TEST_REPLACE=1 cmake --build build --target check`.
+- Expected outputs live under `testdata/output/`; refresh them with `P4TEST_REPLACE=1 cmake --build build --target check`.
 - Pass compiler flags via `P4C_ARGS`, e.g. `P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG" cmake --build build --target check`.
 
 ### Contributing a Test
-- Every language or compiler fix needs a P4 program under `testdata/p4_16_samples/` (use `testdata/p4_16_errors/` for programs that must be rejected).
+- Every language or compiler fix needs a P4 program in its suite under `testdata/`. Use `core/` for P4-16 language regressions and the suite's `errors/` directory for programs that must be rejected.
 - Name the file after the GitHub issue it covers (`issue1234.p4`) or after the feature under test (`generic-extern-inference.p4`); add the `-bmv2`, `_ebpf`, `_ubpf`, or `psa-`/`pna-` markers only when the program targets that backend.
 - If it targets a particular backend and compiles, add a packet test (PTF/STF) to ensure compilation behaves as expected.
 - Suites are globbed at configure time, so re-run cmake after adding a file, otherwise `ctest` will not see the new test.
-- Generate the reference outputs and commit them together with the test: `P4TEST_REPLACE=1 ctest --test-dir build -R <test-name>`. This writes `<name>{,-first,-frontend,-midend}.p4` and `<name>.p4-stderr` into `testdata/p4_16_samples_outputs/`.
+- Generate the reference outputs and commit them together with the test: `P4TEST_REPLACE=1 ctest --test-dir build -R <test-name>`. The reference directory mirrors the input's directory under `testdata/output/`.
 
 ## Commit & Pull Request Guidelines
 - Use DCO sign-off for every commit (`git commit --signoff`).

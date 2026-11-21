@@ -22,7 +22,7 @@ from scapy.packet import Packet, bind_layers, split_layers
 
 
 class SimpleForwardingPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/simple-fwd.p4"
+    p4_file_path = PSA_PROGRAMS / "simple-fwd.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -38,7 +38,7 @@ class SimpleForwardingPSATest(P4EbpfTest):
 class DeparserMetadataPSATest(P4EbpfTest):
     """Both deparsers read the user metadata"""
 
-    p4_file_path = "p4testdata/deparser-metadata.p4"
+    p4_file_path = PSA_PROGRAMS / "deparser-metadata.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -55,7 +55,7 @@ class DeparserMetadataEmitPSATest(P4EbpfTest):
     TC only: with XDP the headers are emitted in TC and the user metadata is not passed there.
     """
 
-    p4_file_path = "p4testdata/deparser-metadata-emit.p4"
+    p4_file_path = PSA_PROGRAMS / "deparser-metadata-emit.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -68,7 +68,7 @@ class DeparserMetadataEmitPSATest(P4EbpfTest):
 class EgressOwnTypesPSATest(P4EbpfTest):
     """Egress uses other header and user metadata types than ingress"""
 
-    p4_file_path = "p4testdata/egress-own-types.p4"
+    p4_file_path = PSA_PROGRAMS / "egress-own-types.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -78,7 +78,7 @@ class EgressOwnTypesPSATest(P4EbpfTest):
 
 
 class PSAResubmitTest(P4EbpfTest):
-    p4_file_path = "p4testdata/resubmit.p4"
+    p4_file_path = PSA_PROGRAMS / "resubmit.p4"
 
     def runTest(self):
         pkt = testutils.simple_eth_packet()
@@ -88,7 +88,7 @@ class PSAResubmitTest(P4EbpfTest):
 
 
 class SimpleTunnelingPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/psa-tunneling.p4"
+    p4_file_path = PSA_PROGRAMS / "psa-tunneling.p4"
 
     def runTest(self):
         pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(ip_dst="192.168.1.1")
@@ -107,7 +107,7 @@ class SimpleTunnelingPSATest(P4EbpfTest):
 
 
 class PSACloneI2E(P4EbpfTest):
-    p4_file_path = "p4testdata/clone-i2e.p4"
+    p4_file_path = PSA_PROGRAMS / "clone-i2e.p4"
 
     def runTest(self):
         # create clone session table
@@ -136,7 +136,7 @@ class PSACloneI2E(P4EbpfTest):
 
 
 class EgressTrafficManagerDropPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/etm-drop.p4"
+    p4_file_path = PSA_PROGRAMS / "etm-drop.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="55:44:33:22:11:00")
@@ -159,7 +159,7 @@ class EgressTrafficManagerClonePSATest(P4EbpfTest):
            destination MAC address set to '00:00:00:00:00:11'.
     """
 
-    p4_file_path = "p4testdata/etm-clone-e2e.p4"
+    p4_file_path = PSA_PROGRAMS / "etm-clone-e2e.p4"
 
     def runTest(self):
         # create clone session table
@@ -190,7 +190,7 @@ class EgressTrafficManagerRecirculatePSATest(P4EbpfTest):
     Open question: how to verify here that the eBPF program did above operations?
     """
 
-    p4_file_path = "p4testdata/etm-recirc.p4"
+    p4_file_path = PSA_PROGRAMS / "etm-recirc.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="55:44:33:22:11:00")
@@ -206,7 +206,7 @@ class EgressTrafficManagerRecirculatePSATest(P4EbpfTest):
 
 
 class MulticastPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/psa-multicast.p4"
+    p4_file_path = PSA_PROGRAMS / "psa-multicast.p4"
 
     def runTest(self):
         self.multicast_group_create(group=8)
@@ -229,7 +229,7 @@ class MulticastPSATest(P4EbpfTest):
 
 
 class SimpleLpmP4PSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/psa-lpm.p4"
+    p4_file_path = PSA_PROGRAMS / "psa-lpm.p4"
 
     def runTest(self):
         # This command adds LPM entry 10.10.0.0/16 with action forwarding on port 6 (PORT2 in ptf)
@@ -256,7 +256,7 @@ class SimpleLpmP4PSATest(P4EbpfTest):
 
 
 class SimpleLpmP4TwokeyPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/psa-lpm-two-keys.p4"
+    p4_file_path = PSA_PROGRAMS / "psa-lpm-two-keys.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(ip_src="1.2.3.4", ip_dst="10.10.11.11")
@@ -285,7 +285,7 @@ class SimpleLpmP4TwokeyPSATest(P4EbpfTest):
 
 
 class ConstDefaultActionPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/action-const-default.p4"
+    p4_file_path = PSA_PROGRAMS / "action-const-default.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -294,7 +294,7 @@ class ConstDefaultActionPSATest(P4EbpfTest):
 
 
 class ConstEntryPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/const-entry.p4"
+    p4_file_path = PSA_PROGRAMS / "const-entry.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -303,7 +303,7 @@ class ConstEntryPSATest(P4EbpfTest):
 
 
 class ConstEntryAndActionPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/const-entry-and-action.p4"
+    p4_file_path = PSA_PROGRAMS / "const-entry-and-action.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -325,7 +325,7 @@ class ConstEntryAndActionPSATest(P4EbpfTest):
 
 
 class BridgedMetadataPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/bridged-metadata.p4"
+    p4_file_path = PSA_PROGRAMS / "bridged-metadata.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -340,7 +340,7 @@ class BridgedMetadataPSATest(P4EbpfTest):
 
 @tc_only
 class QoSPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/cos-psa.p4"
+    p4_file_path = PSA_PROGRAMS / "cos-psa.p4"
 
     def runTest(self):
         ip_pkt = testutils.simple_ip_packet()
@@ -360,7 +360,7 @@ class QoSPSATest(P4EbpfTest):
 class PacketInLengthPSATest(P4EbpfTest):
     """Sends 114 bytes packet and check this using packet_in.length() in a parser"""
 
-    p4_file_path = "p4testdata/packet_in-length.p4"
+    p4_file_path = PSA_PROGRAMS / "packet_in-length.p4"
 
     def runTest(self):
         pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(ip_dst="192.168.1.1")
@@ -379,7 +379,7 @@ class PacketInLengthPSATest(P4EbpfTest):
 class PacketInAdvancePSATest(P4EbpfTest):
     """This test checks if MPLS header is skipped using packet_in.advance()"""
 
-    p4_file_path = "p4testdata/packet_in-advance.p4"
+    p4_file_path = PSA_PROGRAMS / "packet_in-advance.p4"
 
     def runTest(self):
         pkt = (
@@ -398,8 +398,8 @@ class PacketInAdvancePSATest(P4EbpfTest):
 
 
 class DigestPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/digest.p4"
-    p4info_reference_file_path = "p4testdata/digest.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "digest.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "digest.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_src="fa:fb:fc:fd:fe:f0")
@@ -420,7 +420,7 @@ class DigestPSATest(P4EbpfTest):
 
 
 class WideFieldDigest(P4EbpfTest):
-    p4_file_path = "p4testdata/wide-field-digest.p4"
+    p4_file_path = PSA_PROGRAMS / "wide-field-digest.p4"
 
     def runTest(self):
         pkt = testutils.simple_ipv6ip_packet(ipv6_src="::2", ipv6_dst="::1", ipv6_hlim=64)
@@ -441,7 +441,7 @@ class WideFieldDigest(P4EbpfTest):
 
 
 class DigestMetadataPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/digest-metadata.p4"
+    p4_file_path = PSA_PROGRAMS / "digest-metadata.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -457,8 +457,8 @@ class DigestMetadataPSATest(P4EbpfTest):
 
 
 class CountersPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/counters.p4"
-    p4info_reference_file_path = "p4testdata/counters.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "counters.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "counters.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(
@@ -485,7 +485,7 @@ class CountersPSATest(P4EbpfTest):
 
 
 class DirectCountersPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/direct-counters.p4"
+    p4_file_path = PSA_PROGRAMS / "direct-counters.p4"
 
     def runTest(self):
         self.table_add(table="ingress_tbl1", key=["10.0.0.0"], action=1)
@@ -527,8 +527,8 @@ class ParserValueSetPSATest(P4EbpfTest):
     """Test value_set implementation. P4 application will pass packet, which IP
     destination address contains value_set and destination port 80."""
 
-    p4_file_path = "p4testdata/pvs.p4"
-    p4info_reference_file_path = "p4testdata/pvs.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "pvs.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "pvs.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_udp_packet(ip_dst="10.0.0.1", udp_dport=80)
@@ -550,7 +550,7 @@ class ParserValueSetPSAWideField(P4EbpfTest):
     """Test support for fields wider than 64 bits in value_set using IPv6
     protocol."""
 
-    p4_file_path = "p4testdata/wide-field-pvs.p4"
+    p4_file_path = PSA_PROGRAMS / "wide-field-pvs.p4"
 
     def runTest(self):
         ip = "1111:2222:3333:4444:5555:6666:7777:8888"
@@ -576,7 +576,7 @@ class RandomPSATest(P4EbpfTest):
     Verify that random values are in the expected range.
     """
 
-    p4_file_path = "p4testdata/random.p4"
+    p4_file_path = PSA_PROGRAMS / "random.p4"
 
     class RandomHeader(Packet):
         name = "random"
@@ -622,7 +622,7 @@ class RandomPSATest(P4EbpfTest):
 
 
 class VerifyPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/verify.p4"
+    p4_file_path = PSA_PROGRAMS / "verify.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -646,7 +646,7 @@ class VerifyPSATest(P4EbpfTest):
 
 
 class PSATernaryTest(P4EbpfTest):
-    p4_file_path = "p4testdata/psa-ternary.p4"
+    p4_file_path = PSA_PROGRAMS / "psa-ternary.p4"
 
     def runTest(self):
         # flow rules for 'tbl_ternary_0'
@@ -740,7 +740,7 @@ class PSATernaryTest(P4EbpfTest):
 
 
 class ActionDefaultTernaryPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/action-default-ternary.p4"
+    p4_file_path = PSA_PROGRAMS / "action-default-ternary.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -751,7 +751,7 @@ class ActionDefaultTernaryPSATest(P4EbpfTest):
 
 
 class ConstEntryTernaryPSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/const-entry-ternary.p4"
+    p4_file_path = PSA_PROGRAMS / "const-entry-ternary.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -769,7 +769,7 @@ class ConstEntryTernaryPSATest(P4EbpfTest):
 
 
 class PassToKernelStackTest(P4EbpfTest):
-    p4_file_path = "p4testdata/pass-to-kernel.p4"
+    p4_file_path = PSA_PROGRAMS / "pass-to-kernel.p4"
 
     def setUp(self):
         super(PassToKernelStackTest, self).setUp()
@@ -838,7 +838,7 @@ class PassToKernelStackTest(P4EbpfTest):
 
 
 class LPMTableCachePSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/table-cache-lpm.p4"
+    p4_file_path = PSA_PROGRAMS / "table-cache-lpm.p4"
     p4c_additional_args = "--table-caching"
 
     def runTest(self):
@@ -881,7 +881,7 @@ class LPMTableCachePSATest(P4EbpfTest):
 
 
 class TernaryTableCachePSATest(P4EbpfTest):
-    p4_file_path = "p4testdata/table-cache-ternary.p4"
+    p4_file_path = PSA_PROGRAMS / "table-cache-ternary.p4"
     p4c_additional_args = "--table-caching"
 
     def runTest(self):
@@ -922,7 +922,7 @@ class WideFieldTableSupport(P4EbpfTest):
     Test support for fields wider than 64 bits in tables using IPv6 protocol.
     """
 
-    p4_file_path = "p4testdata/wide-field-tables.p4"
+    p4_file_path = PSA_PROGRAMS / "wide-field-tables.p4"
 
     def runTest(self):
         tests = [
@@ -1048,7 +1048,7 @@ class WideFieldTableSupport(P4EbpfTest):
 class EmitInIfStatementTest(P4EbpfTest):
     """Test for issue #5026: emit inside if-statement in deparser."""
 
-    p4_file_path = "p4testdata/conditional-emit.p4"
+    p4_file_path = PSA_PROGRAMS / "conditional-emit.p4"
 
     def runTest(self):
         # True branch: dstAddr[7:0] == 1, IPv4 header is emitted.

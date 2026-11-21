@@ -388,9 +388,10 @@ fi
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
-  # Symlink the toz3 extension for the p4 compiler.
-  mkdir -p ${P4C_DIR}/extensions
-  git clone -b stable https://github.com/p4gauntlet/toz3 extensions/toz3
+  # Pin fruffy/p4c-5996-testdata until toz3's stable branch supports the new layout.
+  local toz3_dir="${P4C_DIR}/extensions/toz3"
+  git clone https://github.com/p4gauntlet/toz3 "$toz3_dir"
+  git -C "$toz3_dir" checkout --detach 8c9129beec26b23abbfc9f8dcc160bcb07de2ac8
   # Disable failures on crashes
   CMAKE_FLAGS+="-DVALIDATION_IGNORE_CRASHES=ON "
 }

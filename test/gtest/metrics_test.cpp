@@ -2,8 +2,8 @@
 Tests for the frontend code metric collection passes in frontends/p4/metrics.
 The tests run the frontend of the compiler and compare the code metrics
 output with the expected output. P4 programs for testing are located in
-testdata/p4_16_samples, and the expected metric outputs are located in
-testdata/p4_16_samples_outputs.
+testdata/core, and the expected metric outputs are located in
+testdata/output/core.
 */
 
 #include <gtest/gtest.h>
@@ -104,12 +104,12 @@ class MetricPassesTest : public P4CTest {
     }
 };
 
-#define DEFINE_METRIC_TEST(N)                                                                    \
-    TEST_F(MetricPassesTest, MetricsTest##N) {                                                   \
-        inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_" #N ".p4");            \
-        SetUpFrontend(true);                                                                     \
-        compareWithExpectedOutput(                                                               \
-            srcPath("testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.json")); \
+#define DEFINE_METRIC_TEST(N)                                                          \
+    TEST_F(MetricPassesTest, MetricsTest##N) {                                         \
+        inputFile = srcPath("testdata/core/metrics/metrics_test_" #N ".p4");           \
+        SetUpFrontend(true);                                                           \
+        compareWithExpectedOutput(                                                     \
+            srcPath("testdata/output/core/metrics/metrics_test_" #N "_metrics.json")); \
     }
 
 DEFINE_METRIC_TEST(1)
@@ -122,14 +122,13 @@ DEFINE_METRIC_TEST(7)
 DEFINE_METRIC_TEST(8)
 
 TEST_F(MetricPassesTest, MetricsTest9) {
-    inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_8.p4");
+    inputFile = srcPath("testdata/core/metrics/metrics_test_8.p4");
     SetUpFrontend(false);
-    compareWithExpectedOutput(
-        srcPath("testdata/p4_16_samples_outputs/metrics/metrics_test_9_metrics.json"));
+    compareWithExpectedOutput(srcPath("testdata/output/core/metrics/metrics_test_9_metrics.json"));
 }
 
 TEST_F(MetricPassesTest, MetricsTest10) {
-    inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_8.p4");
+    inputFile = srcPath("testdata/core/metrics/metrics_test_8.p4");
     SetUpFrontend(true);
 
     // Check if the metric values got written to compiler context.

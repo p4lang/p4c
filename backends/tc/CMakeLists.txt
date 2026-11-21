@@ -103,6 +103,3 @@ add_custom_target(linkp4tc
         )
 
 add_dependencies(p4c_driver linkp4tc)
-
-#### Tests ####
-include(${CMAKE_CURRENT_SOURCE_DIR}/TCTests.cmake)

@@ -9,9 +9,7 @@ if(NOT ENABLE_CONTROL_PLANE)
 endif()
 
 if(ENABLE_TESTING)
-  # Include the test subdirectory.
-  message("-- Adding p4testgen bmv2 test suite")
-  include(test/P4Tests.cmake)
+  include("${P4C_SOURCE_DIR}/testdata/bmv2/testgen/Testgen.cmake")
 endif()
 
 # Source files for p4testgen.

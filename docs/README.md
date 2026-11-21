@@ -66,29 +66,10 @@ p4c
 ├── test                           -- test code
 │   └── gtest                      -- unit test code written using gtest
 ├── testdata                       -- test inputs and reference outputs
-│   ├───extern_modules             -- Extern module input test programs
-│   ├───p4_14_errors               -- P4_14 negative input test programs
-│   ├───p4_14_errors_outputs       -- Expected outputs from P4_14 negative tests
-│   ├───p4_14_samples              -- P4_14 input test programs
-│   ├───p4_14_samples_outputs      -- Expected outputs from P4_14 tests
-|   ├── p4_16_samples              -- P4_16 input test programs
-|   ├── p4_16_samples_outputs      -- Expected outputs from P4_16 tests
-│   ├───p4_16_bmv_errors           -- P4_16 negative input tests for the bmv2 backend
-│   ├───p4_16_dpdk_errors          -- P4_16 negative input tests for the dpdk backend
-│   ├───p4_16_dpdk_errors_outputs  -- Expected outputs from dpdk negative tests 
-│   ├───p4_16_ebpf_errors          -- P4_16 negative input tests for the ebpf backend
-│   ├───p4_16_ebpf_errors_outputs  -- Expected outputs from edpf negative tests 
-|   ├── p4_16_errors               -- P4_16 negative input test programs
-|   ├── p4_16_errors_outputs       -- Expected outputs from P4_16 negative tests
-│   ├───p4_16_pna_errors           -- P4_16 negative input test programs for pna
-│   ├───p4_16_pna_errors_outputs   -- Expected outputs from P4_16 pna negative tests
-│   ├───p4_16_psa_errors           -- P4_16 negative input test programs for psa
-│   ├───p4_16_psa_errors_outputs   -- Expected outputs from P4_16 psa negative tests
-│   ├───p4_16_samples              -- P4_16 input test programs
-│   ├───p4_16_samples_outputs      -- Expected outputs from P4_16 tests
-│   ├───p4tc_samples               -- P4 traffic control sample input test programs
-│   ├───p4tc_samples_outputs       -- Expected outputs from P4 traffic control tests
-│   └───v1_1_samples               -- P4 v1.1 sample programs
+│   ├── p4_14, core                -- language tests
+│   ├── shared/{psa,pna}           -- inputs exercised by multiple compiler backends
+│   ├── bmv2, dpdk, ebpf, tc, tofino, ubpf -- target-specific inputs
+│   └── output                     -- reference files, grouped like the inputs
 └── tools                          -- external programs used in the build/test process
     ├── ci-ptf                     -- scripts to run PSA PTF tests
     ├── debian-build               -- resources and scripts for creating Ubuntu (or Debian) packages
@@ -324,16 +305,7 @@ tests are using at the link below:
 
 ### Adding new test data
 
-To add a new input test with a sample P4 code file (under `testdata/p4_16_samples/` for example), one needs to:
-
-* Add the `*.p4` file to the `testdata/p4_16_samples/` directory. The file name might determine which test suite this test belongs to. Those are determined by cmake commands.
-  * For example, [any P4 file under `testdata/p4_16_samples/`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L63) belongs to the [`p4` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L113) (meaning it will run with `make check-p4`).
-  * [File ending with `*-bmv2.p4`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L127) also belongs to the [`bmv2` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L200) (meaning it will run with `make check-bmv2`).
-* Then generate reference outputs:
-  * For a frontend-only test, you can run `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`. Note that this command needs to run under the `build/` directory. The test will fail if the test output is missing or does not match with the existing reference outputs. Toggling the `-f` flag will force the script to produce new reference outputs, which can, and should be committed, along with the changes that caused the output change. 
-  * For a test targeting bmv2 backend, the corresponding command is `../backends/bmv2/run-bmv2-test.py`.
-  * If you have many reference outputs to add/update, you could also do `P4TEST_REPLACE=True make check` (or `make check-*`) to update all tests.
-* The reference files for each test will be updated after running the tests.
+See the [P4C test guide](AddingTestGuide.md) for suite selection, naming, and reference generation.
 
 ## Coding conventions
 

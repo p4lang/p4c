@@ -49,7 +49,7 @@ def build(compiler, directory, mode, flags, prepare=None, extra_sources=()):
         "deparser-bits": "tc-codegen-deparser-bits.p4",
         "register-init": "tc-register-init.p4",
     }
-    source = ROOT / "testdata/p4_16_samples" / fixtures.get(mode, "tc-codegen-emission.p4")
+    source = ROOT / "testdata/tc" / fixtures.get(mode, "tc-codegen-emission.p4")
     shutil.copyfile(source, directory / "case.p4")
     execute(
         [compiler, "-I", ROOT / "p4include", *flags, directory / "case.p4", "-o", directory],
@@ -489,7 +489,7 @@ def main():
             record["variants"][name]["rejection_specs"] = specs
     if args.mode == "arithmetic":
         oracle = {frame: wire for frame, wire, _ in cases("arithmetic", "32-control")[0]}
-        stf = (ROOT / "testdata/p4_16_samples/tc-codegen-arithmetic.stf").read_text()
+        stf = (ROOT / "testdata/tc/tc-codegen-arithmetic.stf").read_text()
         packets = [
             line.split() for line in stf.splitlines() if line.startswith(("packet ", "expect "))
         ]
@@ -587,7 +587,7 @@ def main():
                     "-I",
                     ROOT / "p4include",
                     *flags,
-                    ROOT / f"testdata/p4_16_samples/tc-codegen-{program}.p4",
+                    ROOT / f"testdata/tc/tc-codegen-{program}.p4",
                     "-o",
                     directory,
                 ],
@@ -611,7 +611,7 @@ def main():
                     ROOT / "p4include",
                     *two_ranges,
                     "--tc-outline-parser-local=left:" + local + ":5",
-                    ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                    ROOT / "testdata/tc/tc-codegen-emission.p4",
                     "-o",
                     directory,
                 ],
@@ -635,7 +635,7 @@ def main():
                     "-I",
                     ROOT / "p4include",
                     flag,
-                    ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                    ROOT / "testdata/tc/tc-codegen-emission.p4",
                     "-o",
                     directory,
                 ],
@@ -653,7 +653,7 @@ def main():
                 args.compiler.resolve(),
                 "-I",
                 ROOT / "p4include",
-                ROOT / "testdata/p4_16_samples/tc-codegen-vlan-deparser.p4",
+                ROOT / "testdata/tc/tc-codegen-vlan-deparser.p4",
                 "-o",
                 directory,
             ],
@@ -687,7 +687,7 @@ def main():
                     "--tc-outline-parser-range=parse_flags:finish",
                     "--tc-outline-parser-offset-max=1522",
                     flag,
-                    ROOT / "testdata/p4_16_samples/tc-codegen-narrow-cache.p4",
+                    ROOT / "testdata/tc/tc-codegen-narrow-cache.p4",
                     "-o",
                     directory,
                 ],
@@ -747,7 +747,7 @@ def main():
                         "--tc-outline-parser-range=start:parse_flags",
                         "--tc-outline-parser-range=parse_flags:finish",
                         name + "=" + template.format(v=value),
-                        ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                        ROOT / "testdata/tc/tc-codegen-emission.p4",
                         "-o",
                         directory,
                     ],
@@ -798,7 +798,7 @@ def main():
                         "--tc-outline-parser-range=parse_flags:finish",
                         *extra,
                         name + "=" + template.format(v=value),
-                        ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                        ROOT / "testdata/tc/tc-codegen-emission.p4",
                         "-o",
                         directory,
                     ],
@@ -836,7 +836,7 @@ def main():
                     ROOT / "p4include",
                     "--tc-outline-deparser",
                     "--tc-outline-deparser-max=" + value,
-                    ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                    ROOT / "testdata/tc/tc-codegen-emission.p4",
                     "-o",
                     directory,
                 ],
@@ -861,7 +861,7 @@ def main():
                     ROOT / "p4include",
                     "--tc-outline-deparser",
                     "--tc-outline-deparser-max=" + value,
-                    ROOT / "testdata/p4_16_samples/tc-codegen-emission.p4",
+                    ROOT / "testdata/tc/tc-codegen-emission.p4",
                     "-o",
                     directory,
                 ],

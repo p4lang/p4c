@@ -669,11 +669,11 @@ All tests should be included in `cmake --build build --target check` and in addi
 set(MY_DRIVER <driver or compiler executable>)
 
 set (MY_TEST_SUITES
-  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4
-  ${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4
+  ${P4C_SOURCE_DIR}/testdata/core/*.p4
+  ${P4C_SOURCE_DIR}/testdata/core/errors/*.p4
   )
 set (MY_XFAIL_TESTS
-  testdata/p4_16_errors/this_test_fails.p4
+  testdata/core/errors/this_test_fails.p4
  )
 p4c_add_tests("mybackend" ${MY_DRIVER} "${MY_TEST_SUITES}" "${MY_XFAIL_TESTS}")
 ```
@@ -681,7 +681,7 @@ p4c_add_tests("mybackend" ${MY_DRIVER} "${MY_TEST_SUITES}" "${MY_XFAIL_TESTS}")
 In addition, you can add individual tests to a suite using the following macro:
 ```
 set(isXFail FALSE)
-set(SWITCH_P4 testdata/p4_14_samples/switch_20160512/switch.p4)
+set(SWITCH_P4 testdata/p4_14/switch_20160512/switch.p4)
 
 p4c_add_test_with_args ("mybackend" ${MY_DRIVER} ${isXFail}
   "switch_with_custom_profile" ${SWITCH_P4} "-DCUSTOM_PROFILE")
