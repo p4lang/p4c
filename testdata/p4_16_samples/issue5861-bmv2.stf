@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Output bytes: <parser_error> <elem0_tag> <tail_valid> <tail_value> [<unparsed_payload>]
+# Error codes: 00 = NoError, 01 = PacketTooShort, 02 = StackOutOfBounds
+
+# Mode 0: explicit-index loop (in-range control + reporter's short-packet case).
+# In-range terminating element: NoError, elem0_tag=AA.
+packet 0 00 01 AA
+expect 0 00 AA 00 00
+# Short first element: PacketTooShort.
+packet 0 00
+expect 0 01 00 00 00
+# First element requests another; second (out-of-range) extract has 0 bytes left: PacketTooShort.
+packet 0 00 00 BB
+expect 0 01 BB 00 00
+# Second (out-of-range) extract has only 1 of 2 bytes left: PacketTooShort (checks 16-bit width).
+packet 0 00 00 CC DD
+expect 0 01 CC 00 00 DD
+
+# Mode 1: out-of-range explicit extract (index == 1) followed by trailing extract(h.tail).
+# Short at out-of-range extract (0 bytes left): PacketTooShort.
+packet 0 01 11 22
+expect 0 01 22 00 00
+# Short at out-of-range extract (1 of 2 bytes left): PacketTooShort.
+packet 0 01 11 22 33
+expect 0 01 22 00 00 33
+# Exact 2 bytes for out-of-range extract (33 44 consumed), 0 bytes left for tail: PacketTooShort.
+packet 0 01 11 22 33 44
+expect 0 01 22 00 00
+# Full packet: out-of-range extract consumes 33 44 without clobbering stack[0], tail extracts 55.
+packet 0 01 11 22 33 44 55
+expect 0 00 22 01 55
+
+# Mode 2: .next exhaustion control (must still report StackOutOfBounds).
+# In-range .next terminating element: NoError, elem0_tag=EE.
+packet 0 02 01 EE
+expect 0 00 EE 00 00
+# .next exhaustion on short packet: StackOutOfBounds.
+packet 0 02 00 FF
+expect 0 02 FF 00 00
+# .next exhaustion on long packet: StackOutOfBounds (12 34 unparsed).
+packet 0 02 00 FF 12 34
+expect 0 02 FF 00 00 12 34
+
+# Mode 3: negative runtime index (-1) followed by trailing extract(h.tail).
+# Short at negative-index extract (1 of 2 bytes left): PacketTooShort.
+packet 0 03 77
+expect 0 01 00 00 00 77
+# Full packet: negative-index extract consumes 77 88, tail extracts 99.
+packet 0 03 77 88 99
+expect 0 00 00 01 99

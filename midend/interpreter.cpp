@@ -1079,7 +1079,13 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
     }
     auto ix = r->to<SymbolicInteger>();
     CHECK_NULL(ix);
-    auto result = lv->get(expression, ix->constant->asInt());
+    SymbolicValue *result = nullptr;
+    if (ix->constant->value < 0 || !ix->constant->fitsUint64() ||
+        ix->constant->asUint64() >= lv->size) {
+        result = new SymbolicException(expression, P4::StandardExceptions::StackOutOfBounds);
+    } else {
+        result = lv->get(expression, ix->constant->asUint64());
+    }
     set(expression, result);
 }
 
@@ -1094,12 +1100,69 @@ void ExpressionEvaluator::postorder(const IR::PathExpression *expression) {
     set(expression, result);
 }
 
+namespace {
+
+// If @expr is an explicit runtime index into a header stack (hs[idx]) or a
+// header union stack member (hs[idx].field), return the ArrayIndex node.
+// Returns nullptr for compile-time constant indices and for .next/.last.
+const IR::ArrayIndex *getRuntimeHeaderStackIndex(const IR::Expression *expr,
+                                                 const TypeMap *typeMap) {
+    const IR::ArrayIndex *arrIdx = expr->to<IR::ArrayIndex>();
+    if (arrIdx == nullptr) {
+        if (const auto *mem = expr->to<IR::Member>()) {
+            arrIdx = mem->expr->to<IR::ArrayIndex>();
+            if (arrIdx != nullptr) {
+                const auto *elemType = typeMap->getType(arrIdx, true);
+                if (elemType == nullptr || !elemType->is<IR::Type_HeaderUnion>()) return nullptr;
+            }
+        }
+    }
+    if (arrIdx == nullptr || arrIdx->right->is<IR::Constant>()) return nullptr;
+    const auto *baseType = typeMap->getType(arrIdx->left, true);
+    if (baseType == nullptr || !baseType->is<IR::Type_Array>()) return nullptr;
+    return arrIdx;
+}
+
+}  // namespace
+
 void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) {
     MethodInstance *mi = MethodInstance::resolve(expression, refMap, typeMap);
+
+    // P4-16 sections 8.18, 8.22, and 12.8.1.1: fixed-width packet.extract on an
+    // explicit runtime header stack index that evaluates out of range does not
+    // raise StackOutOfBounds; it still checks packet length and advances the
+    // cursor while leaving defined stack elements unchanged.
+    bool outOfRangeExplicitExtract = false;
+    if (auto *em = mi->to<ExternMethod>()) {
+        if (em->originalExternType->name.name == P4CoreLibrary::instance().packetIn.name &&
+            em->method->name.name == P4CoreLibrary::instance().packetIn.extract.name &&
+            expression->arguments->size() == 1) {
+            auto *arg0 = expression->arguments->at(0);
+            auto *argType = typeMap->getType(arg0, true);
+            if (argType != nullptr && argType->is<IR::Type_Header>() &&
+                factory->isFixedWidth(argType)) {
+                if (const auto *arrIdx = getRuntimeHeaderStackIndex(arg0->expression, typeMap)) {
+                    auto *baseVal = get(arrIdx->left);
+                    auto *idxVal = get(arrIdx->right);
+                    if (auto *sa = baseVal->to<SymbolicArray>()) {
+                        if (auto *ix = idxVal->to<SymbolicInteger>()) {
+                            if (ix->isKnown() &&
+                                (ix->constant->value < 0 || !ix->constant->fitsUint64() ||
+                                 ix->constant->asUint64() >= sa->size)) {
+                                outOfRangeExplicitExtract = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     for (auto arg : *expression->arguments) {
         auto argValue = get(arg->expression);
         CHECK_NULL(argValue);
         if (argValue->is<SymbolicError>()) {
+            if (outOfRangeExplicitExtract && arg == expression->arguments->at(0)) continue;
             set(expression, argValue);
             return;
         }
@@ -1213,6 +1276,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
                 auto pkt = obj->to<SymbolicPacketIn>();
                 pkt->advance(width);
                 if (!fixed) pkt->setConservative();
+
+                if (outOfRangeExplicitExtract) {
+                    set(expression, SymbolicVoid::get());
+                    return;
+                }
 
                 BUG_CHECK(hdr->is<SymbolicHeader>(), "%1%: Not a header?", hdr);
                 auto sh = hdr->to<SymbolicHeader>();

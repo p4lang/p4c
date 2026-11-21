@@ -39,6 +39,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyParser.index") int<32> index_0;
+    srcRoute_t discard;
     state stateOutOfBound {
         verify(false, error.StackOutOfBounds);
         transition reject;
@@ -75,6 +76,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         }
     }
     state parse_srcRouting3 {
+        packet.extract<srcRoute_t>(discard);
+        index_0 = (int<32>)((int)index_0 + 1);
         transition stateOutOfBound;
     }
     @name(".start") state start {
