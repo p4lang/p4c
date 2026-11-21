@@ -9,10 +9,8 @@ parser p0(packet_in p, out Header h) {
     state start {
         b_0 = true;
         p.extract<Header>(h);
-        transition select(h.data, 1w1) {
-            (default, 1w1): next;
-            (default, default): reject;
-            default: noMatch;
+        transition select(h.data) {
+            default: next;
         }
     }
     state next {
@@ -22,10 +20,6 @@ parser p0(packet_in p, out Header h) {
             (default, default): reject;
             default: reject;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 
