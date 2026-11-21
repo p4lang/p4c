@@ -4,6 +4,8 @@
 
 #include "parserUnroll.h"
 
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 #include "interpreter.h"
 #include "ir/ir.h"
 #include "lib/hash.h"
@@ -164,6 +166,84 @@ class ParserStateRewriter : public Transform {
         currentIndex = 0;
     }
 
+    /// Lowers fixed-width 1-argument packet.extract on an out-of-range explicit
+    /// runtime stack index to extract into a fresh parser-local scratch header
+    /// so packet length checks, cursor movement, and subsequent statements are
+    /// preserved across all backends without modifying stack elements.
+    const IR::Node *preorder(IR::MethodCallExpression *expression) override {
+        if (valueMap == nullptr) return expression;
+        const auto *orig = getOriginal<IR::MethodCallExpression>();
+        const auto *mi = MethodInstance::resolve(orig, refMap, typeMap);
+        const auto *em = mi->to<ExternMethod>();
+        if (em == nullptr) return expression;
+        const auto &pktIn = P4CoreLibrary::instance().packetIn;
+        if (em->originalExternType->name.name != pktIn.name ||
+            em->method->name.name != pktIn.extract.name || orig->arguments->size() != 1) {
+            return expression;
+        }
+
+        const auto *arg0 = orig->arguments->at(0);
+        const auto *argType = typeMap->getType(arg0, true);
+        SymbolicValueFactory factory(typeMap);
+        const auto *hdrType = argType != nullptr ? argType->to<IR::Type_Header>() : nullptr;
+        if (hdrType == nullptr || !factory.isFixedWidth(hdrType)) {
+            return expression;
+        }
+
+        const IR::ArrayIndex *arrIdx = arg0->expression->to<IR::ArrayIndex>();
+        if (arrIdx == nullptr) {
+            if (const auto *mem = arg0->expression->to<IR::Member>()) {
+                arrIdx = mem->expr->to<IR::ArrayIndex>();
+                if (arrIdx != nullptr) {
+                    const auto *elemType = typeMap->getType(arrIdx, true);
+                    if (elemType == nullptr || !elemType->is<IR::Type_HeaderUnion>()) {
+                        return expression;
+                    }
+                }
+            }
+        }
+        if (arrIdx == nullptr || arrIdx->right->is<IR::Constant>()) return expression;
+
+        const auto *baseType = getTypeArray(arrIdx->left);
+        if (baseType == nullptr || !baseType->is<IR::Type_Array>()) return expression;
+        const auto *arrayType = baseType->to<IR::Type_Array>();
+
+        ExpressionEvaluator ev(refMap, typeMap, valueMap);
+        auto *val = ev.evaluate(arrIdx->right, false);
+        if (!val->is<SymbolicInteger>()) return expression;
+        auto *si = val->to<SymbolicInteger>();
+        if (!si->isKnown()) return expression;
+        const auto *res = si->constant;
+        if (res->value >= 0 && res->fitsUint64() && res->asUint64() < arrayType->getSize()) {
+            return expression;
+        }
+
+        cstring tmpName = refMap->newName("discard"_cs);
+        auto *typeName = new IR::Type_Name(new IR::Path(hdrType->name));
+        auto *decl = new IR::Declaration_Variable(orig->srcInfo, IR::ID(tmpName), typeName);
+        parserStructure->newLocals.push_back(decl);
+
+        auto *tmpPath =
+            new IR::PathExpression(arg0->srcInfo, hdrType, new IR::Path(arg0->srcInfo, tmpName));
+        auto *newArg = new IR::Argument(arg0->srcInfo, arg0->name, tmpPath);
+        auto *newArgs = new IR::Vector<IR::Argument>({newArg});
+        auto *newCall = expression->clone();
+        newCall->arguments = newArgs;
+
+        refMap->setDeclaration(typeName->path, hdrType);
+        typeMap->setType(typeName, new IR::Type_Type(hdrType));
+        typeMap->setType(decl, hdrType);
+        refMap->setDeclaration(tmpPath->path, decl);
+        typeMap->setType(tmpPath, hdrType);
+        typeMap->setLeftValue(tmpPath);
+        typeMap->setType(newArg, hdrType);
+        typeMap->setType(newCall, IR::Type_Void::get());
+
+        state->substitutedIndexes[arrIdx->left] = res->clone();
+        prune();
+        return newCall;
+    }
+
     /// Updates indexes of a header stack.
     IR::Node *preorder(IR::ArrayIndex *expression) {
         if (expression->right->is<IR::Constant>()) {
@@ -192,7 +272,7 @@ class ParserStateRewriter : public Transform {
             return expression;
         }
         const auto *arrayType = basetype->to<IR::Type_Array>();
-        if (res->asUnsigned() >= arrayType->getSize()) {
+        if (res->value < 0 || !res->fitsUint64() || res->asUint64() >= arrayType->getSize()) {
             wasOutOfBound = true;
             return expression;
         }
