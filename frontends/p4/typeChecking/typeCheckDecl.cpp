@@ -449,6 +449,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
         return member;
     }
     const IR::Type *exprType = getType(member->value);
+    if (exprType == nullptr) return member;
     auto tvs = unifyCast(member, type, exprType,
                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
                          {member, exprType, type});

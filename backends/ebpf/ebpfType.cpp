@@ -402,6 +402,16 @@ unsigned EBPFScalarTypePNA::alignment() const {
         return 1;
 }
 
+void EBPFScalarTypePNA::emit(CodeBuilder *builder) {
+    if (!isSigned || !generatesScalar(width)) {
+        EBPFScalarType::emit(builder);
+        return;
+    }
+
+    unsigned scalarWidth = width <= 8 ? 8 : width <= 16 ? 16 : width <= 32 ? 32 : 64;
+    builder->appendFormat("s%u", scalarWidth);
+}
+
 void EBPFScalarTypePNA::declare(CodeBuilder *builder, cstring id, bool asPointer) {
     if (generatesScalar(width) && isPrimitiveByteAligned == true) {
         emit(builder);

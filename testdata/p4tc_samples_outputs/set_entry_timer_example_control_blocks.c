@@ -122,7 +122,7 @@ if (/* hdr->ipv4.isValid() */
                                         .tblid = 1,
                                         .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key));
+                                    bpf_p4tc_entry_update(skb, &update_params, sizeof(update_params), &key, sizeof(key));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -177,7 +177,7 @@ if (/* hdr->ipv4.isValid() */
                                         .tblid = 2,
                                         .profile_id = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key));
+                                    bpf_p4tc_entry_update(skb, &update_params, sizeof(update_params), &key, sizeof(key));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
@@ -291,11 +291,11 @@ if (/* hdr->ipv4.isValid() */
             }
             
             ebpf_byte = ((char*)(&hdr->ipv4.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->ipv4.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->ipv4.diffserv))[0];
@@ -317,15 +317,15 @@ if (/* hdr->ipv4.isValid() */
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->ipv4.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
             hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&hdr->ipv4.ttl))[0];

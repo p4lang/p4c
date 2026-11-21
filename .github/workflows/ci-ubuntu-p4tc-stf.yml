@@ -10,6 +10,8 @@ on:
     - cron: "0 0 * * *"
   pull_request:
     branches: [main]
+    # "labeled" so adding p4tc to an open PR starts a run.
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches: [main]
 
@@ -42,5 +44,5 @@ jobs:
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random -R "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
+        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random -R "p4tc_samples_stf|tc-.*-stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build

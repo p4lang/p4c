@@ -16,7 +16,8 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 field0; /* hdr.ipv4.srcAddr */
 } __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
-#define INGRESS_NH_TABLE_ACT__NOACTION 0
+#define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
+#define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     u32 hit:1,
@@ -30,6 +31,8 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
             u8 dmac[6];
             u8 smac[6];
         } ingress_send_nh;
+        struct {
+        } ingress_drop;
     } u;
 };
 
@@ -94,7 +97,13 @@ storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(valu
                                 send_to_port(value->u.ingress_send_nh.port_id);
                             }
                             break;
-                        case INGRESS_NH_TABLE_ACT__NOACTION: 
+                        case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
+                            {
+/* drop_packet() */
+                                drop_packet();
+                            }
+                            break;
+                        case INGRESS_NH_TABLE_ACT_NOACTION: 
                             {
                             }
                             break;
@@ -196,11 +205,11 @@ storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(valu
             }
             
             ebpf_byte = ((char*)(&hdr->ipv4.version))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->ipv4.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
             ebpf_byte = ((char*)(&hdr->ipv4.diffserv))[0];
@@ -222,15 +231,15 @@ storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(valu
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->ipv4.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
             hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial_ex(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&hdr->ipv4.ttl))[0];

@@ -304,4 +304,35 @@ TEST_F(P4CFrontendDefaultAction, MismatchedInvalidHeaderActionArgs) {
     EXPECT_GT(::P4::errorCount(), 0);
 }
 
+TEST_F(P4CFrontendEnumValidation, InitializerThatFailsTypeChecking) {
+    std::string program = P4_SOURCE(R"(
+        enum bit<8> FailingExample {
+            a = 0,
+            b = (bit<4>)a
+        }
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::P4::errorCount(), 1);
+    ASSERT_TRUE(errors.contains("Cannot cast from"));
+}
+
+TEST_F(P4CFrontendEnumValidation, CheckingContinuesAfterInvalidInitializer) {
+    std::string program = P4_SOURCE(R"(
+        enum bit<8> FailingExample {
+            a = 0,
+            b = (bit<4>)a,
+            unrepresentable = 256
+        }
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::P4::errorCount(), 2);
+    ASSERT_TRUE(errors.contains("unrepresentable = 256"));
+}
+
 }  // namespace P4::Test

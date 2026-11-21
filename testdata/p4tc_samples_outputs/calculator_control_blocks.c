@@ -102,7 +102,7 @@ if (/* hdr->p4calc.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_ADD: 
                                 {
-                                    hdr->p4calc.res = hdr->p4calc.operand_a + hdr->p4calc.operand_b;
+                                    hdr->p4calc.res = (((u64)(hdr->p4calc.operand_a) + (u64)(hdr->p4calc.operand_b)) & 4294967295ULL);
                                     storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
                                     storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
                                     storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));
@@ -113,7 +113,7 @@ if (/* hdr->p4calc.isValid() */
                                 break;
                             case MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_SUB: 
                                 {
-                                    hdr->p4calc.res = hdr->p4calc.operand_a - hdr->p4calc.operand_b;
+                                    hdr->p4calc.res = (((u64)(hdr->p4calc.operand_a) - (u64)(hdr->p4calc.operand_b)) & 4294967295ULL);
                                     storePrimitive64((u8 *)&tmp_5[0], 48, getPrimitive64((u8 *)(hdr->ethernet.dstAddr), 48));
                                     storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
                                     storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(tmp_5), 48));

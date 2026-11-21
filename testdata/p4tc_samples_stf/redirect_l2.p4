@@ -86,14 +86,20 @@ control ingress(
          send_to_port(port_id);
     }
 
+    action drop() {
+        drop_packet();
+    }
+
     table nh_table {
         key = {
             hdr.ipv4.srcAddr : exact @tc_type("ipv4") @name("srcAddr");
         }
         actions = {
-            send_nh;
+            @tableonly send_nh;
+            drop;
         }
         size = REDIR_TABLE_SIZE;
+        const default_action = drop;
     }
 
     apply {

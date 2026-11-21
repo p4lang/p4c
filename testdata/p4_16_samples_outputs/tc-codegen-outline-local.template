@@ -1,0 +1,7 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/tc-codegen-outline-local numtables 0
+$TC p4template update pipeline/tc-codegen-outline-local state ready
