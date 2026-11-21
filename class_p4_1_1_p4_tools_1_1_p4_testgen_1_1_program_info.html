@@ -183,10 +183,10 @@ virtual const IR::Type_Bits *&#160;</td><td class="memItemRight" valign="bottom"
 <tr class="separator:a8351919e9f65903e1cd28eececf008b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1b5895605090143d8a1bf69d633b310" id="r_ae1b5895605090143d8a1bf69d633b310"><td class="memItemLeft" align="right" valign="top">std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae1b5895605090143d8a1bf69d633b310">getTargetConstraints</a> () const</td></tr>
 <tr class="separator:ae1b5895605090143d8a1bf69d633b310"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1d54878c7f854586b126a2df25ed48d" id="r_ae1d54878c7f854586b126a2df25ed48d"><td class="memItemLeft" align="right" valign="top">virtual const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae1d54878c7f854586b126a2df25ed48d">getTargetInputPortVar</a> () const =0</td></tr>
-<tr class="separator:ae1d54878c7f854586b126a2df25ed48d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a324651ca71136e2f27a0bb5d4fda58fa" id="r_a324651ca71136e2f27a0bb5d4fda58fa"><td class="memItemLeft" align="right" valign="top">virtual const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a324651ca71136e2f27a0bb5d4fda58fa">getTargetOutputPortVar</a> () const =0</td></tr>
-<tr class="separator:a324651ca71136e2f27a0bb5d4fda58fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9ca7eb14c83a6b67886b751417cd8d1" id="r_aa9ca7eb14c83a6b67886b751417cd8d1"><td class="memItemLeft" align="right" valign="top">virtual IR::StateVariable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9ca7eb14c83a6b67886b751417cd8d1">getTargetInputPortVar</a> () const =0</td></tr>
+<tr class="separator:aa9ca7eb14c83a6b67886b751417cd8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dae78964a9e740e17ad2b2a2dede6a3" id="r_a8dae78964a9e740e17ad2b2a2dede6a3"><td class="memItemLeft" align="right" valign="top">virtual IR::StateVariable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dae78964a9e740e17ad2b2a2dede6a3">getTargetOutputPortVar</a> () const =0</td></tr>
+<tr class="separator:a8dae78964a9e740e17ad2b2a2dede6a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94825cd707a7efc20ca7ea868f69b491" id="r_a94825cd707a7efc20ca7ea868f69b491"><td class="memItemLeft" align="right" valign="top"><a id="a94825cd707a7efc20ca7ea868f69b491" name="a94825cd707a7efc20ca7ea868f69b491"></a>
 <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html">ProgramInfo</a> &amp;)=default</td></tr>
 <tr class="separator:a94825cd707a7efc20ca7ea868f69b491"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -539,8 +539,8 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
 
 </div>
 </div>
-<a id="ae1d54878c7f854586b126a2df25ed48d" name="ae1d54878c7f854586b126a2df25ed48d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae1d54878c7f854586b126a2df25ed48d">&#9670;&#160;</a></span>getTargetInputPortVar()</h2>
+<a id="aa9ca7eb14c83a6b67886b751417cd8d1" name="aa9ca7eb14c83a6b67886b751417cd8d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9ca7eb14c83a6b67886b751417cd8d1">&#9670;&#160;</a></span>getTargetInputPortVar()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -549,7 +549,7 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const IR::StateVariable &amp; P4::P4Tools::P4Testgen::ProgramInfo::getTargetInputPortVar </td>
+          <td class="memname">virtual IR::StateVariable P4::P4Tools::P4Testgen::ProgramInfo::getTargetInputPortVar </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -563,12 +563,12 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>the metadata member corresponding to the ingress port </dd></dl>
 
-<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a9a068cc5099ad7c9250e7994ede29ca7">P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html#a5e6692f1c1d3791d3a29973da1da3ab7">P4::P4Tools::P4Testgen::EBPF::EBPFProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#acca77f233f6f692f42cb5778bf72478f">P4::P4Tools::P4Testgen::Pna::SharedPnaProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html#a6d2dfa63448caaffdc911546cbbabd06">P4::P4Tools::P4Testgen::Tofino::JBayProgramInfo</a>, and <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html#a9347b8b874c4e292286da02de09e8e58">P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo</a>.</p>
+<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a93f0d1a7f73993c3493227ac645b3e0e">P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html#ade008400898d09f8e78f129a62958cd1">P4::P4Tools::P4Testgen::EBPF::EBPFProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#a5ba5994c372631f7e3c8ae4005663d6f">P4::P4Tools::P4Testgen::Pna::SharedPnaProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html#aeea5dc3d62d639ea5e5a946b42cedb78">P4::P4Tools::P4Testgen::Tofino::JBayProgramInfo</a>, and <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html#a8da8b863a8b7d6101e8eb716623ba37f">P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo</a>.</p>
 
 </div>
 </div>
-<a id="a324651ca71136e2f27a0bb5d4fda58fa" name="a324651ca71136e2f27a0bb5d4fda58fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a324651ca71136e2f27a0bb5d4fda58fa">&#9670;&#160;</a></span>getTargetOutputPortVar()</h2>
+<a id="a8dae78964a9e740e17ad2b2a2dede6a3" name="a8dae78964a9e740e17ad2b2a2dede6a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dae78964a9e740e17ad2b2a2dede6a3">&#9670;&#160;</a></span>getTargetOutputPortVar()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -577,7 +577,7 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const IR::StateVariable &amp; P4::P4Tools::P4Testgen::ProgramInfo::getTargetOutputPortVar </td>
+          <td class="memname">virtual IR::StateVariable P4::P4Tools::P4Testgen::ProgramInfo::getTargetOutputPortVar </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -591,7 +591,7 @@ std::optional&lt; const IR::Expression * &gt;&#160;</td><td class="memItemRight"
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>the metadata member corresponding to the final output port </dd></dl>
 
-<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#af40313981f968183a793fd5e012e28e3">P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html#a5c38817b8e009d39af7698bfccaf1e43">P4::P4Tools::P4Testgen::EBPF::EBPFProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#a1bf376b36bdb9b7d3e36a9312ae0affc">P4::P4Tools::P4Testgen::Pna::SharedPnaProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html#a9e37aef9a5b0aa1111dbddb7c26845ac">P4::P4Tools::P4Testgen::Tofino::JBayProgramInfo</a>, and <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html#aadecd98323c3b23ffc12bc9f1f70c2d8">P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo</a>.</p>
+<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a1252d5dd5851d1430a350bf159733c16">P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html#a2606b88823b1402c66595c7bc05c23e6">P4::P4Tools::P4Testgen::EBPF::EBPFProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html#a443aeef20057d09f7a6c4d483acc3ee7">P4::P4Tools::P4Testgen::Pna::SharedPnaProgramInfo</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html#ad8fdbbab5f0688ebb9bee04de709f936">P4::P4Tools::P4Testgen::Tofino::JBayProgramInfo</a>, and <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html#a3f2e3d9a6d985cae52260fe7d58d1740">P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo</a>.</p>
 
 </div>
 </div>
