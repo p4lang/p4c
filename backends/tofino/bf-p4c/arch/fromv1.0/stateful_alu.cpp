@@ -208,9 +208,8 @@ class ConstantLogicValue : public Inspector {
 };
 
 class CreateSaluApplyFunction : public Inspector {
-    // These annotations will be put on the RegisterAction instance that will be
-    // created to contain the apply function being created by this inspector
-    IR::Vector<IR::Annotation> annots;
+    // Append register initializers to the annotations on the enclosing action instance.
+    IR::Vector<IR::Annotation> &annots;
     P4V1::ProgramStructure *structure;
     const IR::Type *rtype;
     const IR::Type::Bits *utype;
@@ -698,10 +697,10 @@ class CreateSaluApplyFunction : public Inspector {
     }
 
  public:
-    CreateSaluApplyFunction(IR::Vector<IR::Annotation> annots, P4V1::ProgramStructure *s,
+    CreateSaluApplyFunction(IR::Vector<IR::Annotation> &annots, P4V1::ProgramStructure *s,
                             const IR::Type *rtype, const IR::Type::Bits *utype, cstring mu,
                             bool saturating)
-        : annots(std::move(annots)),
+        : annots(annots),
           structure(s),
           rtype(rtype),
           utype(utype),
@@ -733,13 +732,13 @@ class CreateSaluApplyFunction : public Inspector {
         apply = new IR::Function(
             "apply", new IR::Type_Method(IR::Type_Void::get(), apply_params, "apply"_cs), body);
     }
-    static const IR::Function *create(IR::Vector<IR::Annotation> annots,
+    static const IR::Function *create(IR::Vector<IR::Annotation> &annots,
                                       P4V1::ProgramStructure *structure,
                                       const IR::Declaration_Instance *ext, const IR::Type *rtype,
                                       const IR::Type::Bits *utype,
                                       cstring math_unit_name = cstring(), bool saturating = false) {
-        CreateSaluApplyFunction create_apply(std::move(annots), structure, rtype, utype,
-                                             math_unit_name, saturating);
+        CreateSaluApplyFunction create_apply(annots, structure, rtype, utype, math_unit_name,
+                                             saturating);
         // need a separate traversal here as "update" will be visited after "output"
         forAllMatching<IR::AttribLocal>(&ext->properties, [&](const IR::AttribLocal *attr) {
             if (attr->name.name.endsWith("_bitc")) {

@@ -1057,3 +1057,8 @@ if (ENABLE_GTESTS)
   # set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
 
 endif(ENABLE_GTESTS)
+
+add_test(NAME tofino-p4-14-register-initializer
+  COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/test/check_register_initializer.py
+          ${P4C_BINARY_DIR}/p4c
+          ${P4C_SOURCE_DIR}/testdata/p4_16_samples/tofino/p4-14-register-initializer.p4)
