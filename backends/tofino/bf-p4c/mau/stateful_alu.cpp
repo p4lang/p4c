@@ -20,6 +20,7 @@
 
 #include <cmath>
 
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/asm_output.h"  // for generic formatting routines
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/common/slice.h"
@@ -1310,7 +1311,9 @@ bool CreateSaluInstruction::preorder(const IR::Operation::Relation *rel, cstring
                             error(ErrorType::ERR_UNSUPPORTED,
                                   "%sCan't do %d-bit comparison in a %d-bit SALU", rel->srcInfo,
                                   t->size, salu->source_width());
-                        } else if (t->size == salu->source_width()) {
+                        } else if (t->size == salu->source_width() && !BackendOptions().isv1()) {
+                            // P4-16 wraps a sum or difference to the operand width. P4-14
+                            // blackbox predicates compare the full intermediate result.
                             type_suffix = ".uus";
                         }
                     }

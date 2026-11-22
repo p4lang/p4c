@@ -18,6 +18,11 @@ def main(compiler, program):
         values = counts["initial_value_lo"], counts["initial_value_hi"]
         if values != (17, 42):
             raise AssertionError(f"expected register initializers (17, 42), got {values}")
+        assembly = (output / (Path(program).stem + ".bfa")).read_text()
+        # The sum of two negative inputs can overflow a signed 32-bit value.
+        # lss.s tests the full sum; lss.uus tests bit 31 of the truncated sum.
+        if not any(line.strip().startswith("- lss.s ") for line in assembly.splitlines()):
+            raise AssertionError("expected a signed comparison of the full register sum")
 
 
 if __name__ == "__main__":
