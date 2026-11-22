@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# General test utilities.
+include(${P4TOOLS_SOURCE_DIR}/cmake/TestUtils.cmake)
+# This file defines how we write the tests we generate.
+include(${CMAKE_CURRENT_LIST_DIR}/TestTemplate.cmake)
+
+#############################################################################
+# TEST PROGRAMS
+#############################################################################
+set(PNA_SEARCH_PATTERNS "include.*pna.p4" "main")
+# The BMv2 and TC flavors of PNA have a different package, this target only handles the DPDK one.
+set(PNA_EXCLUDE_PATTERNS "include.*bmv2/pna.p4" "include.*tc/pna.p4")
+set(
+  P4TESTS_FOR_PNA
+  "${P4C_SOURCE_DIR}/testdata/shared/pna/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/dpdk/pna/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/bmv2/pna/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/core/*.p4"
+)
+p4c_find_tests("${P4TESTS_FOR_PNA}" PNA_TESTS INCLUDE "${PNA_SEARCH_PATTERNS}" EXCLUDE "${PNA_EXCLUDE_PATTERNS}")
+
+# Custom PNA tests, not used yet.
+set(TESTGEN_PNA_P416_TESTS "${CMAKE_CURRENT_LIST_DIR}/*.p4")
+p4c_find_tests("${TESTGEN_PNA_P416_TESTS}" CUSTOM_PNA_TESTS INCLUDE "${PNA_SEARCH_PATTERNS}" EXCLUDE "")
+
+# Combine compiler examples and dedicated PNA Testgen inputs.
+set(PNA_TEST_SUITE ${PNA_TESTS} ${CUSTOM_PNA_TESTS})
+
+
+#############################################################################
+# TEST SUITES
+#############################################################################
+option(P4TOOLS_TESTGEN_PNA_TEST_METADATA "Run tests on the Metadata test back end" ON)
+option(P4TOOLS_TESTGEN_PNA_TEST_PTF "Run tests on the PTF test back end" ON)
+
+# Test settings.
+set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10 ")
+
+# Metadata
+if(P4TOOLS_TESTGEN_PNA_TEST_METADATA)
+  p4tools_add_tests(
+    TESTS "${PNA_TEST_SUITE}"
+    TAG "testgen-p4c-pna-metadata" DRIVER ${P4TESTGEN_DRIVER}
+    TARGET "dpdk" ARCH "pna" TEST_ARGS "--test-backend METADATA ${EXTRA_OPTS} "
+  )
+  include(${CMAKE_CURRENT_LIST_DIR}/PNAMetadataXfail.cmake)
+endif()
+
+# PTF
+# TODO: The PTF test back end currently does not support packet sizes over 12000 bits, so we limit
+# the range (at least it is the case in Bmv2).
+# Check for infrap4d.
+find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
+# SDE_INSTALL is the path to the dpdk-target install directory.
+if(P4TOOLS_TESTGEN_PNA_TEST_PTF AND ENABLE_DPDK AND INFRAP4D AND EXISTS "${IPDK_INSTALL_DIR}")
+  execute_process(COMMAND bash -c "printf \"import google.rpc\nimport google.protobuf\" | python3" RESULT_VARIABLE result)
+  if(result AND NOT result EQUAL 0)
+    message(
+            WARNING
+            "Pna PTF tests are enabled, but the Python3 module 'google.rpc' can not be found. Pna PTF tests will fail."
+    )
+  endif()
+  # Both pna.p4 and dpdk/pna.p4 programs target the DPDK PNA backend.
+  # Restricting this to the latter silently drops most packet regressions.
+  # Match the runner's two TAP interfaces (ports 0 and 1).
+  # DPDK SWX does not support too short pkts, so we start from 4096
+  p4tools_add_tests(
+          TESTS "${PNA_TEST_SUITE}"
+          TAG "testgen-p4c-pna-ptf" DRIVER ${P4TESTGEN_DRIVER}
+          TARGET "dpdk" ARCH "pna" P416_PTF TEST_ARGS "--test-backend PTF --port-ranges 0:1 --packet-size-range 4096:12000 ${EXTRA_OPTS} "
+  )
+  include(${CMAKE_CURRENT_LIST_DIR}/PNAPTFXfail.cmake)
+endif()

@@ -22,7 +22,7 @@ class RegisterActionPSATest(P4EbpfTest):
     7. Verify a value stored in register (15)
     """
 
-    p4_file_path = "p4testdata/register-action.p4"
+    p4_file_path = PSA_PROGRAMS / "register-action.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -56,8 +56,8 @@ class RegisterApplyPSATest(P4EbpfTest):
     6. Verify a value stored in register (15)
     """
 
-    p4_file_path = "p4testdata/register-apply.p4"
-    p4info_reference_file_path = "p4testdata/register-apply.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "register-apply.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "register-apply.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -76,7 +76,7 @@ class RegisterArrayMetadataPSATest(P4EbpfTest):
     the incremented values back to the same register elements.
     """
 
-    p4_file_path = "p4testdata/register-array-metadata.p4"
+    p4_file_path = PSA_PROGRAMS / "register-array-metadata.p4"
 
     def runTest(self):
         register_name = "RegisterIngress_register_array"
@@ -114,7 +114,7 @@ class RegisterDefaultPSATest(P4EbpfTest):
     3. Verify a value stored in register (16)
     """
 
-    p4_file_path = "p4testdata/register-default.p4"
+    p4_file_path = PSA_PROGRAMS / "register-default.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -136,7 +136,7 @@ class RegisterBigKeyPSATest(P4EbpfTest):
     3. Verify a value stored in register (16)
     """
 
-    p4_file_path = "p4testdata/register-big-key.p4"
+    p4_file_path = PSA_PROGRAMS / "register-big-key.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -156,7 +156,7 @@ class RegisterStructsPSATest(P4EbpfTest):
     5. Verify a dstAddr field change to 0x0D
     """
 
-    p4_file_path = "p4testdata/register-structs.p4"
+    p4_file_path = PSA_PROGRAMS / "register-structs.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -191,7 +191,7 @@ class RegisterWideIndexData(P4EbpfTest):
     3. Validate values.
     """
 
-    p4_file_path = "p4testdata/wide-field-register.p4"
+    p4_file_path = PSA_PROGRAMS / "wide-field-register.p4"
 
     def runTest(self):
         addr = "0000:1111:2222:3333:4444:5555:6767:7676"

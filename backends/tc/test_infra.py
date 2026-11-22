@@ -233,11 +233,6 @@ class Bridge:
         return result.returncode
 
 
-def isError(p4filename):
-    # True if the filename represents a p4 program that should fail
-    return "_errors" in str(p4filename)
-
-
 class TCInfra:
     def __init__(self, tmpdir, options, template):
         # Dir in which all files are stored.
@@ -331,7 +326,7 @@ class TCInfra:
 
         returncode = result.returncode
 
-        expected_error = isError(self.options.p4filename)
+        expected_error = testutils.is_err(self.options.p4filename)
         if expected_error:
             if result.returncode == testutils.SUCCESS:
                 returncode = testutils.FAILURE
@@ -377,8 +372,7 @@ class TCInfra:
 
     def compare_compiled_files(self):
         files = os.listdir(self.outputdir)
-        dirname = os.path.dirname(self.options.p4filename)
-        expected_dirname = dirname + "_outputs"
+        expected_dirname = str(testutils.reference_dir(self.options.p4filename))
         for file in files:
             _, extension = os.path.splitext(file)
             # Skip generated object files
@@ -389,6 +383,7 @@ class TCInfra:
             produced = self.outputdir + "/" + file
             expected = expected_dirname + "/" + file
             if not os.path.isfile(expected):
+                os.makedirs(expected_dirname, exist_ok=True)
                 if self.options.verbose:
                     print("Expected file does not exist; creating", expected)
                 shutil.copy2(produced, expected)

@@ -113,8 +113,8 @@ class MeterPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters.p4"
-    p4info_reference_file_path = "p4testdata/meters.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "meters.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "meters.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -144,7 +144,7 @@ class MeterColorAwarePSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100 in a Peak bucket only.
     """
 
-    p4_file_path = "p4testdata/meters-color-aware.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-color-aware.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -172,7 +172,7 @@ class MeterActionPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters-action.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-action.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -203,7 +203,7 @@ class MeterPacketsPSATest(P4EbpfTest):
     Send 1 packet and verify that the number of tokes decreases by 1.
     """
 
-    p4_file_path = "p4testdata/meters-packets.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-packets.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -227,8 +227,8 @@ class DirectMeterPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters-direct.p4"
-    p4info_reference_file_path = "p4testdata/meters-direct.p4info.txtpb"
+    p4_file_path = PSA_PROGRAMS / "meters-direct.p4"
+    p4info_reference_file_path = PSA_REFERENCES / "meters-direct.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -270,7 +270,7 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100 in a Peak bucket only.
     """
 
-    p4_file_path = "p4testdata/meters-direct-color-aware.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-direct-color-aware.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -312,7 +312,7 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters-direct-and-indirect.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-direct-and-indirect.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -377,7 +377,7 @@ class DirectAndIndirectActionMeterPSATest(DirectAndIndirectMeterPSATest):
     and execute Indirect Meter in single action.
     """
 
-    p4_file_path = "p4testdata/meters-direct-and-indirect-single-action.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-direct-and-indirect-single-action.p4"
 
 
 class DirectTwoMetersPSATest(P4EbpfTest):
@@ -386,7 +386,7 @@ class DirectTwoMetersPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters-two-direct.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-two-direct.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -450,7 +450,7 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
     Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
-    p4_file_path = "p4testdata/meters-direct-and-counter.p4"
+    p4_file_path = PSA_PROGRAMS / "meters-direct-and-counter.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -489,7 +489,7 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
 
 
 class MeterWideBitIndex(P4EbpfTest):
-    p4_file_path = "p4testdata/wide-field-meters.p4"
+    p4_file_path = PSA_PROGRAMS / "wide-field-meters.p4"
 
     def validate_meter_get(self, index):
         value = self.meter_get(name="ingress_meter1", index=index)

@@ -83,16 +83,14 @@ ConstraintsVector loadExample(const char *curFile, bool flag) {
 }
 
 TEST_F(P4AssertsParserTest, RestrictionCount) {
-    ConstraintsVector parsingResult = loadExample(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4",
-        true);
+    ConstraintsVector parsingResult =
+        loadExample("testdata/bmv2/testgen/bmv2_restrictions_1.p4", true);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
 }
 
 TEST_F(P4AssertsParserTest, Restrictions) {
-    ConstraintsVector parsingResult = loadExample(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4",
-        true);
+    ConstraintsVector parsingResult =
+        loadExample("testdata/bmv2/testgen/bmv2_restrictions_1.p4", true);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
@@ -122,9 +120,8 @@ TEST_F(P4AssertsParserTest, Restrictions) {
 }
 
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
-    ConstraintsVector parsingResult = loadExample(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
-        false);
+    ConstraintsVector parsingResult =
+        loadExample("testdata/bmv2/testgen/bmv2_restrictions_2.p4", false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
         IR::Type_Bits::get(8), "ingress.table_1_key_h.h.a"_cs);
@@ -135,9 +132,8 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
 }
 
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
-    ConstraintsVector parsingResult = loadExample(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
-        false);
+    ConstraintsVector parsingResult =
+        loadExample("testdata/bmv2/testgen/bmv2_restrictions_2.p4", false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     const auto *expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
         IR::Type_Bits::get(8), "ingress.table_1_ingress.MyAction1_arg_input_val"_cs);

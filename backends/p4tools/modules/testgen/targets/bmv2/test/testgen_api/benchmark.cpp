@@ -29,7 +29,7 @@ TEST_F(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     auto includePath = P4CTestEnvironment::getProjectRoot() / "p4include";
     testgenOptions.preprocessor_options = "-I" + includePath.string();
     auto fabricFile =
-        P4CTestEnvironment::getProjectRoot() / "testdata/p4_16_samples/fabric_20190420/fabric.p4";
+        P4CTestEnvironment::getProjectRoot() / "testdata/bmv2/v1model/fabric_20190420/fabric.p4";
     testgenOptions.file = fabricFile.string();
     testgenOptions.testBackend = "PROTOBUF_IR"_cs;
     testgenOptions.testBaseName = "dummy"_cs;

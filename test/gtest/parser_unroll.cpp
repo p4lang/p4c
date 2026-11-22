@@ -66,7 +66,7 @@ const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     options.loopsUnrolling = true;
     options.file = sourcePath;
-    options.file /= "testdata/p4_16_samples";
+    options.file /= "testdata/core";
     options.file /= curFile;
     auto program = P4::parseP4File(options);
     if (!originalEnv)
@@ -112,8 +112,8 @@ TEST_F(P4CParserUnroll, test3) {
 
 #ifdef SUPPORT_P4_14
 TEST_F(P4CParserUnroll, switch_20160512) {
-    auto parsers = loadExample("../p4_14_samples/switch_20160512/switch.p4",
-                               CompilerOptions::FrontendVersion::P4_14);
+    auto parsers =
+        loadExample("../p4_14/switch_20160512/switch.p4", CompilerOptions::FrontendVersion::P4_14);
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 22 - 4 - 2);
@@ -142,7 +142,7 @@ TEST_F(P4CParserUnroll, t1_Cond) {
 }
 
 TEST_F(P4CParserUnroll, header_union) {
-    auto parsers = loadExample("issue561-7-bmv2.p4");
+    auto parsers = loadExample("../bmv2/v1model/issue561-7-bmv2.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());

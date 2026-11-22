@@ -110,7 +110,7 @@ class NodeFinder : public Inspector {
 };
 
 TEST_F(P4CReachability, testParserStatesAndAnnotations) {
-    auto result = loadExampleForReachability("testdata/p4_16_samples/action_profile-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/v1model/action_profile-bmv2.p4");
     const auto *program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -160,7 +160,7 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
 }
 
 TEST_F(P4CReachability, testLoops) {
-    auto result = loadExampleForReachability("testdata/p4_16_samples/stack_complex-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/v1model/stack_complex-bmv2.p4");
     const auto *program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -182,8 +182,7 @@ const IR::Node *getFromHash(const P4Tools::ReachabilityHashType &hash, const cha
 }
 
 TEST_F(P4CReachability, testTableAndActions) {
-    auto result = loadExampleForReachability(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/testgen/bmv2_hit.p4");
     const auto *program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -224,7 +223,7 @@ TEST_F(P4CReachability, testTableAndActions) {
 }
 
 TEST_F(P4CReachability, testSwitchStatement) {
-    auto result = loadExampleForReachability("testdata/p4_16_samples/basic_routing-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/v1model/basic_routing-bmv2.p4");
     const auto *program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -252,8 +251,7 @@ TEST_F(P4CReachability, testSwitchStatement) {
 
 TEST_F(P4CReachability, testIfStatement) {
     // Example for IsStatement checking.
-    auto result = loadExampleForReachability(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/testgen/bmv2_if.p4");
     const auto *program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -276,7 +274,7 @@ TEST_F(P4CReachability, testIfStatement) {
 }
 
 TEST_F(P4CReachability, testParserValueSet) {
-    auto result = loadExampleForReachability("testdata/p4_16_samples/value-sets.p4");
+    auto result = loadExampleForReachability("testdata/core/value-sets.p4");
     const auto *program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -319,8 +317,7 @@ bool listEqu(std::list<const IR::Node *> &left, std::list<const IR::Node *> righ
 }
 
 TEST_F(P4CReachability, testReachabilityEngine) {
-    auto result = loadExampleForReachability(
-        "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+    auto result = loadExampleForReachability("testdata/bmv2/testgen/bmv2_if.p4");
     const auto *program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
@@ -429,8 +426,7 @@ bool checkResultingSTF(const std::list<std::list<std::string>> &identifiersList,
 }
 
 TEST_F(P4CReachability, testReachabilityEngineActions) {
-    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_miss.p4",
-                "ingress.MyAction2", "tmp", 10);
+    callTestgen("testdata/bmv2/testgen/bmv2_miss.p4", "ingress.MyAction2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{"MyAction2"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
     ids = {{"MyAction1"}};
@@ -438,22 +434,20 @@ TEST_F(P4CReachability, testReachabilityEngineActions) {
 }
 
 TEST_F(P4CReachability, testReachabilityEngineTables) {
-    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_action_run.p4",
-                "ingress.MyAction2", "tmp", 10);
+    callTestgen("testdata/bmv2/testgen/bmv2_action_run.p4", "ingress.MyAction2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{" MyAction2"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 
 TEST_F(P4CReachability, testReachabilityEngineTable2) {
-    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
-                "ingress.MyAction1;ingress.table2", "tmp", 10);
+    callTestgen("testdata/bmv2/testgen/bmv2_if.p4", "ingress.MyAction1;ingress.table2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{"ingress.table2"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 
 TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
-    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
-                "!ingress.MyAction1;!ingress.table2", "tmp", 10);
+    callTestgen("testdata/bmv2/testgen/bmv2_if.p4", "!ingress.MyAction1;!ingress.table2", "tmp",
+                10);
     std::list<std::list<std::string>> ids = {{"table2"}};
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
