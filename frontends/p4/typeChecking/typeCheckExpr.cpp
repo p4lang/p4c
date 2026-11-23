@@ -2392,6 +2392,26 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectExpression *express
     auto selectType = getType(expression->select);
     if (selectType == nullptr) return expression;
 
+    // A list that contains a value_set has a set type, not a tuple type.
+    if (selectType->is<IR::Type_Set>()) {
+        // Report each value_set, also when it is nested in a list.
+        auto reportValueSets = [this](auto &self, const IR::ListExpression *list) -> void {
+            for (const auto *component : list->components) {
+                const auto *type = getType(component);
+                if (type == nullptr || !type->is<IR::Type_Set>()) continue;
+                if (const auto *nested = component->to<IR::ListExpression>())
+                    self(self, nested);
+                else
+                    typeError(
+                        "%s: a value_set can only be used as a select case label, not in the "
+                        "select expression",
+                        component);
+            }
+        };
+        reportValueSets(reportValueSets, expression->select);
+        return expression;
+    }
+
     // Check that the selectType is determined
     auto tuple = selectType->to<IR::Type_BaseList>();
     BUG_CHECK(tuple != nullptr, "%1%: Expected a tuple type for the select expression, got %2%",
