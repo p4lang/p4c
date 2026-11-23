@@ -17,6 +17,8 @@ namespace {
 bool containsTypeVariable(const IR::Type *type) {
     struct FindTypeVariable : public Inspector {
         bool found = false;
+        // Stop the walk at the first type variable.
+        bool preorder(const IR::Node *) override { return !found; }
         bool preorder(const IR::Type_Var *) override {
             found = true;
             return false;
