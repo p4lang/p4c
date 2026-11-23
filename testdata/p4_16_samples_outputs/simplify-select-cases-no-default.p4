@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 parser p(packet_in packet) {
     state start {
         transition select(packet.lookahead<bit<8>>()) {

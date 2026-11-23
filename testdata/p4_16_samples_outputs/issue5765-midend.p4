@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 extern Register {
     Register();
     void read(out bit<32> result, in bit<32> index);
