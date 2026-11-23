@@ -64,6 +64,10 @@ class ActionInvocation {
 class FindActionParameters : public Inspector, public ResolutionContext {
     TypeMap *typeMap;
     ActionInvocation *invocations;
+    /// Action calls in the current table outside of its action list, such as the
+    /// default_action. They are bound when the whole table has been visited,
+    /// because the action list does not have to be the first property.
+    std::vector<std::pair<const IR::P4Action *, const IR::MethodCallExpression *>> tableCalls;
 
  public:
     FindActionParameters(TypeMap *typeMap, ActionInvocation *invocations)
@@ -75,6 +79,7 @@ class FindActionParameters : public Inspector, public ResolutionContext {
 
     void postorder(const IR::ActionListElement *element) override;
     void postorder(const IR::MethodCallExpression *expression) override;
+    void postorder(const IR::P4Table *table) override;
 };
 
 /**

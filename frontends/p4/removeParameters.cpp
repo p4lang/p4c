@@ -92,11 +92,20 @@ void FindActionParameters::postorder(const IR::MethodCallExpression *expression)
             // These are processed elsewhere
             return;
         // This is probably the default_action; we must remove some parameters
-        invocations->bindDefaultAction(ac->action, expression);
+        tableCalls.emplace_back(ac->action, expression);
     } else {
         // Direction action invocation: remove all parameters
         invocations->bind(ac->action, expression, true);
     }
+}
+
+void FindActionParameters::postorder(const IR::P4Table *) {
+    for (const auto &[action, call] : tableCalls) {
+        // A target-specific property may call an action that is not in the
+        // action list. Leave such calls and their actions unchanged.
+        if (invocations->get(action) != nullptr) invocations->bindDefaultAction(action, call);
+    }
+    tableCalls.clear();
 }
 
 namespace {
