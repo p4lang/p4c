@@ -18,15 +18,16 @@
 
 # NOTE: THIS SCRIPT SHOULD NOT BE EXECUTED MANUALLY
 
+set -e
+
 RUNTIME_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-EXTRACT_URL=$1
 
 if ! [ -f "$RUNTIME_DIR/cleanup" ]; then
     echo "setup and cleanup script should be in the same directory"
     exit 1
 fi
 
-$RUNTIME_DIR/extract_deb $EXTRACT_URL
+"$RUNTIME_DIR/extract_deb"
 
 sudo useradd -s /bin/bash -m ci
 
