@@ -13,7 +13,6 @@
 #include "backends/ebpf/psa/ebpfPsaGen.h"
 #include "control-plane/p4RuntimeArchHandler.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/parserCallGraph.h"
 #include "introspection.h"
 #include "ir/ir.h"

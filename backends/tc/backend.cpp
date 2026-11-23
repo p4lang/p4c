@@ -1837,6 +1837,7 @@ bool Backend::process() {
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
     EBPF::EBPFTypeFactory::createFactory(typeMapEBPF, true);
     PassManager backEnd = {};
+    // Force the clear: the mid-end type map lacks types for some nodes created late in the mid end.
     backEnd.addPasses({new P4::ClearTypeMap(typeMap, true),
                        new P4::TypeChecking(refMap, typeMap, true), sw, tcIR, genIJ});
     widths = sw;
