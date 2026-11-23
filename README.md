@@ -304,8 +304,8 @@ see the dependency options in [Installing P4C from source](#installing-p4c-from-
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
   * [BMv2](backends/bmv2/README.md)
-  * [eBPF](backends/ebpf/README.md)
-  * [uBPF](backends/ubpf/README.md)
+  * [eBPF](backends/ebpf/README.md#dependencies)
+  * [uBPF](backends/ubpf/README.md#dependencies)
   * [TC](backends/tc/README.md)
   * [DPDK](backends/dpdk/README.md)
   * [graphs](backends/graphs/README.md)
