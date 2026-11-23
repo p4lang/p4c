@@ -429,4 +429,48 @@ TEST_F(P4CMidend, EliminateTuplesConcreteTupleShapes) {
     EXPECT_GE(threeFieldStructs, 1U);
 }
 
+TEST_F(P4CMidend, EliminateTuplesGenericSignatures) {
+    auto program = P4::parseP4String(R"(
+        extern Pair<T> {
+            Pair(tuple<T, T> init);
+            void read(out tuple<T, T> value);
+            tuple<U, U> swap<U>(in tuple<U, U> value);
+        }
+        extern tuple<T> wrap<T>(in T x);
+        parser P<M>(in tuple<M, M, M> m);
+        control C<M>(in tuple<M, M, M, M> m);
+        package top<M>(C<M> c);
+
+        control c(in tuple<bit<8>, bit<8>, bit<8>, bit<8>> m) {
+            Pair<bit<8>>({ 8w1, 8w2 }) pair;
+            apply {
+                tuple<bit<8>, bit<8>> r;
+                pair.read(r);
+                tuple<bit<16>, bit<16>> s = pair.swap({ 16w1, 16w2 });
+                tuple<bit<8>> w = wrap(m[0]);
+            }
+        }
+        top(c()) main;
+    )");
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    TypeMap typeMap;
+    program = program->apply(EliminateTuples(&typeMap));
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(errorCount(), 0U);
+
+    struct CountTuples : public Inspector {
+        size_t tuples = 0;
+        void postorder(const IR::Type_BaseList *) override { tuples++; }
+    } counts;
+    program->apply(counts);
+    EXPECT_EQ(counts.tuples, 0U);
+
+    ReferenceMap refMap;
+    program = program->apply(TypeChecking(&refMap, &typeMap, true));
+    ASSERT_NE(program, nullptr);
+    EXPECT_EQ(errorCount(), 0U);
+}
+
 }  // namespace P4::Test

@@ -137,20 +137,11 @@ class DoReplaceTuples final : public Transform {
         return node;
     }
     const IR::Node *postorder(IR::Type_BaseList *type) override;
+    /// Inserts the new struct declarations in front of the top-level declaration @p before.
     const IR::Node *insertReplacements(const IR::Node *before);
-    const IR::Node *postorder(IR::Type_Struct *type) override { return insertReplacements(type); }
     const IR::Node *postorder(IR::ArrayIndex *expression) override;
-    const IR::Node *postorder(IR::Type_Typedef *type) override { return insertReplacements(type); }
-    const IR::Node *postorder(IR::Type_Newtype *type) override { return insertReplacements(type); }
-    const IR::Node *postorder(IR::P4Parser *parser) override { return insertReplacements(parser); }
-    const IR::Node *postorder(IR::P4Control *control) override {
-        return insertReplacements(control);
-    }
-    const IR::Node *postorder(IR::Method *method) override { return insertReplacements(method); }
-    const IR::Node *postorder(IR::Type_Extern *ext) override { return insertReplacements(ext); }
-    const IR::Node *postorder(IR::Declaration_Instance *decl) override {
-        return insertReplacements(decl);
-    }
+    /// Any top-level declaration can use a tuple, including parser, control, and package types.
+    const IR::Node *postorder(IR::Node *node) override { return insertReplacements(node); }
     const IR::Node *preorder(IR::P4ValueSet *set) override {
         // Disable substitution of type parameters for value sets.
         // We want to keep these as tuples.
