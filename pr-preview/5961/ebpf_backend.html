@@ -456,25 +456,21 @@ P4 and eBPF overlap in capabilities</div></div>
 </div><!-- fragment --><p>The P4 program only describes the packet processing <em>data plane</em>, that runs in the Linux kernel. The <em>control plane</em> must be separately implemented by the user. BCC tools simplify this task considerably, by generating C and/or Python APIs that expose the dataplane/control-plane APIs.</p>
 <h3><a class="anchor" id="dependencies-2"></a>
 Dependencies</h3>
-<p>Our eBPF programs require a Linux kernel with version 4.15 or newer. The eBPF backend relies on <a href="https://github.com/libbpf/libbpf">libbpf</a>, which provides kernel- and distribution-independent header files. libbpf must be available in order to compile the generated eBPF C code into eBPF byte code. To install libbpf, run <code>python3 backends/ebpf/build_libbpf</code> in the p4c folder.</p>
-<p>In addition the following packages and programs are required to run the full test suite:</p>
+<p>Our eBPF programs require a Linux kernel with version 4.15 or newer. The eBPF backend relies on <a href="https://github.com/libbpf/libbpf">libbpf</a>, which provides kernel- and distribution-independent header files. libbpf must be available in order to compile the generated eBPF C code into eBPF byte code. To install libbpf, run <code>python3 backends/ebpf/build_libbpf</code> in the p4c folder. CMake runs this script when it configures the eBPF backend and does not find libbpf.</p>
+<p>In addition to the <a class="el" href="getting_started.html#dependencies">P4C dependencies</a>, the following packages are required to run the eBPF tests:</p>
 <ul>
-<li>Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for llvm. Until the bugfix is committed upstream, workarounds are available in <a href="https://github.com/p4lang/p4c/issues/1376">this issue</a>:</li>
-<li>libpcap-dev to parse and generate .pcap files.</li>
-<li>libelf-dev to compile C-programs to eBPF byte code.</li>
-<li>zlib1g as libelf dependency.</li>
-<li>a recent version of iproute2 that supports <code>clsact</code> to load eBPF programs via <code>tc</code> and <code>ip</code>.</li>
-<li>net-tools (if not installed already)</li>
+<li>clang and llvm, to compile the generated C code to eBPF byte code. CMake warns if LLVM is older than 3.7.1.</li>
+<li>libpcap-dev, because the test runtime reads and writes .pcap files (<code>runtime/pcap_util.h</code>).</li>
+<li>libelf-dev and zlib1g-dev, which the kernel test runtime links against.</li>
+<li>iproute2 with <code>clsact</code> support, to load eBPF programs with <code>tc</code> and <code>ip</code> in the kernel tests.</li>
+<li>iptables, which the kernel test environment uses (<code>targets/ebpfenv.py</code>).</li>
+<li>tcpdump, which the kernel tests use to capture packets.</li>
 </ul>
-<p>Additionally, the eBPF compiler test suite has the following python dependencies:</p>
-<ul>
-<li>The python iproute2 package to create virtual interfaces.</li>
-<li>The python ply package to parse .stf testing files.</li>
-<li>The python scapy package to read and write pcap files.</li>
-</ul>
-<p>You can install these using: </p><div class="fragment"><div class="line">$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools</div>
-<div class="line">$ pip3 install --user pyroute2 ply==3.8 scapy==2.4.0</div>
-</div><!-- fragment --><h3><a class="anchor" id="supported-capabilities"></a>
+<p>The CI also installs net-tools. The Python packages are installed by <code>uv sync</code>, as described in the top-level README.</p>
+<p>On Ubuntu, the packages can be installed with: </p><div class="fragment"><div class="line">sudo apt-get install clang llvm libpcap-dev libelf-dev zlib1g-dev \</div>
+<div class="line">  iproute2 iptables net-tools tcpdump</div>
+</div><!-- fragment --><p> The CI installs the same packages (see <code>build_ebpf</code> in <a href="../../tools/ci-build.sh"><code>tools/ci-build.sh</code></a>; tcpdump is part of the core dependencies there).</p>
+<h3><a class="anchor" id="supported-capabilities"></a>
 Supported capabilities</h3>
 <p>The current version of the P4 to eBPF compiler supports a relatively narrow subset of the P4 language, but still powerful enough to write very complex packet filters and simple packet forwarding engines. We expect that the compiler's capabilities will improve gradually.</p>
 <p>Here are some limitations imposed on the P4 programs:</p>

@@ -2236,6 +2236,7 @@ var hierarchy =
     [ "P4::TC::ConvertToBackendIR::ExternBlock", "class_p4_1_1_t_c_1_1_convert_to_backend_i_r.html#struct_p4_1_1_t_c_1_1_convert_to_backend_i_r_1_1_extern_block", null ],
     [ "P4::TC::ConvertToBackendIR::ExternInstance", "class_p4_1_1_t_c_1_1_convert_to_backend_i_r.html#struct_p4_1_1_t_c_1_1_convert_to_backend_i_r_1_1_extern_instance", null ],
     [ "P4::TC::decllist", "namespace_p4_1_1_t_c.html#struct_p4_1_1_t_c_1_1decllist", null ],
+    [ "P4::TC::EBPFPnaParser::OutlineRegion", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html#struct_p4_1_1_t_c_1_1_e_b_p_f_pna_parser_1_1_outline_region", null ],
     [ "P4::TC::Extern", "class_p4_1_1_t_c_1_1_extern.html", null ],
     [ "P4::TC::ExternAttributes", "struct_p4_1_1_t_c_1_1_extern_attributes.html", null ],
     [ "P4::TC::ExternInstancesAttributes", "struct_p4_1_1_t_c_1_1_extern_instances_attributes.html", null ],

@@ -316,22 +316,24 @@ $(function(){initNavTree('z3__solver_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span></div>
 <div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    <span class="keywordtype">bool</span> recurseBinary(<span class="keyword">const</span> IR::Operation_Binary *binary, Z3BinaryOp f);</div>
 <div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span></div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="keywordtype">bool</span> recurseTernary(<span class="keyword">const</span> IR::Operation_Ternary *ternary, Z3TernaryOp f);</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="keywordtype">bool</span> recurseShift(<span class="keyword">const</span> IR::Operation_Binary *shift, Z3BinaryOp f);</div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> ShiftType&gt;</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keyword">const</span> ShiftType *rewriteShift(<span class="keyword">const</span> ShiftType *shift) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span></div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    z3::expr result;</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span></div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    std::reference_wrapper&lt;Z3Solver&gt; _solver;</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span></div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    [[nodiscard]] <a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_z3_solver.html">Z3Solver</a> &amp;<a class="code hl_namespace" href="namespacesolver.html">solver</a>();</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>};</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <span class="keywordtype">bool</span> recurseTernary(<span class="keyword">const</span> IR::Operation_Ternary *ternary, Z3TernaryOp f);</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> ShiftType&gt;</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keyword">const</span> ShiftType *rewriteShift(<span class="keyword">const</span> ShiftType *shift) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    z3::expr result;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    std::reference_wrapper&lt;Z3Solver&gt; _solver;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    [[nodiscard]] <a class="code hl_class" href="class_p4_1_1_p4_tools_1_1_z3_solver.html">Z3Solver</a> &amp;<a class="code hl_namespace" href="namespacesolver.html">solver</a>();</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>};</div>
 </div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>}  <span class="comment">// namespace P4::P4Tools</span></div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>}  <span class="comment">// namespace P4::P4Tools</span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_abstract_solver_html"><div class="ttname"><a href="class_p4_1_1_abstract_solver.html">P4::AbstractSolver</a></div><div class="ttdoc">Provides a higher-level interface for an SMT solver.</div><div class="ttdef"><b>Definition</b> solver.h:30</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:44</div></div>
 <div class="ttc" id="aclass_p4_1_1_j_s_o_n_generator_html"><div class="ttname"><a href="class_p4_1_1_j_s_o_n_generator.html">P4::JSONGenerator</a></div><div class="ttdef"><b>Definition</b> json_generator.h:30</div></div>
@@ -354,9 +356,9 @@ $(function(){initNavTree('z3__solver_8h_source.html',''); initResizable(true); }
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_solver_html_af3fd2b4edc12cc0d01c9f2879ff7a83c"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_solver.html#af3fd2b4edc12cc0d01c9f2879ff7a83c">P4::P4Tools::Z3Solver::comment</a></div><div class="ttdeci">void comment(cstring comment) override</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:146</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_solver_html_af87c4eda2ff852e7615c09aa9dec2761"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_solver.html#af87c4eda2ff852e7615c09aa9dec2761">P4::P4Tools::Z3Solver::getAssertions</a></div><div class="ttdeci">safe_vector&lt; const Constraint * &gt; getAssertions() const</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:90</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_a0f67d60efc13200ae7089ef0ba146343"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#a0f67d60efc13200ae7089ef0ba146343">P4::P4Tools::Z3Translator::Z3Translator</a></div><div class="ttdeci">Z3Translator(Z3Solver &amp;solver)</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:377</div></div>
-<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_a734ad78f7d945c858a3e5c181a19b218"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#a734ad78f7d945c858a3e5c181a19b218">P4::P4Tools::Z3Translator::translate</a></div><div class="ttdeci">z3::expr translate(const IR::Expression *expression)</div><div class="ttdoc">Translate an P4C IR expression and return the Z3 equivalent.</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:631</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_a734ad78f7d945c858a3e5c181a19b218"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#a734ad78f7d945c858a3e5c181a19b218">P4::P4Tools::Z3Translator::translate</a></div><div class="ttdeci">z3::expr translate(const IR::Expression *expression)</div><div class="ttdoc">Translate an P4C IR expression and return the Z3 equivalent.</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:650</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_a891b3d1593cea617a367bb466f8fc2e9"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#a891b3d1593cea617a367bb466f8fc2e9">P4::P4Tools::Z3Translator::preorder</a></div><div class="ttdeci">bool preorder(const IR::Node *node) override</div><div class="ttdoc">Handles unexpected nodes.</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:398</div></div>
-<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_ac4d68ff954780877d553def0189c1e73"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#ac4d68ff954780877d553def0189c1e73">P4::P4Tools::Z3Translator::getResult</a></div><div class="ttdeci">z3::expr getResult()</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:629</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_z3_translator_html_ac4d68ff954780877d553def0189c1e73"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_z3_translator.html#ac4d68ff954780877d553def0189c1e73">P4::P4Tools::Z3Translator::getResult</a></div><div class="ttdeci">z3::expr getResult()</div><div class="ttdef"><b>Definition</b> z3_solver.cpp:648</div></div>
 <div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:69</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:76</div></div>
 <div class="ttc" id="aclass_p4_1_1safe__vector_html"><div class="ttname"><a href="class_p4_1_1safe__vector.html">P4::safe_vector</a></div><div class="ttdef"><b>Definition</b> safe_vector.h:18</div></div>

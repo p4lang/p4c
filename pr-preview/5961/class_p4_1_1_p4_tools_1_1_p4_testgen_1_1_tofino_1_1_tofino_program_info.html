@@ -153,10 +153,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aeec914e517199b6c2f5684b118ee7262"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5357f8ed74b072463945542d0a51d4b" id="r_ac5357f8ed74b072463945542d0a51d4b"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_p4_tools_1_1_arch_spec.html">ArchSpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5357f8ed74b072463945542d0a51d4b">getArchSpec</a> () const override</td></tr>
 <tr class="separator:ac5357f8ed74b072463945542d0a51d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9347b8b874c4e292286da02de09e8e58" id="r_a9347b8b874c4e292286da02de09e8e58"><td class="memItemLeft" align="right" valign="top">const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9347b8b874c4e292286da02de09e8e58">getTargetInputPortVar</a> () const override</td></tr>
-<tr class="separator:a9347b8b874c4e292286da02de09e8e58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aadecd98323c3b23ffc12bc9f1f70c2d8" id="r_aadecd98323c3b23ffc12bc9f1f70c2d8"><td class="memItemLeft" align="right" valign="top">const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aadecd98323c3b23ffc12bc9f1f70c2d8">getTargetOutputPortVar</a> () const override</td></tr>
-<tr class="separator:aadecd98323c3b23ffc12bc9f1f70c2d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8da8b863a8b7d6101e8eb716623ba37f" id="r_a8da8b863a8b7d6101e8eb716623ba37f"><td class="memItemLeft" align="right" valign="top">IR::StateVariable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8da8b863a8b7d6101e8eb716623ba37f">getTargetInputPortVar</a> () const override</td></tr>
+<tr class="separator:a8da8b863a8b7d6101e8eb716623ba37f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f2e3d9a6d985cae52260fe7d58d1740" id="r_a3f2e3d9a6d985cae52260fe7d58d1740"><td class="memItemLeft" align="right" valign="top">IR::StateVariable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f2e3d9a6d985cae52260fe7d58d1740">getTargetOutputPortVar</a> () const override</td></tr>
+<tr class="separator:a3f2e3d9a6d985cae52260fe7d58d1740"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf294f4a7d9afd5fc5fa3f0cd9ff9765" id="r_acf294f4a7d9afd5fc5fa3f0cd9ff9765"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; Continuation::Command &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf294f4a7d9afd5fc5fa3f0cd9ff9765">ingressCmds</a> () const override</td></tr>
 <tr class="separator:acf294f4a7d9afd5fc5fa3f0cd9ff9765"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html">P4::P4Tools::P4Testgen::Tofino::TofinoSharedProgramInfo</a></td></tr>
@@ -398,8 +398,8 @@ static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><b
 
 </div>
 </div>
-<a id="a9347b8b874c4e292286da02de09e8e58" name="a9347b8b874c4e292286da02de09e8e58"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9347b8b874c4e292286da02de09e8e58">&#9670;&#160;</a></span>getTargetInputPortVar()</h2>
+<a id="a8da8b863a8b7d6101e8eb716623ba37f" name="a8da8b863a8b7d6101e8eb716623ba37f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8da8b863a8b7d6101e8eb716623ba37f">&#9670;&#160;</a></span>getTargetInputPortVar()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -408,7 +408,7 @@ static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><b
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const IR::StateVariable &amp; P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo::getTargetInputPortVar </td>
+          <td class="memname">IR::StateVariable P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo::getTargetInputPortVar </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -422,12 +422,12 @@ static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><b
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>the metadata member corresponding to the ingress port </dd></dl>
 
-<p>Implements <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html#ae1d54878c7f854586b126a2df25ed48d">P4::P4Tools::P4Testgen::ProgramInfo</a>.</p>
+<p>Implements <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html#aa9ca7eb14c83a6b67886b751417cd8d1">P4::P4Tools::P4Testgen::ProgramInfo</a>.</p>
 
 </div>
 </div>
-<a id="aadecd98323c3b23ffc12bc9f1f70c2d8" name="aadecd98323c3b23ffc12bc9f1f70c2d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aadecd98323c3b23ffc12bc9f1f70c2d8">&#9670;&#160;</a></span>getTargetOutputPortVar()</h2>
+<a id="a3f2e3d9a6d985cae52260fe7d58d1740" name="a3f2e3d9a6d985cae52260fe7d58d1740"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f2e3d9a6d985cae52260fe7d58d1740">&#9670;&#160;</a></span>getTargetOutputPortVar()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -436,7 +436,7 @@ static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><b
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const IR::StateVariable &amp; P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo::getTargetOutputPortVar </td>
+          <td class="memname">IR::StateVariable P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo::getTargetOutputPortVar </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -450,7 +450,7 @@ static const IR::Type_Bits&#160;</td><td class="memItemRight" valign="bottom"><b
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>the metadata member corresponding to the final output port </dd></dl>
 
-<p>Implements <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html#a324651ca71136e2f27a0bb5d4fda58fa">P4::P4Tools::P4Testgen::ProgramInfo</a>.</p>
+<p>Implements <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html#a8dae78964a9e740e17ad2b2a2dede6a3">P4::P4Tools::P4Testgen::ProgramInfo</a>.</p>
 
 </div>
 </div>

@@ -27,7 +27,7 @@ var namespace_p4_1_1_t_c =
     [ "EBPFHashPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_hash_p_n_a.html", null ],
     [ "EBPFInternetChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html", null ],
     [ "EBPFMeterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html", null ],
-    [ "EBPFPnaParser", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html", null ],
+    [ "EBPFPnaParser", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser" ],
     [ "EBPFRandomPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_random_p_n_a.html", null ],
     [ "EBPFRegisterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_register_p_n_a.html", null ],
     [ "EBPFTablePNA", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a.html", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a" ],

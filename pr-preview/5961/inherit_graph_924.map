@@ -1,9 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p_h_v_1_1v2_1_1_tx_score_maker.html" title="TxScoreMaker is the interface of the factory class of TxScore." alt="" coords="5,57,177,85"/>
-<area shape="rect" id="Node000001" href="$class_p_h_v_1_1v2_1_1_greedy_tx_score_maker.html" title=" " alt="" coords="228,5,446,33"/>
-<area shape="poly" id="edge2657_Node000000_Node000001" title=" " alt="" coords="174,51,270,33,266,35,176,56"/>
-<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_min_pack_tx_score_maker.html" title="factory class for MinPackTxScore." alt="" coords="225,57,450,85"/>
-<area shape="poly" id="edge2658_Node000000_Node000002" title=" " alt="" coords="192,69,227,71,222,72,193,74"/>
-<area shape="rect" id="Node000003" href="$class_p_h_v_1_1v2_1_1_nil_tx_score_maker.html" title="NilTxScoreMaker is a factory class to make nil score." alt="" coords="243,109,432,137"/>
-<area shape="poly" id="edge2659_Node000000_Node000003" title=" " alt="" coords="175,86,271,108,265,109,175,92"/>
+<area shape="rect" id="Node000000" href="$class_p_h_v_1_1v2_1_1_tx_score.html" title="TxScore is the interface of an allocation score." alt="" coords="5,57,137,85"/>
+<area shape="rect" id="Node000001" href="$class_p_h_v_1_1v2_1_1_greedy_tx_score.html" title="GreedyTxScore is the default allocation heuristics." alt="" coords="188,5,366,33"/>
+<area shape="poly" id="edge2654_Node000000_Node000001" title=" " alt="" coords="143,50,222,32,217,35,145,55"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_min_pack_tx_score.html" title="MinPackTxScore prefers minimal packing." alt="" coords="185,57,370,85"/>
+<area shape="poly" id="edge2655_Node000000_Node000002" title=" " alt="" coords="152,69,187,70,181,72,152,74"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1v2_1_1_nil_tx_score.html" title=" " alt="" coords="203,109,352,137"/>
+<area shape="poly" id="edge2656_Node000000_Node000003" title=" " alt="" coords="144,87,222,108,217,109,143,92"/>
 </map>

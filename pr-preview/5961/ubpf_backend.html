@@ -145,6 +145,9 @@ $(function(){initNavTree('ubpf_backend.html',''); initResizable(true); });
         </ul>
       </li>
       <li class="level2">
+        <a href="#dependencies-3">Dependencies</a>
+      </li>
+      <li class="level2">
         <a href="#compiling-p4-to-ubpf">Compiling P4 to uBPF</a>
         <ul>
           <li class="level3">
@@ -244,7 +247,10 @@ uBPF</h3>
 <p><b>Why uBPF?</b> The uBPF Virtual Machine can be used in any solution implementing the kernel bypass (e.g. DPDK apps).</p>
 <p>The uBPF project re-implements the <a class="el" href="ebpf_backend.html#ebpf">eBPF</a> kernel-based Virtual Machine. While the BPF programs are intented to run in the kernel, the uBPF project enables running the BPF programs in user-space applications. It contains eBPF assembler, disassembler, interpreter, and JIT compiler for x86-64.</p>
 <p>Moreover, contrary to the eBPF implementation, uBPF is not licensed under GPL. The uBPF implementation is licensed under Apache License, version 2.0.</p>
-<h2><a class="anchor" id="compiling-p4-to-ubpf"></a>
+<h2><a class="anchor" id="dependencies-3"></a>
+Dependencies</h2>
+<p>In addition to the <a class="el" href="getting_started.html#dependencies">P4C dependencies</a>, the uBPF tests require libpcap-dev. The test runtime uses the pcap helpers of the eBPF backend (<code>backends/ebpf/runtime/pcap_util.h</code>) and links with <code>-lpcap</code>. On Ubuntu, it can be installed with: </p><div class="fragment"><div class="line">sudo apt-get install libpcap-dev</div>
+</div><!-- fragment --><h2><a class="anchor" id="compiling-p4-to-ubpf"></a>
 Compiling P4 to uBPF</h2>
 <p>The scope of the uBPF backend is wider than the scope of the eBPF backend. Except for simple packet filtering the P4-to-uBPF compiler supports also P4 registers and programmable actions including packet's modifications and tunneling. For further details refer to <a href="p4include/ubpf_model.p4">uBPF architecture model</a>.</p>
 <p><b>Note!</b> Due to the reason that the <code>standard_metadata</code> has been introduced to the uBPF model at 15th of May 2020 the old P4 programs will not work anymore. You should update your P4 program to the latest architecture model. Alternatively, you can also specify the old version of uBPF model: <code>#define UBPF_MODEL_VERSION 20200304</code> before <code>#include &lt;ubpf_model.p4&gt;</code>.</p>

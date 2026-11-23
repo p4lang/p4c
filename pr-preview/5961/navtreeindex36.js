@@ -1,5 +1,7 @@
 var NAVTREEINDEX36 =
 {
+"struct_i_x_bar_1_1_field_info.html#adef12a816b28562271904ac0318ab941":[13,0,392,1,3],
+"struct_i_x_bar_1_1_key_info.html":[13,0,392,3],
 "struct_i_x_bar_1_1_loc.html":[13,0,392,4],
 "struct_i_x_bar_1_1_loc.html#adfa9a8f98d381ba5bc41ccb7c41cf3c8":[13,0,392,4,0],
 "struct_i_x_bar_1_1_use.html":[13,0,392,5],
@@ -247,7 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector.html":[13,0,12,3,1,6],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_n_a_01_4.html":[12,0,14,1,1,8],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_n_a_01_4.html":[13,0,12,3,1,8],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html":[12,0,14,1,1,9],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html":[13,0,12,3,1,9],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html":[12,0,14,1,1,11]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_action_selector_traits_3_01_arch_1_1_p_s_a_01_4.html":[12,0,14,1,1,9]
 };

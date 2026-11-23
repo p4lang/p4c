@@ -9,6 +9,6 @@ var class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info
     [ "getP4RuntimeAPI", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#addb0cac0ed2304e630b6a314077898df", null ],
     [ "getProgrammableBlocks", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#aad9692e79e2dcda24af36a879dc9766e", null ],
     [ "getTableofDirectExtern", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a41e82b45ed0f0c945e746dc4e95c96c6", null ],
-    [ "getTargetInputPortVar", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a9a068cc5099ad7c9250e7994ede29ca7", null ],
-    [ "getTargetOutputPortVar", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#af40313981f968183a793fd5e012e28e3", null ]
+    [ "getTargetInputPortVar", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a93f0d1a7f73993c3493227ac645b3e0e", null ],
+    [ "getTargetOutputPortVar", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html#a1252d5dd5851d1430a350bf159733c16", null ]
 ];

@@ -1,5 +1,7 @@
 var NAVTREEINDEX40 =
 {
+"struct_slice_list_accumulator.html":[13,0,622],
+"struct_sort_extracts.html":[13,0,624],
 "struct_stage_use.html":[13,0,635],
 "struct_stage_use_estimate.html":[13,0,636],
 "struct_stage_use_estimate.html#a61b61ae1fde8cd11d090b5b2b397f015":[13,0,636,2],
@@ -247,7 +249,5 @@ var NAVTREEINDEX40 =
 "structstd_1_1hash_3_01std_1_1tuple_3_01_types_8_8_8_01_4_01_4.html":[13,0,19,7],
 "structubits.html":[13,0,690],
 "structubits__base.html":[13,0,691],
-"structwidereg.html":[13,0,714],
-"structwidereg__base.html":[13,0,715],
-"structwidereg__base.html#a316afb2b3a61ce025bb05563f6af2619":[13,0,715,0]
+"structwidereg.html":[13,0,714]
 };
