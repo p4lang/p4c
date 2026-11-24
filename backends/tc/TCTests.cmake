@@ -73,7 +73,7 @@ p4c_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
 
 if (ENABLE_P4TC_STF_TESTS)
   # Setup fixture
-  add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup "https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest")
+  add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup)
   set_tests_properties(p4tc_setup PROPERTIES FIXTURES_SETUP P4TCFixture)
 
   add_test(NAME p4tc_cleanup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/cleanup)
