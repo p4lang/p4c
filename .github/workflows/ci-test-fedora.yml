@@ -29,6 +29,7 @@ jobs:
         IN_DOCKER: "TRUE"
     env:
       CTEST_PARALLEL_LEVEL: 4
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
     steps:
       # We need to install git here because it is not provided out of the box in Fedora container.
       - name: Install git

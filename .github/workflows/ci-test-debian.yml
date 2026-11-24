@@ -27,6 +27,7 @@ jobs:
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
       SUPPORT_P4_14: ON
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
 
     steps:
       - uses: actions/checkout@v7

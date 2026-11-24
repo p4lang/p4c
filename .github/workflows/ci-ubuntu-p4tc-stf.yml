@@ -31,6 +31,7 @@ jobs:
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
       INSTALL_STF_P4TC_DEPENDENCIES: ON
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
     steps:
       - uses: actions/checkout@v7
         with:
