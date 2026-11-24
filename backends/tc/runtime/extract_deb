@@ -16,12 +16,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+RELEASE_URL=https://github.com/p4tc-dev/linux-p4tc-pub/releases/download/release-v17-rc11
+IMAGE=linux-image-7.3.0p4tc-v17-rc11+_7.3.0p4tc-v17.rc11-g84617ed206cf-1_amd64.deb
+SHA256=02b3cbd0bd65e872639658838205508883c46ca622b0866eb808761f94854722
 
-RELEASE_URL=$1
-EXTRACT_DIR="$SCRIPT_DIR/extracted_deb"
-
-IMAGE_URL=$(curl -s ${RELEASE_URL} | jq .assets[2].browser_download_url | tr -d \")
-echo $IMAGE_URL
-wget $IMAGE_URL
-dpkg -X linux-image-*.deb ${EXTRACT_DIR}
+package=$(mktemp)
+trap 'rm -f "$package"' EXIT
+curl --fail --location --silent --show-error --retry 3 "$RELEASE_URL/$IMAGE" -o "$package"
+echo "$SHA256  $package" | sha256sum --check
+dpkg-deb --extract "$package" "$SCRIPT_DIR/extracted_deb"
