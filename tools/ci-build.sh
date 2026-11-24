@@ -170,7 +170,7 @@ fi
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
   # Install BMv2 - use OBS package on 22.04, source build on other versions
-  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] && [[ -z "${BMV2_REF:-}" ]]; then
+  if [[ "${DISTRIB_RELEASE}" == "22.04" && -z "${BMV2_REF:-}" && -z "${PI_REF:-}" ]]; then
     # Installation instructions documented at
     # https://software.opensuse.org/download.html?project=home%3Ap4lang&package=p4lang-bmv2
     echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
@@ -221,8 +221,13 @@ function build_bmv2() {
     # Install PI from source for BMv2 gRPC target support.
     tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
     pushd "${tmp_dir}"
-    git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+    git clone --depth=1 https://github.com/p4lang/PI
     cd PI
+    if [[ -n "${PI_REF:-}" ]]; then
+        git fetch --depth=1 origin "${PI_REF}"
+        git checkout --detach FETCH_HEAD
+    fi
+    git submodule update --init --recursive
     ./autogen.sh
     ./configure --with-proto
     make -j$(( $(nproc) + 1 ))
