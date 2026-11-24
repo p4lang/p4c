@@ -10,10 +10,11 @@ file(SHA256 "${TEST_BINARY_DIR}/package.tar" archive_hash)
 
 # A developer's environment must not change the selection rules under test.
 foreach(option CPM_DOWNLOAD_ALL CPM_DOWNLOAD_P4CFixture CPM_USE_LOCAL_PACKAGES
-               CPM_LOCAL_PACKAGES_ONLY)
+               CPM_LOCAL_PACKAGES_ONLY CPM_SOURCE_CACHE)
   unset(ENV{${option}})
 endforeach()
 
+set(source_cache "${TEST_BINARY_DIR}/cache")
 function(check_configure build_name)
   execute_process(
     COMMAND ${CMAKE_COMMAND}
@@ -21,7 +22,7 @@ function(check_configure build_name)
       -B "${TEST_BINARY_DIR}/${build_name}"
       -DSCENARIO=${SCENARIO}
       -DCPM_IMPLEMENTATION=${CPM_IMPLEMENTATION}
-      -DCPM_SOURCE_CACHE=${TEST_BINARY_DIR}/cache
+      "-DCPM_SOURCE_CACHE:PATH=${source_cache}"
       -DFIXTURE_ROOT=${FIXTURE_ROOT}
       -DFIXTURE_ARCHIVE=${TEST_BINARY_DIR}/package.tar
       -DFIXTURE_HASH=${archive_hash}
@@ -45,6 +46,21 @@ function(check_configure build_name)
     endif()
   endif()
 endfunction()
+
+if(SCENARIO STREQUAL "source-cache-relocation")
+  # Exercise P4C's bootstrap on each configure. Seed the script for offline use.
+  set(cpm_script "${CPM_IMPLEMENTATION}")
+  set(CPM_IMPLEMENTATION "${CMAKE_CURRENT_LIST_DIR}/../CPM.cmake")
+  file(COPY "${cpm_script}" DESTINATION "${TEST_BINARY_DIR}/first/cmake")
+  set(source_cache "")
+  check_configure(first)
+  foreach(cache_name cache-a cache-b)
+    set(source_cache "${TEST_BINARY_DIR}/${cache_name}")
+    file(COPY "${cpm_script}" DESTINATION "${source_cache}/cpm")
+    check_configure(first)
+  endforeach()
+  return()
+endif()
 
 check_configure(first)
 if(SCENARIO STREQUAL "source-cache")

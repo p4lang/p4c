@@ -27,4 +27,7 @@ file(DOWNLOAD
      ${CPM_DOWNLOAD_LOCATION} EXPECTED_HASH SHA256=${CPM_HASH_SUM}
 )
 
+# CPM's include guard remembers the script directory across configure runs.
+# Discard the old location in case CPM_SOURCE_CACHE moved.
+unset(CPM_DIRECTORY CACHE)
 include(${CPM_DOWNLOAD_LOCATION})

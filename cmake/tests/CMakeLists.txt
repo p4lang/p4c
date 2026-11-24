@@ -43,7 +43,7 @@ enable_testing()
 foreach(scenario
     default-source package-source installed-prefix installed-dir source-fallback
     prefer-installed require-installed missing-installed source-override
-    parent-older parent-newer source-cache)
+    parent-older parent-newer source-cache source-cache-relocation)
   add_test(NAME cpm-${scenario}
     COMMAND ${CMAKE_COMMAND}
       -DSCENARIO=${scenario}
