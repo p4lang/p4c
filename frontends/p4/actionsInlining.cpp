@@ -75,25 +75,25 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     ParameterSubstitution substitution;
     substitution.populate(callee->parameters, statement->methodCall->arguments);
 
-    // Evaluate in and inout parameters in order. Directionless action parameters behave like
-    // `in` parameters when their values are supplied by an explicit action call.
+    // evaluate in and inout parameters in order
     for (const auto *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
         IR::ID parameterName(newName, param->name.originalName);
         paramRename.emplace(param, newName);
-        if (param->direction == IR::Direction::None && !argument) {
-            ::P4::error(ErrorType::ERR_UNINITIALIZED, "%1%: No argument supplied for %2%",
-                        statement, param);
-            continue;
-        }
-        if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut ||
-            param->direction == IR::Direction::None) {
+        if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             const auto *vardecl = new IR::Declaration_Variable(
                 argument->srcInfo, newName, param->annotations, param->type, argument->expression);
             body.push_back(vardecl);
             subst.add(param,
                       new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
+        } else if (param->direction == IR::Direction::None) {
+            if (!argument) {
+                ::P4::error(ErrorType::ERR_UNINITIALIZED, "%1%: No argument supplied for %2%",
+                            statement, param);
+                continue;
+            }
+            subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
             const auto *vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,

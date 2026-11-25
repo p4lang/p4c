@@ -270,16 +270,14 @@ std::vector<Continuation::Command> JBayProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::StateVariable &JBayProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(JBayConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*ig_intr_md"),
-                                                 "ingress_port"));
+IR::StateVariable JBayProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(JBayConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*ig_intr_md"), "ingress_port"));
 }
 
-const IR::StateVariable &JBayProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(JBayConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*eg_intr_md"),
-                                                 "egress_port"));
+IR::StateVariable JBayProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(JBayConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*eg_intr_md"), "egress_port"));
 }
 
 const IR::Expression *JBayProgramInfo::dropIsActive() const {

@@ -30,7 +30,33 @@ DiagnosticAction actionFor(ErrorReporter &reporter, cstring name) {
 
 }  // namespace
 
-class DiagnosticOptions : public P4CTest {};
+class DiagnosticOptions : public P4CTest {
+ protected:
+    // Processing options repoints the process-wide include paths relative to the
+    // running binary, not the source tree the standard headers came from, so they
+    // stop counting as system files. Restore them for the tests that follow.
+    void SetUp() override {
+        P4CTest::SetUp();
+        savedP4includePath = p4includePath;
+#ifdef SUPPORT_P4_14
+        savedP4_14includePath = p4_14includePath;
+#endif
+    }
+
+    void TearDown() override {
+        p4includePath = savedP4includePath;
+#ifdef SUPPORT_P4_14
+        p4_14includePath = savedP4_14includePath;
+#endif
+        P4CTest::TearDown();
+    }
+
+ private:
+    std::filesystem::path savedP4includePath;
+#ifdef SUPPORT_P4_14
+    std::filesystem::path savedP4_14includePath;
+#endif
+};
 
 TEST_F(DiagnosticOptions, WdisableSingleDiagnostic) {
     auto &reporter = processOption("--Wdisable=some-warning");

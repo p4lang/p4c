@@ -1,0 +1,3 @@
+varbit-fixed-unaligned-header-bmv2.p4(7): [--Werror=target-error] error: header variable_t: Found header with fixed fields totaling 1 bits.  BMv2 target only supports headers with fixed fields totaling a multiple of 8 bits.
+header variable_t { bit<1> tag; varbit<63> data; }
+       ^^^^^^^^^^

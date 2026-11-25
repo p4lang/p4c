@@ -22,6 +22,7 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_split.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
@@ -51,9 +52,8 @@ bool isSystemFile(cstring file) { return isSystemFile(std::filesystem::path(file
 /// Sets the diagnostic action for a comma-separated list of diagnostic names.
 /// Returns false if any named diagnostic is a registered error.
 bool applyDiagnosticAction(const char *diagnostic, DiagnosticAction action) {
-    auto copy = strdup(diagnostic);
     bool success = true;
-    while (auto name = strsep(&copy, ",")) {
+    for (std::string_view name : absl::StrSplit(diagnostic, ',')) {
         if (ErrorCatalog::getCatalog().isError(name)) {
             ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", name);
             success = false;
@@ -227,8 +227,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--disable-annotations", "annotations",
         [this](const char *arg) {
-            auto copy = strdup(arg);
-            while (auto name = strsep(&copy, ",")) disabledAnnotations.insert(cstring(name));
+            for (std::string_view name : absl::StrSplit(arg, ','))
+                disabledAnnotations.insert(cstring(name));
             return true;
         },
         "Specify a (comma separated) list of annotations that should be "
@@ -278,8 +278,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         "--Werror", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                auto copy = strdup(diagnostic);
-                while (auto name = strsep(&copy, ","))
+                for (std::string_view name : absl::StrSplit(diagnostic, ','))
                     P4CContext::get().setDiagnosticAction(name, DiagnosticAction::Error);
             } else {
                 auto action = DiagnosticAction::Error;
@@ -324,8 +323,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--top4", "pass1[,pass2]",
         [this](const char *arg) {
-            auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ",")) top4.push_back(cstring(pass));
+            for (std::string_view pass : absl::StrSplit(arg, ',')) top4.push_back(cstring(pass));
             return true;
         },
         "[Compiler debugging] Dump the P4 representation after\n"

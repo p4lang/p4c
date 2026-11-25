@@ -7,9 +7,13 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+#include <string_view>
+
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/json.h"
 
 namespace P4::Util {
 
@@ -86,6 +90,62 @@ TEST(UtilSourceFile, SourceInfo) {
 
     SourceInfo invalid;
     EXPECT_FALSE(invalid.isValid());
+}
+
+namespace {
+
+/// Returns the brief source fragment for the first occurrence of @p needle in the one-line
+/// source @p text.
+cstring briefFragmentOf(const char *text, std::string_view needle) {
+    InputSources sources;
+    sources.appendText(text);
+    sources.seal();
+    const auto column = std::string_view(text).find(needle);
+    SourceInfo info(&sources, SourcePosition(1, column), SourcePosition(1, column + needle.size()));
+    return info.toBriefSourceFragment();
+}
+
+}  // namespace
+
+TEST(UtilSourceFile, BriefSourceFragment) {
+    EXPECT_EQ("hdr.a", briefFragmentOf("x = hdr.a;\n", "hdr.a"));
+    EXPECT_EQ("a = 's';", briefFragmentOf("a = 's';", "a = 's';"));
+}
+
+TEST(UtilSourceFile, BriefSourceFragmentOnLineWithQuotes) {
+    // Only the requested range is returned, not the whole line.
+    EXPECT_EQ("hdr.a", briefFragmentOf("log_msg(\"hello\"); x = hdr.a;\n", "hdr.a"));
+}
+
+TEST(UtilSourceFile, BriefSourceFragmentKeepsQuotes) {
+    // The fragment is raw source text; JSON escaping is the serializer's job.
+    EXPECT_EQ("@name(\"ingress.t\")",
+              briefFragmentOf("@name(\"ingress.t\") table t {}\n", "@name(\"ingress.t\")"));
+}
+
+TEST(UtilSourceFile, BriefSourceFragmentWithoutTrailingNewline) {
+    // No character may be dropped from a quoted line that has no line terminator.
+    EXPECT_EQ("a = \"s\";", briefFragmentOf("a = \"s\";", "a = \"s\";"));
+}
+
+TEST(UtilSourceFile, BriefSourceFragmentMultiLineSpan) {
+    // A span that continues on later lines is cut at the end of its first line and marked,
+    // whether or not that line contains quotes.
+    for (const auto *text :
+         {"if (x == 'a') {\n  y = 1;\n}\n", "if (x == \"a\") {\n  y = 1;\n}\n"}) {
+        InputSources sources;
+        sources.appendText(text);
+        sources.seal();
+        SourceInfo info(&sources, SourcePosition(1, 0), SourcePosition(3, 1));
+        const std::string expected = std::string(text).substr(0, 15) + " ...";
+        EXPECT_EQ(expected, info.toBriefSourceFragment()) << text;
+    }
+}
+
+TEST(UtilSourceFile, BriefSourceFragmentEscapedOnceInJson) {
+    const auto fragment = briefFragmentOf("a = \"s\";\n", "\"s\"");
+    ASSERT_EQ("\"s\"", fragment);
+    EXPECT_EQ("\"\\\"s\\\"\"", JsonValue(fragment).toString());
 }
 
 }  // namespace P4::Util

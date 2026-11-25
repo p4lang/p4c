@@ -59,8 +59,9 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoEbpfContext(new EbpfContext);
-    auto &options = EbpfContext::get().options();
+    EbpfContext context;
+    AutoCompileContext autoEbpfContext(&context);
+    auto &options = context.options();
     options.compilerVersion = cstring(P4C_UBPF_VERSION_STRING);
 
     if (options.process(argc, argv) != nullptr) {

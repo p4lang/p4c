@@ -144,17 +144,17 @@ void CoverableNodesScanner::updateNodeCoverage(const IR::Node *node,
                                                P4::Coverage::CoverageSet &nodes) {
     CHECK_NULL(node);
 
-    static NodeCache CACHED_NODES;
+    auto &cachedNodes = state.get().getCoverageCache();
     // If the node is already in the cache, return it.
-    auto it = CACHED_NODES.find(node);
-    if (it != CACHED_NODES.end()) {
+    auto it = cachedNodes.find(node);
+    if (it != cachedNodes.end()) {
         nodes.insert(it->second.begin(), it->second.end());
         return;
     }
     node->apply(*this);
     nodes.insert(coverableNodes.begin(), coverableNodes.end());
     // Store the result in the cache.
-    CACHED_NODES.emplace(node, coverableNodes);
+    cachedNodes.emplace(node, coverableNodes);
 }
 
 CoverableNodesScanner::CoverableNodesScanner(const ExecutionState &state)

@@ -12,6 +12,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <optional>
 #include <stack>
 #include <utility>
@@ -41,6 +42,8 @@ class ExecutionState : public AbstractExecutionState {
     friend class Test::SmallStepTest;
 
  public:
+    using CoverageCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
+
     class StackFrame {
      public:
         using ExceptionHandlers = std::map<Continuation::Exception, Continuation>;
@@ -83,6 +86,9 @@ class ExecutionState : public AbstractExecutionState {
 
     /// Set of visited nodes. Used for code coverage.
     P4::Coverage::CoverageSet visitedNodes;
+
+    /// Coverage lookahead is shared by branches of one execution.
+    std::shared_ptr<CoverageCache> coverageCache = std::make_shared<CoverageCache>();
 
     /// The remaining body of the current function being executed.
     ///
@@ -177,6 +183,8 @@ class ExecutionState : public AbstractExecutionState {
 
     /// @returns list of all nodes visited before reaching this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
+
+    CoverageCache &getCoverageCache() const { return *coverageCache; }
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.

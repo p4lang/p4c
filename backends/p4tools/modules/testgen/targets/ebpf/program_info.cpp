@@ -111,14 +111,14 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::StateVariable &EBPFProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*"), "input_port"));
+IR::StateVariable EBPFProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*"), "input_port"));
 }
 
-const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*"), "output_port"));
+IR::StateVariable EBPFProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(EBPFConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*"), "output_port"));
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {
