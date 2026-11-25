@@ -27,6 +27,7 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       INSTALL_PTF_EBPF_DEPENDENCIES: ON
       BUILD_GENERATOR: Ninja
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
     steps:
       - uses: actions/checkout@v7
         with:
