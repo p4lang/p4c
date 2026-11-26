@@ -22,6 +22,7 @@
 #include "ir/json_generator.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
+#include "lib/hash.h"
 #include "lib/ordered_map.h"
 #include "lib/rtti.h"
 #include "lib/safe_vector.h"
@@ -219,9 +220,16 @@ class Z3Translator : public virtual Inspector {
     z3::expr translate(const IR::Expression *expression);
 
  private:
+    /// Hashes a node by its id rather than its address. Clearing @ref translations releases the
+    /// cached Z3 expressions in bucket order and Z3 recycles the ids of released expressions, so
+    /// an address-based hash makes the solver's models depend on the memory layout.
+    struct NodeIdHash {
+        size_t operator()(const IR::Node *node) const { return Util::Hash{}(node->id); }
+    };
+
     /// Reuse translations of shared IR nodes only within one traversal. The key must be
     /// pointer identity: structurally equivalent symbolic nodes may have different types.
-    std::unordered_map<const IR::Expression *, z3::expr> translations;
+    std::unordered_map<const IR::Expression *, z3::expr, NodeIdHash> translations;
 
     profile_t init_apply(const IR::Node *root) override;
     void end_apply() override;
