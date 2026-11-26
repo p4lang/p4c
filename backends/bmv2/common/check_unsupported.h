@@ -20,6 +20,15 @@ class CheckUnsupported : public Inspector {
         error(ErrorType::ERR_UNSUPPORTED, "%sBMV2 does not support for-in loops", fs->srcInfo);
         return false;
     }
+
+    bool preorder(const IR::Type_Header *h) override {
+        for (const auto *f : h->fields) {
+            if (f->type->is<IR::Type_Array>())
+                error(ErrorType::ERR_UNSUPPORTED, "%sBMV2 does not support arrays in a header",
+                      f->srcInfo);
+        }
+        return false;
+    }
 };
 
 }  // namespace P4::BMV2
