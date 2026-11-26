@@ -73,8 +73,13 @@ export MAKEFLAGS
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
 pushd "${tmp_dir}"
-git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+git clone --depth=1 https://github.com/p4lang/PI
 cd PI
+if [[ -n "${PI_REF:-}" ]]; then
+  git fetch --depth=1 origin "${PI_REF}"
+  git checkout --detach FETCH_HEAD
+fi
+git submodule update --init --recursive
 ./autogen.sh
 ./configure --with-proto
 make -j$((`nproc`+1))

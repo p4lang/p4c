@@ -32,6 +32,8 @@ jobs:
       COMPILE_WITH_CLANG: ON
       BUILD_AUTO_VAR_INIT_PATTERN: ON
       ENABLE_SANITIZERS: ON
+      BMV2_REF: 5c722502bc390cbd5f5b77f0d107c9b3fb92ab56
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
       UBSAN_OPTIONS: print_stacktrace=1
       ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:

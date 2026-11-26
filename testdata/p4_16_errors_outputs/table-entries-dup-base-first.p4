@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 struct Headers {
     bit<8> a;
     bit<8> b;

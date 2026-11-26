@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 @command_line("--loopsUnroll") header h1 {
     bit<8> a;
 }
