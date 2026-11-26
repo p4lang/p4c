@@ -29,6 +29,7 @@ jobs:
         IN_DOCKER: "TRUE"
     env:
       CTEST_PARALLEL_LEVEL: 4
+      BMV2_REF: 5c722502bc390cbd5f5b77f0d107c9b3fb92ab56
       PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
     steps:
       # We need to install git here because it is not provided out of the box in Fedora container.
