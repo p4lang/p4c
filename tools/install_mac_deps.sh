@@ -48,21 +48,16 @@ brew update
 # creating a Python venv so package install succeeds.
 brew install python@3.14
 
-BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake jsoncpp libtool
     openssl coreutils bison grep ninja uv
     libevent nanomsg thrift xxhash
-    ${BOOST_LIB}
+    # Homebrew disabled boost@1.85 and has no newer versioned formula.
+    boost
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
   brew_install ${package}
 done
-
-# Check if linking is needed.
-if ! brew ls --linked --formula ${BOOST_LIB} > /dev/null 2>&1; then
-  brew link ${BOOST_LIB}
-fi
 
 # Check if PATH modification is needed.
 if ! grep -q "$(brew --prefix bison)/bin" ~/.bash_profile; then

@@ -33,7 +33,15 @@ class JsonData : public ICastable {
     virtual ~JsonData() = default;
     static bool strict;  // enforce strict syntax checking of json on input, default false.
 
-    friend std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
+    /// Extract one JSON value. Check trailing input separately to validate a document.
+    /// Numbers must be integers. In strict mode, strings must contain valid Unicode and
+    /// object keys cannot contain NUL. Stream exceptions follow the stream's exception mask.
+    ///
+    /// @param in Input stream.
+    /// @param strict Enforce strict syntax independently of JsonData::strict.
+    /// @return Ownership of the value, or nullptr if legacy mode extracts no value.
+    /// @throws error If strict mode encounters malformed or unsupported input.
+    static std::unique_ptr<JsonData> parse(std::istream &in, bool strict);
     struct error : public std::runtime_error {
         const JsonData *data = nullptr;  // object/item with error if parsed
         std::streamoff loc = -1;         // location of the error if no object

@@ -11,6 +11,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # "labeled" so adding run-static to an open PR starts a run.
+    types: [opened, synchronize, reopened, labeled]
 
 # Cancel any preceding run on the pull request.
 concurrency:

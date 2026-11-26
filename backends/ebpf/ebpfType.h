@@ -227,9 +227,10 @@ class EBPFScalarTypePNA : public EBPFScalarType {
                                   (width > 56 && width <= 64));
     }
     unsigned alignment() const;
-    void declare(CodeBuilder *builder, cstring id, bool asPointer);
-    void declareInit(CodeBuilder *builder, cstring id, bool asPointer);
-    void emitInitializer(CodeBuilder *builder);
+    void emit(CodeBuilder *builder) override;
+    void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder *builder) override;
 };
 
 }  // namespace P4::EBPF

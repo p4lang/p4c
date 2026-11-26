@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 struct header_t {
 }
 

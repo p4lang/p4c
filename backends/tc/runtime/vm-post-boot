@@ -21,6 +21,9 @@ HOST_IP=$1
 mkdir -p /home/ci/.ssh
 sudo bash -c "cat /mnt/id_rsa.pub > /home/ci/.ssh/authorized_keys"
 
+# Generated programs always call the bpf_p4tc_skb_meta_set kfunc
+sudo modprobe ext_skb_meta
+
 sudo ip l set dev ens2 up
 sudo ip a add $HOST_IP/24 dev ens2
 

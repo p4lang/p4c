@@ -42,9 +42,9 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
     std::filesystem::path filename = isTDI ? options.tdiFile : options.bfRtSchema;
-    auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
     if (auto out = openFile(filename, false)) {
-        p4rt->serializeBFRuntimeSchema(out.get());
+        P4::BFRT::BFRuntimeSchemaGenerator generator(*p4Runtime.p4Info, isTDI, options);
+        generator.serializeBFRuntimeSchema(out.get());
     } else {
         ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
     }
@@ -53,8 +53,9 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
-    auto &options = DPDK::DpdkContext::get().options();
+    DPDK::DpdkContext context;
+    AutoCompileContext autoDpdkContext(&context);
+    auto &options = context.options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(DPDK_VERSION_STRING);
 
@@ -132,14 +133,14 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
+    DPDK::DpdkBackend backend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
-    backend->convert(toplevel);
+    backend.convert(toplevel);
     if (::P4::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
         if (auto out = openFile(options.outputFile, false)) {
-            backend->codegen(*out);
+            backend.codegen(*out);
             out->flush();
         }
     }

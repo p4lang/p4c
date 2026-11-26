@@ -34,8 +34,9 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
-    auto &options = BMV2::SimpleSwitchContext::get().options();
+    BMV2::SimpleSwitchContext simpleSwitchContext;
+    AutoCompileContext driverContextGuard(&simpleSwitchContext);
+    auto &options = simpleSwitchContext.options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(BMV2_SIMPLESWITCH_VERSION_STRING);
 
@@ -103,13 +104,13 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend =
-        new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    BMV2::SimpleSwitchBackend backend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
+    BMV2::BMV2Context backendContext(simpleSwitchContext);
+    AutoCompileContext backendContextGuard(&backendContext);
     try {
-        backend->convert(toplevel);
+        backend.convert(toplevel);
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -118,7 +119,7 @@ int main(int argc, char *const argv[]) {
 
     if (!options.outputFile.empty()) {
         if (auto out = openFile(options.outputFile, false)) {
-            backend->serialize(*out);
+            backend.serialize(*out);
             out->flush();
         }
     }

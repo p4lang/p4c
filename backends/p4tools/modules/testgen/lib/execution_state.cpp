@@ -67,9 +67,7 @@ ExecutionState::StackFrame::getExceptionHandlers() const {
 const NamespaceContext *ExecutionState::StackFrame::getNameSpaces() const { return namespaces; }
 
 ExecutionState::ExecutionState(const IR::P4Program *program)
-    : AbstractExecutionState(program),
-      body({program}),
-      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+    : AbstractExecutionState(program), body({program}) {
     env.set(&PacketVars::INPUT_PACKET_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     // We also add the taint property and set it to false.
@@ -86,8 +84,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     }
 }
 
-ExecutionState::ExecutionState(Continuation::Body body)
-    : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+ExecutionState::ExecutionState(Continuation::Body body) : body(std::move(body)) {
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState"_cs, false);
     // Drop is initialized to false, too.

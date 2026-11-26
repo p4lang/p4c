@@ -20,12 +20,18 @@ function(p4c_obtain_p4runtime)
     set(CMAKE_UNITY_BUILD OFF)
     set(FETCHCONTENT_QUIET OFF)
 
+    # DOWNLOAD_EXTRACT_TIMESTAMP is introduced in CMake 3.24.
+    set(P4C_P4RUNTIME_DOWNLOAD_OPTIONS)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+      set(P4C_P4RUNTIME_DOWNLOAD_OPTIONS DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+    endif()
+
     FetchContent_Declare(
       p4runtime
       # P4Runtime 1.6.0 with CMake packaging
       URL https://github.com/p4lang/p4runtime/archive/0bea6a3be25d6f852615a8d6b55fd68dfd624350.tar.gz
       URL_HASH SHA256=e64fac0ce4abf47aa0e2ed9920473edbba67aa1c79767f198f8606a8beea986e
-      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+      ${P4C_P4RUNTIME_DOWNLOAD_OPTIONS}
     )
     FetchContent_MakeAvailable(p4runtime)
     set(proto_dir "${p4runtime_SOURCE_DIR}/proto")

@@ -170,7 +170,7 @@ fi
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
   # Install BMv2 - use OBS package on 22.04, source build on other versions
-  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] && [[ -z "${BMV2_REF:-}" ]]; then
+  if [[ "${DISTRIB_RELEASE}" == "22.04" && -z "${BMV2_REF:-}" && -z "${PI_REF:-}" ]]; then
     # Installation instructions documented at
     # https://software.opensuse.org/download.html?project=home%3Ap4lang&package=p4lang-bmv2
     echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
@@ -221,8 +221,13 @@ function build_bmv2() {
     # Install PI from source for BMv2 gRPC target support.
     tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
     pushd "${tmp_dir}"
-    git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+    git clone --depth=1 https://github.com/p4lang/PI
     cd PI
+    if [[ -n "${PI_REF:-}" ]]; then
+        git fetch --depth=1 origin "${PI_REF}"
+        git checkout --detach FETCH_HEAD
+    fi
+    git submodule update --init --recursive
     ./autogen.sh
     ./configure --with-proto
     make -j$(( $(nproc) + 1 ))
@@ -313,7 +318,7 @@ function install_stf_p4tc_test_deps() (
                              python3-scapy \
                              qemu-system-x86"
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
-    git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc8 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
+    git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc11 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
     ${P4C_DIR}/backends/tc/runtime/build-iproute2 ${P4C_DIR}/backends/tc/runtime
     sudo apt-get install -y virtme-ng
 )

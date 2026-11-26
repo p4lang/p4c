@@ -223,7 +223,7 @@ bool TypeUnification::containsDots(const IR::Type_StructLike *type) {
     if (type->fields.empty()) return false;
     size_t lastIndex = type->fields.size() - 1;
     const auto *lastField = type->fields.at(lastIndex);
-    return lastField->name == "..."_cs && lastField->type->is<IR::Type_Any>();
+    return lastField->name == IR::Dots::name && lastField->type->is<IR::Type_Any>();
 }
 
 bool TypeUnification::containsDots(const IR::Type_BaseList *type) {
@@ -374,7 +374,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                strct, st);
             if (!strctHasDots) {
                 for (auto f : st->fields) {
-                    if (f->name != "..."_cs && !strct->getField(f->name))
+                    if (f->name != IR::Dots::name && !strct->getField(f->name))
                         return constraint->reportError(
                             constraints->getCurrentSubstitution(),
                             "Field %1% in initializer is not a member of structure %2%", f->name,
@@ -409,7 +409,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
             if (stHasDots) {
                 auto dotsType = new IR::Type_UnknownStruct(st->name, std::move(missingFields));
-                auto dotsField = st->getField("..."_cs);
+                auto dotsField = st->getField(IR::Dots::name);
                 CHECK_NULL(dotsField);
                 auto partial = new IR::Type_Fragment(dotsType);
                 constraints->add(new EqualityConstraint(dotsField->type, partial, constraint));

@@ -8,6 +8,7 @@ set(P4TC_BACKEND_SOURCES
     ebpfCodeGen.cpp
     introspection.cpp
     midend.cpp
+    options.cpp
     pnaProgramStructure.cpp
     tc.cpp
     tcAnnotations.cpp
@@ -102,10 +103,6 @@ add_custom_target(linkp4tc
         )
 
 add_dependencies(p4c_driver linkp4tc)
-
-add_custom_target(tc_includes ALL
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/tc
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/tc/pna.p4 ${P4C_BINARY_DIR}/p4include/tc)
 
 #### Tests ####
 include(${CMAKE_CURRENT_SOURCE_DIR}/TCTests.cmake)
