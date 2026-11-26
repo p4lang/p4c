@@ -15,7 +15,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "ir/ir.h"
@@ -221,7 +220,7 @@ class Z3Translator : public virtual Inspector {
  private:
     /// Reuse translations of shared IR nodes only within one traversal. The key must be
     /// pointer identity: structurally equivalent symbolic nodes may have different types.
-    std::unordered_map<const IR::Expression *, z3::expr> translations;
+    ordered_map<const IR::Expression *, z3::expr> translations;
 
     profile_t init_apply(const IR::Node *root) override;
     void end_apply() override;
