@@ -146,7 +146,7 @@ def compare_files(options, produced, expected, ignore_case):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    args = "-B -u -w"
+    args = "-u"
     if ignore_case:
         args = args + " -i"
     cmd = "diff " + args + " " + expected + " " + produced + " >&2"

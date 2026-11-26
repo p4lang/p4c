@@ -2,7 +2,6 @@ header ipv4_option_timestamp_t_1 {
     bit<8> value;
     bit<8> len;
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>

@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 parser p(packet_in packet) {
     @name("p.tmp_0") bit<8> tmp_0;
     state start {

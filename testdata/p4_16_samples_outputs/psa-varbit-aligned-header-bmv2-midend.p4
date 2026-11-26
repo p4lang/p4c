@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <bmv2/psa.p4>
 
 header variable_t {

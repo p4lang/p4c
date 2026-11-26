@@ -3,7 +3,6 @@
     start_e2e_mirrored = 32w1,
     start_i2e_mirrored = 32w2
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
