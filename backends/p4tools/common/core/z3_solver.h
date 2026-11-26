@@ -220,7 +220,6 @@ class Z3Translator : public virtual Inspector {
  private:
     /// Reuse translations of shared IR nodes only within one traversal. The key must be
     /// pointer identity: structurally equivalent symbolic nodes may have different types.
-    /// Insertion-ordered, so that clearing it releases the cached Z3 expressions in a deterministic
     /// order: Z3 recycles the ids of released expressions, and those ids affect its models.
     ordered_map<const IR::Expression *, z3::expr> translations;
 
