@@ -43,7 +43,7 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    meter(1024, MeterType.bytes) simple_meter;
+    meter(1024, MeterType.packets) simple_meter;
     apply {
         MeterColor color;
         simple_meter.execute_meter<MeterColor>(h.h.idx, color);
