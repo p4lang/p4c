@@ -31,10 +31,7 @@ apply {
 	extract h.u0_h3
 	invalidate h.u0_h1
 	invalidate h.u0_h2
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	mov m.MainParserT_parser_tmp 1
 	jmpv LABEL_END h.u0_h3
 	mov m.MainParserT_parser_tmp 0
@@ -49,29 +46,14 @@ apply {
 	LABEL_END_0 :	mov h.u0_h1.data h.u0_h3.data
 	invalidate h.u0_h2
 	invalidate h.u0_h3
-	PARSERIMPL_START_JOIN :	validate h.u0_h1
+	PARSERIMPL_START_JOIN :	mov h.u0_h1.data 0x1
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
-	validate h.u0_h1
-	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
-	validate h.u0_h2
 	mov h.u0_h2.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h3
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	validate h.u0_h1
 	invalidate h.u0_h2
 	invalidate h.u0_h3
-	validate h.u0_h1
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
 	validate h.u0_h2
 	invalidate h.u0_h1
 	invalidate h.u0_h3
@@ -108,30 +90,15 @@ apply {
 	invalidate h.u1_h2
 	jmp LABEL_END_5
 	LABEL_FALSE_4 :	invalidate h.u1_h3
-	LABEL_END_5 :	validate h.u1_h1
-	mov h.u1_h1.data 0x1
-	invalidate h.u1_h2
-	invalidate h.u1_h3
-	validate h.u1_h2
+	LABEL_END_5 :	mov h.u1_h1.data 0x1
 	mov h.u1_h2.data 0x1
-	invalidate h.u1_h1
-	invalidate h.u1_h3
 	validate h.u0_h2
 	invalidate h.u0_h1
 	invalidate h.u0_h3
 	invalidate h.u0_h3
-	validate h.u0_h1
 	mov h.u0_h1.data 0x1
-	invalidate h.u0_h2
-	invalidate h.u0_h3
-	validate h.u0_h2
 	mov h.u0_h2.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h3
-	validate h.u0_h3
 	mov h.u0_h3.data 0x1
-	invalidate h.u0_h1
-	invalidate h.u0_h2
 	tx m.pna_main_output_metadata_output_port
 }
 

@@ -78,14 +78,10 @@ apply {
 	LABEL_END_3 :	jmpneq LABEL_END_4 m.MainControlT_retval 0x1
 	mov h.base.t 0x3
 	LABEL_END_4 :	jmpnv LABEL_FALSE_3 h.u_short
-	validate h.u_short
 	mov h.u_short.data 0xFFFF
-	invalidate h.u_byte
 	jmp LABEL_END_5
 	LABEL_FALSE_3 :	jmpnv LABEL_END_5 h.u_byte
-	validate h.u_byte
 	mov h.u_byte.data 0xFF
-	invalidate h.u_short
 	LABEL_END_5 :	emit h.base
 	emit h.u_byte
 	emit h.u_short

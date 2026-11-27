@@ -30,10 +30,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         pkt.extract<Header1>(hdr.u1_h3);
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h2.setInvalid();
         transition select(hdr.u1_h3.isValid()) {
             true: start_true;
             false: start_false;
@@ -51,25 +48,13 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         transition start_join;
     }
     state start_join {
-        hdr.u1_h1.setValid();
         hdr.u1_h1.data = 32w1;
-        hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u1_h1.setValid();
         hdr.u1_h1.data = 32w1;
-        hdr.u1_h2.setInvalid();
-        hdr.u1_h3.setInvalid();
-        hdr.u1_h2.setValid();
         hdr.u1_h2.data = 16w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h3.setInvalid();
-        hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
-        hdr.u1_h1.setInvalid();
-        hdr.u1_h2.setInvalid();
         transition accept;
     }
 }
@@ -91,10 +76,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u1_0_h1_0.setValid();
         u1_0_h2_0.setInvalid();
         u1_0_h3_0.setInvalid();
-        u1_0_h1_0.setValid();
         u1_0_h1_0.data = 32w1;
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
@@ -122,10 +104,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         } else {
             u2_0_h3_0.setInvalid();
         }
-        u2_0_h2_0.setValid();
         u2_0_h2_0.data = 16w1;
-        u2_0_h1_0.setInvalid();
-        u2_0_h3_0.setInvalid();
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();

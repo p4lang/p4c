@@ -30,10 +30,7 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition select(hdr.u[0].h3.isValid()) {
             true: start_true;
             false: start_false;
@@ -51,25 +48,13 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         transition start_join;
     }
     state start_join {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h2.setValid();
         hdr.u[0].h2.data = 16w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition accept;
     }
 }
@@ -86,10 +71,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u_1[0].h1.setValid();
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
-        u_1[0].h1.setValid();
         u_1[0].h1.data = 32w1;
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
         if (u_1[0].h1.isValid()) {
             u_1[1].h1.setValid();
             u_1[1].h1 = u_1[0].h1;
@@ -98,10 +80,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         } else {
             u_1[1].h1.setInvalid();
         }
-        u_1[1].h1.setValid();
         u_1[1].h1.data = 32w1;
-        u_1[1].h2.setInvalid();
-        u_1[1].h3.setInvalid();
         u_1[0].h2.setValid();
         u_1[0].h1.setInvalid();
         u_1[0].h3.setInvalid();
@@ -129,10 +108,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         } else {
             u_1[1].h3.setInvalid();
         }
-        u_1[1].h2.setValid();
         u_1[1].h2.data = 16w1;
-        u_1[1].h1.setInvalid();
-        u_1[1].h3.setInvalid();
         u_1[1w0].h2.setValid();
         u_1[1w0].h1.setInvalid();
         u_1[1w0].h3.setInvalid();
