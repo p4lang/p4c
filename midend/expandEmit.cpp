@@ -26,7 +26,7 @@ bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
             expandArg(st->elementType, element, result, resultTypes);
         }
         return true;
-    } else if (auto tup = type->to<IR::Type_Tuple>()) {
+    } else if (auto tup = type->to<IR::Type_BaseList>()) {
         auto le = arg->expression->to<IR::ListExpression>();
         BUG_CHECK(le != nullptr && le->size() == tup->getSize(), "%1%: not a list?", arg);
         for (size_t i = 0; i < le->size(); i++) {
