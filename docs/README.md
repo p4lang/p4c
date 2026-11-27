@@ -103,6 +103,9 @@ p4c
 
 # Additional documentation
 
+* [Managing dependencies with CPM](CPM.md) covers installed packages, local
+  checkouts, and source caching for CMake builds.
+
 * the P4_14 and P4_16 languages are described in their respective
   specifications, available [here](https://p4.org/specs).
 

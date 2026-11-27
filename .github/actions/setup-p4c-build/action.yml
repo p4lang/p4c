@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 name: "Setup and Build p4c"
-description: "Handles ccache configuration and runs the initial CI build script."
+description: "Caches dependency sources and compiler output, then runs the initial CI build."
 inputs:
   ccache-key:
     description: "Cache key for jobs using the same compiler and build settings."
@@ -17,6 +17,9 @@ inputs:
   use-ccache:
     description: "Disable for jobs that do not compile, such as formatting."
     default: "true"
+  use-cpm-cache:
+    description: "Cache CPM dependency sources; disable for formatting-only jobs."
+    default: "true"
   custom-build-command:
     description: "Optional custom compilation commands instead of running ci-build.sh"
     required: false
@@ -24,6 +27,20 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Configure dependency source cache
+      if: inputs.use-cpm-cache == 'true'
+      shell: bash
+      run: echo "CPM_SOURCE_CACHE=$RUNNER_TEMP/p4c-cpm" >> "$GITHUB_ENV"
+    - name: Restore dependency sources
+      if: inputs.use-cpm-cache == 'true'
+      id: cpm
+      uses: actions/cache/restore@v6
+      with:
+        path: ${{ runner.temp }}/p4c-cpm
+        # Jobs enable different backends; separate keys avoid the first writer
+        # permanently caching only a subset of another job's dependencies.
+        key: cpm-v1-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ inputs.ccache-key }}-main-${{ hashFiles('CMakeLists.txt', 'cmake/**', 'backends/**/CMakeLists.txt', 'backends/**/*.cmake', '.github/workflows/*.y*ml') }}
+        restore-keys: cpm-v1-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ inputs.ccache-key }}-main-
     - name: Restore compiler cache
       if: inputs.use-ccache == 'true'
       id: ccache
@@ -50,3 +67,9 @@ runs:
       with:
         prefix: ${{ steps.ccache.outputs.prefix }}
         save-main: ${{ inputs.save-main }}
+    - name: Save dependency sources
+      if: inputs.use-cpm-cache == 'true' && steps.cpm.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main' && github.event_name != 'merge_group'
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ runner.temp }}/p4c-cpm
+        key: ${{ steps.cpm.outputs.cache-primary-key }}

@@ -13,20 +13,14 @@ endif()
 message(STATUS "Start configuring the eBPF back end")
 
 if(NOT APPLE)
-  # Fetch and declare the libbpf library. Print out download state while setting up libbpf.
-  set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-  set(FETCHCONTENT_QUIET OFF)
-  fetchcontent_declare(
-    bpfrepo
+  # The runtime build scripts require bpftool sources at this location.
+  CPMAddPackage(
+    NAME bpfrepo
     URL https://github.com/libbpf/bpftool/releases/download/v7.5.0/bpftool-libbpf-v7.5.0-sources.tar.gz
-    # URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/bpftool
-    USES_TERMINAL_DOWNLOAD TRUE
-    GIT_PROGRESS TRUE
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    DOWNLOAD_ONLY YES
+    FORCE YES
   )
-  fetchcontent_makeavailable(bpfrepo)
-  set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
   # Check if we have already built the libbpf library.
   find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
   if (NOT LIBBPF)

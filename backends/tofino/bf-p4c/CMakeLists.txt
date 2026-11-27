@@ -536,14 +536,12 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} bfn_p4runtime ir)
+target_link_libraries(tofinobackend PUBLIC spdlog::spdlog_header_only PRIVATE absl::prefetch ${P4C_LIB_DEPS} bfn_p4runtime ir)
 target_include_directories(
   tofinobackend
   # We also export Z3's includes with the common library.
   # This is necessary because the z3 target itself does not export its includes.
   SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
-  # FIXME: This should be pulled with FetchContent.
-  PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
 )
 add_dependencies(tofinobackend frontend genLogging)
 
@@ -594,15 +592,13 @@ else()
   # here explictly as well as their dependencies
   add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
-  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(p4c-barefoot spdlog::spdlog_header_only ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
   # FIXME: These includes should be exported by earlier libraries.
   target_include_directories(
       p4c-barefoot
       # We also export Z3's includes with the common library.
       # This is necessary because the z3 target itself does not export its includes.
       SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
-      # FIXME: This should be pulled with FetchContent.
-      PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
     )
 endif()
 
@@ -927,7 +923,7 @@ if (ENABLE_GTESTS)
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
   # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
   # Leave it in GTEST_BF_P4C_SOURCES for now.
-  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
+  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir GTest::gtest ${P4C_LIB_DEPS})
   target_include_directories(
     bf_gtest_support
     # We also export Z3's includes with the common library.
@@ -935,7 +931,7 @@ if (ENABLE_GTESTS)
     SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
   )
   # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
-  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen genLogging)
+  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated frontend-parser-gen genLogging)
 
   set (GTEST_BF_P4C_SOURCES
     # Currently all gtests need to be built directly into the gtestp4c binary.
