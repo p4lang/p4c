@@ -29,10 +29,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition select(hdr.u[0].h3.isValid()) {
             true: start_true;
             false: start_false;
@@ -50,25 +47,13 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         transition start_join;
     }
     state start_join {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h2.setValid();
         hdr.u[0].h2.data = 16w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
         transition accept;
     }
 }
@@ -85,10 +70,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u_1[0].h1.setValid();
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
-        u_1[0].h1.setValid();
         u_1[0].h1.data = 32w1;
-        u_1[0].h2.setInvalid();
-        u_1[0].h3.setInvalid();
         u_1[0].h2.setValid();
         u_1[0].h1.setInvalid();
         u_1[0].h3.setInvalid();
@@ -116,10 +98,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         } else {
             u_1[1].h3.setInvalid();
         }
-        u_1[1].h2.setValid();
         u_1[1].h2.data = 16w1;
-        u_1[1].h1.setInvalid();
-        u_1[1].h3.setInvalid();
         u_1[0].h2.setValid();
         u_1[0].h1.setInvalid();
         u_1[0].h3.setInvalid();

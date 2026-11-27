@@ -104,15 +104,6 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a)
                     a->srcInfo, result, trueBlock->to<IR::BlockStatement>(), ifFalse);
                 return ifStatement;
             }
-        } else if (auto leftMem = lhs->expr->to<IR::Member>()) {  // hdr.u1.h1 or u1.h1
-            // Handling hdr.u1.h1.data = <constant>
-            if (auto huType = leftMem->expr->type->to<IR::Type_HeaderUnion>()) {
-                // hdr.u1 or u1
-                if (leftMem->type->is<IR::Type_Header>() && right->is<IR::Constant>()) {
-                    // h1.data = constant
-                    return setInvalidforRest(a, leftMem, huType, leftMem->member.name, true);
-                }
-            }
         }
     }
     return a;

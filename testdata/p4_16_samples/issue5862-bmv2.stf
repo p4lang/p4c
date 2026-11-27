@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Only a is valid. Do not inspect the potentially clobbered union data.
+packet 0 0007
+expect 0 01

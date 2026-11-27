@@ -59,9 +59,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         clone_md_data_h1_0.setInvalid();
         clone_md_data_h1_0.setValid();
         clone_md_data_h0_0.setInvalid();
-        clone_md_data_h1_0.setValid();
         clone_md_data_h1_0.data = 32w0;
-        clone_md_data_h0_0.setInvalid();
         transition select((bit<1>)(b.meta == 32w1)) {
             1w1: start_true;
             1w0: start_join;
