@@ -12,7 +12,6 @@ header ipv4_t_1 {
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>

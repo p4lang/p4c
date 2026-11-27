@@ -635,21 +635,21 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._wcmp_group_id_valid37 = true;
         local_metadata._wcmp_group_id_value38 = wcmp_group_id;
     }
-    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_4) {
+    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_2) {
         local_metadata._wcmp_group_id_valid37 = true;
-        local_metadata._wcmp_group_id_value38 = wcmp_group_id_4;
+        local_metadata._wcmp_group_id_value38 = wcmp_group_id_2;
     }
-    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_5, @name("route_metadata") bit<6> route_metadata_3) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_3, @name("route_metadata") bit<6> route_metadata_3) {
         @id(0x01000004) @inlinedFrom("set_wcmp_group_id") {
             local_metadata._wcmp_group_id_valid37 = true;
-            local_metadata._wcmp_group_id_value38 = wcmp_group_id_5;
+            local_metadata._wcmp_group_id_value38 = wcmp_group_id_3;
         }
         local_metadata._route_metadata34 = route_metadata_3;
     }
-    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_6, @name("route_metadata") bit<6> route_metadata_4) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_4, @name("route_metadata") bit<6> route_metadata_4) {
         @id(0x01000004) @inlinedFrom("set_wcmp_group_id") {
             local_metadata._wcmp_group_id_valid37 = true;
-            local_metadata._wcmp_group_id_value38 = wcmp_group_id_6;
+            local_metadata._wcmp_group_id_value38 = wcmp_group_id_4;
         }
         local_metadata._route_metadata34 = route_metadata_4;
     }
@@ -963,12 +963,12 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._packet_rewrites_src_mac8 = src_mac_4;
         local_metadata._packet_rewrites_vlan_id10 = vlan_id_1;
     }
-    @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") bit<9> port_4, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_6) {
+    @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") bit<9> port_3, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_5) {
         @id(0x0100001B) @unsupported @action_restriction("
     // Disallow reserved VLAN IDs with implementation-defined semantics.
     vlan_id != 0 && vlan_id != 4095") @inlinedFrom("set_port_and_src_mac_and_vlan_id") {
-            standard_metadata.egress_spec = (bit<9>)port_4;
-            local_metadata._packet_rewrites_src_mac8 = src_mac_6;
+            standard_metadata.egress_spec = (bit<9>)port_3;
+            local_metadata._packet_rewrites_src_mac8 = src_mac_5;
             local_metadata._packet_rewrites_vlan_id10 = 12w0xfff;
         }
     }
@@ -1038,14 +1038,14 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         const default_action = NoAction_13();
         size = 1024;
     }
-    @id(0x01000013) @name("ingress.routing_resolution.mark_for_p2p_tunnel_encap") action routing_resolution_mark_for_p2p_tunnel_encap_0(@id(1) @format(IPV6_ADDRESS) @name("encap_src_ip") bit<128> encap_src_ip, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("encap_dst_ip") bit<128> encap_dst_ip, @id(3) @refers_to(neighbor_table , router_interface_id) @refers_to(router_interface_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_11) {
+    @id(0x01000013) @name("ingress.routing_resolution.mark_for_p2p_tunnel_encap") action routing_resolution_mark_for_p2p_tunnel_encap_0(@id(1) @format(IPV6_ADDRESS) @name("encap_src_ip") bit<128> encap_src_ip, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("encap_dst_ip") bit<128> encap_dst_ip, @id(3) @refers_to(neighbor_table , router_interface_id) @refers_to(router_interface_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_6) {
         local_metadata._tunnel_encap_src_ipv616 = encap_src_ip;
         local_metadata._tunnel_encap_dst_ipv617 = encap_dst_ip;
         local_metadata._apply_tunnel_encap_at_egress15 = true;
         @id(0x01000014) @inlinedFrom("set_ip_nexthop") {
             @id(0x01000017) @inlinedFrom("set_ip_nexthop_and_disable_rewrites") {
                 routing_resolution_router_interface_id_valid = true;
-                routing_resolution_router_interface_id_value = router_interface_id_11;
+                routing_resolution_router_interface_id_value = router_interface_id_6;
                 routing_resolution_neighbor_id_valid = true;
                 routing_resolution_neighbor_id_value = encap_dst_ip;
                 local_metadata._enable_decrement_ttl4 = true;
@@ -1080,7 +1080,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         implementation = routing_resolution_wcmp_group_selector;
         size = 3968;
     }
-    @id(0x01000007) @name("ingress.mirror_session_lookup.mirror_as_ipv4_erspan") action mirror_session_lookup_mirror_as_ipv4_erspan_0(@id(1) @name("port") bit<9> port_5, @id(2) @format(IPV4_ADDRESS) @name("src_ip") bit<32> src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") bit<32> dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_7, @id(5) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_3, @id(6) @name("ttl") bit<8> ttl_1, @id(7) @name("tos") bit<8> tos) {
+    @id(0x01000007) @name("ingress.mirror_session_lookup.mirror_as_ipv4_erspan") action mirror_session_lookup_mirror_as_ipv4_erspan_0(@id(1) @name("port") bit<9> port_4, @id(2) @format(IPV4_ADDRESS) @name("src_ip") bit<32> src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") bit<32> dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_6, @id(5) @format(MAC_ADDRESS) @name("dst_mac") bit<48> dst_mac_3, @id(6) @name("ttl") bit<8> ttl_1, @id(7) @name("tos") bit<8> tos) {
     }
     @id(0x0100001D) @unsupported @name("ingress.mirror_session_lookup.mirror_with_vlan_tag_and_ipfix_encapsulation") action mirror_session_lookup_mirror_with_vlan_tag_and_ipfix_encapsulation_0(@id(1) @name("monitor_port") bit<9> monitor_port, @id(2) @name("monitor_failover_port") bit<9> monitor_failover_port, @id(3) @format(MAC_ADDRESS) @name("mirror_encap_src_mac") bit<48> mirror_encap_src_mac_1, @id(4) @format(MAC_ADDRESS) @name("mirror_encap_dst_mac") bit<48> mirror_encap_dst_mac_1, @id(6) @name("mirror_encap_vlan_id") bit<12> mirror_encap_vlan_id_1, @id(7) @format(IPV6_ADDRESS) @name("mirror_encap_dst_ip") bit<128> mirror_encap_dst_ip_1, @id(8) @format(IPV6_ADDRESS) @name("mirror_encap_src_ip") bit<128> mirror_encap_src_ip_1, @id(9) @name("mirror_encap_udp_src_port") bit<16> mirror_encap_udp_src_port_1, @id(10) @name("mirror_encap_udp_dst_port") bit<16> mirror_encap_udp_dst_port_1) {
         local_metadata._mirror_egress_port21 = monitor_port;
@@ -1141,19 +1141,19 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._enable_vlan_checks0 = true;
         key_0 = 1w1;
     }
-    @hidden action pins_middleblock1538() {
+    @hidden action pins_middleblock1537() {
         acl_pre_ingress_dscp = headers.ipv4.dscp;
         acl_pre_ingress_ecn = headers.ipv4.ecn;
     }
-    @hidden action pins_middleblock1542() {
+    @hidden action pins_middleblock1541() {
         acl_pre_ingress_dscp = headers.ipv6.dscp;
         acl_pre_ingress_ecn = headers.ipv6.ecn;
     }
-    @hidden action pins_middleblock1418() {
+    @hidden action pins_middleblock1417() {
         acl_pre_ingress_dscp = 6w0;
         acl_pre_ingress_ecn = 2w0;
     }
-    @hidden action pins_middleblock1458() {
+    @hidden action pins_middleblock1457() {
         key_1 = headers.ipv4.isValid() || headers.ipv6.isValid();
     }
     @hidden action pins_middleblock875() {
@@ -1177,7 +1177,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @hidden action pins_middleblock803() {
         local_metadata._admit_to_l32 = false;
     }
-    @hidden action pins_middleblock1552() {
+    @hidden action pins_middleblock1551() {
         local_metadata._admit_to_l32 = headers.ethernet.dst_addr == 48w0x1a11175f80;
     }
     @hidden action pins_middleblock536() {
@@ -1189,13 +1189,13 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @hidden action pins_middleblock546() {
         local_metadata._ipmc_table_hit41 = standard_metadata.mcast_grp != 16w0;
     }
-    @hidden action pins_middleblock1398() {
+    @hidden action pins_middleblock1397() {
         acl_ingress_ttl = headers.ipv4.ttl;
         acl_ingress_dscp = headers.ipv4.dscp;
         acl_ingress_ecn = headers.ipv4.ecn;
         acl_ingress_ip_protocol = headers.ipv4.protocol;
     }
-    @hidden action pins_middleblock1403() {
+    @hidden action pins_middleblock1402() {
         acl_ingress_ttl = headers.ipv6.hop_limit;
         acl_ingress_dscp = headers.ipv6.dscp;
         acl_ingress_ecn = headers.ipv6.ecn;
@@ -1211,13 +1211,13 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @hidden action pins_middleblock1206() {
         key_3 = headers.ipv4.isValid() || headers.ipv6.isValid();
     }
-    @hidden action pins_middleblock1333() {
+    @hidden action pins_middleblock1332() {
         key_6 = headers.ipv4.isValid() || headers.ipv6.isValid();
     }
-    @hidden action pins_middleblock1378() {
+    @hidden action pins_middleblock1377() {
         key_8 = headers.ipv4.isValid() || headers.ipv6.isValid();
     }
-    @hidden action pins_middleblock1412() {
+    @hidden action pins_middleblock1411() {
         local_metadata._marked_to_copy18 = false;
     }
     @hidden action pins_middleblock553() {
@@ -1268,29 +1268,29 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         }
         const default_action = pins_middleblock852();
     }
-    @hidden table tbl_pins_middleblock1418 {
+    @hidden table tbl_pins_middleblock1417 {
         actions = {
-            pins_middleblock1418();
+            pins_middleblock1417();
         }
-        const default_action = pins_middleblock1418();
+        const default_action = pins_middleblock1417();
     }
-    @hidden table tbl_pins_middleblock1538 {
+    @hidden table tbl_pins_middleblock1537 {
         actions = {
-            pins_middleblock1538();
+            pins_middleblock1537();
         }
-        const default_action = pins_middleblock1538();
+        const default_action = pins_middleblock1537();
     }
-    @hidden table tbl_pins_middleblock1542 {
+    @hidden table tbl_pins_middleblock1541 {
         actions = {
-            pins_middleblock1542();
+            pins_middleblock1541();
         }
-        const default_action = pins_middleblock1542();
+        const default_action = pins_middleblock1541();
     }
-    @hidden table tbl_pins_middleblock1458 {
+    @hidden table tbl_pins_middleblock1457 {
         actions = {
-            pins_middleblock1458();
+            pins_middleblock1457();
         }
-        const default_action = pins_middleblock1458();
+        const default_action = pins_middleblock1457();
     }
     @hidden table tbl_pins_middleblock875 {
         actions = {
@@ -1316,11 +1316,11 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         }
         const default_action = pins_middleblock1016();
     }
-    @hidden table tbl_pins_middleblock1552 {
+    @hidden table tbl_pins_middleblock1551 {
         actions = {
-            pins_middleblock1552();
+            pins_middleblock1551();
         }
-        const default_action = pins_middleblock1552();
+        const default_action = pins_middleblock1551();
     }
     @hidden table tbl_pins_middleblock803 {
         actions = {
@@ -1370,17 +1370,17 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         }
         const default_action = pins_middleblock1121();
     }
-    @hidden table tbl_pins_middleblock1398 {
+    @hidden table tbl_pins_middleblock1397 {
         actions = {
-            pins_middleblock1398();
+            pins_middleblock1397();
         }
-        const default_action = pins_middleblock1398();
+        const default_action = pins_middleblock1397();
     }
-    @hidden table tbl_pins_middleblock1403 {
+    @hidden table tbl_pins_middleblock1402 {
         actions = {
-            pins_middleblock1403();
+            pins_middleblock1402();
         }
-        const default_action = pins_middleblock1403();
+        const default_action = pins_middleblock1402();
     }
     @hidden table tbl_pins_middleblock1206 {
         actions = {
@@ -1388,23 +1388,23 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         }
         const default_action = pins_middleblock1206();
     }
-    @hidden table tbl_pins_middleblock1333 {
+    @hidden table tbl_pins_middleblock1332 {
         actions = {
-            pins_middleblock1333();
+            pins_middleblock1332();
         }
-        const default_action = pins_middleblock1333();
+        const default_action = pins_middleblock1332();
     }
-    @hidden table tbl_pins_middleblock1378 {
+    @hidden table tbl_pins_middleblock1377 {
         actions = {
-            pins_middleblock1378();
+            pins_middleblock1377();
         }
-        const default_action = pins_middleblock1378();
+        const default_action = pins_middleblock1377();
     }
-    @hidden table tbl_pins_middleblock1412 {
+    @hidden table tbl_pins_middleblock1411 {
         actions = {
-            pins_middleblock1412();
+            pins_middleblock1411();
         }
-        const default_action = pins_middleblock1412();
+        const default_action = pins_middleblock1411();
     }
     @hidden table tbl_pins_middleblock553 {
         actions = {
@@ -1450,13 +1450,13 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
             }
             tbl_pins_middleblock852.apply();
             vlan_untag_disable_vlan_checks_table.apply();
-            tbl_pins_middleblock1418.apply();
+            tbl_pins_middleblock1417.apply();
             if (headers.ipv4.isValid()) {
-                tbl_pins_middleblock1538.apply();
+                tbl_pins_middleblock1537.apply();
             } else if (headers.ipv6.isValid()) {
-                tbl_pins_middleblock1542.apply();
+                tbl_pins_middleblock1541.apply();
             }
-            tbl_pins_middleblock1458.apply();
+            tbl_pins_middleblock1457.apply();
             acl_pre_ingress_acl_pre_ingress_table.apply();
             if (local_metadata._enable_vlan_checks0 && !(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff)) {
                 tbl_pins_middleblock875.apply();
@@ -1470,7 +1470,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
                     tbl_pins_middleblock1016.apply();
                 }
             }
-            tbl_pins_middleblock1552.apply();
+            tbl_pins_middleblock1551.apply();
             if (local_metadata._enable_vlan_checks0 && !(local_metadata._vlan_id1 == 12w0x0 || local_metadata._vlan_id1 == 12w0xfff)) {
                 tbl_pins_middleblock803.apply();
             } else {
@@ -1497,18 +1497,18 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
             }
             tbl_pins_middleblock1121.apply();
             if (headers.ipv4.isValid()) {
-                tbl_pins_middleblock1398.apply();
+                tbl_pins_middleblock1397.apply();
             } else if (headers.ipv6.isValid()) {
-                tbl_pins_middleblock1403.apply();
+                tbl_pins_middleblock1402.apply();
             }
             tbl_pins_middleblock1206.apply();
             acl_ingress_acl_ingress_table.apply();
-            tbl_pins_middleblock1333.apply();
+            tbl_pins_middleblock1332.apply();
             acl_ingress_acl_ingress_mirror_and_redirect_table.apply();
-            tbl_pins_middleblock1378.apply();
+            tbl_pins_middleblock1377.apply();
             acl_ingress_acl_ingress_security_table.apply();
             if (acl_ingress_cancel_copy) {
-                tbl_pins_middleblock1412.apply();
+                tbl_pins_middleblock1411.apply();
             }
             tbl_pins_middleblock553.apply();
             if (local_metadata._admit_to_l32) {
@@ -1551,9 +1551,9 @@ control egress(inout headers_t headers, inout local_metadata_t local_metadata, i
     @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_4() {
         local_metadata._acl_drop42 = true;
     }
-    @id(0x01000019) @name("egress.packet_rewrites.multicast_rewrites.set_multicast_src_mac") action packet_rewrites_multicast_rewrites_set_multicast_src_mac_0(@id(1) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_8) {
+    @id(0x01000019) @name("egress.packet_rewrites.multicast_rewrites.set_multicast_src_mac") action packet_rewrites_multicast_rewrites_set_multicast_src_mac_0(@id(1) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_7) {
         local_metadata._enable_src_mac_rewrite5 = true;
-        local_metadata._packet_rewrites_src_mac8 = src_mac_8;
+        local_metadata._packet_rewrites_src_mac8 = src_mac_7;
     }
     @p4runtime_role("sdn_controller") @id(0x0200004C) @name("egress.packet_rewrites.multicast_rewrites.multicast_router_interface_table") table packet_rewrites_multicast_rewrites_multicast_router_interface_table {
         key = {

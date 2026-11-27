@@ -104,7 +104,7 @@ class BackendDriver:
                 "Programmer error - config_warning_modifiers does not support option " + option
             )
 
-        apply_to_all = len(arguments) == 1 and arguments[0] == ""
+        apply_to_all = "" in arguments
 
         if apply_to_all:
             self.add_command_option('compiler', f'--W{option}')

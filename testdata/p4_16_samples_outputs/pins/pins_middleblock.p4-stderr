@@ -49,19 +49,19 @@ pins_middleblock.p4(1158): [--Wwarn=unused] warning: 'cpu_queue' is unused
 pins_middleblock.p4(1161): [--Wwarn=unused] warning: 'cpu_queue' is unused
 ...ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1255): [--Wwarn=unused] warning: table 'acl_ingress_qos_table' is unused
+pins_middleblock.p4(1254): [--Wwarn=unused] warning: table 'acl_ingress_qos_table' is unused
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1290): [--Wwarn=unused] warning: table 'acl_ingress_counting_table' is unused
+pins_middleblock.p4(1289): [--Wwarn=unused] warning: table 'acl_ingress_counting_table' is unused
   ") table acl_ingress_counting_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1489): [--Wwarn=unused] warning: table 'acl_pre_ingress_vlan_table' is unused
+pins_middleblock.p4(1488): [--Wwarn=unused] warning: table 'acl_pre_ingress_vlan_table' is unused
   ") table acl_pre_ingress_vlan_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1518): [--Wwarn=unused] warning: table 'acl_pre_ingress_metadata_table' is unused
+pins_middleblock.p4(1517): [--Wwarn=unused] warning: table 'acl_pre_ingress_metadata_table' is unused
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1580): [--Wwarn=unused] warning: control 'lag_hashing_config' is unused
+pins_middleblock.p4(1579): [--Wwarn=unused] warning: control 'lag_hashing_config' is unused
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(621): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
@@ -76,19 +76,19 @@ pins_middleblock.p4(852): [--Wwarn=ignore-prop] warning: KeyElement: constant ke
 pins_middleblock.p4(1086): [--Winfo=removed] info: removing table 'acl_egress_dhcp_to_host_table'
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1255): [--Winfo=removed] info: removing table 'acl_ingress_qos_table'
+pins_middleblock.p4(1254): [--Winfo=removed] info: removing table 'acl_ingress_qos_table'
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1290): [--Winfo=removed] info: removing table 'acl_ingress_counting_table'
+pins_middleblock.p4(1289): [--Winfo=removed] info: removing table 'acl_ingress_counting_table'
   ") table acl_ingress_counting_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1489): [--Winfo=removed] info: removing table 'acl_pre_ingress_vlan_table'
+pins_middleblock.p4(1488): [--Winfo=removed] info: removing table 'acl_pre_ingress_vlan_table'
   ") table acl_pre_ingress_vlan_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1518): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
+pins_middleblock.p4(1517): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1580): [--Winfo=removed] info: removing control 'lag_hashing_config'
+pins_middleblock.p4(1579): [--Winfo=removed] info: removing control 'lag_hashing_config'
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(638): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
@@ -106,9 +106,9 @@ pins_middleblock.p4(565): [--Wwarn=uninitialized-use] warning: neighbor_id_value
 pins_middleblock.p4(852): [--Wwarn=mismatch] warning: 1w1: Constant key field
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
-pins_middleblock.p4(1564): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+pins_middleblock.p4(1563): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
 ... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1568): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+pins_middleblock.p4(1567): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
 ... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

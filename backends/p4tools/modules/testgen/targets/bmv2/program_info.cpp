@@ -186,16 +186,16 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*standard_metadata"),
-                                                 "ingress_port"));
+IR::StateVariable Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*standard_metadata"),
+                                            "ingress_port"));
 }
 
-const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*standard_metadata"),
-                                                 "egress_spec"));
+IR::StateVariable Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*standard_metadata"),
+                                            "egress_spec"));
 }
 
 const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {

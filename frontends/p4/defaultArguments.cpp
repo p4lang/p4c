@@ -59,7 +59,8 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
             arg = new IR::Argument(param->srcInfo, param->name, value->clone());
             changed = true;
         }
-        args->push_back(arg);
+        // Optional parameters without defaults remain absent from the call
+        if (arg != nullptr) args->push_back(arg);
     }
 
     if (changed) return args;

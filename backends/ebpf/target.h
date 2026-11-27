@@ -36,9 +36,9 @@ class Target {
  protected:
     explicit Target(cstring name) : name(name) {}
     Target() = delete;
-    virtual ~Target() {}
 
  public:
+    virtual ~Target() = default;
     const cstring name;
 
     virtual void emitLicense(Util::SourceCodeBuilder *builder, cstring license) const = 0;

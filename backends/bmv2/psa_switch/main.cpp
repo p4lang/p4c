@@ -31,8 +31,9 @@ using namespace P4;
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new BMV2::PsaSwitchContext);
-    auto &options = BMV2::PsaSwitchContext::get().options();
+    BMV2::PsaSwitchContext psaSwitchContext;
+    AutoCompileContext driverContextGuard(&psaSwitchContext);
+    auto &options = psaSwitchContext.options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(BMV2_PSA_VERSION_STRING);
 
@@ -100,13 +101,13 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend =
-        new BMV2::PsaSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    BMV2::PsaSwitchBackend backend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::PsaSwitchContext::get()));
+    BMV2::BMV2Context backendContext(psaSwitchContext);
+    AutoCompileContext backendContextGuard(&backendContext);
     try {
-        backend->convert(toplevel);
+        backend.convert(toplevel);
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -115,7 +116,7 @@ int main(int argc, char *const argv[]) {
 
     if (!options.outputFile.empty()) {
         if (auto out = openFile(options.outputFile, false)) {
-            backend->serialize(*out);
+            backend.serialize(*out);
             out->flush();
         }
     }

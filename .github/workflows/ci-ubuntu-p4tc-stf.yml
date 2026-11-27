@@ -10,6 +10,8 @@ on:
     - cron: "0 0 * * *"
   pull_request:
     branches: [main]
+    # "labeled" so adding p4tc to an open PR starts a run.
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches: [main]
 
@@ -29,6 +31,8 @@ jobs:
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
       INSTALL_STF_P4TC_DEPENDENCIES: ON
+      BMV2_REF: 5c722502bc390cbd5f5b77f0d107c9b3fb92ab56
+      PI_REF: d415e4b781f508f187e3315354b7bb734ddf0816
     steps:
       - uses: actions/checkout@v7
         with:

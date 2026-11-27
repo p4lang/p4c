@@ -50,9 +50,9 @@ TofinoTestBackend::TofinoTestBackend(const TofinoSharedProgramInfo &programInfo,
         exit(EXIT_FAILURE);
     }
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testBackendConfiguration);
+        testWriter = std::make_unique<PTF>(testBackendConfiguration);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else {
         std::stringstream supportedBackendString;
         bool isFirst = true;
