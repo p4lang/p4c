@@ -131,8 +131,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "nested stack"
-  # testgen has issues with arrays
+  "BMV2 does not support arrays in a header"
   array1.p4
   array2.p4
 )
