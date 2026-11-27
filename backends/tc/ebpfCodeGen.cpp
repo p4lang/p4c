@@ -5,7 +5,6 @@
 
 #include "ebpfCodeGen.h"
 
-#include <cctype>
 #include <regex>
 
 namespace P4::TC {
@@ -384,40 +383,117 @@ class ParserLocalUses : public Inspector {
     }
 };
 
+/// Records whether the visited states read the packet length.
+class PacketLengthUses : public Inspector {
+    const P4::ReferenceMap *refMap;
+    const IR::Parameter *packet;
+
+ public:
+    bool used = false;
+
+    PacketLengthUses(const P4::ReferenceMap *refMap, const IR::Parameter *packet)
+        : refMap(refMap), packet(packet) {}
+
+    bool preorder(const IR::MethodCallExpression *call) override {
+        auto *member = call->method->to<IR::Member>();
+        if (member == nullptr) return true;
+        if (member->member.name != P4::P4CoreLibrary::instance().packetIn.length.name) return true;
+        auto *path = member->expr->to<IR::PathExpression>();
+        if (path == nullptr) return true;
+        if (refMap->getDeclaration(path->path, true) == packet) used = true;
+        return true;
+    }
+};
+
+/// Records whether the visited expression states a bound on a metadata member:
+/// a relation (other than inequality) comparing the member directly with a
+/// constant. A verify that merely mentions the member, for example one that
+/// tests its low bits, does not bound it.
+class MetadataBoundUses : public Inspector {
+    const P4::ReferenceMap *refMap;
+    const IR::Parameter *metadata;
+    cstring field;
+
+    bool isField(const IR::Expression *expression) const {
+        auto *member = expression->to<IR::Member>();
+        if (member == nullptr || member->member.name != field) return false;
+        auto *path = member->expr->to<IR::PathExpression>();
+        return path != nullptr && refMap->getDeclaration(path->path, true) == metadata;
+    }
+
+ public:
+    bool used = false;
+
+    MetadataBoundUses(const P4::ReferenceMap *refMap, const IR::Parameter *metadata, cstring field)
+        : refMap(refMap), metadata(metadata), field(field) {}
+
+    bool preorder(const IR::Operation_Relation *relation) override {
+        if (relation->is<IR::Neq>()) return true;
+        bool leftField = isField(relation->left);
+        bool rightField = isField(relation->right);
+        if ((leftField && relation->right->is<IR::Constant>()) ||
+            (rightField && relation->left->is<IR::Constant>())) {
+            used = true;
+            return false;
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 // Outlined states get a private copy of each parser local, so a local shared
 // with code outside the region would not carry its value across the helper.
-// Extern instances are not copied at all: they are registered while the normal
-// parser body is emitted, after the helper has been built, so a helper that
-// uses one would look up an instance it does not have.
-static bool checkOutlineLocals(const EBPFPnaParser *parser) {
+// An extern instance has the same problem in a sharper form: the helper
+// registers its own copy, whose state starts fresh on every call, so an
+// instance whose state is written in one place and read in another would
+// silently lose the update. An instance used only inside one region is
+// supported, because the helper's copy then lives exactly as long as the whole
+// parse of that region.
+static bool checkOutlineLocals(EBPFPnaParser *parser) {
     std::set<cstring> locals;
-    std::set<cstring> instances;
+    std::set<cstring> instanceNames;
+    std::map<cstring, const IR::Declaration_Instance *> instances;
     for (auto *local : parser->parserBlock->container->parserLocals) {
         if (local->is<IR::Declaration_Variable>()) {
             locals.insert(local->getName().name);
         } else if (local->is<IR::Declaration_Instance>()) {
-            instances.insert(local->getName().name);
+            instanceNames.insert(local->getName().name);
+            instances.emplace(local->getName().name, local->to<IR::Declaration_Instance>());
         }
     }
-    for (const auto &region : parser->outlineRegions) {
-        std::set<cstring> inside, outside, instancesInside;
+    // Which regions use each instance, and whether any state outside every
+    // region uses it. A state is classified once, so a use in one region is
+    // never counted as a use outside another region.
+    std::map<cstring, std::set<size_t>> stateRegions;
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index)
+        for (auto &name : parser->outlineRegions[index].states) stateRegions[name].insert(index);
+
+    std::map<cstring, std::set<size_t>> instanceRegions;
+    std::set<cstring> instanceOutside;
+    for (auto *state : parser->states) {
+        std::set<cstring> instancesUsed;
+        ParserLocalUses instanceUses(instanceNames, instancesUsed);
+        state->state->apply(instanceUses);
+        if (instancesUsed.empty()) continue;
+        auto found = stateRegions.find(state->state->name.name);
+        if (found == stateRegions.end()) {
+            instanceOutside.insert(instancesUsed.begin(), instancesUsed.end());
+            continue;
+        }
+        for (auto index : found->second)
+            for (auto &name : instancesUsed) instanceRegions[name].insert(index);
+    }
+    // A parser local variable crosses the region when it is read or written on
+    // both sides of the helper boundary: the helper's copy would not carry the
+    // value back out.
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index) {
+        const auto &region = parser->outlineRegions[index];
+        std::set<cstring> inside, outside;
         for (auto *state : parser->states) {
             bool isInside = region.states.count(state->state->name.name) != 0;
             ParserLocalUses uses(locals, isInside ? inside : outside);
             state->state->apply(uses);
-            if (isInside) {
-                ParserLocalUses instanceUses(instances, instancesInside);
-                state->state->apply(instanceUses);
-            }
-        }
-        for (auto name : instancesInside) {
-            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Parser local '%1%' is an extern instance, which the outlined region "
-                        "starting at state '%2%' cannot use",
-                        name, region.startState);
-            return false;
         }
         for (auto name : inside) {
             if (!outside.count(name)) continue;
@@ -428,7 +504,64 @@ static bool checkOutlineLocals(const EBPFPnaParser *parser) {
             return false;
         }
     }
+    for (auto &entry : instanceRegions) {
+        if (entry.second.size() == 1 && !instanceOutside.count(entry.first)) continue;
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Parser local '%1%' is an extern instance whose state would not cross the "
+                    "boundary of the outlined region starting at state '%2%'; an outlined region "
+                    "can use an extern instance only if every use of it is inside that region",
+                    entry.first, parser->outlineRegions[*entry.second.begin()].startState);
+        return false;
+    }
+    for (size_t index = 0; index < parser->outlineRegions.size(); ++index) {
+        for (auto &entry : instanceRegions) {
+            if (entry.second.count(index) != 0)
+                parser->outlineRegions[index].instances.push_back(entry.first);
+        }
+    }
     return true;
+}
+
+// A helper runs a fragment of the parser body, so it declares only the locals
+// its region can reach: the packet cursor and the error it maintains, plus the
+// packet length when a state of the region reads it.
+static bool regionUsesPacketLength(EBPFPnaParser *parser, const ParserOutlineRegion &region) {
+    PacketLengthUses uses(parser->program->refMap, parser->packet);
+    for (auto *state : parser->states) {
+        if (region.states.count(state->state->name.name) == 0) continue;
+        state->state->apply(uses);
+    }
+    return uses.used;
+}
+
+// A region's metadata bound can be stated in the program: a verify() on the
+// field as the entry state's first statement narrows the scalar the region
+// caches the field in, and that narrowing is what the helper's bounds proof
+// needs. A verify after a packet access is not an entry precondition, so only
+// the statements before the first packet access are considered.
+static const IR::MethodCallExpression *entryVerifyOf(EBPFPnaParser *parser, cstring stateName,
+                                                     cstring field) {
+    auto *refMap = parser->program->refMap;
+    for (auto *state : parser->states) {
+        if (state->state->name.name != stateName) continue;
+        for (auto *component : state->state->components) {
+            auto *statement = component->to<IR::MethodCallStatement>();
+            if (statement == nullptr) continue;
+            auto *call = statement->methodCall;
+            if (auto *method = call->method->to<IR::Member>()) {
+                auto *path = method->expr->to<IR::PathExpression>();
+                if (path != nullptr && refMap->getDeclaration(path->path, true) == parser->packet)
+                    return nullptr;
+            }
+            auto *name = call->method->to<IR::PathExpression>();
+            if (name == nullptr || name->path->name.name != IR::ParserState::verify) continue;
+            MetadataBoundUses uses(refMap, parser->user_metadata, field);
+            call->apply(uses);
+            if (uses.used) return call;
+        }
+        return nullptr;
+    }
+    return nullptr;
 }
 
 void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
@@ -475,17 +608,57 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         if (region.localField && !scalarMetadataField(region.localField, "local")) return;
         if (region.boundField && !scalarMetadataField(region.boundField, "bound")) return;
     }
+    // The entry check rejects before the program's own verify can run, so the
+    // two cannot both state the bound: the option would replace the program's
+    // error with its own and its source location with none.
+    for (const auto &region : parser->outlineRegions) {
+        if (!region.boundField) continue;
+        if (auto *verify = entryVerifyOf(parser, region.startState, region.boundField)) {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "%1% bounds '%2%' at the outlined region's entry, so "
+                        "--tc-outline-parser-bound=%2% would reject first with its own error",
+                        verify, region.boundField);
+            return;
+        }
+    }
     if (!checkOutlineLocals(parser)) return;
 
     // The cache name is a stem only: prefixing it keeps it clear of the
     // helper's own locals and parameters, and newName() keeps it clear of every
-    // other name the program uses.
+    // other name the program uses. The helper's labels must also stay clear of
+    // the parser state names, which are emitted as labels in the same function.
+    std::set<cstring> stateNames;
+    for (auto *state : parser->states) stateNames.insert(state->state->name.name);
+    auto outlineLabel = [&](std::string_view base) {
+        cstring name = refMap->newName(base);
+        while (stateNames.count(name)) name = refMap->newName(base);
+        return name;
+    };
     for (auto &region : parser->outlineRegions) {
         if (region.localField) region.localName = refMap->newName("p4tc_cache_" + region.localName);
+        region.doneLabel = outlineLabel("p4tc_outline_done");
+        region.noMatchLabel = outlineLabel("p4tc_outline_no_match");
     }
 
+    std::map<cstring, const IR::Declaration *> instanceDecls;
+    for (auto *local : parser->parserBlock->container->parserLocals) {
+        if (local->is<IR::Declaration_Instance>())
+            instanceDecls.emplace(local->getName().name, local);
+    }
+    for (const auto &region : parser->outlineRegions)
+        for (auto &name : region.instances) parser->outlinedInstances.insert(name);
+
+    cstring metaName = parser->user_metadata->name.name;
     for (const auto &region : parser->outlineRegions) {
         EBPF::CodeBuilder helper(builder->target);
+        // The helper owns its own copy of the cached metadata field. The copy
+        // lives for exactly one call, so every exit writes it back.
+        auto writeBack = [&]() {
+            if (!region.localField) return;
+            helper.appendFormat("%s->%s = %s; ", metaName.c_str(), region.localField.c_str(),
+                                region.localName.c_str());
+        };
+
         helper.append("__attribute__((noinline)) unsigned int ");
         helper.append(region.helperName.c_str());
         helper.append("(");
@@ -494,19 +667,22 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         if (!region.noHdr)
             helper.appendFormat("struct %s *%s, ", headerType->name.c_str(),
                                 parser->headers->name.name.c_str());
-        helper.appendFormat("struct %s *%s, ", metaStruct->name.c_str(),
-                            parser->user_metadata->name.name.c_str());
+        helper.appendFormat("struct %s *%s, ", metaStruct->name.c_str(), metaName.c_str());
         helper.append("unsigned int ebpf_outline_offset)");
         helper.newline();
         helper.blockStart();
 
+        emittingOutlineHelper = true;
+        outlineHelperUsesLength = regionUsesPacketLength(parser, region);
         emitLocalVariables(&helper);
+        emittingOutlineHelper = false;
+
         helper.emitIndent();
         if (region.noHdr)
-            helper.appendFormat("if (!%s) {", parser->user_metadata->name.name.c_str());
+            helper.appendFormat("if (!%s) {", metaName.c_str());
         else
             helper.appendFormat("if (!%s || !%s) {", parser->headers->name.name.c_str(),
-                                parser->user_metadata->name.name.c_str());
+                                metaName.c_str());
         helper.newline();
         helper.emitIndent();
         helper.emitIndent();
@@ -520,7 +696,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             auto *fieldType = metadataField(region.localField);
             BUG_CHECK(fieldType != nullptr, "outline local field was validated");
             fieldType->declare(&helper, region.localName, false);
-            helper.append(" = __P4TC_LOCAL_SOURCE__;");
+            helper.appendFormat(" = %s->%s;", metaName.c_str(), region.localField.c_str());
             helper.newline();
         }
         if (region.offsetMaxSet) {
@@ -530,6 +706,7 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             helper.newline();
             helper.emitIndent();
             helper.emitIndent();
+            writeBack();
             helper.append("return 0x80000000u | ((unsigned)PacketTooShort << 16);");
             helper.newline();
             helper.emitIndent();
@@ -541,11 +718,12 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             if (region.boundField == region.localField) {
                 helper.appendFormat("if (%s > %u)", region.localName.c_str(), region.boundValue);
             } else {
-                helper.appendFormat("if (%s->%s > %u)", parser->user_metadata->name.name.c_str(),
-                                    region.boundField.c_str(), region.boundValue);
+                helper.appendFormat("if (%s->%s > %u)", metaName.c_str(), region.boundField.c_str(),
+                                    region.boundValue);
             }
             helper.blockStart();
             helper.emitIndent();
+            writeBack();
             helper.append("return 0x80000000u | ((unsigned)PacketTooShort << 16);");
             helper.newline();
             helper.blockEnd(true);
@@ -569,23 +747,39 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
             if (l->is<IR::Declaration_Variable>()) parser->emitDeclaration(&helper, l);
         }
 
+        // Register this region's extern instances against the helper while its
+        // states are emitted: the visitor resolves a checksum call through the
+        // parser's instance map, and the variables the instance emits belong in
+        // this function. The map entry is dropped afterwards so the normal
+        // parser body registers its own copy instead of emitting calls against
+        // a name this helper declares.
+        for (auto &name : region.instances) {
+            auto found = instanceDecls.find(name);
+            if (found == instanceDecls.end()) continue;
+            parser->emittingHelperInstance = true;
+            parser->emitDeclaration(&helper, found->second);
+            parser->emittingHelperInstance = false;
+        }
+
         helper.emitIndent();
         helper.appendFormat("goto %s;", region.startState.c_str());
         helper.newline();
 
         parser->visitor->setBuilder(&helper);
         auto *visitor = static_cast<PnaStateTranslationVisitor *>(parser->visitor);
-        visitor->emittingOutlineRegion = true;
+        visitor->outlineRegion = &region;
         for (auto s : parser->states) {
             if (!region.states.count(s->state->name.name)) continue;
             parser->visitor->setState(s);
             s->state->apply(*parser->visitor);
         }
-        visitor->emittingOutlineRegion = false;
+        visitor->outlineRegion = nullptr;
         parser->visitor->setBuilder(builder);
+        for (auto &name : region.instances) parser->checksums.erase(name);
 
         helper.emitIndent();
-        helper.append("__p4tc_outline_done:");
+        helper.append(region.doneLabel.c_str());
+        helper.append(":");
         helper.newline();
         // The result carries the consumed bits in sixteen bits; anything larger
         // would corrupt the error field, so such a region rejects instead.
@@ -594,141 +788,40 @@ void TCIngressPipelinePNA::emitParserOutline(EBPF::CodeBuilder *builder) {
         helper.newline();
         helper.emitIndent();
         helper.emitIndent();
+        writeBack();
         helper.append("return 0x80000000u | ((unsigned)ParserInvalidArgument << 16);");
         helper.newline();
         helper.emitIndent();
         helper.append("}");
         helper.newline();
         helper.emitIndent();
+        writeBack();
         helper.appendFormat("return %s;", offsetVar.c_str());
         helper.newline();
         helper.emitIndent();
         helper.append("reject:");
         helper.newline();
         helper.emitIndent();
+        writeBack();
         helper.appendFormat("return 0x80000000u | ((unsigned int)%s << 16) | (%s & 0xffff);",
                             errorVar.c_str(), offsetVar.c_str());
         helper.newline();
         helper.emitIndent();
-        helper.append("__p4tc_outline_no_match:");
+        helper.append(region.noMatchLabel.c_str());
+        helper.append(":");
         helper.newline();
         helper.emitIndent();
         helper.appendFormat("%s = NoMatch;", errorVar.c_str());
         helper.newline();
         helper.emitIndent();
+        writeBack();
         helper.appendFormat("return 0x80000000u | ((unsigned int)%s << 16) | (%s & 0xffff);",
                             errorVar.c_str(), offsetVar.c_str());
         helper.newline();
         helper.blockEnd(true);
         helper.newline();
 
-        std::string code = helper.toString();
-        if (region.localField) {
-            std::string fieldRef = std::string(parser->user_metadata->name.name.c_str()) + "->" +
-                                   region.localField.c_str();
-            size_t localInit = code.find("__P4TC_LOCAL_SOURCE__");
-            size_t pos = 0;
-            while ((pos = code.find(fieldRef, pos)) != std::string::npos) {
-                size_t end = pos + fieldRef.size();
-                if (end < code.size() &&
-                    (std::isalnum(static_cast<unsigned char>(code[end])) || code[end] == '_')) {
-                    pos = end;
-                    continue;
-                }
-                code.replace(pos, fieldRef.size(), region.localName.c_str());
-                pos += region.localName.size();
-            }
-            cstring token = cstring("__P4TC_LOCAL_SOURCE__");
-            pos = 0;
-            while ((pos = code.find(token.c_str(), pos)) != std::string::npos) {
-                code.replace(pos, token.size(), fieldRef);
-                pos += fieldRef.size();
-            }
-            std::string writeBack = fieldRef + " = " + std::string(region.localName.c_str()) + "; ";
-            pos = 0;
-            while ((pos = code.find("return ", pos)) != std::string::npos) {
-                if (localInit != std::string::npos && pos < localInit) {
-                    pos += 7;
-                    continue;
-                }
-                code.insert(pos, writeBack);
-                pos += writeBack.size() + 1;
-            }
-        }
-        {
-            static const std::regex loadRe(
-                R"(load_(dword|word|half|byte)\(pkt, BYTES\(ebpf_packetOffsetInBits\)\))");
-            static const std::regex headerEndRe(R"(hdr_start \+= BYTES\([^;]*\);)");
-            static const std::regex extractRe(R"(/\* extract\([^\n]*\) \*/)");
-            static const std::regex advanceRe(R"(ebpf_packetOffsetInBits \+= (\d+);)");
-            std::string rewritten;
-            size_t last = 0;
-            size_t localBits = 0;
-            for (std::sregex_iterator it(code.begin(), code.end(), loadRe), end; it != end; ++it) {
-                std::string between = code.substr(last, it->position() - last);
-                // A load can span more bytes than the P4 field it extracts.
-                // Follow the cursor increments, and restart at each header.
-                size_t headerEnd = 0;
-                for (std::sregex_iterator h(between.begin(), between.end(), headerEndRe), he;
-                     h != he; ++h) {
-                    headerEnd = h->position() + h->length();
-                    localBits = 0;
-                }
-                for (std::sregex_iterator h(between.begin(), between.end(), extractRe), he; h != he;
-                     ++h) {
-                    headerEnd = h->position() + h->length();
-                    localBits = 0;
-                }
-                std::string fields = between.substr(headerEnd);
-                for (std::sregex_iterator a(fields.begin(), fields.end(), advanceRe), ae; a != ae;
-                     ++a)
-                    localBits += std::stoul((*a)[1].str());
-                std::string kind = (*it)[1].str();
-                rewritten += code.substr(last, it->position() - last);
-                rewritten += "load_" + kind + "(hdr_start, " + std::to_string(localBits / 8) + ")";
-                last = it->position() + it->length();
-            }
-            rewritten += code.substr(last);
-            code = std::move(rewritten);
-        }
-        std::string endGoto = "goto " + std::string(region.endState.c_str()) + ";";
-        cstring doneGoto = cstring("goto __p4tc_outline_done;");
-        size_t pos = 0;
-        while ((pos = code.find(endGoto.c_str(), pos)) != std::string::npos) {
-            code.replace(pos, endGoto.size(), doneGoto.c_str());
-            pos += doneGoto.size();
-        }
-        std::string noMatchGoto = "goto noMatch;";
-        cstring noMatchLabel = cstring("goto __p4tc_outline_no_match;");
-        pos = 0;
-        while ((pos = code.find(noMatchGoto.c_str(), pos)) != std::string::npos) {
-            code.replace(pos, noMatchGoto.size(), noMatchLabel.c_str());
-            pos += noMatchLabel.size();
-        }
-        {
-            static const std::regex declRe(
-                R"(^[ \t]+([A-Za-z_]\w*(?:\s+[A-Za-z_]\w*)*(?:\s*\*)?)\s+([A-Za-z_]\w*)\s*(?:=[^;]*)?;[ \t]*$)",
-                std::regex::multiline);
-            std::vector<std::pair<size_t, size_t>> dead;
-            for (std::sregex_iterator it(code.begin(), code.end(), declRe), end; it != end; ++it) {
-                std::string name = (*it)[2].str();
-                std::regex useRe("\\b" + name + "\\b");
-                auto begin = std::sregex_iterator(code.begin(), code.end(), useRe);
-                auto count = std::distance(begin, std::sregex_iterator());
-                if (count == 1) dead.emplace_back(it->position(), it->length());
-            }
-            if (!dead.empty()) {
-                std::string pruned;
-                size_t last = 0;
-                for (auto &range : dead) {
-                    pruned += code.substr(last, range.first - last);
-                    last = range.first + range.second;
-                }
-                pruned += code.substr(last);
-                code = std::move(pruned);
-            }
-        }
-        builder->append(code);
+        builder->append(helper.toString());
     }
 }
 
@@ -765,13 +858,14 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
     if (name == "tc-parse" && !tcOptions.outlineParserStart.empty()) {
         auto *parser = this->parser->checkedTo<EBPFPnaParser>();
-        if (!parser->setOutlineRange(cstring("__p4tc_parser_outline"),
-                                     cstring(tcOptions.outlineParserStart.c_str()),
+        cstring firstHelper = refMap->newName("p4tc_parser_outline");
+        if (!parser->setOutlineRange(firstHelper, cstring(tcOptions.outlineParserStart.c_str()),
                                      cstring(tcOptions.outlineParserEnd.c_str()))) {
             return;
         }
         if (!tcOptions.outlineParserStart2.empty()) {
-            if (!parser->setOutlineRange(cstring("__p4tc_parser_outline_2"),
+            cstring secondHelper = refMap->newName("p4tc_parser_outline_2");
+            if (!parser->setOutlineRange(secondHelper,
                                          cstring(tcOptions.outlineParserStart2.c_str()),
                                          cstring(tcOptions.outlineParserEnd2.c_str()))) {
                 return;
@@ -1071,9 +1165,15 @@ void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
 
 void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
-    builder->newline();
+    // An outlining helper runs a fragment of the parser body: it needs the
+    // packet cursor, the offset and error it maintains there, and the packet
+    // length when one of its states reads it. Everything else is reached only
+    // by code outside a region.
+    if (!emittingOutlineHelper) {
+        builder->emitIndent();
+        builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
+        builder->newline();
+    }
     builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());
@@ -1089,25 +1189,29 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
                           builder->target->dataEnd(model.CPacketName.toString()).c_str());
     builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("u32 %s = 1;", oneKey.c_str());
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("unsigned char %s;", byteVar.c_str());
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("unsigned int adv;");
-    builder->newline();
+    if (!emittingOutlineHelper) {
+        builder->emitIndent();
+        builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("u32 %s = 1;", oneKey.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("unsigned char %s;", byteVar.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("unsigned int adv;");
+        builder->newline();
+    }
 
-    builder->emitIndent();
-    builder->appendFormat("u32 %s = ", lengthVar.c_str());
-    emitPacketLength(builder);
-    builder->endOfStatement(true);
+    if (!emittingOutlineHelper || outlineHelperUsesLength) {
+        builder->emitIndent();
+        builder->appendFormat("u32 %s = ", lengthVar.c_str());
+        emitPacketLength(builder);
+        builder->endOfStatement(true);
+    }
 
-    if (shouldEmitTimestamp()) {
+    if (!emittingOutlineHelper && shouldEmitTimestamp()) {
         builder->emitIndent();
         builder->appendFormat("u64 %s = ", timestampVar.c_str());
         emitTimestamp(builder);
@@ -1116,6 +1220,11 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
 }
 
 // =====================EBPFPnaParser=============================
+// A select without a default case targets the state HandleNoMatch synthesizes.
+// A region treats it as a boundary, like reject, and the helper ends it with a
+// label of its own.
+static const cstring noMatchState = "noMatch"_cs;
+
 static void collectParserTargets(const IR::Expression *select, std::set<cstring> &targets) {
     if (select == nullptr) return;
     if (auto pe = select->to<IR::PathExpression>()) {
@@ -1160,7 +1269,7 @@ bool EBPFPnaParser::setOutlineRange(cstring helper, cstring start, cstring end) 
         std::set<cstring> targets;
         collectParserTargets(src->selectExpression, targets);
         for (auto target : targets) {
-            if (target == end || target == IR::ParserState::reject || target == "noMatch" ||
+            if (target == end || target == IR::ParserState::reject || target == noMatchState ||
                 target == IR::ParserState::accept)
                 continue;
             if (index.find(target) == index.end()) {
@@ -1187,7 +1296,7 @@ bool EBPFPnaParser::setOutlineRange(cstring helper, cstring start, cstring end) 
                     reachesEnd = true;
                     continue;
                 }
-                if (targetInside || target == IR::ParserState::reject || target == "noMatch")
+                if (targetInside || target == IR::ParserState::reject || target == noMatchState)
                     continue;
                 if (target == IR::ParserState::accept) {
                     ::P4::error(ErrorType::ERR_UNSUPPORTED,
@@ -1214,7 +1323,7 @@ bool EBPFPnaParser::setOutlineRange(cstring helper, cstring start, cstring end) 
         return false;
     }
 
-    OutlineRegion newRegion;
+    ParserOutlineRegion newRegion;
     newRegion.helperName = helper;
     newRegion.startState = start;
     newRegion.endState = end;
@@ -1227,7 +1336,7 @@ bool EBPFPnaParser::setOutlineRange(cstring helper, cstring start, cstring end) 
 bool PnaStateTranslationVisitor::preorder(const IR::ParserState *parserState) {
     auto *parser = this->parser->checkedTo<EBPFPnaParser>();
     cstring stateName = parserState->name.name;
-    if (emittingOutlineRegion || !parser->outlinedStates.count(stateName))
+    if (outlineRegion != nullptr || !parser->outlinedStates.count(stateName))
         return EBPF::PsaStateTranslationVisitor::preorder(parserState);
 
     auto *outline = parser->getOutlineRegion(stateName);
@@ -1313,6 +1422,8 @@ void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
 void EBPFPnaParser::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
+        // An instance whose every use was outlined lives in the helper only.
+        if (!emittingHelperInstance && outlinedInstances.count(name)) return;
         if (EBPFObject::getTypeName(di) == "InternetChecksum") {
             auto instance = new EBPFInternetChecksumPNA(program, di, name);
             checksums.emplace(name, instance);
@@ -1512,6 +1623,16 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
     msgStr = absl::StrFormat("Parser: extracting field %v", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
+    // An outlined helper addresses the packet through a cursor that is bounded
+    // at the region's entry, so it loads a field at a constant offset from the
+    // header base instead of through the parser's running offset.
+    auto emitLoadAddress = [&](unsigned fieldBits) {
+        if (outlineRegion != nullptr)
+            builder->appendFormat("%s, %u", program->headerStartVar.c_str(), fieldBits / 8);
+        else
+            builder->appendFormat("%v, BYTES(%v)", program->packetStartVar, program->offsetVar);
+    };
+
     if (widthToExtract <= 64) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
         unsigned lastWordIndex = lastBitIndex / 8;
@@ -1549,8 +1670,9 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
                 visit(expr);
                 builder->appendFormat(".%v, %d, (", fieldName, widthToExtract);
                 type->emit(builder);
-                builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
-                                      program->offsetVar);
+                builder->appendFormat(")((%s(", helper);
+                emitLoadAddress(hdrOffsetBits);
+                builder->append(")");
                 if (shift != 0) builder->appendFormat(" >> %d", shift);
                 builder->append(")");
                 if (widthToExtract != loadSize) {
@@ -1563,8 +1685,9 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
                 visit(expr);
                 builder->appendFormat(".%v = (", fieldName);
                 type->emit(builder);
-                builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
-                                      program->offsetVar);
+                builder->appendFormat(")((%s(", helper);
+                emitLoadAddress(hdrOffsetBits);
+                builder->append(")");
                 if (shift != 0) builder->appendFormat(" >> %d", shift);
                 builder->append(")");
                 if (widthToExtract != loadSize) {
@@ -1659,6 +1782,17 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
 }
 
 bool PnaStateTranslationVisitor::preorder(const IR::Member *m) {
+    // The helper keeps a private copy of its region's cached metadata field, so
+    // a reference to that field resolves to the copy rather than to the caller's
+    // user metadata.
+    if (outlineRegion != nullptr && outlineRegion->localField == m->member.name) {
+        if (auto *path = m->expr->to<IR::PathExpression>()) {
+            if (refMap->getDeclaration(path->path, true) == parser->user_metadata) {
+                builder->append(outlineRegion->localName);
+                return false;
+            }
+        }
+    }
     if ((m->expr != nullptr) && (m->expr->type != nullptr)) {
         if (auto st = m->expr->type->to<IR::Type_Struct>()) {
             if (st->name == "pna_main_parser_input_metadata_t") {
@@ -1685,6 +1819,23 @@ bool PnaStateTranslationVisitor::preorder(const IR::Member *m) {
     }
 
     return EBPF::PsaStateTranslationVisitor::preorder(m);
+}
+
+bool PnaStateTranslationVisitor::preorder(const IR::PathExpression *path) {
+    if (outlineRegion != nullptr) {
+        // A transition to the region's END, or to the parser's no-match state,
+        // leaves the helper instead of branching inside it.
+        cstring target = path->path->name.name;
+        if (target == outlineRegion->endState) {
+            builder->append(outlineRegion->doneLabel);
+            return false;
+        }
+        if (target == noMatchState) {
+            builder->append(outlineRegion->noMatchLabel);
+            return false;
+        }
+    }
+    return EBPF::CodeGenInspector::preorder(path);
 }
 
 bool PnaStateTranslationVisitor::preorder(const IR::AssignmentStatement *statement) {
@@ -2555,7 +2706,8 @@ void IngressDeparserPNA::outlineDeparserHeaders(EBPF::CodeBuilder *builder) {
         cstring typeName = st->name.name;
         cstring helperName = outlinedHelperNames.count(typeName)
                                  ? outlinedHelperNames[typeName]
-                                 : cstring(std::string("__p4tc_deparser_emit_") + typeName.c_str());
+                                 : program->refMap->newName(cstring(
+                                       std::string("p4tc_deparser_emit_") + typeName.c_str()));
         if (!outlinedHelperNames.count(typeName)) {
             outlinedHelperNames[typeName] = helperName;
             std::string body = code.substr(b.open + 1, b.close - b.open - 1);
