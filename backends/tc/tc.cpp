@@ -16,9 +16,20 @@
 #include "lib/nullstream.h"
 #include "midend.h"
 #include "options.h"
+#include "tcAnnotations.h"
 #include "version.h"
 
 using namespace P4;
+
+namespace {
+
+class TCFrontEndPolicy : public P4::FrontEndPolicy {
+    P4::ParseAnnotations *getParseAnnotations() const override {
+        return new TC::ParseTCAnnotations();
+    }
+};
+
+}  // namespace
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -46,7 +57,8 @@ int main(int argc, char *const argv[]) {
     try {
         P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-        P4::FrontEnd frontend;
+        TCFrontEndPolicy frontEndPolicy;
+        P4::FrontEnd frontend(&frontEndPolicy);
         frontend.addDebugHook(hook);
         program = frontend.run(options, program);
     } catch (const Util::P4CExceptionBase &bug) {
