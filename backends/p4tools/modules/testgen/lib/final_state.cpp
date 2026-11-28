@@ -4,6 +4,8 @@
 
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
+#include <cstdint>
+#include <limits>
 #include <list>
 #include <utility>
 #include <variant>
@@ -48,13 +50,24 @@ void FinalState::calculatePayload(const ExecutionState &executionState, Model &e
     int calculatedPacketSize = IR::getIntFromLiteral(payloadSizeConst);
     const auto *inputPacketExpr = executionState.getInputPacket();
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
-    if (payloadSize > 0) {
-        const auto *payloadType = IR::Type_Bits::get(payloadSize);
-        const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
-        if (payloadExpr == nullptr) {
-            payloadExpr = Utils::getRandConstantForType(payloadType);
-            evaluatedModel.set(&PacketVars::PAYLOAD_SYMBOL, payloadExpr);
+    const bool needsPayload =
+        payloadSize > 0 && evaluatedModel.get(&PacketVars::PAYLOAD_SYMBOL, false) == nullptr;
+    big_int payload = 0;
+    if (Utils::getCurrentSeed()) {
+        // Draw for a full packet so the solver's choice of length cannot shift branch selection.
+        constexpr auto wordBits = std::numeric_limits<uint32_t>::digits;
+        const auto maxPacketSize = ExecutionState::getMaxPacketLength();
+        for (int64_t offset = 0; offset < maxPacketSize; offset += wordBits) {
+            auto word = Utils::getRandInt(std::numeric_limits<uint32_t>::max());
+            if (needsPayload && offset < payloadSize) {
+                payload |= big_int(word) << offset;
+            }
         }
+    }
+    if (needsPayload) {
+        evaluatedModel.set(&PacketVars::PAYLOAD_SYMBOL,
+                           IR::Constant::get(IR::Type_Bits::get(payloadSize),
+                                             payload & IR::getMaxBvVal(payloadSize)));
     }
 }
 
