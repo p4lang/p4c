@@ -1,0 +1,6 @@
+issue4913-1.p4(13): [--Werror=type-error] error: vs: a value_set can only be used as a select case label, not in the select expression
+        transition select(x, vs) {
+                             ^^
+issue4913-1.p4(19): [--Werror=type-error] error: vs: a value_set can only be used as a select case label, not in the select expression
+        transition select(x, { x, vs }) {
+                                  ^^
