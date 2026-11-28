@@ -98,6 +98,7 @@ bool TypeInferenceBase::containsActionEnum(const IR::Type *type) const {
     if (auto st = type->to<IR::Type_Struct>()) {
         if (auto field = st->getField(IR::Type_Table::action_run)) {
             auto ft = getTypeType(field->type);
+            if (ft == nullptr) return false;
             if (ft->is<IR::Type_ActionEnum>()) return true;
         }
     }
@@ -546,6 +547,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Invalid *expression) {
 const IR::Node *TypeInferenceBase::postorder(const IR::InvalidHeader *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerType);
+    if (type == nullptr) return expression;
     auto concreteType = type;
     if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>()) concreteType = ts->substituted;
     if (!concreteType->is<IR::Type_Header>()) {
@@ -562,6 +564,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::InvalidHeader *expression
 const IR::Node *TypeInferenceBase::postorder(const IR::InvalidHeaderUnion *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerUnionType);
+    if (type == nullptr) return expression;
     auto concreteType = type;
     if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>()) concreteType = ts->substituted;
     if (!concreteType->is<IR::Type_HeaderUnion>()) {

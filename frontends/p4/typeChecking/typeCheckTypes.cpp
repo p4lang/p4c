@@ -235,9 +235,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Name *typeName) {
         auto t = IR::Type_Dontcare::get();
         type = new IR::Type_Type(t);
     } else {
-        auto decl = getDeclaration(typeName->path, !errorOnNullDecls);
-        if (errorOnNullDecls && decl == nullptr) {
-            typeError("%1%: Cannot resolve type", typeName);
+        auto decl = getDeclaration(typeName->path);
+        if (decl == nullptr) {
+            if (errorOnNullDecls) typeError("%1%: Cannot resolve type", typeName);
             return typeName;
         }
         // Check for references of a control or parser within itself.
