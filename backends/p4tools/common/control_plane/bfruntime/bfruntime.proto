@@ -1,0 +1,611 @@
+/*
+ * Copyright (c) Intel Corporation
+ * SPDX-License-Identifier: CC-BY-ND-4.0
+ */
+
+syntax = "proto3";
+import "google/rpc/status.proto";
+
+package bfrt_proto;
+option go_package = "./bfrt_proto";
+
+service BfRuntime {
+  // Update one or more P4 entities on the target.
+  rpc Write(WriteRequest) returns (WriteResponse) {}
+
+  // Read one or more P4 entities from the target.
+  rpc Read(ReadRequest) returns (stream ReadResponse) {}
+
+  // Sets the P4 fowarding-pipeline config.
+  rpc SetForwardingPipelineConfig(SetForwardingPipelineConfigRequest)
+      returns (SetForwardingPipelineConfigResponse) {}
+
+  // Gets the current P4 fowarding-pipeline config.
+  rpc GetForwardingPipelineConfig(GetForwardingPipelineConfigRequest)
+      returns (GetForwardingPipelineConfigResponse) {}
+
+  // Represents the bidirectional stream between the controller and the
+  // switch (initiated by the controller).
+  rpc StreamChannel(stream StreamMessageRequest)
+      returns (stream StreamMessageResponse) {}
+}
+
+//------------------------------------------------------------------------------
+message WriteRequest {
+  // This is the default TargetDevice.
+  // If entry_tgt under TableEntry is specified, that takes precedence over this field
+  TargetDevice target = 1;
+  uint32 client_id = 2;
+
+  // The write batch, comprising a list of Update operations.
+  repeated Update updates = 3;
+  enum Atomicity {
+    // Required. This is the default behavior. The batch is processed in a
+    // non-atomic manner from a dataplane point of view. Each operation within
+    // the batch must be attempted even if one or more encounter errors.
+    // Every dataplane packet is guaranteed to be processed according to
+    // table contents as they are between two individual operations of the
+    // batch, but there could be several packets processed that see each of
+    // these intermediate stages.
+    CONTINUE_ON_ERROR = 0;
+    // Optional. Operations within the batch are committed to dataplane until
+    // an error is encountered. At this point, the operations must be rolled
+    // back such that both software and dataplane state is consistent with the
+    // state before the batch was attempted. The resulting behavior is
+    // all-or-none, except the batch is not atomic from a data plane point of
+    // view. Every dataplane packet is guaranteed to be processed according to
+    // table contents as they are between two individual operations of the
+    // batch, but there could be several packets processed that see each of
+    // these intermediate stages.
+    ROLLBACK_ON_ERROR = 1;
+    // Optional. Every dataplane packet is guaranteed to be processed according
+    // to table contents before the batch began, or after the batch completed
+    // and the operations were programmed to the hardware.
+    // The batch is therefore treated as a transaction.
+    DATAPLANE_ATOMIC = 2;
+  }
+  Atomicity atomicity = 4;
+  string p4_name = 5;
+}
+
+message WriteResponse {
+  repeated Error status = 1;
+}
+
+message ReadRequest {
+  // This is the default TargetDevice.
+  // If entry_tgt under TableEntry is specified, that takes precedence over this field
+  TargetDevice target = 1;
+  uint32 client_id = 2;
+  repeated Entity entities = 3;
+  string p4_name = 4;
+}
+
+message ReadResponse {
+  repeated Entity entities = 1;
+  repeated Error status = 2;
+}
+
+message TargetDevice {
+  uint32 device_id = 1;
+  uint32 pipe_id = 2;
+  uint32 direction = 3;
+  uint32 prsr_id = 4;
+  // More target-specific ids.
+}
+
+message Update {
+  enum Type {
+    UNSPECIFIED = 0;
+    INSERT = 1;
+    MODIFY = 2;
+    // MODIFY_INC is used to add/delete the given data to/from the
+    // existing table entry incrementally.
+    MODIFY_INC = 3;
+    DELETE = 4;
+    INSERT_OR_MODIFY = 5;
+    RESET = 6;
+  }
+
+  Type type = 1;
+  Entity entity = 2;
+}
+
+message Entity {
+  oneof entity {
+    TableEntry table_entry = 1;
+    TableUsage table_usage = 2;
+    TableAttribute table_attribute = 3;
+    TableOperation table_operation = 4;
+    ObjectId object_id = 5;
+    HandleId handle = 6;
+  }
+}
+
+message HandleId {
+  uint32 table_id = 1;
+  oneof value {
+    TableKey key = 2;
+    uint32 handle_id = 3;
+  }
+}
+
+message TableEntry {
+  uint32 table_id = 1;
+  oneof value {
+    TableKey key = 2;
+    uint32 handle_id = 7;
+  }
+  TableData data = 3;
+  bool is_default_entry = 4;
+  // Deprecated, please use table_flags
+  TableReadFlag table_read_flag = 5 [ deprecated = true ];
+  TableModIncFlag table_mod_inc_flag = 6 [ deprecated = true ];
+  // If entry_tgt is specified, all the fields of entry_tgt are used even if not explicitly set
+  TargetDevice entry_tgt = 8;
+  TableFlags table_flags = 9;
+}
+
+message TableUsage {
+  uint32 table_id = 1;
+  uint32 usage = 2;
+  // Deprecated, please use table_flags
+  TableReadFlag table_read_flag = 3 [ deprecated = true ];
+  TableFlags table_flags = 4;
+}
+
+message TableAttribute {
+  uint32 table_id = 1;
+  oneof attribute {
+    IdleTable idle_table = 2;
+    EntryScope entry_scope = 3;
+    DynKeyMask dyn_key_mask = 4;
+    DynHashing dyn_hashing = 5;
+    ByteCountAdj byte_count_adj = 6;
+    PortStatusChg port_status_notify = 7;
+    StatePullIntvl intvl_ms = 8;
+    PreDeviceConfig pre_device_config = 9;
+    SelectorUpdateCb selector_update_notify = 10;
+  }
+}
+
+message TableOperation {
+  uint32 table_id = 1;
+  string table_operations_type = 2;
+}
+
+message TableData {
+  uint32 action_id = 1;
+  repeated DataField fields = 2;
+}
+
+message DataField {
+  uint32 field_id = 1;
+  // All data fields are dealt with using a byte stream except for float
+  // values. Float values are used for data fields for LPF and WRED table
+  oneof value {
+    bytes stream = 2;
+    float float_val = 3;
+    string str_val = 4;
+    IntArray int_arr_val = 5;
+    BoolArray bool_arr_val = 6;
+    ContainerArray container_arr_val = 7;
+    bool bool_val = 8;
+    StrArray str_arr_val = 9;
+  }
+  message IntArray { repeated uint32 val = 1; }
+  message BoolArray { repeated bool val = 1; }
+  message StrArray { repeated string val = 1; }
+  message ContainerArray {
+    message Container { repeated DataField val = 1; }
+    repeated Container container = 1;
+  }
+}
+
+message TableKey { repeated KeyField fields = 1; }
+
+message KeyField {
+  uint32 field_id = 1;
+
+  // Matches can be performed on arbitrarily-large inputs; the protobuf type
+  // 'bytes' is used to model arbitrarily-large values.
+  message Exact { bytes value = 1; }
+
+  message Ternary {
+    bytes value = 1;
+    bytes mask = 2;
+  }
+
+  message LPM {
+    bytes value = 1;
+    int32 prefix_len = 2; // in bits
+  }
+
+  // A Range is logically a set that contains all values numerically between
+  // 'low' and 'high' inclusively.
+  message Range {
+    bytes low = 1;
+    bytes high = 2;
+  }
+
+  message Optional {
+    bytes value = 1;
+    bool is_valid = 2;
+  }
+
+  oneof match_type {
+    Exact exact = 2;
+    Ternary ternary = 3;
+    LPM lpm = 4;
+    Range range = 5;
+    Optional optional = 6;
+  }
+}
+
+// Deprecated, please use TableFlags
+message TableReadFlag {
+ bool from_hw = 1;
+ bool key_only = 2;
+}
+
+message TableFlags {
+ bool from_hw = 1;
+ bool key_only = 2;
+ bool mod_del = 3;
+ bool reset_ttl = 4;
+ bool reset_stats = 5;
+}
+
+// Deprecated, please use TableFlags
+message TableModIncFlag {
+  enum Type {
+    // Enum to add the given data incrementally to the
+    // exising table entry
+    MOD_INC_ADD = 0;
+    // Enum to delete the given data from the
+    // exising table entry
+    MOD_INC_DELETE = 1;
+  }
+
+  Type type = 1;
+}
+
+message KeyFieldMask {
+  uint32 field_id = 1;
+  bytes mask = 2;
+}
+
+message DynKeyMask {
+  repeated KeyFieldMask fields = 1;
+}
+
+message DynHashing {
+  uint32 alg = 1;
+  uint64 seed = 2;
+}
+
+message ByteCountAdj { int32 byte_count_adjust = 1; }
+
+message IdleTable {
+  enum IdleTableMode {
+    IDLE_TABLE_POLL_MODE = 0;
+    IDLE_TABLE_NOTIFY_MODE = 1;
+  }
+  uint32 ttl_query_interval = 1;
+  uint32 max_ttl = 2;
+  uint32 min_ttl = 3;
+  IdleTableMode idle_table_mode = 4;
+  bool enable = 5;
+}
+
+message StatePullIntvl { uint32 intvl_val = 1; }
+
+message PortStatusChg { bool enable = 1; }
+
+message SelectorUpdateCb { bool enable = 1; }
+
+message Mode {
+  enum PredefinedMode {
+    ALL = 0;
+    SINGLE = 1;
+  }
+  oneof scope {
+    PredefinedMode predef = 1;
+    uint64 user_defined = 2;
+  }
+  uint64 args = 3;
+}
+
+message PreGlobalRid { uint32 global_rid = 1; }
+
+message PrePortProtection { bool enable = 1; }
+
+message PreFastFailover { bool enable = 1; }
+
+message PreMaxNodesBeforeYield { uint32 count = 1; }
+
+message PreMaxNodeThreshold {
+  uint32 node_count = 1;
+  uint32 port_lag_count = 2;
+}
+
+message PreDeviceConfig {
+  PreGlobalRid pre_global_rid = 1;
+  PrePortProtection pre_port_protection = 2;
+  PreFastFailover pre_fast_failover = 3;
+  PreMaxNodesBeforeYield pre_max_nodes_before_yield = 4;
+  PreMaxNodeThreshold pre_max_node_threshold = 5;
+}
+
+message EntryScope {
+  Mode gress_scope = 1;
+  Mode pipe_scope = 2;
+  Mode prsr_scope = 3;
+}
+
+message ObjectId {
+  message ActionName { string action = 1; }
+
+  message KeyFieldName { string field = 1; }
+
+  message DataFieldName {
+    string action = 1;
+    string field = 2;
+  }
+
+  message TableObject {
+    string table_name = 1;
+    oneof names {
+      ActionName action_name = 2;
+      KeyFieldName key_field_name = 3;
+      DataFieldName data_field_name = 4;
+    }
+  }
+  message LearnObject {
+    string learn_name = 1;
+    DataFieldName data_field_name = 2;
+  }
+  oneof object {
+    TableObject table_object = 1;
+    LearnObject learn_object = 2;
+  }
+  uint32 id = 3;
+}
+
+message StreamMessageRequest {
+  uint32 client_id = 1;
+  oneof update {
+    Subscribe subscribe = 2;
+    DigestListAck digest_ack = 3;
+  }
+}
+
+message Subscribe {
+  bool is_master = 1 [ deprecated = true ];
+           // Master for Warm Init messages.
+           // Deprecated and not needed anymore.
+           // Keeping for backward compatibility.
+  uint32 device_id = 2; // Device ID
+  message Notifications {
+    bool enable_learn_notifications =
+        1; // Enable learn digest notifications. These notifications are
+           // (device, P4-program) based so these will be triggered only after a
+           // client binds to a program.
+    bool enable_idletimeout_notifications =
+        2; // Enable idletimeout notifications. These are on per table basis and
+           // hence (device, P4-Program) based so these will be triggered only
+           // after a client binds to a program.
+    bool enable_port_status_change_notifications =
+        3; // Enable port status change notifications. These notifications are
+           // device based and so they will be triggered whether a client is
+           // bound to a program or not.
+    bool enable_entry_active_notifications =
+        4; // Enable entry active notifications. These are on per table basis and
+           // hence (device, P4-Program) based so these will be triggered only
+           // after a client binds to a program.
+    bool enable_selector_update_change_notifications =
+        5; // Enable Selector update change notifications. These notifications are
+           // for selector table and will be triggered when any member is
+           // add/del/mod
+  }
+  Notifications notifications = 3; // Contains which notifications need to be
+                                   // enabled for this client. Default value of
+                                   // these notifications are false.
+  .google.rpc.Status status = 4; // The controller doesn't populate this field.
+                                 // This is filled in by the GRPC server to
+                                 // indicate status of a subscribe request
+}
+
+message DigestListAck {
+  uint32 digest_id = 1;
+  uint32 list_id = 2;
+}
+
+message StreamMessageResponse {
+  oneof update {
+    Subscribe subscribe = 1; // This message is only used to let the server know
+                             // of the existence of client with this client_id
+    DigestList digest = 2;   // Learn Digest
+    IdleTimeoutNotification idle_timeout_notification =
+        3; // Idle timeout notification
+    PortStatusChgNotification port_status_change_notification =
+        4; // Port status change notification
+    SetForwardingPipelineConfigResponse
+        set_forwarding_pipeline_config_response =
+            5; // Response for a SetForwardingPipelineConfigRequest is sent here
+               // on the stream as well because all the active clients need to
+               // be informed of a COMMIT_STARTED or COMMIT_FINISHED
+    SelectorUpdateChgNotification selector_update_change_notification =
+        6; // Selector update change notification
+  }
+}
+
+message SubscribeResponse {
+  Error status = 1;
+}
+
+message DigestList {
+  // Identifies the digest extern instance
+  uint32 digest_id = 1;
+  uint32 list_id = 2;
+  repeated TableData data = 3;
+  TargetDevice target = 4;
+}
+
+message IdleTimeoutNotification {
+  // Only "key" fields are required to be set in each TableEntry.
+  TargetDevice target = 1;
+  TableEntry table_entry = 2;
+  enum NotificationType {
+    ENTRY_ACTIVE = 0; // Entry changed from idle to active
+    ENTRY_IDLE = 1; // Entry changed from active to idle
+  }
+  NotificationType type = 3;
+}
+
+message PortStatusChgNotification {
+  // Only "key" fields are required to be set in each TableEntry.
+  TableEntry table_entry = 1;
+  bool port_up = 2;
+}
+
+message SelectorUpdateChgNotification {
+  uint32 sel_group_id = 1;
+  uint32 act_member_id = 2;
+  uint32 logical_entry_index = 3;
+  bool is_add = 4;
+}
+
+//-----------------------------------------------------------------------------
+// SetForwardingPipelineConfig RPC takes in this message. It should contain
+// details of the entire device.
+message SetForwardingPipelineConfigRequest {
+  enum Action {
+    BIND = 0; // BIND: Default Action. Only binds the client to the program
+              // specified in the p4_name. One client can bind to only one
+              // program. One program can have only one client as of now. Even
+              // in case of multiple programs on a single device, BIND requires
+              // just one program’s config msg. If multiple repeated
+              // forwarding_pipeline_config msgs are sent as part of this
+              // request, then google.rpc.INVALID_ARGUMENT is sent. If a client
+              // doesn't BIND, then it can only access
+              // SetForwardingPipelineConfigRequest,
+              // GetForwardingPipelineConfigRequest and StreamMessageRequest
+              // RPCs. Read and Write RPCs are not allowed for non-bound clients
+    VERIFY = 1; // VERIFY(Master): Verifies whether this config is valid or not.
+                // Upon failure or incomplete config in the msg,
+                // google.rpc.Code::INVALID_ARGUMENT is sent.
+    VERIFY_AND_WARM_INIT_BEGIN =
+        2; // VERIFY_AND_WARM_INIT_BEGIN(Master):  Verifies the config and then
+           // begins warm_init with this config. This does not modify the
+           // forwarding state of the device. However, any subsequent Read /
+           // Write requests must refer to fields in the new config. Returns an
+           // INVALID_ARGUMENT error if the forwarding config is not provided or
+           // if the provided config cannot be realized.
+    VERIFY_AND_WARM_INIT_BEGIN_AND_END =
+        3; // VERIFY_AND_WARM_INIT_BEGIN_AND_END(Master): Verifies, starts
+           // warm_init and then initiates warm_init_end on the switch. The
+           // existing forwarding state is reset. Returns an INVALID_ARGUMENT
+           // error if the forwarding config is not provided of if the provided
+           // config cannot be realized.
+    WARM_INIT_END = 4; // WARM_INIT_END(Master): Issues a warm_init_end. If
+                       // forwarding_pipeline_config contains anything, or if no
+                       // WARM_INIT_BEGIN was previously called on the device
+                       // with a valid config, then
+                       // google.rpc.Code::INVALID_ARGUMENT is sent. The
+                       // forwarding state in the target is updated by replaying
+                       // the write requests to the target device since the last
+                       // config was saved by the client.
+    RECONCILE_AND_WARM_INIT_END =
+        5; // RECONCILE_AND_WARM_INIT_END(Master): Try and reconcile with the
+           // current config and preserve existing forwarding state. Minimal
+           // traffic loss is tried to be incurred in this scenario. Not
+           // supported with first release. google.rpc.Code::UNIMPLEMENTED is
+           // sent. NOT_SUPPORTED as of now
+  }
+
+  enum DevInitMode {
+    FAST_RECONFIG = 0; // This is the default device init mode.
+    // Device incurs a fast-reconfig reset with minimal traffic disruption
+    HITLESS = 1; // Device incurs a hitless warm init. This incurs even lesser traffic
+     // disruption than FAST_RECONFIG. However, currently, there are certain conditions
+     // to be maintained during replay of the entries.
+     // 1. All entries should only be replayed once.
+     // 2. Table dependency requirements need to be followed. That is, an indirect
+     // match entry is not to be replayed before the corresponding action_profile entry
+     // is inserted. Right now, this dependency is not enforced during entry_add but only
+     // during entry_del, but during replay, it is enforced during entry_add as well
+     // 3. Only final state of an entry should be replayed. So, currently entry_del and
+     // entry_mod are not supported
+  }
+
+  uint32 device_id = 1; // Device ID
+  uint32 client_id = 2; // Client ID
+  Action action = 3;    // action
+  DevInitMode dev_init_mode = 4; // warm init mode. Fast reconfig or Hitless
+  string base_path = 5; // The base path where the config is wished to be
+                        // stored. If empty, then current directory is used
+  repeated ForwardingPipelineConfig config = 6; // Device's config
+}
+
+enum SetForwardingPipelineConfigResponseType {
+  WARM_INIT_STARTED = 0; // WARM_INIT_STARTED indicates a successful
+                         // WARM_INIT_BEGIN. This is issued in case of
+                         // VERIFY_AND_WARM_INIT_BEGIN and
+                         // VERIFY_AND_WARM_INIT_BEGIN_AND_END
+
+  WARM_INIT_FINISHED = 1; // WARM_INIT_FINISHED indicates a successful
+                          // WARM_INIT_END. This is issued in case of
+                          // VERIFY_AND_WARM_INIT_BEGIN_AND_END and
+                          // WARM_INIT_END
+}
+
+message SetForwardingPipelineConfigResponse {
+  SetForwardingPipelineConfigResponseType
+      set_forwarding_pipeline_config_response_type = 1;
+}
+
+// This message contains config of a SINGLE program. The reason config is a
+// repeated field in the SetForwardingPipelineConfigRequest is because a
+// device can have multiple programs.
+message ForwardingPipelineConfig {
+  string p4_name = 1;               // P4 program name
+  bytes bfruntime_info = 2;         // BF-RT info json file contents
+  message Profile {                 // P4 Pipeline Profile
+    string profile_name = 1;        // profile name
+    bytes context = 2;              // context json file contents
+    bytes binary = 3;               // Binary to execute
+    repeated uint32 pipe_scope = 4; // Array of pipe_scope.
+  }
+  repeated Profile profiles = 3;
+}
+
+message NonP4Config { bytes bfruntime_info = 1; }
+
+// Request to get config of the entire device. Any client can issue this
+// request
+message GetForwardingPipelineConfigRequest {
+  uint32 device_id = 1;
+  uint32 client_id = 2;
+}
+
+// Config of the entire device
+message GetForwardingPipelineConfigResponse {
+  repeated ForwardingPipelineConfig config = 1; // P4 info
+  NonP4Config non_p4_config = 2; // Non-P4 info
+}
+
+// Error message used to report a single P4-entity error for a Write RPC.
+message Error {
+  // gRPC canonical error code (see
+  // github.com/grpc/grpc-go/blob/master/codes/codes.go)
+  int32 canonical_code = 1;
+  // Detailed error message.
+  string message = 2;
+  // Target and architecture specific space to which this error belongs.
+  // We encourage using triplet: <target>-<arch>-<vendor>,
+  // e.g."targetX-psa-vendor1" or "targetY-psa-vendor2".
+  string space = 3;
+  // Numeric code drawn from target-specific error space above.
+  int32 code = 4;
+}

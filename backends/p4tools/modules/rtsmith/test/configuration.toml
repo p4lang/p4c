@@ -1,0 +1,8 @@
+maxEntryGenCnt = 10
+maxAttempts = 200
+maxTables = 10
+tablesToSkip = ["table1", "table2"]
+thresholdForDeletion = 50
+maxUpdateCount = 20
+maxUpdateTimeInMicroseconds = 100001
+minUpdateTimeInMicroseconds = 50001
