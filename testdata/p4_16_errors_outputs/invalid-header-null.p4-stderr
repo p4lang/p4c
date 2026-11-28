@@ -1,0 +1,6 @@
+invalid-header-null.p4(13): [--Werror=not-found] error: UndefinedType: declaration not found
+        H<UndefinedType> h = (H<UndefinedType>){#};
+          ^^^^^^^^^^^^^
+invalid-header-null.p4(13): [--Werror=not-found] error: UndefinedType: declaration not found
+        H<UndefinedType> h = (H<UndefinedType>){#};
+                                ^^^^^^^^^^^^^

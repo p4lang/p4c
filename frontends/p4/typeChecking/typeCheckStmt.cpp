@@ -289,9 +289,9 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     auto method = call->method;
     if (!method->is<IR::PathExpression>()) BUG("%1%: unexpected expression", method);
     auto pe = method->to<IR::PathExpression>();
-    auto decl = getDeclaration(pe->path, !errorOnNullDecls);
-    if (errorOnNullDecls && decl == nullptr) {
-        typeError("%1%: Cannot resolve declaration", pe);
+    auto decl = getDeclaration(pe->path);
+    if (decl == nullptr) {
+        if (errorOnNullDecls) typeError("%1%: Cannot resolve declaration", pe);
         return nullptr;
     }
 
