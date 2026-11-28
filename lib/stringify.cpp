@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "absl/strings/ascii.h"
 #include "big_int.h"
 #include "cstring.h"
 #include "exceptions.h"
@@ -116,5 +117,13 @@ cstring toString(cstring value) {
 }
 
 cstring toString(std::string_view value) { return cstring(value); }
+
+void lowerInPlace(std::string &s) { absl::AsciiStrToLower(&s); }
+
+std::string toLower(std::string_view s) { return absl::AsciiStrToLower(s); }
+
+void upperInPlace(std::string &s) { absl::AsciiStrToUpper(&s); }
+
+std::string toUpper(std::string_view s) { return absl::AsciiStrToUpper(s); }
 
 }  // namespace P4::Util
