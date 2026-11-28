@@ -32,7 +32,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.byaA") bit<16> byaA_0;
+    @name("ingress.retval_0") bit<16> retval_0;
+    @name("ingress.tmp") bit<16> tmp_0;
+    @name("ingress.retval") bit<16> retval_3;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_4;
+    @name("ingress.inlinedRetval_1") bit<16> inlinedRetval_5;
     @name("ingress.simple_action") action simple_action() {
+        retval_3 = 16w1;
+        inlinedRetval_4 = retval_3;
+        tmp_0 = inlinedRetval_4;
+        retval_0 = tmp_0;
+        inlinedRetval_5 = retval_0;
+        byaA_0 = inlinedRetval_5;
         h.eth_hdr.eth_type = byaA_0;
     }
     apply {

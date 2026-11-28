@@ -1,0 +1,12 @@
+gauntlet_hdr_out_in_action-bmv2.p4(41): [--Wwarn=unused] warning: 'val' is unused
+    action do_action(out ethernet_t val) {
+                                    ^^^
+gauntlet_hdr_out_in_action-bmv2.p4(46): [--Werror=invalid] error: out argument binds value accessed by callee do_action
+        do_action(h.eth_hdr);
+                  ^^^^^^^^^
+gauntlet_hdr_out_in_action-bmv2.p4(41)
+    action do_action(out ethernet_t val) {
+           ^^^^^^^^^
+gauntlet_hdr_out_in_action-bmv2.p4(42)
+        h.eth_hdr.dst_addr = 1;
+        ^^^^^^^^^^^^^^^^^^

@@ -61,7 +61,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         x_0 = hdr.ipv4.identification;
         y_0 = hdr.ipv4.hdrChecksum;
-        z_0 = hdr.ipv4.totalLen;
+        z_0 = hdr.ipv4.srcAddr[15:0];
         if (hdr.ipv4.identification > 16w0) {
             x_0 = 16w1;
             y_0 = 16w2;
