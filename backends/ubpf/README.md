@@ -51,6 +51,16 @@ eBPF assembler, disassembler, interpreter, and JIT compiler for x86-64.
 Moreover, contrary to the eBPF implementation, uBPF is not licensed under GPL. The uBPF implementation is licensed under
 Apache License, version 2.0. 
 
+## Dependencies
+
+In addition to the [P4C dependencies](../../README.md#dependencies), the
+uBPF tests require libpcap-dev. The test runtime uses the pcap helpers of
+the eBPF backend (`backends/ebpf/runtime/pcap_util.h`) and links with
+`-lpcap`. On Ubuntu, it can be installed with:
+```
+sudo apt-get install libpcap-dev
+```
+
 ## Compiling P4 to uBPF
 
 The scope of the uBPF backend is wider than the scope of the eBPF backend. Except for simple packet filtering the 

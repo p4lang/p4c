@@ -8,49 +8,44 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Setup
 
-This repo contains the tofino backend for p4c v1.2 compiler.  It contains
-*just* the backend and can only be built within the p4c build infrastructure
-in git@github.com:p4lang/p4c.  To use this repo:
+This directory contains the Tofino backend of P4C, together with the Tofino
+assembler (`backends/tofino/bf-asm`). It is built as part of P4C and is
+disabled by default. To enable it, configure P4C with `-DENABLE_TOFINO=ON`:
 
-    git clone git@github.com:barefootnetworks/p4c-extension-tofino.git
-    cd p4c-extension-tofino
-    ./bootstrap.sh
+    cmake -B build -DENABLE_TOFINO=ON
+    cmake --build build
 
-This will check out the p4lang/p4c repository, move the
-p4c-extension-tofino to `p4c/extensions/bfn`, install the
-necessary dependences, and build the project.
+The CI builds and tests the Tofino backend on x86_64 only.
 
 ## Dependencies
 
-- Tofino assembler and Harlyn model for testing the output of
-  the Tofino backend.  The test scripts will look for sibling repos
-  (in preference to installed versions), so the easiest is to
-  check out these repos in parent of the `p4c` folder and build them
-  there:
+In addition to the [P4C dependencies](../../../README.md#dependencies), the
+Tofino backend requires:
 
+- Boost 1.83 or newer headers. On Ubuntu 24.04, this is the `libboost-dev`
+  package. On older systems, either install a newer Boost (and point CMake
+  to it with `BOOST_ROOT`), or configure with
+  `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON`.
+
+- RapidJSON 1.1.0 (`rapidjson-dev` on Ubuntu).
+
+- The Python packages `jsl`, `pyinstaller`, `jsonschema` and `pyyaml`,
+  which are used during the build to generate code from the JSON schemas in
+  `backends/tofino/compiler_interfaces` and to package the `p4c-build-logs`
+  tool.
+
+On Ubuntu, they can be installed from the root of the P4C repository with:
+
+```bash
+sudo apt-get install libboost-dev rapidjson-dev
+uv pip install jsl==0.2.4 pyinstaller==6.11.0 jsonschema==4.23.0 pyyaml==6.0.2
 ```
-git clone git@github.com:barefootnetworks/tofino-asm.git
-git clone git@github.com:barefootnetworks/model.git
-cd tofino-asm
-make all
-cd ..
-cd model
-./autogen.sh
-./configure
-make
-```
 
-- It may be desirable to checkout the "cdodd-simple_harness" branch of
-  the model to get the latest code for the test harness we're using.
+These are the versions used by the CI (see `build_tofino` in
+[`tools/ci-build.sh`](../../../tools/ci-build.sh)).
 
-- The Harlyn model requires additional dependences; please refer to
-  its own documentation:
-  https://barefootnetworks.atlassian.net/wiki/pages/viewpage.action?pageId=17006668.
-  Only the dependences required by the "model" are needed (i.e., we
-  don't use the driver in the compiler tests).
-
-- The tests depend on GNU utilities. On macOS, these can be installed with
-  `brew install coreutils`.
+The tests depend on GNU utilities. On macOS, these can be installed with
+`brew install coreutils`.
 
 ## Tofino mid-end and back-end design
 

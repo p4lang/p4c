@@ -217,39 +217,39 @@ newer. The eBPF backend relies on
 distribution-independent header files. libbpf must be available in
 order to compile the generated eBPF C code into eBPF byte code. To
 install libbpf, run `python3 backends/ebpf/build_libbpf` in the p4c
-folder.
+folder. CMake runs this script when it configures the eBPF backend and
+does not find libbpf.
 
-In addition the following packages and programs are required to run the full test suite:
+In addition to the [P4C dependencies](../../README.md#dependencies), the
+following packages are required to run the eBPF tests:
 
-- Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some
-  versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for
-  llvm. Until the bugfix is committed upstream, workarounds are
-  available in [this issue]( https://github.com/p4lang/p4c/issues/1376):
- 
+- clang and llvm, to compile the generated C code to eBPF byte code.
+  CMake warns if LLVM is older than 3.7.1.
 
-- libpcap-dev to parse and generate .pcap files.
+- libpcap-dev, because the test runtime reads and writes .pcap files
+  (`runtime/pcap_util.h`).
 
-- libelf-dev to compile C-programs to eBPF byte code.
+- libelf-dev and zlib1g-dev, which the kernel test runtime links against.
 
-- zlib1g as libelf dependency.
+- iproute2 with `clsact` support, to load eBPF programs with `tc` and
+  `ip` in the kernel tests.
 
-- a recent version of iproute2 that supports `clsact` to load eBPF programs via `tc` and `ip`.
+- iptables, which the kernel test environment uses
+  (`targets/ebpfenv.py`).
 
-- net-tools (if not installed already)
+- tcpdump, which the kernel tests use to capture packets.
 
-Additionally, the eBPF compiler test suite has the following python dependencies:
+The CI also installs net-tools. The Python packages are installed by
+`uv sync`, as described in the top-level README.
 
-- The python iproute2 package to create virtual interfaces.
-
-- The python ply package to parse .stf testing files.
-
-- The python scapy package to read and write pcap files.
-
-You can install these using:
+On Ubuntu, the packages can be installed with:
 ```
-$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
-$ pip3 install --user pyroute2 ply==3.8 scapy==2.4.0
+sudo apt-get install clang llvm libpcap-dev libelf-dev zlib1g-dev \
+  iproute2 iptables net-tools tcpdump
 ```
+The CI installs the same packages (see `build_ebpf` in
+[`tools/ci-build.sh`](../../tools/ci-build.sh); tcpdump is part of the
+core dependencies there).
 
 ### Supported capabilities
 

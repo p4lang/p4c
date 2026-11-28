@@ -279,32 +279,47 @@ platforms are untested; you can try to use them, but YMMV.
 
 - CMake 3.16.3 or higher
 
-- Boehm-Weiser garbage-collector C++ library
-
 - GNU Bison and Flex for the parser and lexical analyzer generators.
-
-- Google Protocol Buffers v3.25.3 or higher for control plane API generation
-
-- Boost.Multiprecision library for arbitrary precision arithmetic
 
 - Python 3 and uv for scripting and running tests
 
 - Optional: Documentation generation requires Doxygen (1.13.2) and Graphviz (2.38.0 or higher).
 
+The following libraries are integral to P4C. By default, CMake downloads and
+builds pinned versions of them as part of the P4C build, so they do not need
+to be installed beforehand. To use versions installed on the system instead,
+see the dependency options in [Installing P4C from source](#installing-p4c-from-source).
+
+- The Boehm-Weiser garbage collector ([bdwgc](https://github.com/ivmai/bdwgc)).
+  See also [Garbage collector](#garbage-collector).
+
+- Google Abseil.
+
+- Boost.Multiprecision for arbitrary precision arithmetic.
+
+- Google Protocol Buffers (v3.25.3) for control plane API generation. Protobuf
+  is only required when the control-plane library is enabled
+  (`-DENABLE_CONTROL_PLANE=ON`, the default).
+
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
   * [BMv2](backends/bmv2/README.md)
-  * [eBPF](backends/ebpf/README.md)
+  * [eBPF](backends/ebpf/README.md#dependencies)
+  * [uBPF](backends/ubpf/README.md#dependencies)
+  * [TC](backends/tc/README.md)
+  * [DPDK](backends/dpdk/README.md)
   * [graphs](backends/graphs/README.md)
+  * [P4Tools](backends/p4tools/README.md)
+  * [Tofino](backends/tofino/bf-p4c/README.md#dependencies)
 
 ### Ubuntu dependencies
 
 Most dependencies can be installed using `apt-get install`:
 
 ```bash
-sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
+sudo apt-get install cmake g++ git automake libtool bison flex \
 libfl-dev libboost-dev llvm pkg-config python3 python3-pip \
-tcpdump
+tcpdump curl
 
 ```
 Python dependencies can be installed using `uv`:
@@ -371,7 +386,7 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 ### Fedora dependencies
 
 ```bash
-sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
+sudo dnf install -y cmake g++ git automake libtool bison flex \
 libfl-devel gmp-devel boost-devel llvm pkg-config \
 python3 python3-pip tcpdump uv
 
@@ -421,11 +436,11 @@ Installing on macOS:
 
 - Install dependencies using Homebrew:
   ```
-  brew install autoconf automake libtool bdw-gc boost bison pkg-config
+  brew install autoconf automake libtool boost bison pkg-config
   ```
   or with MacPorts
   ```
-  sudo port install autoconf automake coreutils libtool boehmgc boost bison pkg-config
+  sudo port install autoconf automake coreutils libtool boost bison pkg-config
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
