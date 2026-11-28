@@ -42,12 +42,23 @@ decltype(auto) logArgument(const T &arg) {
 
 }  // namespace detail
 
+/// The log tag of printFeature. Log::Detail::fileLogLevel caches log levels by the address of the
+/// tag, so the tag must have static storage duration. The consteval constructor enforces this.
+class FeatureLabel {
+ public:
+    consteval FeatureLabel(const char *label) : label_(label) {}  // NOLINT(runtime/explicit)
+
+    [[nodiscard]] const char *c_str() const { return label_; }
+
+ private:
+    const char *label_;
+};
+
 /// A helper function that allows us to configure logging for a particular feature. This code is
 /// taken from
 // https://stackoverflow.com/a/25859856
 template <typename... Arguments>
-void printFeature(const std::string &label, int level, const std::string &fmt,
-                  Arguments &&...args) {
+void printFeature(FeatureLabel label, int level, const std::string &fmt, Arguments &&...args) {
     // Do not print logging messages when logging is not enabled.
     if (!Log::fileLogLevelIsAtLeast(label.c_str(), level)) {
         return;
