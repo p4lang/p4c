@@ -145,14 +145,11 @@ class CheckUnimplementedFeatures : public Inspector {
     explicit CheckUnimplementedFeatures(bool print = false) : _printAndNotExit(print) {}
 
     bool preorder(const IR::EntriesList *entries) {
-        auto source = entries->getSourceInfo().toPosition();
         if (_printAndNotExit)
-            ::warning("Table entries (%s) are not yet implemented in this backend",
-                      source.toString());
+            ::warning("Table entries are not yet implemented in this backend: %1%", entries);
         else
-            throw Util::CompilerUnimplemented(
-                source.sourceLine, source.fileName.c_str(),
-                "Table entries are not yet implemented in this backend");
+            P4C_UNIMPLEMENTED("Table entries are not yet implemented in this backend: %1%",
+                              entries);
         return false;
     }
 };

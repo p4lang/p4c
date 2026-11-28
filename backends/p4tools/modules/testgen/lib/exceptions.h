@@ -7,7 +7,6 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_
 
-#include "absl/strings/str_cat.h"
 #include "lib/exceptions.h"
 
 namespace P4::P4Tools::P4Testgen {
@@ -18,26 +17,19 @@ class TestgenUnimplemented final : public Util::P4CExceptionBase {
  public:
     template <typename... Args>
     explicit TestgenUnimplemented(const char *format, Args &&...args)
-        : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        // Check if output is redirected and if so, then don't color text so that
-        // escape characters are not present
-        message = absl::StrCat(Util::cerr_colorize(Util::ANSI_BLUE), "Not yet implemented",
-                               Util::cerr_clear_colors(), ":\n", message);
-    }
+        : P4CExceptionBase(createBugMessage(format, args...), "Not yet implemented",
+                           Util::ANSI_BLUE) {}
 
     template <typename... Args>
-    TestgenUnimplemented(int line, const char *file, const char *format, Args &&...args)
-        : P4CExceptionBase(format, std::forward<Args>(args)...) {
-        message = absl::StrCat(
-            "In file: ", file, ":", line, "\n", Util::cerr_colorize(Util::ANSI_BLUE),
-            "Unimplemented compiler support", Util::cerr_clear_colors(), ": ", message);
-    }
+    TestgenUnimplemented(std::source_location location, const char *format, Args &&...args)
+        : P4CExceptionBase(location, createBugMessage(format, args...),
+                           "Unimplemented compiler support", Util::ANSI_BLUE) {}
 };
 
-#define TESTGEN_UNIMPLEMENTED(...)                                   \
-    do {                                                             \
-        throw TestgenUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
+template <typename... Args>
+[[noreturn]] inline void TESTGEN_UNIMPLEMENTED(Util::FormatWithLocation fmt, Args &&...args) {
+    throw TestgenUnimplemented(fmt.location, fmt.format, std::forward<Args>(args)...);
+}
 
 }  // namespace P4::P4Tools::P4Testgen
 
