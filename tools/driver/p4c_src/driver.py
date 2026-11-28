@@ -47,6 +47,7 @@ class BackendDriver:
         self._source_basename = None
         self._verbose = False
         self._run_preprocessor_only = False
+        self._diagnostics = None
 
     def __str__(self):
         return self._backend
@@ -116,6 +117,7 @@ class BackendDriver:
 
     def process_command_line_options(self, opts):
         """Process all command line options"""
+        self._diagnostics = getattr(opts, "_diagnostics", None)
         self._dry_run = opts.dry_run
         self._verbose = opts.debug
         self._output_directory = opts.output_directory
@@ -305,15 +307,22 @@ class BackendDriver:
             return 0
 
         args = shlex.split(" ".join(cmd))
+        if self._diagnostics is not None and step in ("preprocessor", "compiler"):
+            return self._diagnostics.run(step, args, self._run_command)
+        return self._run_command(args, display=cmd)
+
+    def _run_command(self, args, stderr=None, display=None):
+        if display is None:
+            display = args
         try:
-            p = subprocess.Popen(args)
+            p = subprocess.Popen(args, stderr=stderr)
         except Exception:
-            print(f"error invoking {' '.join(cmd)}", file=sys.stderr)
+            print(f"error invoking {' '.join(display)}", file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
         if self._verbose:
-            print(f"running {' '.join(cmd)}")
+            print(f"running {' '.join(display)}")
         # Wait for the process, if we get CTRL+C during that time, forward it
         # to the process and continue waiting (leave the program to resolve
         # it), if we get other error kill the process:
@@ -334,7 +343,7 @@ class BackendDriver:
                 p.communicate(timeout=0.1)
             except Exception:  # on timeout or other error
                 p.kill()
-            print(f"error running {' '.join(cmd)}", file=sys.stderr)
+            print(f"error running {' '.join(display)}", file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
