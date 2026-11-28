@@ -105,7 +105,6 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_1();
     }
     @hidden action issue1653complexbmv2l65() {
-        bh_0.setInvalid();
     }
     @hidden action issue1653complexbmv2l88() {
         bh_0._row_alt1_type10 = 16w0x800;

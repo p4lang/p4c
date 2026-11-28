@@ -86,9 +86,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u1_0_h1_0.setInvalid();
         u1_0_h2_0.setInvalid();
         u1_0_h3_0.setInvalid();
-        u2_0_h1_0.setInvalid();
-        u2_0_h2_0.setInvalid();
-        u2_0_h3_0.setInvalid();
         u1_0_h1_0.setValid();
         u1_0_h2_0.setInvalid();
         u1_0_h3_0.setInvalid();
@@ -102,31 +99,17 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         if (u1_0_h1_0.isValid()) {
             u2_0_h1_0.setValid();
             u2_0_h1_0 = u1_0_h1_0;
-            u2_0_h2_0.setInvalid();
-            u2_0_h3_0.setInvalid();
-        } else {
-            u2_0_h1_0.setInvalid();
         }
         if (u1_0_h2_0.isValid()) {
             u2_0_h2_0.setValid();
             u2_0_h2_0 = u1_0_h2_0;
-            u2_0_h1_0.setInvalid();
-            u2_0_h3_0.setInvalid();
-        } else {
-            u2_0_h2_0.setInvalid();
         }
         if (u1_0_h3_0.isValid()) {
             u2_0_h3_0.setValid();
             u2_0_h3_0 = u1_0_h3_0;
-            u2_0_h1_0.setInvalid();
-            u2_0_h2_0.setInvalid();
-        } else {
-            u2_0_h3_0.setInvalid();
         }
         u2_0_h2_0.setValid();
         u2_0_h2_0.data = 16w1;
-        u2_0_h1_0.setInvalid();
-        u2_0_h3_0.setInvalid();
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();

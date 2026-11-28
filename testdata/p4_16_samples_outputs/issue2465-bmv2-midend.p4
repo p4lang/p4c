@@ -18,9 +18,6 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
     h1[3] l_0_h;
     bit<24> tmp;
     state start {
-        l_0_h[0].setInvalid();
-        l_0_h[1].setInvalid();
-        l_0_h[2].setInvalid();
         tmp = b.lookahead<bit<24>>();
         l_0_h[0].setValid();
         l_0_h[0].f1 = tmp[23:16];

@@ -16,7 +16,6 @@ struct Headers {
 control ingress(inout Headers h) {
     @name("ingress.x") H x_0;
     @hidden action issue2890l23() {
-        x_0.setInvalid();
         x_0 = h.h;
         x_0.a = 16w2;
         h.e.e = 16w2;
