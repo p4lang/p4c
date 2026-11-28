@@ -4,16 +4,15 @@
 
 /// Represents a reference to an object in a P4 program.
 ///
-/// This is a thin wrapper around a 'const Member*' to (1) enforce invariants on which forms of
-/// Members can represent state variables and (2) enable the use of StateVariables as map keys.
+/// This is a thin wrapper around a reference expression that enables the use of StateVariables
+/// as map keys. References consist of paths, members, and constant array indices.
 class StateVariable : Expression {
     #noconstructor
 
     /// The wrapped reference.
     const Expression *ref;
 
-    /// The expression type is derived from the member.
-    /// Implicit conversions to allow implementations to be treated like a Member*.
+    /// Implicit conversions to the wrapped reference expression.
 #emit
     operator const Expression *() const { return ref; }
 #end
@@ -31,8 +30,7 @@ class StateVariable : Expression {
         return compare(ref, other.ref) == 0;
     }
 
-    /// Implements comparisons so that StateVariables can be used as map keys.
-    /// Note that we ignore the type of the variable in the comparison.
+    /// Compares references after the generated base-expression equivalence check (including type).
     equiv {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?
@@ -47,87 +45,11 @@ class StateVariable : Expression {
         return compare(ref, other.ref) < 0;
     }
 
-    int compare(const Expression *e1, const Expression *e2) const {
-        // e1 is a Member.
-        if (const auto *m1 = e1->to<Member>()) {
-            if (const auto *m2 = e2->to<Member>()) {
-                return compare(m1, m2);
-            }
-            if (e2->is<PathExpression>()) {
-                return 1;
-            }
-            if (e2->is<ArrayIndex>()) {
-                return 1;
-            }
-        }
-        // e1 is a PathExpression.
-        if (const auto *p1 = e1->to<PathExpression>()) {
-            if (const auto *p2 = e2->to<PathExpression>()) {
-                return compare(p1, p2);
-            }
-            if (e2->is<Member>()) {
-                return -1;
-            }
-            if (e2->is<ArrayIndex>()) {
-                return 1;
-            }
-        }
-        // e1 is a ArrayIndex.
-        if (const auto *a1 = e1->to<ArrayIndex>()) {
-            if (const auto *a2 = e2->to<ArrayIndex>()) {
-                return compare(a1, a2);
-            }
-            if (e2->is<Member>()) {
-                return -1;
-            }
-            if (e2->is<PathExpression>()) {
-                return -1;
-            }
-        }
-        BUG("Either %1% of type %2% or %3% of type %4% is not a valid StateVariable", e1, e1->node_type_name(), e2, e2->node_type_name());
-    }
+    /// Compares two expressions. Returns -1 if e1 < e2, 0 if e1 == e2, and 1 if e1 > e2.
+    static int compare(const Expression *e1, const Expression *e2);
 
-    int compare(const Member *m1, const Member *m2) const {
-        auto result = compare(m1->expr, m2->expr);
-        if (result != 0) {
-            return result;
-        }
-        if (m1->member.name < m2->member.name) {
-            return -1;
-        }
-        if (m1->member.name > m2->member.name) {
-            return 1;
-        }
-        return 0;
-    }
-
-    int compare(const PathExpression *p1, const PathExpression *p2) const {
-        if (p1->path->name.name < p2->path->name.name) {
-            return -1;
-        }
-        if (p1->path->name.name > p2->path->name.name) {
-            return 1;
-        }
-        return 0;
-    }
-
-    int compare(const ArrayIndex *a1, const ArrayIndex *a2) const {
-        auto result = compare(a1->left, a2->left);
-        if (result != 0) {
-            return result;
-        }
-        auto a1Val = a1->right->to<Constant>();
-        BUG_CHECK(a1Val != nullptr, "Value %1% is not a constant. Only constants are supported as part of a state variable.", a1->right);
-        auto a2Val = a2->right->to<Constant>();
-        BUG_CHECK(a2Val != nullptr, "Value %1% is not a constant. Only constants are supported as part of a state variable.", a2->right);
-        if (a1Val->value < a2Val->value) {
-            return -1;
-        }
-        if (a1Val->value > a2Val->value) {
-            return 1;
-        }
-        return 0;
-    }
+    /// Hashes the reference structure, names, and numeric index values, ignoring types like compare.
+    uint64_t hash() const;
 
     toString { return ref->toString(); }
 

@@ -54,6 +54,7 @@ set(
 
   test/gtest_utils.cpp
   test/lib/format_int.cpp
+  test/lib/ir_compare.cpp
   test/lib/logging.cpp
   test/lib/taint.cpp
   test/lib/random.cpp

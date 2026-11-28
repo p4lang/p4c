@@ -8,6 +8,7 @@
 #define IR_COMPARE_H_
 
 #include "ir/ir.h"
+#include "lib/hash.h"
 
 namespace P4::IR {
 
@@ -29,6 +30,13 @@ struct SymbolicVariableLess {
     bool operator()(const IR::SymbolicVariable &s1, const IR::SymbolicVariable &s2) const {
         return s1 < s2;
     }
+};
+
+/// Hash of symbolic variable labels, ignoring types. Use with SymbolicVariableEqual.
+struct SymbolicVariableHash {
+    size_t operator()(const IR::SymbolicVariable *s1) const { return Util::Hash{}(s1->label); }
+
+    size_t operator()(const IR::SymbolicVariable &s1) const { return Util::Hash{}(s1.label); }
 };
 
 }  // namespace P4::IR
