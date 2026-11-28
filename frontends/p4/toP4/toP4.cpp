@@ -596,7 +596,17 @@ bool ToP4::preorder(const IR::BoolLiteral *b) {
 }
 
 bool ToP4::preorder(const IR::StringLiteral *s) {
-    builder.append(s->toString());
+    // Lexer stores raw source text; only unescaped quotes from compiler passes need escaping.
+    std::string text;
+    bool escaped = false;
+    for (const char c : s->value.string_view()) {
+        if (c == '"' && !escaped) text += '\\';
+        text += c;
+        escaped = c == '\\' && !escaped;
+    }
+    builder.append("\"");
+    builder.append(text);
+    builder.append("\"");
     return false;
 }
 
