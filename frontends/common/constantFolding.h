@@ -106,9 +106,16 @@ class DoConstantFolding : public Transform, public ResolutionContext {
      *    - Result::No
      *    - Result::DontKnow
      *
-     *  depending on whether @p constant is contained in @p keyset.
+     *  depending on whether @p select is contained in @p keySet. Unknown
+     *  components are permitted; one disjoint component makes the tuple disjoint.
+     *  With @p reportErrors false, runtime keysets are treated as unknown.
      */
-    Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
+    Result setContains(const IR::Expression *keySet, const IR::Expression *select,
+                       bool reportErrors = true) const;
+
+    /// Project constant components out of a partially constant select and its keysets.
+    /// Opaque keysets (notably runtime value sets) retain their original tuple schema.
+    const IR::Node *specializeSelect(IR::SelectExpression *expression) const;
 
  public:
     DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,

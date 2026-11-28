@@ -5,6 +5,8 @@
 
 #include "constantFolding.h"
 
+#include <vector>
+
 #include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
@@ -1001,101 +1003,207 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
 }
 
 DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *keySet,
-                                                         const IR::Expression *select) const {
+                                                         const IR::Expression *select,
+                                                         bool reportErrors) const {
     if (keySet->is<IR::DefaultExpression>()) return Result::Yes;
     if (auto list = select->to<IR::ListExpression>()) {
         if (auto klist = keySet->to<IR::ListExpression>()) {
-            BUG_CHECK(list->components.size() == klist->components.size(),
-                      "%1% and %2% size mismatch", list, klist);
+            if (list->size() != klist->size()) return Result::DontKnow;
+            auto result = Result::Yes;
             for (unsigned i = 0; i < list->components.size(); i++) {
-                auto r = setContains(klist->components.at(i), list->components.at(i));
-                if (r == Result::DontKnow || r == Result::No) return r;
+                auto r = setContains(klist->components.at(i), list->components.at(i), reportErrors);
+                if (r == Result::No) return r;
+                if (r == Result::DontKnow) result = r;
             }
-            return Result::Yes;
+            return result;
         } else {
-            BUG_CHECK(list->components.size() == 1, "%1%: mismatch in list size", list);
-            return setContains(keySet, list->components.at(0));
+            // An opaque tuple (for example, a constructor parameter or value set)
+            // denotes the whole tuple, even when that tuple has only one component.
+            const auto *keyType = typeMap->getType(keySet);
+            if (!keyType) keyType = keySet->type;
+            if (auto set = keyType->to<IR::Type_Set>()) keyType = set->elementType;
+            if (keyType->is<IR::Type_BaseList>() || list->size() != 1) return Result::DontKnow;
+            return setContains(keySet, list->components.at(0), reportErrors);
         }
     }
+
+    if (!getConstant(select)) return Result::DontKnow;
 
     if (select->is<IR::BoolLiteral>()) {
         auto key = getConstant(keySet);
         if (key == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
                         keySet);
             return Result::No;
         }
-        BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
-        if (select->to<IR::BoolLiteral>()->value == key->to<IR::BoolLiteral>()->value)
-            return Result::Yes;
+        auto boolean = key->to<IR::BoolLiteral>();
+        if (!boolean) return Result::DontKnow;
+        if (select->to<IR::BoolLiteral>()->value == boolean->value) return Result::Yes;
         return Result::No;
     }
 
-    if (select->is<IR::Member>()) {
-        // This must be an enum value
+    if (auto ei = EnumInstance::resolve(select, typeMap); ei && ei->is<SimpleEnumInstance>()) {
         auto key = getConstant(keySet);
         if (key == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
                         keySet);
             return Result::No;
         }
-        auto sel = getConstant(select);
-        BUG_CHECK(sel, "%1%: expected a constant expression", select);
-        // For Enum and SerEnum instances we can just use expression equivalence.
-        // This assumes that type checking does not allow us to compare constants to SerEnums.
-        if (key->equiv(*sel)) return Result::Yes;
-        return Result::No;
+        // Compare resolved enum types and member names, not typedef spellings.
+        if (auto ki = EnumInstance::resolve(key, typeMap))
+            return ei->equals(ki) ? Result::Yes : Result::No;
+        return Result::DontKnow;
     }
 
-    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
-    auto cst = select->to<IR::Constant>();
-    if (auto kc = keySet->to<IR::Constant>()) {
+    // Normalize both the selected value and every numeric keyset operand. In
+    // particular, a constant enum member is not itself an IR::Constant.
+    auto numericConstant = [this](const IR::Expression *expression) -> const IR::Constant * {
+        const auto *constant = getConstant(expression);
+        if (!constant) return nullptr;
+        if (auto ei = EnumInstance::resolve(constant, typeMap)) {
+            if (auto se = ei->to<SerEnumInstance>()) constant = getConstant(se->value);
+        }
+        return constant ? constant->to<IR::Constant>() : nullptr;
+    };
+    const auto *cst = numericConstant(select);
+    if (!cst) return Result::DontKnow;
+    if (auto kc = numericConstant(keySet)) {
         if (kc->value == cst->value) return Result::Yes;
         return Result::No;
     } else if (auto range = keySet->to<IR::Range>()) {
-        auto left = getConstant(range->left);
+        auto left = numericConstant(range->left);
         if (left == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
                         range->left);
             return Result::DontKnow;
         }
-        auto right = getConstant(range->right);
+        auto right = numericConstant(range->right);
         if (right == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
                         range->right);
             return Result::DontKnow;
         }
-        if (left->to<IR::Constant>()->value <= cst->value &&
-            right->to<IR::Constant>()->value >= cst->value)
-            return Result::Yes;
+        if (left->value <= cst->value && right->value >= cst->value) return Result::Yes;
         return Result::No;
     } else if (auto mask = keySet->to<IR::Mask>()) {
         // check if left & right == cst & right
-        auto left = getConstant(mask->left);
+        auto left = numericConstant(mask->left);
         if (left == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
                         mask->left);
             return Result::DontKnow;
         }
-        auto right = getConstant(mask->right);
+        auto right = numericConstant(mask->right);
         if (right == nullptr) {
+            if (!reportErrors) return Result::DontKnow;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
                         mask->right);
             return Result::DontKnow;
         }
-        if ((left->to<IR::Constant>()->value & right->to<IR::Constant>()->value) ==
-            (right->to<IR::Constant>()->value & cst->value))
-            return Result::Yes;
+        if ((left->value & right->value) == (right->value & cst->value)) return Result::Yes;
         return Result::No;
     }
     // Otherwise the keyset may be a ValueSet
     return Result::DontKnow;
 }
 
+const IR::Node *DoConstantFolding::specializeSelect(IR::SelectExpression *expression) const {
+    const auto &components = expression->select->components;
+    std::vector<bool> project(components.size(), false);
+    bool hasConstant = false;
+    for (size_t i = 0; i < components.size(); ++i) {
+        project[i] = getConstant(components.at(i)) != nullptr;
+        hasConstant |= project[i];
+    }
+    if (!hasConstant) return expression;
+
+    // Early frontend folding precedes side-effect ordering and parser chain collapsing.
+    // Defer until calls have been lifted into statements so pruning edges cannot make an
+    // effectful select look like an unconditional transition to a subsequent pass.
+    // Only the TypeMap is guaranteed to be populated here. Conservatively defer
+    // all calls without resolving methods from embedded expression types.
+    bool hasCall = false;
+    forAllMatching<IR::Expression>(expression->select, [&](const IR::Expression *component) {
+        hasCall |= component->is<IR::MethodCallExpression>() ||
+                   component->is<IR::ConstructorCallExpression>();
+    });
+    if (hasCall) return expression;
+
+    // A value set describes the whole tuple. Projecting it would change the control-plane API,
+    // and its entries are not known at compile time. Likewise, leave other opaque keysets alone.
+    for (auto c : expression->selectCases) {
+        if (c->keyset->is<IR::DefaultExpression>()) continue;
+        auto list = c->keyset->to<IR::ListExpression>();
+        if (!list || list->size() != components.size()) return expression;
+    }
+
+    bool changes = false;
+    IR::Vector<IR::Expression> remaining;
+    for (size_t i = 0; i < components.size(); ++i) {
+        if (project[i]) {
+            for (auto c : expression->selectCases) {
+                if (c->keyset->is<IR::DefaultExpression>()) continue;
+                auto key = c->keyset->checkedTo<IR::ListExpression>()->components.at(i);
+                if (setContains(key, components.at(i), false) == Result::DontKnow) {
+                    project[i] = false;
+                    break;
+                }
+            }
+        }
+        changes |= project[i];
+        if (!project[i]) remaining.push_back(components.at(i));
+    }
+    if (!changes) return expression;
+
+    IR::Vector<IR::SelectCase> cases;
+    for (auto c : expression->selectCases) {
+        if (c->keyset->is<IR::DefaultExpression>()) {
+            cases.push_back(c);
+            break;
+        }
+        auto list = c->keyset->checkedTo<IR::ListExpression>();
+        IR::Vector<IR::Expression> keys;
+        bool disjoint = false;
+        for (size_t i = 0; i < components.size(); ++i) {
+            auto key = list->components.at(i);
+            if (project[i]) {
+                if (setContains(key, components.at(i), false) == Result::No) {
+                    disjoint = true;
+                    break;
+                }
+            } else {
+                keys.push_back(key);
+            }
+        }
+        if (disjoint) continue;
+        // Preserve first-match precedence between overlapping surviving keysets.
+        const IR::Expression *single = keys.size() == 1 ? keys.at(0) : nullptr;
+        const auto *keyType = single ? typeMap->getType(single) : nullptr;
+        if (single && !keyType) keyType = single->type;
+        const IR::Expression *keyset = single && !keyType->is<IR::Type_BaseList>()
+                                           ? single
+                                           : new IR::ListExpression(list->srcInfo, keys);
+        cases.push_back(new IR::SelectCase(c->srcInfo, keyset, c->state));
+        // A projected wildcard is now an unconditional match. Later defaults
+        // must not override it in consumers that store a single default edge.
+        if (keyset->is<IR::DefaultExpression>()) break;
+    }
+    // Keep every remaining expression, even with no matching cases. Evaluation may have side
+    // effects, and an empty select must still produce NoMatch rather than an accepting edge.
+    return new IR::SelectExpression(expression->srcInfo, expression->type,
+                                    new IR::ListExpression(expression->select->srcInfo, remaining),
+                                    cases);
+}
+
 const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     if (!typesKnown) return expression;
     auto sel = getConstant(expression->select);
-    if (sel == nullptr) return expression;
+    if (sel == nullptr) return specializeSelect(expression);
 
     IR::Vector<IR::SelectCase> cases;
     bool someUnknown = false;

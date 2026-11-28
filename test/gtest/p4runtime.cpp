@@ -1345,6 +1345,53 @@ TEST_F(P4Runtime, ValueSet) {
     checkMatchField(vset->match(2), 3, "f3", {}, 8, std::nullopt, "custom"_cs);
 }
 
+TEST_F(P4Runtime, PartiallyConstantSelectValueSet) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header H { bit<8> kind; }
+        struct Headers { H h; }
+        struct Metadata { }
+        struct Key { bit<16> profile; @match(ternary) bit<8> kind; }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm)(bit<16> profile) {
+            @id(23) @name(".runtime_keys") value_set<Key>(4) keys;
+            state start {
+                p.extract(h.h);
+                transition select(profile, h.h.kind) {
+                    keys: accept;
+                    (2, 7): reject;
+                    default: reject;
+                }
+            }
+        }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                       inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        V1Switch(parse(1), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+    ASSERT_TRUE(test);
+    ASSERT_EQ(0U, ::P4::diagnosticCount());
+    ASSERT_EQ(1, test->p4Info->value_sets_size());
+    const auto *set = findP4RuntimeValueSet(*test->p4Info, "runtime_keys"_cs);
+    ASSERT_TRUE(set) << test->p4Info->DebugString();
+    EXPECT_EQ((unsigned(P4Ids::VALUE_SET) << 24) | 23, set->preamble().id());
+    EXPECT_EQ("runtime_keys", set->preamble().alias());
+    EXPECT_EQ(4, set->size());
+    ASSERT_EQ(2, set->match_size());
+    EXPECT_EQ(1, set->match(0).id());
+    EXPECT_EQ("profile", set->match(0).name());
+    EXPECT_EQ(16, set->match(0).bitwidth());
+    EXPECT_EQ(p4configv1::MatchField::EXACT, set->match(0).match_type());
+    EXPECT_EQ(2, set->match(1).id());
+    EXPECT_EQ("kind", set->match(1).name());
+    EXPECT_EQ(8, set->match(1).bitwidth());
+    EXPECT_EQ(p4configv1::MatchField::TERNARY, set->match(1).match_type());
+}
+
 TEST_F(P4Runtime, Register) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<32> hfA; bit<16> hfB; }

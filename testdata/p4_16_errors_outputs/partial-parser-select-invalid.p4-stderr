@@ -1,0 +1,9 @@
+partial-parser-select-invalid.p4(7): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(in bit<8> x) {
+       ^
+partial-parser-select-invalid.p4(10): [--Werror=type-error] error: ..: cannot be applied to expression 'true' with type 'bool'
+            (E.A .. true, 7): accept;
+                    ^^^^
+partial-parser-select-invalid.p4(11): [--Werror=type-error] error: &&&: cannot be applied to expression 'false' with type 'bool'
+            (E.B &&& false, 8): accept;
+                     ^^^^^
