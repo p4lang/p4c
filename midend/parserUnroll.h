@@ -142,6 +142,7 @@ class ParserStructure {
     StateCallGraph *callGraph;
     std::map<cstring, std::set<cstring>> statesWithHeaderStacks;
     std::map<cstring, size_t> callsIndexes;  // map for curent calls of state insite current one
+    IR::IndexedVector<IR::Declaration> newLocals;  // scratch headers for out-of-range extracts
     void setParser(const IR::P4Parser *parser) {
         CHECK_NULL(parser);
         callGraph = new StateCallGraph(parser->name.name);
@@ -247,6 +248,9 @@ class RewriteAllParsers : public Transform {
         BUG_CHECK(rewriter->current.result,
                   "No result was found after unrolling of the parser loop");
         IR::P4Parser *newParser = parser->clone();
+        for (const auto *decl : rewriter->current.newLocals) {
+            newParser->parserLocals.push_back(decl);
+        }
         IR::IndexedVector<IR::ParserState> states = newParser->states;
         newParser->states.clear();
         if (rewriter->hasOutOfboundState) {
