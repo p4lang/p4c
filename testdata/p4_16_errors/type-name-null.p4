@@ -4,4 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-type MyType = UndefinedType;
+header H<T> {
+    T f;
+}
+
+control c() {
+    apply {
+        H<UndefinedType> h;
+    }
+}

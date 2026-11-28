@@ -1,3 +1,3 @@
-type-name-null.p4(1): [--Werror=not-found] error: UndefinedType: declaration not found
-type MyType = UndefinedType;
-              ^^^^^^^^^^^^^
+type-name-null.p4(13): [--Werror=not-found] error: UndefinedType: declaration not found
+        H<UndefinedType> h;
+          ^^^^^^^^^^^^^
