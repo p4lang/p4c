@@ -44,7 +44,7 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 #endif
 
     // Provide an initial source location.
-    driver.sources->mapLine(sourceFile, sourceLine);
+    driver.sources->mapLine(sourceFile, sourceLine + 1);
 
     // Parse.
     if (parser.parse() != 0) return nullptr;

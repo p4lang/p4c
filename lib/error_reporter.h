@@ -8,18 +8,22 @@
 #ifndef LIB_ERROR_REPORTER_H_
 #define LIB_ERROR_REPORTER_H_
 
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"
+#include "lib/diagnostic.h"
 #include "lib/format.h"
 #include "lib/source_file.h"
 
@@ -38,6 +42,12 @@ enum class DiagnosticAction {
 // Supported formatting styles are boost-style (%1%, %2%, ...) and
 // printf/absl::StrFormat-style (%s, %d, ...).
 class ErrorReporter {
+    bool collectingDiagnostics = false;
+    std::vector<Diagnostic> diagnostics;
+    std::function<void(const Diagnostic &)> diagnosticConsumer;
+
+    void publishDiagnostic(Diagnostic diagnostic);
+
  protected:
     unsigned int infoCount;
     unsigned int warningCount;
@@ -74,17 +84,30 @@ class ErrorReporter {
     cstring get_error_name(int errorCode) { return ErrorCatalog::getCatalog().getName(errorCode); }
 
  public:
-    ErrorReporter()
-        : infoCount(0),
-          warningCount(0),
-          errorCount(0),
-          maxErrorCount(20),
-          outputstream(&std::cerr),
-          defaultInfoDiagnosticAction(DiagnosticAction::Info),
-          defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
-        ErrorCatalog::getCatalog().initReporter(*this);
+    ErrorReporter();
+    /// Copy diagnostic state and policy, without sharing consumers.
+    ErrorReporter(const ErrorReporter &other);
+    ErrorReporter &operator=(const ErrorReporter &other);
+    virtual ~ErrorReporter();
+
+    /// Enable owned, compilation-scoped snapshots. Terminal output is unchanged.
+    void enableDiagnosticCollection() { collectingDiagnostics = true; }
+    bool isCollectingDiagnostics() const { return collectingDiagnostics; }
+
+    /// Return a copy that remains valid after this reporter/context is destroyed.
+    std::vector<Diagnostic> getDiagnostics() const { return diagnostics; }
+
+    /// Optional synchronous observer, invoked after storing a record.
+    /// Copy records to retain them; the callback must not reenter this reporter.
+    void setDiagnosticConsumer(std::function<void(const Diagnostic &)> consumer) {
+        enableDiagnosticCollection();
+        diagnosticConsumer = std::move(consumer);
     }
-    virtual ~ErrorReporter() = default;
+
+    /// Import a diagnostic from an external producer (e.g. GCC). It has already
+    /// passed that producer's warning policy. Print/count it without filtering it
+    /// through p4c's catalog, then publish the same owned record to API consumers.
+    void reportDiagnostic(Diagnostic diagnostic);
 
     // Error message for a bug.
     template <typename... Args>
@@ -149,6 +172,7 @@ class ErrorReporter {
 
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
         msg = ::P4::error_helper(format, std::move(msg), std::forward<Args>(args)...);
+        if (collectingDiagnostics) publishDiagnostic(makeDiagnostic(msg));
         emit_message(msg);
 
         if (errorCount >= maxErrorCount)
@@ -185,7 +209,9 @@ class ErrorReporter {
         std::stringstream ss;
         ss << message;
 
-        emit_message(ParserErrorMessage(location, ss.str()));
+        ParserErrorMessage diagnostic(location, ss.str());
+        if (collectingDiagnostics) publishDiagnostic(makeDiagnostic(diagnostic));
+        emit_message(diagnostic);
     }
 
     /**
@@ -209,7 +235,9 @@ class ErrorReporter {
             BUG("Failed to format string %s", fmt);
         }
 
-        emit_message(ParserErrorMessage(Util::SourceInfo(sources, position), std::move(message)));
+        ParserErrorMessage diagnostic(Util::SourceInfo(sources, position), std::move(message));
+        if (collectingDiagnostics) publishDiagnostic(makeDiagnostic(diagnostic));
+        emit_message(diagnostic);
     }
 
     /// @return the action to take for the given diagnostic, falling back to the
