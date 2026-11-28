@@ -344,14 +344,6 @@ p4tools_add_xfail_reason(
   "exceeded the maximum number of permitted guard violations for this run"
 )
 
-# Test generation can stop at the output-port guard limit. If it finishes,
-# compilation fails because packet header fields cannot be allocated.
-p4tools_add_xfail_reason(
-  "testgen-tofino"
-  "PHV allocation was not successful|exceeded the maximum number of permitted guard violations for this run"
-  switchml.p4
-)
-
 p4tools_add_xfail_reason(
   "testgen-tofino"
   "table .* should not have empty const entries list"

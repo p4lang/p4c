@@ -150,9 +150,10 @@ struct port_metadata_t {
     drop_probability_t egress_drop_probability;
 }
 
+// Match the width of the stateful ALU result used by check_worker_bitmap_action.
+@pa_container_size("ingress", "ig_md.switchml_md.map_result", 32)
 @pa_no_overlay("ingress" , "ig_md.switchml_md.simulate_egress_drop") @flexible header switchml_md_h {
     MulticastGroupId_t mgid;
-    queue_pair_index_t recirc_port_selector;
     packet_size_t      packet_size;
     worker_type_t      worker_type;
     worker_id_t        worker_id;
@@ -777,6 +778,8 @@ control RDMAReceiver(inout header_t hdr, inout ingress_metadata_t ig_md, in ingr
     Counter<counter_t, queue_pair_index_t>(max_num_queue_pairs, CounterType_t.PACKETS) rdma_packet_counter;
     Counter<counter_t, queue_pair_index_t>(max_num_queue_pairs, CounterType_t.PACKETS) rdma_message_counter;
     Counter<counter_t, queue_pair_index_t>(max_num_queue_pairs, CounterType_t.PACKETS) rdma_sequence_violation_counter;
+    // Only the three ingress counters use this index.
+    queue_pair_index_t qp_index = 0;
     bool message_possibly_received;
     bool sequence_violation;
     RegisterAction<receiver_data_t, queue_pair_index_t, return_t>(receiver_data_register) receiver_reset_action = {
@@ -816,7 +819,8 @@ control RDMAReceiver(inout header_t hdr, inout ingress_metadata_t ig_md, in ingr
         ig_md.switchml_rdma_md.rdma_addr = hdr.ib_reth.addr;
         ig_md.switchml_md.tsi = hdr.ib_reth.len;
         ig_md.switchml_md.packet_size = packet_size;
-        ig_md.switchml_md.recirc_port_selector = (queue_pair_index_t)(hdr.ib_bth.dst_qp[16 + max_num_workers_log2 - 1:16] ++ hdr.ib_bth.dst_qp[max_num_queue_pairs_per_worker_log2 - 1:0]);
+        qp_index = hdr.ib_bth.dst_qp[16 + max_num_workers_log2 - 1:16] ++
+                   hdr.ib_bth.dst_qp[max_num_queue_pairs_per_worker_log2 - 1:0];
         hdr.ethernet.setInvalid();
         hdr.ipv4.setInvalid();
         hdr.udp.setInvalid();
@@ -906,11 +910,11 @@ control RDMAReceiver(inout header_t hdr, inout ingress_metadata_t ig_md, in ingr
     }
     apply {
         if (receive_roce.apply().hit) {
-            rdma_packet_counter.count(ig_md.switchml_md.recirc_port_selector);
+            rdma_packet_counter.count(qp_index);
             if (sequence_violation) {
-                rdma_sequence_violation_counter.count(ig_md.switchml_md.recirc_port_selector);
+                rdma_sequence_violation_counter.count(qp_index);
             } else if (message_possibly_received) {
-                rdma_message_counter.count(ig_md.switchml_md.recirc_port_selector);
+                rdma_message_counter.count(qp_index);
             }
         }
     }
